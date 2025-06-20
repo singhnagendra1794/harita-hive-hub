@@ -3,8 +3,21 @@ import Layout from "../components/Layout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
+  const navigate = useNavigate();
+
+  const handleSubscribe = (planName: string, amount: number, features: string[]) => {
+    navigate('/payment', {
+      state: {
+        planName,
+        amount,
+        features
+      }
+    });
+  };
+
   return (
     <Layout>
       <div className="container py-12">
@@ -91,7 +104,17 @@ const Pricing = () => {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">
+              <Button 
+                className="w-full"
+                onClick={() => handleSubscribe("Professional Plan", 29, [
+                  "Full access to Learn section",
+                  "QGIS Project integration", 
+                  "Basic Geo-Dashboard features",
+                  "Post up to 5 job listings",
+                  "Enhanced profile features",
+                  "Priority support"
+                ])}
+              >
                 Subscribe Now
               </Button>
             </CardFooter>
@@ -136,7 +159,19 @@ const Pricing = () => {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handleSubscribe("Enterprise Plan", 99, [
+                  "Everything in Professional",
+                  "Team collaboration features",
+                  "Advanced Geo-Dashboard",
+                  "Unlimited job postings",
+                  "API access",
+                  "Dedicated support",
+                  "Custom integration options"
+                ])}
+              >
                 Contact Sales
               </Button>
             </CardFooter>
