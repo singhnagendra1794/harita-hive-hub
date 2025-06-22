@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,71 +22,80 @@ import Payment from "./pages/Payment";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/learn" element={
-              <ProtectedRoute>
-                <Learn />
-              </ProtectedRoute>
-            } />
-            <Route path="/projects" element={
-              <ProtectedRoute>
-                <Projects />
-              </ProtectedRoute>
-            } />
-            <Route path="/spatial-analysis" element={
-              <ProtectedRoute>
-                <SpatialAnalysis />
-              </ProtectedRoute>
-            } />
-            <Route path="/geo-dashboard" element={
-              <ProtectedRoute>
-                <GeoDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/job-posting" element={
-              <ProtectedRoute>
-                <JobPosting />
-              </ProtectedRoute>
-            } />
-            <Route path="/resume-posting" element={
-              <ProtectedRoute>
-                <ResumePosting />
-              </ProtectedRoute>
-            } />
-            <Route path="/qgis-project" element={
-              <ProtectedRoute>
-                <QgisProject />
-              </ProtectedRoute>
-            } />
-            <Route path="/pricing" element={
-              <ProtectedRoute>
-                <Pricing />
-              </ProtectedRoute>
-            } />
-            <Route path="/payment" element={
-              <ProtectedRoute>
-                <Payment />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/learn" element={
+                <ProtectedRoute>
+                  <Learn />
+                </ProtectedRoute>
+              } />
+              <Route path="/projects" element={
+                <ProtectedRoute>
+                  <Projects />
+                </ProtectedRoute>
+              } />
+              <Route path="/spatial-analysis" element={
+                <ProtectedRoute>
+                  <SpatialAnalysis />
+                </ProtectedRoute>
+              } />
+              <Route path="/geo-dashboard" element={
+                <ProtectedRoute>
+                  <GeoDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/job-posting" element={
+                <ProtectedRoute>
+                  <JobPosting />
+                </ProtectedRoute>
+              } />
+              <Route path="/resume-posting" element={
+                <ProtectedRoute>
+                  <ResumePosting />
+                </ProtectedRoute>
+              } />
+              <Route path="/qgis-project" element={
+                <ProtectedRoute>
+                  <QgisProject />
+                </ProtectedRoute>
+              } />
+              <Route path="/pricing" element={
+                <ProtectedRoute>
+                  <Pricing />
+                </ProtectedRoute>
+              } />
+              <Route path="/payment" element={
+                <ProtectedRoute>
+                  <Payment />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
