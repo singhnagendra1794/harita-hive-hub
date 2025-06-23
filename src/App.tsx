@@ -25,6 +25,7 @@ import Notes from "./pages/Notes";
 import CodeSnippets from "./pages/CodeSnippets";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ const App: React.FC = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/search" element={<Search />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
