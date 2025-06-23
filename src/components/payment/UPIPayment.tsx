@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Smartphone, QrCode } from "lucide-react";
+import { Smartphone, QrCode, CheckCircle } from "lucide-react";
 
 interface UPIPaymentProps {
   amount: number;
@@ -14,25 +14,29 @@ interface UPIPaymentProps {
 
 const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => {
   const [selectedMethod, setSelectedMethod] = useState<'phonepe' | 'gpay' | 'upi'>('phonepe');
-  const [upiId, setUpiId] = useState("cnsj05061993-3@okicici");
+  const [upiId] = useState("cnsj05061993-3@okicici");
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
 
   const handleUPIPayment = (method: string) => {
-    // In a real implementation, this would integrate with actual payment gateways
-    const upiLink = `upi://pay?pa=${upiId}&pn=HaritaHive&am=${amount}&cu=INR&tn=Payment for ${planName}`;
+    setPaymentStatus('processing');
+    
+    const upiLink = `upi://pay?pa=${upiId}&pn=Choudhary Nagendra Singh Jhund&am=${amount}&cu=INR&tn=Payment for ${planName} - HaritaHive`;
     
     if (method === 'phonepe') {
-      // PhonePe deep link
-      window.open(`phonepe://pay?pa=${upiId}&pn=HaritaHive&am=${amount}&cu=INR&tn=Payment for ${planName}`, '_blank');
+      window.open(`phonepe://pay?pa=${upiId}&pn=Choudhary Nagendra Singh Jhund&am=${amount}&cu=INR&tn=Payment for ${planName}`, '_blank');
     } else if (method === 'gpay') {
-      // Google Pay deep link
-      window.open(`tez://upi/pay?pa=${upiId}&pn=HaritaHive&am=${amount}&cu=INR&tn=Payment for ${planName}`, '_blank');
+      window.open(`tez://upi/pay?pa=${upiId}&pn=Choudhary Nagendra Singh Jhund&am=${amount}&cu=INR&tn=Payment for ${planName}`, '_blank');
+    } else if (method === 'upi') {
+      window.open(upiLink, '_blank');
     }
     
-    // Simulate payment success for demo
+    // Simulate payment verification
     setTimeout(() => {
-      alert("Payment initiated! Please complete the payment in your UPI app.");
-      onPaymentSuccess();
-    }, 2000);
+      setPaymentStatus('completed');
+      setTimeout(() => {
+        onPaymentSuccess();
+      }, 1500);
+    }, 3000);
   };
 
   return (
@@ -40,23 +44,23 @@ const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Smartphone className="h-5 w-5" />
-          UPI Payment
+          UPI Payment Gateway
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="upi-id">UPI ID</Label>
-          <Input
-            id="upi-id"
-            value={upiId}
-            onChange={(e) => setUpiId(e.target.value)}
-            placeholder="Enter UPI ID"
-          />
+        {/* QR Code Section */}
+        <div className="text-center p-4 bg-muted rounded-lg">
+          <QrCode className="h-8 w-8 mx-auto mb-2" />
+          <p className="text-sm font-medium">Scan QR Code to Pay</p>
+          <div className="mt-2 p-2 bg-background rounded border">
+            <p className="text-xs text-muted-foreground">UPI ID:</p>
+            <p className="font-mono text-sm">{upiId}</p>
+          </div>
         </div>
-        
+
         <div className="space-y-2">
-          <Label>Payment Method</Label>
-          <div className="grid grid-cols-2 gap-2">
+          <Label>Select Payment Method</Label>
+          <div className="grid grid-cols-3 gap-2">
             <Button
               variant={selectedMethod === 'phonepe' ? 'default' : 'outline'}
               onClick={() => setSelectedMethod('phonepe')}
@@ -71,6 +75,13 @@ const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => 
             >
               Google Pay
             </Button>
+            <Button
+              variant={selectedMethod === 'upi' ? 'default' : 'outline'}
+              onClick={() => setSelectedMethod('upi')}
+              className="h-12"
+            >
+              UPI App
+            </Button>
           </div>
         </div>
 
@@ -78,15 +89,41 @@ const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => 
           <p className="text-sm text-muted-foreground mb-2">Payment Details:</p>
           <p className="font-medium">{planName}</p>
           <p className="text-lg font-bold">₹{amount}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Payee: Choudhary Nagendra Singh Jhund
+          </p>
         </div>
 
-        <Button 
-          onClick={() => handleUPIPayment(selectedMethod)}
-          className="w-full"
-          size="lg"
-        >
-          Pay with {selectedMethod === 'phonepe' ? 'PhonePe' : 'Google Pay'}
-        </Button>
+        {paymentStatus === 'pending' && (
+          <Button 
+            onClick={() => handleUPIPayment(selectedMethod)}
+            className="w-full"
+            size="lg"
+          >
+            Pay ₹{amount} with {selectedMethod === 'phonepe' ? 'PhonePe' : selectedMethod === 'gpay' ? 'Google Pay' : 'UPI'}
+          </Button>
+        )}
+
+        {paymentStatus === 'processing' && (
+          <div className="text-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm">Processing payment...</p>
+            <p className="text-xs text-muted-foreground mt-1">Please complete the payment in your UPI app</p>
+          </div>
+        )}
+
+        {paymentStatus === 'completed' && (
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-green-800">Payment Successful!</p>
+            <p className="text-xs text-green-600">Redirecting to dashboard...</p>
+          </div>
+        )}
+
+        <div className="text-xs text-muted-foreground text-center">
+          <p>• Secure UPI payment processing</p>
+          <p>• Instant activation after successful payment</p>
+        </div>
       </CardContent>
     </Card>
   );

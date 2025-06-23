@@ -20,6 +20,10 @@ import Signup from "./pages/Signup";
 import Pricing from "./pages/Pricing";
 import Payment from "./pages/Payment";
 import Auth from "./pages/Auth";
+import LiveClasses from "./pages/LiveClasses";
+import Newsletter from "./pages/Newsletter";
+import Notes from "./pages/Notes";
+import CodeSnippets from "./pages/CodeSnippets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -87,6 +91,26 @@ const App: React.FC = () => {
               <Route path="/payment" element={
                 <ProtectedRoute>
                   <Payment />
+                </ProtectedRoute>
+              } />
+              <Route path="/live-classes" element={
+                <ProtectedRoute>
+                  <LiveClasses />
+                </ProtectedRoute>
+              } />
+              <Route path="/newsletter" element={
+                <ProtectedRoute>
+                  <Newsletter />
+                </ProtectedRoute>
+              } />
+              <Route path="/notes" element={
+                <ProtectedRoute>
+                  <Notes />
+                </ProtectedRoute>
+              } />
+              <Route path="/code-snippets" element={
+                <ProtectedRoute>
+                  <CodeSnippets />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
