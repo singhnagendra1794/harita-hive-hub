@@ -45,6 +45,119 @@ export type Database = {
         }
         Relationships: []
       }
+      class_enrollments: {
+        Row: {
+          class_date: string
+          class_id: string
+          class_title: string
+          enrolled_at: string | null
+          id: string
+          instructor: string | null
+          user_id: string
+        }
+        Insert: {
+          class_date: string
+          class_id: string
+          class_title: string
+          enrolled_at?: string | null
+          id?: string
+          instructor?: string | null
+          user_id: string
+        }
+        Update: {
+          class_date?: string
+          class_id?: string
+          class_title?: string
+          enrolled_at?: string | null
+          id?: string
+          instructor?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_queue: {
+        Row: {
+          created_at: string | null
+          email_data: Json | null
+          error_message: string | null
+          id: string
+          recipient_email: string
+          scheduled_for: string
+          sent_at: string | null
+          status: string | null
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_data?: Json | null
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string | null
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_data?: Json | null
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string | null
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string | null
+          html_content: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          template_type: string
+          text_content: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          template_type: string
+          text_content?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          template_type?: string
+          text_content?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       learning_paths: {
         Row: {
           content_order: Json | null
@@ -315,6 +428,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_email_preferences: {
+        Row: {
+          class_reminders: boolean | null
+          created_at: string | null
+          id: string
+          marketing_emails: boolean | null
+          newsletter_updates: boolean | null
+          onboarding_emails: boolean | null
+          unsubscribed_at: string | null
+          updated_at: string | null
+          user_id: string
+          weekly_digest: boolean | null
+        }
+        Insert: {
+          class_reminders?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_emails?: boolean | null
+          newsletter_updates?: boolean | null
+          onboarding_emails?: boolean | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          weekly_digest?: boolean | null
+        }
+        Update: {
+          class_reminders?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_emails?: boolean | null
+          newsletter_updates?: boolean | null
+          onboarding_emails?: boolean | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_digest?: boolean | null
+        }
+        Relationships: []
+      }
       user_engagement: {
         Row: {
           content_consumed: number | null
@@ -385,6 +537,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_onboarding: {
+        Row: {
+          completed_at: string | null
+          completed_steps: Json | null
+          current_step: number | null
+          id: string
+          last_email_sent: string | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_step?: number | null
+          id?: string
+          last_email_sent?: string | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_step?: number | null
+          id?: string
+          last_email_sent?: string | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_progress: {
         Row: {

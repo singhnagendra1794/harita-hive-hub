@@ -1,1 +1,11 @@
+
 project_id = "uphgdwrwaizomnyuwfwr"
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.email-scheduler]
+verify_jwt = false
+
+[functions.unsubscribe]
+verify_jwt = false
