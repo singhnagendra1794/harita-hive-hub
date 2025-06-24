@@ -125,7 +125,7 @@ export const useAISearch = () => {
         await supabase.from('user_analytics').insert({
           user_id: user.id,
           event_type: 'search',
-          event_data: { query, filters }
+          event_data: { query, filters: filters || {} } as any
         });
       }
       
@@ -158,7 +158,14 @@ export const useAISearch = () => {
       
       if (data) {
         const searches = data
-          .map(d => d.event_data?.query)
+          .map(d => {
+            try {
+              const eventData = d.event_data as any;
+              return eventData?.query;
+            } catch {
+              return null;
+            }
+          })
           .filter(Boolean)
           .reduce((acc: Record<string, number>, query: string) => {
             acc[query] = (acc[query] || 0) + 1;

@@ -51,8 +51,21 @@ export const useNotifications = () => {
         .limit(50);
 
       if (error) throw error;
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.read).length || 0);
+      
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        message: item.message,
+        type: item.type,
+        data: (item.data as any) || {},
+        read: item.read,
+        sent_at: item.sent_at,
+        created_at: item.created_at
+      }));
+      
+      setNotifications(transformedData);
+      setUnreadCount(transformedData.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -124,7 +137,17 @@ export const useNotifications = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          const newNotification = payload.new as Notification;
+          const newNotification = {
+            id: payload.new.id,
+            title: payload.new.title,
+            message: payload.new.message,
+            type: payload.new.type,
+            data: (payload.new.data as any) || {},
+            read: payload.new.read,
+            sent_at: payload.new.sent_at,
+            created_at: payload.new.created_at
+          };
+          
           setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
           
