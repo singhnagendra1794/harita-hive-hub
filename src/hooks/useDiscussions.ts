@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,7 +35,7 @@ export const useDiscussions = (contentType: string, contentId: string) => {
         .from('discussions')
         .select(`
           *,
-          profiles!discussions_user_id_fkey (
+          profiles (
             full_name,
             avatar_url
           )
@@ -57,7 +56,7 @@ export const useDiscussions = (contentType: string, contentId: string) => {
             .from('discussions')
             .select(`
               *,
-              profiles!discussions_user_id_fkey (
+              profiles (
                 full_name,
                 avatar_url
               )
@@ -80,13 +79,13 @@ export const useDiscussions = (contentType: string, contentId: string) => {
             likes_count: discussion.likes_count || 0,
             is_pinned: discussion.is_pinned || false,
             user_has_liked: likedIds.has(discussion.id),
-            profiles: discussion.profiles || null,
+            profiles: discussion.profiles || { full_name: null, avatar_url: null },
             replies: (replies || []).map(reply => ({
               ...reply,
               likes_count: reply.likes_count || 0,
               is_pinned: reply.is_pinned || false,
               user_has_liked: likedIds.has(reply.id),
-              profiles: reply.profiles || null
+              profiles: reply.profiles || { full_name: null, avatar_url: null }
             }))
           };
         })
