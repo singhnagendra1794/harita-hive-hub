@@ -3,22 +3,26 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface UserInteraction {
-  id: string;
-  content_type: string;
-  content_id: string;
-  interaction_type: string;
-  metadata: Record<string, any>;
-  created_at: string;
-}
-
 interface UserPreferences {
   id: string;
+  user_id: string;
   preferred_topics: string[];
   difficulty_level: 'beginner' | 'intermediate' | 'advanced';
   learning_style: 'visual' | 'hands-on' | 'theoretical' | 'mixed';
   notification_frequency: 'daily' | 'weekly' | 'monthly';
   language_preference: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface UserInteraction {
+  id: string;
+  user_id: string;
+  content_type: string;
+  content_id: string;
+  interaction_type: string;
+  metadata: Record<string, any>;
+  created_at: string;
 }
 
 interface ContentRecommendation {
@@ -54,7 +58,13 @@ export const usePersonalization = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setPreferences(data);
+      
+      if (data) {
+        setPreferences({
+          ...data,
+          difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
+        });
+      }
     } catch (error) {
       console.error('Error fetching user preferences:', error);
     }
@@ -69,12 +79,20 @@ export const usePersonalization = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(50);
 
       if (error) throw error;
-      setRecentInteractions(data || []);
+      
+      setRecentInteractions(
+        (data || []).map(item => ({
+          ...item,
+          metadata: typeof item.metadata === 'string' ? JSON.parse(item.metadata) : (item.metadata || {})
+        }))
+      );
     } catch (error) {
       console.error('Error fetching recent interactions:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,8 +107,6 @@ export const usePersonalization = () => {
       setRecommendations(data || []);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -118,56 +134,65 @@ export const usePersonalization = () => {
     }
   };
 
-  const updatePreferences = async (newPreferences: Partial<UserPreferences>) => {
+  const updatePreferences = async (updatedPreferences: Partial<UserPreferences>) => {
     if (!user || !preferences) return;
 
     try {
       const { data, error } = await supabase
         .from('user_preferences')
-        .update({ ...newPreferences, updated_at: new Date().toISOString() })
+        .update({
+          ...updatedPreferences,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', user.id)
         .select()
         .single();
 
       if (error) throw error;
-      setPreferences(data);
+      
+      setPreferences({
+        ...data,
+        difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
+      });
     } catch (error) {
       console.error('Error updating preferences:', error);
     }
   };
 
-  const dismissRecommendation = async (contentType: string, contentId: string) => {
-    if (!user) return;
+  const getRecentlyViewed = (contentType?: string, limit: number = 10) => {
+    let filtered = recentInteractions.filter(
+      interaction => interaction.interaction_type === 'view'
+    );
 
-    try {
-      await supabase
-        .from('content_recommendations')
-        .update({ dismissed: true })
-        .eq('user_id', user.id)
-        .eq('content_type', contentType)
-        .eq('content_id', contentId);
-
-      // Refresh recommendations
-      fetchRecommendations();
-    } catch (error) {
-      console.error('Error dismissing recommendation:', error);
+    if (contentType) {
+      filtered = filtered.filter(interaction => interaction.content_type === contentType);
     }
+
+    return filtered.slice(0, limit);
   };
 
-  const getRecentlyViewed = () => {
-    return recentInteractions
-      .filter(interaction => interaction.interaction_type === 'view')
-      .slice(0, 5);
+  const getBookmarkedContent = (contentType?: string, limit: number = 10) => {
+    let filtered = recentInteractions.filter(
+      interaction => interaction.interaction_type === 'bookmark'
+    );
+
+    if (contentType) {
+      filtered = filtered.filter(interaction => interaction.content_type === contentType);
+    }
+
+    return filtered.slice(0, limit);
   };
 
-  const getBookmarkedContent = () => {
-    return recentInteractions
-      .filter(interaction => interaction.interaction_type === 'bookmark');
-  };
+  const getLikedContent = (contentType?: string, limit: number = 10) => {
+    let filtered = recentInteractions.filter(
+      interaction => interaction.interaction_type === 'like'
+    );
 
-  const getLikedContent = () => {
-    return recentInteractions
-      .filter(interaction => interaction.interaction_type === 'like');
+    if (contentType) {
+      filtered = filtered.filter(interaction => interaction.content_type === contentType);
+    }
+
+    return filtered.slice(0, limit);
   };
 
   return {
@@ -177,7 +202,6 @@ export const usePersonalization = () => {
     loading,
     trackInteraction,
     updatePreferences,
-    dismissRecommendation,
     getRecentlyViewed,
     getBookmarkedContent,
     getLikedContent,

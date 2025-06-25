@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, TrendingUp, BookOpen, Settings, Bot } from 'lucide-react';
 import ContinueLearningDashboard from '@/components/personalization/ContinueLearningDashboard';
 import AITutorPlaceholder from '@/components/ai/AITutorPlaceholder';
-import NotificationCenter from './NotificationCenter';
-import SavedContentGrid from './SavedContentGrid';
-import LearningPathProgress from './LearningPathProgress';
-import EmailNotificationSettings from './EmailNotificationSettings';
+import { NotificationCenter } from './NotificationCenter';
+import { SavedContentGrid } from './SavedContentGrid';
+import { LearningPathProgress } from './LearningPathProgress';
+import { EmailNotificationSettings } from './EmailNotificationSettings';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { Link } from 'react-router-dom';
 

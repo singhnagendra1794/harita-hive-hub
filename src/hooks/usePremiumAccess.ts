@@ -5,11 +5,16 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface UserSubscription {
   id: string;
+  user_id: string;
   subscription_tier: 'free' | 'premium' | 'pro' | 'enterprise';
   status: 'active' | 'cancelled' | 'expired' | 'trial';
   started_at: string;
   expires_at: string | null;
   payment_method: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface PremiumContent {
@@ -43,7 +48,14 @@ export const usePremiumAccess = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setSubscription(data);
+      
+      if (data) {
+        setSubscription({
+          ...data,
+          subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
+          status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
+        });
+      }
     } catch (error) {
       console.error('Error fetching user subscription:', error);
     }
@@ -113,7 +125,12 @@ export const usePremiumAccess = () => {
         .single();
 
       if (error) throw error;
-      setSubscription(data);
+      
+      setSubscription({
+        ...data,
+        subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
+        status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
+      });
       setHasPremiumAccess(true);
     } catch (error) {
       console.error('Error upgrading subscription:', error);
@@ -135,7 +152,12 @@ export const usePremiumAccess = () => {
         .single();
 
       if (error) throw error;
-      setSubscription(data);
+      
+      setSubscription({
+        ...data,
+        subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
+        status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
+      });
     } catch (error) {
       console.error('Error cancelling subscription:', error);
     }
