@@ -77,10 +77,16 @@ export const useDiscussions = (contentType: string, contentId: string) => {
 
           return {
             ...discussion,
+            likes_count: discussion.likes_count || 0,
+            is_pinned: discussion.is_pinned || false,
             user_has_liked: likedIds.has(discussion.id),
+            profiles: discussion.profiles || null,
             replies: (replies || []).map(reply => ({
               ...reply,
-              user_has_liked: likedIds.has(reply.id)
+              likes_count: reply.likes_count || 0,
+              is_pinned: reply.is_pinned || false,
+              user_has_liked: likedIds.has(reply.id),
+              profiles: reply.profiles || null
             }))
           };
         })

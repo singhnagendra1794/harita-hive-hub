@@ -52,7 +52,13 @@ export const useCreatorProfile = (userId?: string) => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setProfile(data);
+      
+      if (data) {
+        setProfile({
+          ...data,
+          social_links: Array.isArray(data.social_links) ? data.social_links : []
+        });
+      }
     } catch (error) {
       console.error('Error fetching creator profile:', error);
     }
@@ -127,7 +133,13 @@ export const useCreatorProfile = (userId?: string) => {
         .single();
 
       if (error) throw error;
-      setProfile(data);
+      
+      if (data) {
+        setProfile({
+          ...data,
+          social_links: Array.isArray(data.social_links) ? data.social_links : []
+        });
+      }
     } catch (error) {
       console.error('Error creating/updating profile:', error);
     }

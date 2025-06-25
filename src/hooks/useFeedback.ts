@@ -44,7 +44,13 @@ export const useFeedback = (contentType: string, contentId: string) => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setUserFeedback(data);
+      
+      if (data) {
+        setUserFeedback({
+          ...data,
+          feedback_type: data.feedback_type as ContentFeedback['feedback_type']
+        });
+      }
     } catch (error) {
       console.error('Error fetching user feedback:', error);
     }
@@ -91,7 +97,12 @@ export const useFeedback = (contentType: string, contentId: string) => {
 
       if (error) throw error;
       
-      setUserFeedback(data);
+      if (data) {
+        setUserFeedback({
+          ...data,
+          feedback_type: data.feedback_type as ContentFeedback['feedback_type']
+        });
+      }
       fetchFeedbackStats();
     } catch (error) {
       console.error('Error submitting feedback:', error);

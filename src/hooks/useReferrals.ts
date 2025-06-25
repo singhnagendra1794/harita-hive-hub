@@ -44,13 +44,18 @@ export const useReferrals = () => {
 
       if (error) throw error;
       
-      setReferrals(data || []);
+      const typedData = (data || []).map(referral => ({
+        ...referral,
+        status: referral.status as Referral['status']
+      }));
       
-      const completed = data?.filter(r => r.status === 'completed').length || 0;
-      const pending = data?.filter(r => r.status === 'completed' && !r.reward_granted).length || 0;
+      setReferrals(typedData);
+      
+      const completed = typedData.filter(r => r.status === 'completed').length;
+      const pending = typedData.filter(r => r.status === 'completed' && !r.reward_granted).length;
       
       setStats({
-        totalReferrals: data?.length || 0,
+        totalReferrals: typedData.length,
         completedReferrals: completed,
         pendingRewards: pending
       });
