@@ -75,6 +75,42 @@ export type Database = {
         }
         Relationships: []
       }
+      content_recommendations: {
+        Row: {
+          clicked: boolean | null
+          content_id: string
+          content_type: string
+          dismissed: boolean | null
+          id: string
+          reason: string | null
+          recommended_at: string | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          clicked?: boolean | null
+          content_id: string
+          content_type: string
+          dismissed?: boolean | null
+          id?: string
+          reason?: string | null
+          recommended_at?: string | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          clicked?: boolean | null
+          content_id?: string
+          content_type?: string
+          dismissed?: boolean | null
+          id?: string
+          reason?: string | null
+          recommended_at?: string | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_queue: {
         Row: {
           created_at: string | null
@@ -266,6 +302,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      premium_content: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_premium: boolean | null
+          premium_tier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_premium?: boolean | null
+          premium_tier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_premium?: boolean | null
+          premium_tier?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -503,6 +572,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_interactions: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          id: string
+          interaction_type: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          id?: string
+          interaction_type: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          interaction_type?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_learning_paths: {
         Row: {
           completed_at: string | null
@@ -568,6 +667,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          difficulty_level: string | null
+          id: string
+          language_preference: string | null
+          learning_style: string | null
+          notification_frequency: string | null
+          preferred_topics: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          language_preference?: string | null
+          learning_style?: string | null
+          notification_frequency?: string | null
+          preferred_topics?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          language_preference?: string | null
+          learning_style?: string | null
+          notification_frequency?: string | null
+          preferred_topics?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed_at: string | null
@@ -604,6 +739,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          payment_method: string | null
+          started_at: string | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_tier: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          started_at?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_tier?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          started_at?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_tier?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -612,6 +789,15 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      get_user_recommendations: {
+        Args: { p_user_id: string; p_limit?: number }
+        Returns: {
+          content_type: string
+          content_id: string
+          score: number
+          reason: string
+        }[]
       }
       halfvec_avg: {
         Args: { "": number[] }
@@ -676,6 +862,20 @@ export type Database = {
       sparsevec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      track_user_interaction: {
+        Args: {
+          p_user_id: string
+          p_content_type: string
+          p_content_id: string
+          p_interaction_type: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
+      user_has_premium_access: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       vector_avg: {
         Args: { "": number[] }

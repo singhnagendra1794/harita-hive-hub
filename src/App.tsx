@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -26,6 +27,7 @@ import CodeSnippets from "./pages/CodeSnippets";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Search from "./pages/Search";
+import PremiumUpgrade from "./pages/PremiumUpgrade";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +52,11 @@ const App: React.FC = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/premium" element={
+                <ProtectedRoute>
+                  <PremiumUpgrade />
+                </ProtectedRoute>
+              } />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
