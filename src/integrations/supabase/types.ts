@@ -75,6 +75,75 @@ export type Database = {
         }
         Relationships: []
       }
+      community_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          related_content_id: string | null
+          related_user_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          related_content_id?: string | null
+          related_user_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          related_content_id?: string | null
+          related_user_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_feedback: {
+        Row: {
+          comment: string | null
+          content_id: string
+          content_type: string
+          created_at: string
+          feedback_type: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          content_id: string
+          content_type: string
+          created_at?: string
+          feedback_type: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_recommendations: {
         Row: {
           clicked: boolean | null
@@ -110,6 +179,127 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      creator_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          follower_count: number | null
+          id: string
+          is_verified: boolean | null
+          social_links: Json | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          follower_count?: number | null
+          id?: string
+          is_verified?: boolean | null
+          social_links?: Json | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          follower_count?: number | null
+          id?: string
+          is_verified?: boolean | null
+          social_links?: Json | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      discussion_likes: {
+        Row: {
+          created_at: string
+          discussion_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discussion_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discussion_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_likes_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussions: {
+        Row: {
+          content: string
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          is_deleted: boolean | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_queue: {
         Row: {
@@ -572,6 +762,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_interactions: {
         Row: {
           content_id: string
@@ -739,6 +950,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referee_id: string | null
+          referral_code: string
+          referrer_id: string
+          reward_granted: boolean | null
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referee_id?: string | null
+          referral_code: string
+          referrer_id: string
+          reward_granted?: boolean | null
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referee_id?: string | null
+          referral_code?: string
+          referrer_id?: string
+          reward_granted?: boolean | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string | null
@@ -789,6 +1033,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      generate_referral_code: {
+        Args: { user_id: string }
+        Returns: string
       }
       get_user_recommendations: {
         Args: { p_user_id: string; p_limit?: number }
