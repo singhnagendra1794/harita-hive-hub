@@ -62,7 +62,10 @@ export const usePersonalization = () => {
       if (data) {
         setPreferences({
           ...data,
-          difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
+          difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
+          learning_style: data.learning_style as 'visual' | 'hands-on' | 'theoretical' | 'mixed',
+          notification_frequency: data.notification_frequency as 'daily' | 'weekly' | 'monthly',
+          preferred_topics: data.preferred_topics || []
         });
       }
     } catch (error) {
@@ -134,6 +137,28 @@ export const usePersonalization = () => {
     }
   };
 
+  const dismissRecommendation = async (contentType: string, contentId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('content_recommendations')
+        .update({ dismissed: true })
+        .eq('user_id', user.id)
+        .eq('content_type', contentType)
+        .eq('content_id', contentId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setRecommendations(prev => 
+        prev.filter(rec => !(rec.content_type === contentType && rec.content_id === contentId))
+      );
+    } catch (error) {
+      console.error('Error dismissing recommendation:', error);
+    }
+  };
+
   const updatePreferences = async (updatedPreferences: Partial<UserPreferences>) => {
     if (!user || !preferences) return;
 
@@ -152,7 +177,10 @@ export const usePersonalization = () => {
       
       setPreferences({
         ...data,
-        difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
+        difficulty_level: data.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
+        learning_style: data.learning_style as 'visual' | 'hands-on' | 'theoretical' | 'mixed',
+        notification_frequency: data.notification_frequency as 'daily' | 'weekly' | 'monthly',
+        preferred_topics: data.preferred_topics || []
       });
     } catch (error) {
       console.error('Error updating preferences:', error);
@@ -201,6 +229,7 @@ export const usePersonalization = () => {
     recommendations,
     loading,
     trackInteraction,
+    dismissRecommendation,
     updatePreferences,
     getRecentlyViewed,
     getBookmarkedContent,
