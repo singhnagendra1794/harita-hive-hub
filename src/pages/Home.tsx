@@ -4,12 +4,33 @@ import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
 import AboutAuthor from "../components/AboutAuthor";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Rocket } from "lucide-react";
 
 const Home = () => {
   return (
     <Layout>
       <HeroSection />
+      
+      {/* Beta Announcement Banner */}
+      <section className="py-8 bg-primary/5 border-y">
+        <div className="container text-center">
+          <Badge variant="secondary" className="mb-4">
+            <Rocket className="h-4 w-4 mr-1" />
+            Public Beta Now Open
+          </Badge>
+          <h2 className="text-2xl font-bold mb-2">Join Our Beta Program!</h2>
+          <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
+            Get early access to all features, help shape the platform, and join our growing community of geospatial learners.
+          </p>
+          <Link to="/beta">
+            <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
+              Join Beta for Free <Rocket className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
       
       <section className="py-16 bg-background">
         <div className="container">
@@ -64,8 +85,8 @@ const Home = () => {
             Join the HaritaHive community today and unlock the full potential of geospatial technology.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/signup">
-              <Button size="lg" variant="secondary">Sign Up Now</Button>
+            <Link to="/beta">
+              <Button size="lg" variant="secondary">Join Beta Program</Button>
             </Link>
             <Link to="/learn">
               <Button size="lg" variant="outline" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">

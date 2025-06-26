@@ -45,6 +45,69 @@ export type Database = {
         }
         Relationships: []
       }
+      beta_analytics: {
+        Row: {
+          date_bucket: string | null
+          id: string
+          metric_data: Json | null
+          metric_name: string
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          date_bucket?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_name: string
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Update: {
+          date_bucket?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_name?: string
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Relationships: []
+      }
+      beta_waitlist: {
+        Row: {
+          converted_at: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          invited_at: string | null
+          referral_source: string | null
+          signup_data: Json | null
+          status: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          invited_at?: string | null
+          referral_source?: string | null
+          signup_data?: Json | null
+          status?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          invited_at?: string | null
+          referral_source?: string | null
+          signup_data?: Json | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       class_enrollments: {
         Row: {
           class_date: string
@@ -179,6 +242,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      content_shares: {
+        Row: {
+          content_id: string
+          content_type: string
+          id: string
+          share_data: Json | null
+          share_platform: string
+          shared_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          id?: string
+          share_data?: Json | null
+          share_platform: string
+          shared_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          id?: string
+          share_data?: Json | null
+          share_platform?: string
+          shared_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       creator_profiles: {
         Row: {
@@ -990,6 +1091,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_subscriptions: {
         Row: {
           created_at: string | null
@@ -1158,7 +1298,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "beta_tester" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1273,6 +1413,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "beta_tester", "user"],
+    },
   },
 } as const

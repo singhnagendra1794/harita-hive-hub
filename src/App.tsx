@@ -1,62 +1,63 @@
 
-import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
+// Page imports
+import Index from "./pages/Index";
 import Home from "./pages/Home";
+import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
 import Learn from "./pages/Learn";
 import Projects from "./pages/Projects";
+import Notes from "./pages/Notes";
+import Community from "./pages/Community";
 import SpatialAnalysis from "./pages/SpatialAnalysis";
-import GeoDashboard from "./pages/GeoDashboard";
+import CodeSnippets from "./pages/CodeSnippets";
+import LiveClasses from "./pages/LiveClasses";
 import JobPosting from "./pages/JobPosting";
 import ResumePosting from "./pages/ResumePosting";
 import QgisProject from "./pages/QgisProject";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Pricing from "./pages/Pricing";
-import Payment from "./pages/Payment";
-import Auth from "./pages/Auth";
-import LiveClasses from "./pages/LiveClasses";
-import Newsletter from "./pages/Newsletter";
-import Notes from "./pages/Notes";
-import CodeSnippets from "./pages/CodeSnippets";
-import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
+import GeoDashboard from "./pages/GeoDashboard";
+import AIStudio from "./pages/AIStudio";
 import Search from "./pages/Search";
+import Payment from "./pages/Payment";
 import PremiumUpgrade from "./pages/PremiumUpgrade";
+import Pricing from "./pages/Pricing";
+import Newsletter from "./pages/Newsletter";
+import AdminDashboard from "./pages/AdminDashboard";
+import Investors from "./pages/Investors";
+import Beta from "./pages/Beta";
+import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
-const App: React.FC = () => {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/premium" element={
-                <ProtectedRoute>
-                  <PremiumUpgrade />
-                </ProtectedRoute>
-              } />
+              <Route path="/beta" element={<Beta />} />
+              <Route path="/investors" element={<Investors />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/newsletter" element={<Newsletter />} />
+              
+              {/* Protected Routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
@@ -72,14 +73,29 @@ const App: React.FC = () => {
                   <Projects />
                 </ProtectedRoute>
               } />
+              <Route path="/notes" element={
+                <ProtectedRoute>
+                  <Notes />
+                </ProtectedRoute>
+              } />
+              <Route path="/community" element={
+                <ProtectedRoute>
+                  <Community />
+                </ProtectedRoute>
+              } />
               <Route path="/spatial-analysis" element={
                 <ProtectedRoute>
                   <SpatialAnalysis />
                 </ProtectedRoute>
               } />
-              <Route path="/geo-dashboard" element={
+              <Route path="/code-snippets" element={
                 <ProtectedRoute>
-                  <GeoDashboard />
+                  <CodeSnippets />
+                </ProtectedRoute>
+              } />
+              <Route path="/live-classes" element={
+                <ProtectedRoute>
+                  <LiveClasses />
                 </ProtectedRoute>
               } />
               <Route path="/job-posting" element={
@@ -97,9 +113,19 @@ const App: React.FC = () => {
                   <QgisProject />
                 </ProtectedRoute>
               } />
-              <Route path="/pricing" element={
+              <Route path="/geo-dashboard" element={
                 <ProtectedRoute>
-                  <Pricing />
+                  <GeoDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/ai-studio" element={
+                <ProtectedRoute>
+                  <AIStudio />
+                </ProtectedRoute>
+              } />
+              <Route path="/search" element={
+                <ProtectedRoute>
+                  <Search />
                 </ProtectedRoute>
               } />
               <Route path="/payment" element={
@@ -107,33 +133,24 @@ const App: React.FC = () => {
                   <Payment />
                 </ProtectedRoute>
               } />
-              <Route path="/live-classes" element={
+              <Route path="/premium-upgrade" element={
                 <ProtectedRoute>
-                  <LiveClasses />
+                  <PremiumUpgrade />
                 </ProtectedRoute>
               } />
-              <Route path="/newsletter" element={
+              <Route path="/admin" element={
                 <ProtectedRoute>
-                  <Newsletter />
+                  <AdminDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/notes" element={
-                <ProtectedRoute>
-                  <Notes />
-                </ProtectedRoute>
-              } />
-              <Route path="/code-snippets" element={
-                <ProtectedRoute>
-                  <CodeSnippets />
-                </ProtectedRoute>
-              } />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
