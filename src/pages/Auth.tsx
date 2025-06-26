@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
-import { Separator } from "@/components/ui/separator";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +21,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [phoneSignIn, setPhoneSignIn] = useState(false);
   const [otp, setOtp] = useState("");
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [verificationStep, setVerificationStep] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -37,7 +39,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -50,10 +52,19 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Success!",
-        description: "Please check your email to confirm your account.",
-      });
+      if (data.user && !data.user.email_confirmed_at) {
+        setVerificationStep(true);
+        toast({
+          title: "Check your email!",
+          description: "We've sent you a confirmation link. Please check your email and click the link to complete your registration.",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: "Account created successfully!",
+        });
+        navigate('/');
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -83,6 +94,55 @@ const Auth = () => {
       });
       
       navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (!emailOtpSent) {
+        // Send OTP to email
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
+
+        if (error) throw error;
+
+        setEmailOtpSent(true);
+        toast({
+          title: "OTP Sent!",
+          description: "Please check your email for the verification code.",
+        });
+      } else {
+        // Verify OTP
+        const { error } = await supabase.auth.verifyOtp({
+          email: email,
+          token: otp,
+          type: 'email'
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Welcome!",
+          description: "You have successfully signed in.",
+        });
+        
+        navigate('/');
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -158,13 +218,82 @@ const Auth = () => {
     }
   };
 
+  const handleResendConfirmation = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email sent!",
+        description: "We've sent you another confirmation email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (verificationStep) {
+    return (
+      <Layout>
+        <div className="container max-w-md py-12">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Check your email</CardTitle>
+              <CardDescription>
+                We've sent a confirmation link to <strong>{email}</strong>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground text-center">
+                Click the link in your email to complete your registration. 
+                The link will expire in 24 hours.
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleResendConfirmation}
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Resend confirmation email"}
+              </Button>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => setVerificationStep(false)}
+              >
+                Back to sign up
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container max-w-md py-12">
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="email-otp">Email OTP</TabsTrigger>
             <TabsTrigger value="phone">Phone</TabsTrigger>
           </TabsList>
           
@@ -332,6 +461,77 @@ const Auth = () => {
                     LinkedIn
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="email-otp">
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl">Email OTP Login</CardTitle>
+                <CardDescription>
+                  Sign in using a one-time code sent to your email
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <form onSubmit={handleEmailOTP}>
+                  <div className="grid gap-2">
+                    <div className="grid gap-1">
+                      <Label htmlFor="email-otp">Email</Label>
+                      <Input
+                        id="email-otp"
+                        placeholder="name@example.com"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={emailOtpSent}
+                        required
+                      />
+                    </div>
+                    
+                    {emailOtpSent && (
+                      <div className="grid gap-1">
+                        <Label htmlFor="otp-code">Verification Code</Label>
+                        <InputOTP
+                          value={otp}
+                          onChange={(value) => setOtp(value)}
+                          maxLength={6}
+                        >
+                          <InputOTPGroup>
+                            <InputOTPSlot index={0} />
+                            <InputOTPSlot index={1} />
+                            <InputOTPSlot index={2} />
+                            <InputOTPSlot index={3} />
+                            <InputOTPSlot index={4} />
+                            <InputOTPSlot index={5} />
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </div>
+                    )}
+                    
+                    <Button className="mt-4" type="submit" disabled={loading}>
+                      {loading 
+                        ? "Processing..." 
+                        : emailOtpSent 
+                          ? "Verify Code" 
+                          : "Send Verification Code"
+                      }
+                    </Button>
+                    
+                    {emailOtpSent && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          setEmailOtpSent(false);
+                          setOtp("");
+                        }}
+                      >
+                        Change Email
+                      </Button>
+                    )}
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>

@@ -4,24 +4,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-type SharePlatform = 'linkedin' | 'twitter' | 'email' | 'copy_link';
-
-interface ShareData {
-  title?: string;
+interface ShareOptions {
+  title: string;
   description?: string;
-  url?: string;
   hashtags?: string[];
 }
 
 export const useContentSharing = () => {
+  const [sharing, setSharing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const [sharing, setSharing] = useState(false);
 
-  const trackShare = async (contentType: string, contentId: string, platform: SharePlatform, shareData: ShareData) => {
+  const shareContent = async (
+    contentType: string,
+    contentId: string,
+    platform: 'linkedin' | 'twitter' | 'email' | 'copy_link',
+    options: ShareOptions
+  ) => {
     if (!user) return;
 
+    setSharing(true);
     try {
+      const currentUrl = window.location.href;
+      const shareData = {
+        title: options.title,
+        description: options.description || '',
+        hashtags: options.hashtags || [],
+        url: currentUrl
+      };
+
+      // Record the share in the database
       await supabase
         .from('content_shares')
         .insert({
@@ -29,80 +41,56 @@ export const useContentSharing = () => {
           content_type: contentType,
           content_id: contentId,
           share_platform: platform,
-          share_data: shareData
+          share_data: shareData as any
         });
-    } catch (error) {
-      console.error('Error tracking share:', error);
-    }
-  };
 
-  const shareContent = async (
-    contentType: string,
-    contentId: string,
-    platform: SharePlatform,
-    shareData: ShareData
-  ) => {
-    setSharing(true);
-    
-    try {
-      const baseUrl = window.location.origin;
-      const shareUrl = shareData.url || `${baseUrl}/${contentType}/${contentId}`;
-      
+      // Handle different sharing platforms
       switch (platform) {
-        case 'linkedin':
-          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-          window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          break;
-          
-        case 'twitter':
-          const tweetText = `${shareData.title}\n\n${shareData.description || ''}\n\n${shareData.hashtags?.map(tag => `#${tag}`).join(' ') || ''}`;
-          const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-          window.open(twitterUrl, '_blank', 'width=600,height=400');
-          break;
-          
-        case 'email':
-          const emailSubject = shareData.title || 'Check this out';
-          const emailBody = `${shareData.description || ''}\n\n${shareUrl}`;
-          window.open(`mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
-          break;
-          
         case 'copy_link':
-          await navigator.clipboard.writeText(shareUrl);
+          await navigator.clipboard.writeText(currentUrl);
           toast({
-            title: 'Link Copied!',
-            description: 'The link has been copied to your clipboard.',
+            title: "Link copied!",
+            description: "The link has been copied to your clipboard.",
           });
           break;
+
+        case 'linkedin':
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          break;
+
+        case 'twitter':
+          const hashtags = options.hashtags?.join(',') || '';
+          const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(options.title)}&hashtags=${hashtags}`;
+          window.open(twitterUrl, '_blank', 'width=600,height=400');
+          break;
+
+        case 'email':
+          const subject = encodeURIComponent(options.title);
+          const body = encodeURIComponent(`${options.description}\n\n${currentUrl}`);
+          window.location.href = `mailto:?subject=${subject}&body=${body}`;
+          break;
       }
 
-      await trackShare(contentType, contentId, platform, { ...shareData, url: shareUrl });
-      
-      if (platform !== 'copy_link') {
-        toast({
-          title: 'Content Shared!',
-          description: `Shared on ${platform} successfully.`,
-        });
-      }
-    } catch (error) {
       toast({
-        title: 'Share Error',
-        description: 'Failed to share content. Please try again.',
-        variant: 'destructive',
+        title: "Content shared!",
+        description: `Successfully shared on ${platform}.`,
+      });
+
+    } catch (error) {
+      console.error('Error sharing content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to share content. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setSharing(false);
     }
   };
 
-  const generateShareUrl = (contentType: string, contentId: string, referralCode?: string) => {
-    const baseUrl = window.location.origin;
-    const url = `${baseUrl}/${contentType}/${contentId}`;
-    return referralCode ? `${url}?ref=${referralCode}` : url;
-  };
-
   return {
     shareContent,
-    generateShareUrl,
     sharing
   };
 };
