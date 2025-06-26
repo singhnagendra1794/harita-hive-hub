@@ -299,6 +299,13 @@ export type Database = {
             referencedRelation: "discussions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "discussions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       email_queue: {

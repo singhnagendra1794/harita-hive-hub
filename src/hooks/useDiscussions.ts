@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -74,20 +75,31 @@ export const useDiscussions = (contentType: string, contentId: string) => {
 
           const likedIds = new Set(userLikes.data?.map(like => like.discussion_id) || []);
 
+          // Safely handle profiles data
+          const safeProfiles = discussion.profiles && typeof discussion.profiles === 'object' && !('error' in discussion.profiles)
+            ? discussion.profiles as { full_name: string | null; avatar_url: string | null }
+            : { full_name: null, avatar_url: null };
+
           return {
             ...discussion,
             likes_count: discussion.likes_count || 0,
             is_pinned: discussion.is_pinned || false,
             user_has_liked: likedIds.has(discussion.id),
-            profiles: discussion.profiles || { full_name: null, avatar_url: null },
-            replies: (replies || []).map(reply => ({
-              ...reply,
-              likes_count: reply.likes_count || 0,
-              is_pinned: reply.is_pinned || false,
-              user_has_liked: likedIds.has(reply.id),
-              profiles: reply.profiles || { full_name: null, avatar_url: null }
-            }))
-          };
+            profiles: safeProfiles,
+            replies: (replies || []).map(reply => {
+              const safeReplyProfiles = reply.profiles && typeof reply.profiles === 'object' && !('error' in reply.profiles)
+                ? reply.profiles as { full_name: string | null; avatar_url: string | null }
+                : { full_name: null, avatar_url: null };
+
+              return {
+                ...reply,
+                likes_count: reply.likes_count || 0,
+                is_pinned: reply.is_pinned || false,
+                user_has_liked: likedIds.has(reply.id),
+                profiles: safeReplyProfiles
+              };
+            })
+          } as Discussion;
         })
       );
 
