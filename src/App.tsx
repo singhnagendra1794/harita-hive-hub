@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +34,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Investors from "./pages/Investors";
 import Beta from "./pages/Beta";
 import NotFound from "./pages/NotFound";
+import MapPlayground from "./pages/MapPlayground";
+import ProjectTemplates from "./pages/ProjectTemplates";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,16 @@ function App() {
               <Route path="/projects" element={
                 <ProtectedRoute>
                   <Projects />
+                </ProtectedRoute>
+              } />
+              <Route path="/project-templates" element={
+                <ProtectedRoute>
+                  <ProjectTemplates />
+                </ProtectedRoute>
+              } />
+              <Route path="/map-playground" element={
+                <ProtectedRoute>
+                  <MapPlayground />
                 </ProtectedRoute>
               } />
               <Route path="/notes" element={

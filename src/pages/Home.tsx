@@ -1,4 +1,3 @@
-
 import Layout from "../components/Layout";
 import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
@@ -49,6 +48,36 @@ const Home = () => {
               </p>
               <Link to="/learn">
                 <Button variant="outline" size="sm">Explore Learning</Button>
+              </Link>
+            </div>
+            
+            <div className="bg-accent/10 p-6 rounded-lg">
+              <h3 className="font-bold text-xl mb-2">Interactive Map Tools</h3>
+              <p className="text-muted-foreground mb-4">
+                Create and visualize geospatial data with our interactive mapping playground.
+              </p>
+              <Link to="/map-playground">
+                <Button variant="outline" size="sm">Try Map Playground</Button>
+              </Link>
+            </div>
+            
+            <div className="bg-accent/10 p-6 rounded-lg">
+              <h3 className="font-bold text-xl mb-2">Project Templates</h3>
+              <p className="text-muted-foreground mb-4">
+                Ready-to-use templates with sample data for common GIS workflows and analyses.
+              </p>
+              <Link to="/project-templates">
+                <Button variant="outline" size="sm">Browse Templates</Button>
+              </Link>
+            </div>
+            
+            <div className="bg-accent/10 p-6 rounded-lg">
+              <h3 className="font-bold text-xl mb-2">Code Snippets Library</h3>
+              <p className="text-muted-foreground mb-4">
+                Runnable code examples and snippets for GIS development and automation.
+              </p>
+              <Link to="/code-snippets">
+                <Button variant="outline" size="sm">View Code Library</Button>
               </Link>
             </div>
             
