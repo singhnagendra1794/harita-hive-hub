@@ -1,19 +1,13 @@
 
-import React, { useEffect } from 'react';
-import Layout from '@/components/Layout';
-import UserDashboard from '@/components/dashboard/UserDashboard';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import Layout from "../components/Layout";
+import UserDashboard from "../components/dashboard/UserDashboard";
+import OnboardingTour from "../components/OnboardingTour";
 
 const Dashboard = () => {
-  const { trackPageView } = useAnalytics();
-
-  useEffect(() => {
-    trackPageView('dashboard');
-  }, [trackPageView]);
-
   return (
     <Layout>
       <UserDashboard />
+      <OnboardingTour />
     </Layout>
   );
 };

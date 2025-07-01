@@ -3,6 +3,11 @@ import Layout from "../components/Layout";
 import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
 import AboutAuthor from "../components/AboutAuthor";
+import TestimonialsSection from "../components/TestimonialsSection";
+import CommunityLinks from "../components/CommunityLinks";
+import ComingSoonSection from "../components/ComingSoonSection";
+import OnboardingTour from "../components/OnboardingTour";
+import FeedbackWidget from "../components/FeedbackWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -133,7 +138,10 @@ const Home = () => {
         </div>
       </section>
       
+      <TestimonialsSection />
+      <ComingSoonSection />
       <BenefitsSection />
+      <CommunityLinks />
       <AboutAuthor />
       
       {/* Call to Action */}
@@ -157,6 +165,10 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Engagement Components */}
+      <OnboardingTour />
+      <FeedbackWidget />
     </Layout>
   );
 };
