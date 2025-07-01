@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
@@ -39,6 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
+          // Clear any cached data
+          setSession(null);
+          setUser(null);
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Token refreshed');
         }
@@ -75,14 +78,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Clear local state first
+      setUser(null);
+      setSession(null);
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
         throw error;
       }
-      // State will be cleared by the auth state change listener
+      
+      console.log('Logout successful');
     } catch (error) {
       console.error('Error in logout:', error);
+      throw error;
     } finally {
       setLoading(false);
     }

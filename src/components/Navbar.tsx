@@ -1,172 +1,233 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import SearchTrigger from './search/SearchTrigger';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/home');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const navigationItems = [
+    { name: "Home", href: "/home", icon: null },
+    { name: "Learn", href: "/learn", icon: BookOpen, protected: true },
+    { name: "Map Playground", href: "/map-playground", icon: MapPin, protected: true },
+    { name: "Code Snippets", href: "/code-snippets", icon: Code, protected: true },
+    { name: "Community", href: "/community", icon: Users, protected: true },
+    { name: "Job Board", href: "/job-posting", icon: Briefcase, protected: true },
+    { name: "Live Classes", href: "/live-classes", icon: GraduationCap, protected: true },
+  ];
+
+  const NavItems = ({ mobile = false, onItemClick = () => {} }) => (
+    <>
+      {navigationItems.map((item) => {
+        if (item.protected && !user) return null;
+        
+        return (
+          <Link
+            key={item.name}
+            to={item.href}
+            className={`${
+              mobile
+                ? "flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
+                : "text-sm font-medium hover:text-primary transition-colors"
+            }`}
+            onClick={onItemClick}
+          >
+            {item.icon && mobile && <item.icon className="h-5 w-5" />}
+            <span>{item.name}</span>
+          </Link>
+        );
+      })}
+    </>
+  );
 
   return (
-    <nav className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">H</span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/home" className="flex items-center space-x-2">
+            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">HH</span>
             </div>
-            <span className="text-xl font-bold text-gray-800">HaritaHive</span>
+            <span className="font-bold text-xl">HaritaHive</span>
           </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {user && (
-              <>
-                <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Dashboard
-                </Link>
-                <Link to="/learn" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Learn
-                </Link>
-                <Link to="/projects" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Projects
-                </Link>
-                <Link to="/live-classes" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Live Classes
-                </Link>
-                <Link to="/code-snippets" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Code
-                </Link>
-                <Link to="/notes" className="text-gray-600 hover:text-green-600 transition-colors">
-                  Notes
-                </Link>
-              </>
-            )}
-          </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <NavItems />
+        </nav>
 
-          {/* Search Bar */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
-            <SearchTrigger />
-          </div>
-
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            {user ? (
+        {/* Desktop Auth Section */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <div className="flex items-center space-x-2">
+              <Link to="/search">
+                <Button variant="ghost" size="sm">
+                  <Search className="h-4 w-4" />
+                </Button>
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" alt={user.email || ""} />
-                      <AvatarFallback>{user.email?.[0]?.toUpperCase()}</AvatarFallback>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
+                      <AvatarFallback>
+                        {user.email?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.email}</p>
+                <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">{user.user_metadata?.full_name || "User"}</p>
+                      <p className="w-[200px] truncate text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
-                  </DropdownMenuLabel>
+                  </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/dashboard" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/pricing">Pricing</Link>
+                    <Link to="/premium-upgrade" className="flex items-center">
+                      <Crown className="mr-2 h-4 w-4" />
+                      Upgrade to Premium
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link to="/login">
-                  <Button variant="ghost">Sign in</Button>
-                </Link>
-                <Link to="/signup">
-                  <Button>Get Started</Button>
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile Menu Toggle */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Link to="/login">
+                <Button variant="ghost">Login</Button>
+              </Link>
+              <Link to="/signup">
+                <Button>Sign Up</Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-2 border-t">
-            {/* Mobile Search */}
-            <div className="px-2 mb-4">
-              <SearchTrigger />
-            </div>
-            
-            {user ? (
-              <>
-                <Link to="/dashboard" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Dashboard
-                </Link>
-                <Link to="/learn" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Learn
-                </Link>
-                <Link to="/projects" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Projects
-                </Link>
-                <Link to="/live-classes" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Live Classes
-                </Link>
-                <Link to="/code-snippets" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Code
-                </Link>
-                <Link to="/notes" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Notes
-                </Link>
-                <hr className="my-2" />
-                <button
-                  onClick={logout}
-                  className="block w-full text-left px-2 py-2 text-gray-600 hover:text-green-600"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Sign in
-                </Link>
-                <Link to="/signup" className="block px-2 py-2 text-gray-600 hover:text-green-600">
-                  Get Started
-                </Link>
-              </>
-            )}
-          </div>
-        )}
+        <div className="md:hidden">
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] bg-background">
+              <div className="flex flex-col space-y-6 mt-6">
+                {user && (
+                  <div className="flex items-center space-x-3 p-4 bg-accent/50 rounded-lg">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
+                      <AvatarFallback>
+                        {user.email?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user.user_metadata?.full_name || "User"}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <nav className="flex flex-col space-y-2">
+                  <NavItems mobile onItemClick={() => setIsOpen(false)} />
+                </nav>
+
+                {user ? (
+                  <div className="flex flex-col space-y-2 pt-4 border-t">
+                    <Link
+                      to="/dashboard"
+                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <User className="h-5 w-5" />
+                      <span>Dashboard</span>
+                    </Link>
+                    <Link
+                      to="/search"
+                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Search className="h-5 w-5" />
+                      <span>Search</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md text-red-600"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2 pt-4 border-t">
+                    <Link
+                      to="/login"
+                      className="flex items-center justify-center px-4 py-2 text-lg hover:bg-accent rounded-md"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="flex items-center justify-center px-4 py-2 text-lg bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-    </nav>
+    </header>
   );
 };
 

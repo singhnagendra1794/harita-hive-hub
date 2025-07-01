@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,6 +37,8 @@ import Beta from "./pages/Beta";
 import NotFound from "./pages/NotFound";
 import MapPlayground from "./pages/MapPlayground";
 import ProjectTemplates from "./pages/ProjectTemplates";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +60,8 @@ function App() {
               <Route path="/investors" element={<Investors />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/newsletter" element={<Newsletter />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               
               {/* Protected Routes */}
               <Route path="/dashboard" element={

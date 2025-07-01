@@ -1,3 +1,4 @@
+
 import Layout from "../components/Layout";
 import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
@@ -5,101 +6,129 @@ import AboutAuthor from "../components/AboutAuthor";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Rocket } from "lucide-react";
+import { Rocket, ArrowRight, CheckCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Home = () => {
+  const features = [
+    {
+      title: "Learning Resources",
+      description: "Comprehensive tutorials, courses, and hands-on projects to enhance your GIS skills.",
+      href: "/learn",
+      icon: "📚"
+    },
+    {
+      title: "Interactive Map Tools",
+      description: "Create and visualize geospatial data with our interactive mapping playground.",
+      href: "/map-playground",
+      icon: "🗺️"
+    },
+    {
+      title: "Project Templates",
+      description: "Ready-to-use templates with sample data for common GIS workflows and analyses.",
+      href: "/project-templates",
+      icon: "📋"
+    },
+    {
+      title: "Code Snippets Library",
+      description: "Runnable code examples and snippets for GIS development and automation.",
+      href: "/code-snippets",
+      icon: "💻"
+    },
+    {
+      title: "Spatial Analysis Tools",
+      description: "Access advanced spatial analysis capabilities, integrated with Python, SQL, and more.",
+      href: "/spatial-analysis",
+      icon: "📊"
+    },
+    {
+      title: "Career Opportunities",
+      description: "Connect with employers and professionals, and showcase your skills to the community.",
+      href: "/job-posting",
+      icon: "💼"
+    }
+  ];
+
+  const benefits = [
+    "Free access to core features",
+    "Community-driven learning",
+    "Industry-standard tools",
+    "Expert-led tutorials",
+    "Career development resources",
+    "Regular updates and new content"
+  ];
+
   return (
     <Layout>
       <HeroSection />
       
       {/* Beta Announcement Banner */}
-      <section className="py-8 bg-primary/5 border-y">
+      <section className="py-8 bg-gradient-to-r from-primary/10 to-accent/10 border-y">
         <div className="container text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Rocket className="h-4 w-4 mr-1" />
+          <Badge variant="secondary" className="mb-4 px-4 py-2">
+            <Rocket className="h-4 w-4 mr-2" />
             Public Beta Now Open
           </Badge>
-          <h2 className="text-2xl font-bold mb-2">Join Our Beta Program!</h2>
-          <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4">Join Our Beta Program!</h2>
+          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto text-lg">
             Get early access to all features, help shape the platform, and join our growing community of geospatial learners.
           </p>
-          <Link to="/beta">
-            <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-              Join Beta for Free <Rocket className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/beta">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90">
+                Join Beta for Free <Rocket className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button variant="outline" size="lg">
+                Create Account <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
       
-      <section className="py-16 bg-background">
+      {/* About Section */}
+      <section className="py-20 bg-background">
         <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">About HaritaHive</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">About HaritaHive</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              HaritaHive is the one-stop solution for geospatial professionals, providing cutting-edge tools, resources, and a community for everyone in the GIS ecosystem.
+              HaritaHive is the comprehensive platform for geospatial professionals, providing cutting-edge tools, 
+              resources, and a vibrant community for everyone in the GIS ecosystem.
             </p>
           </div>
+
+          {/* Why Choose Us */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="flex items-center space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <span className="text-muted-foreground">{benefit}</span>
+              </div>
+            ))}
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Learning Resources</h3>
-              <p className="text-muted-foreground mb-4">
-                Comprehensive tutorials, courses, and hands-on projects to enhance your GIS skills.
-              </p>
-              <Link to="/learn">
-                <Button variant="outline" size="sm">Explore Learning</Button>
-              </Link>
-            </div>
-            
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Interactive Map Tools</h3>
-              <p className="text-muted-foreground mb-4">
-                Create and visualize geospatial data with our interactive mapping playground.
-              </p>
-              <Link to="/map-playground">
-                <Button variant="outline" size="sm">Try Map Playground</Button>
-              </Link>
-            </div>
-            
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Project Templates</h3>
-              <p className="text-muted-foreground mb-4">
-                Ready-to-use templates with sample data for common GIS workflows and analyses.
-              </p>
-              <Link to="/project-templates">
-                <Button variant="outline" size="sm">Browse Templates</Button>
-              </Link>
-            </div>
-            
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Code Snippets Library</h3>
-              <p className="text-muted-foreground mb-4">
-                Runnable code examples and snippets for GIS development and automation.
-              </p>
-              <Link to="/code-snippets">
-                <Button variant="outline" size="sm">View Code Library</Button>
-              </Link>
-            </div>
-            
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Powerful Analysis Tools</h3>
-              <p className="text-muted-foreground mb-4">
-                Access advanced spatial analysis capabilities, integrated with Python, SQL, and more.
-              </p>
-              <Link to="/spatial-analysis">
-                <Button variant="outline" size="sm">Try Analysis Tools</Button>
-              </Link>
-            </div>
-            
-            <div className="bg-accent/10 p-6 rounded-lg">
-              <h3 className="font-bold text-xl mb-2">Career Opportunities</h3>
-              <p className="text-muted-foreground mb-4">
-                Connect with employers and professionals, and showcase your skills to the community.
-              </p>
-              <Link to="/job-posting">
-                <Button variant="outline" size="sm">View Opportunities</Button>
-              </Link>
-            </div>
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">
+                <CardHeader>
+                  <div className="text-3xl mb-2">{feature.icon}</div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="mb-4 text-muted-foreground">
+                    {feature.description}
+                  </CardDescription>
+                  <Link to={feature.href}>
+                    <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      Explore <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -107,18 +136,21 @@ const Home = () => {
       <BenefitsSection />
       <AboutAuthor />
       
-      <section className="bg-primary text-primary-foreground py-16">
+      {/* Call to Action */}
+      <section className="bg-primary text-primary-foreground py-20">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
             Join the HaritaHive community today and unlock the full potential of geospatial technology.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/beta">
-              <Button size="lg" variant="secondary">Join Beta Program</Button>
+              <Button size="lg" variant="secondary" className="min-w-[200px]">
+                Join Beta Program
+              </Button>
             </Link>
             <Link to="/learn">
-              <Button size="lg" variant="outline" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary min-w-[200px]">
                 Explore Resources
               </Button>
             </Link>
