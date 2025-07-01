@@ -22,6 +22,7 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [verificationStep, setVerificationStep] = useState(false);
+  const [debugInfo, setDebugInfo] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -55,8 +56,11 @@ const Auth = () => {
     }
 
     setLoading(true);
+    setDebugInfo("Starting signup process...");
 
     try {
+      console.log('Attempting signup for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -68,8 +72,11 @@ const Auth = () => {
         }
       });
 
+      setDebugInfo(`Signup response received. User: ${data.user?.id}, Session: ${data.session?.access_token ? 'Yes' : 'No'}`);
+
       if (error) {
         console.error('Signup error:', error);
+        setDebugInfo(`Error: ${error.message}`);
         throw error;
       }
 
@@ -77,11 +84,13 @@ const Auth = () => {
 
       if (data.user && !data.user.email_confirmed_at) {
         setVerificationStep(true);
+        setDebugInfo("Email confirmation required. Check your email.");
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link. Please check your email and click the link to complete your registration.",
         });
-      } else if (data.user) {
+      } else if (data.user && data.user.email_confirmed_at) {
+        setDebugInfo("User confirmed, redirecting...");
         toast({
           title: "Success!",
           description: "Account created successfully! Redirecting...",
@@ -89,6 +98,13 @@ const Auth = () => {
         setTimeout(() => {
           navigate('/dashboard');
         }, 1000);
+      } else if (data.user) {
+        // Handle case where user exists but confirmation status is unclear
+        setDebugInfo("User created but confirmation status unclear. Check email or try signing in.");
+        toast({
+          title: "Account created",
+          description: "Please check your email for confirmation or try signing in if you've already confirmed.",
+        });
       }
     } catch (error: any) {
       console.error('Signup error details:', error);
@@ -99,11 +115,14 @@ const Auth = () => {
           errorMessage = "This email is already registered. Please try signing in instead.";
         } else if (error.message.includes("invalid email")) {
           errorMessage = "Please enter a valid email address.";
+        } else if (error.message.includes("Email rate limit exceeded")) {
+          errorMessage = "Too many emails sent. Please wait a few minutes before trying again.";
         } else {
           errorMessage = error.message;
         }
       }
       
+      setDebugInfo(`Error: ${errorMessage}`);
       toast({
         title: "Sign Up Failed",
         description: errorMessage,
@@ -127,18 +146,21 @@ const Auth = () => {
     }
 
     setLoading(true);
+    setDebugInfo("Attempting to sign in...");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
         console.error('Signin error:', error);
+        setDebugInfo(`Sign in error: ${error.message}`);
         throw error;
       }
 
+      setDebugInfo("Sign in successful, redirecting...");
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -156,11 +178,14 @@ const Auth = () => {
           errorMessage = "Invalid email or password. Please check your credentials and try again.";
         } else if (error.message.includes("Email not confirmed")) {
           errorMessage = "Please check your email and confirm your account before signing in.";
+        } else if (error.message.includes("Too many requests")) {
+          errorMessage = "Too many sign in attempts. Please wait a few minutes before trying again.";
         } else {
           errorMessage = error.message;
         }
       }
       
+      setDebugInfo(`Sign in error: ${errorMessage}`);
       toast({
         title: "Sign In Failed",
         description: errorMessage,
@@ -383,6 +408,13 @@ const Auth = () => {
                 Click the link in your email to complete your registration. 
                 The link will expire in 24 hours.
               </p>
+              
+              {debugInfo && (
+                <div className="p-3 bg-muted rounded text-xs">
+                  <strong>Debug Info:</strong> {debugInfo}
+                </div>
+              )}
+              
               <Button 
                 variant="outline" 
                 className="w-full" 
@@ -410,6 +442,12 @@ const Auth = () => {
   return (
     <Layout>
       <div className="container max-w-md py-12">
+        {debugInfo && (
+          <div className="mb-4 p-3 bg-muted rounded text-sm">
+            <strong>Status:</strong> {debugInfo}
+          </div>
+        )}
+        
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -472,7 +510,6 @@ const Auth = () => {
                 
                 <div className="grid gap-2">
                   <Button variant="outline" onClick={() => handleSocialSignIn('google')} className="w-full" disabled={loading}>
-                    
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                       <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -555,7 +592,6 @@ const Auth = () => {
                 
                 <div className="grid gap-2">
                   <Button variant="outline" onClick={() => handleSocialSignIn('google')} className="w-full" disabled={loading}>
-                    
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                       <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
