@@ -1,255 +1,316 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, Play, CheckCircle, Clock, Bookmark } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Clock, Star, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-interface LearningPath {
+interface Course {
   id: string;
   title: string;
   description: string;
+  category: string;
   difficulty_level: string;
-  estimated_hours: number;
-  tags: string[];
-  is_premium: boolean;
+  thumbnail_url: string;
+  is_free: boolean;
+  price: number;
 }
 
-interface UserLearningPath {
+interface Enrollment {
   id: string;
-  learning_path_id: string;
+  course_id: string;
   progress_percentage: number;
-  started_at: string;
+  enrolled_at: string;
   completed_at: string | null;
-  learning_paths: LearningPath;
+  courses: Course;
 }
 
 export const LearningPathProgress = () => {
   const { user } = useAuth();
-  const [userPaths, setUserPaths] = useState<UserLearningPath[]>([]);
-  const [availablePaths, setAvailablePaths] = useState<LearningPath[]>([]);
+  const { toast } = useToast();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchUserLearningPaths();
-      fetchAvailablePaths();
+      fetchUserProgress();
+      fetchAvailableCourses();
     }
   }, [user]);
 
-  const fetchUserLearningPaths = async () => {
+  const fetchUserProgress = async () => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
-        .from('user_learning_paths')
+        .from('course_enrollments')
         .select(`
           *,
-          learning_paths (
+          courses (
             id,
             title,
             description,
+            category,
             difficulty_level,
-            estimated_hours,
-            tags,
-            is_premium
+            thumbnail_url,
+            is_free,
+            price
           )
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('enrolled_at', { ascending: false });
 
       if (error) throw error;
-      setUserPaths(data || []);
+      setEnrollments(data || []);
     } catch (error) {
-      console.error('Error fetching user learning paths:', error);
+      console.error('Error fetching user progress:', error);
     }
   };
 
-  const fetchAvailablePaths = async () => {
+  const fetchAvailableCourses = async () => {
     try {
       const { data, error } = await supabase
-        .from('learning_paths')
+        .from('courses')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(6);
 
       if (error) throw error;
-      setAvailablePaths(data || []);
+      setAvailableCourses(data || []);
     } catch (error) {
-      console.error('Error fetching available paths:', error);
+      console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const joinLearningPath = async (pathId: string) => {
+  const enrollInCourse = async (courseId: string) => {
     if (!user) return;
 
     try {
       const { error } = await supabase
-        .from('user_learning_paths')
-        .insert({
+        .from('course_enrollments')
+        .insert([{
           user_id: user.id,
-          learning_path_id: pathId,
-          progress_percentage: 0,
-        });
+          course_id: courseId
+        }]);
 
       if (error) throw error;
-      fetchUserLearningPaths();
+
+      toast({
+        title: "Success",
+        description: "Successfully enrolled in course!",
+      });
+
+      fetchUserProgress();
     } catch (error) {
-      console.error('Error joining learning path:', error);
+      console.error('Error enrolling in course:', error);
+      toast({
+        title: "Error",
+        description: "Failed to enroll in course",
+        variant: "destructive",
+      });
     }
   };
 
   const getDifficultyColor = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'bg-green-500';
-      case 'intermediate':
-        return 'bg-yellow-500';
-      case 'advanced':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
+      case 'beginner': return 'bg-green-100 text-green-800';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-4">
-              <div className="h-6 bg-muted rounded mb-2"></div>
-              <div className="h-4 bg-muted rounded mb-4"></div>
-              <div className="h-2 bg-muted rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const getProgressColor = (progress: number) => {
+    if (progress === 100) return 'bg-green-500';
+    if (progress >= 50) return 'bg-blue-500';
+    return 'bg-orange-500';
+  };
 
-  const enrolledPathIds = userPaths.map(up => up.learning_path_id);
-  const suggestedPaths = availablePaths.filter(path => !enrolledPathIds.includes(path.id));
+  if (loading) {
+    return <div>Loading your learning progress...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Active Learning Paths */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Your Learning Paths</h3>
-        {userPaths.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h4 className="text-lg font-medium mb-2">No learning paths yet</h4>
-              <p className="text-muted-foreground mb-4">
-                Join a learning path to track your progress and get structured guidance.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {userPaths.map((userPath) => (
-              <Card key={userPath.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-xl font-semibold">{userPath.learning_paths.title}</h4>
-                        {userPath.learning_paths.is_premium && (
-                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                            <Star className="h-3 w-3 mr-1" />
-                            Premium
-                          </Badge>
-                        )}
+      {/* Continue Learning Section */}
+      {enrollments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              Continue Learning
+            </CardTitle>
+            <CardDescription>
+              Pick up where you left off
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              {enrollments
+                .filter(enrollment => !enrollment.completed_at)
+                .slice(0, 3)
+                .map(enrollment => (
+                  <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-8 w-8 text-primary" />
                       </div>
-                      <p className="text-muted-foreground mb-3">
-                        {userPath.learning_paths.description}
-                      </p>
-                      <div className="flex gap-2 mb-4">
-                        <Badge className={getDifficultyColor(userPath.learning_paths.difficulty_level)}>
-                          {userPath.learning_paths.difficulty_level}
-                        </Badge>
-                        <Badge variant="outline">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {userPath.learning_paths.estimated_hours}h
-                        </Badge>
+                      <div>
+                        <h3 className="font-semibold">{enrollment.courses.title}</h3>
+                        <p className="text-sm text-muted-foreground">{enrollment.courses.category}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Progress 
+                            value={enrollment.progress_percentage} 
+                            className="w-32 h-2"
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {enrollment.progress_percentage}%
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold text-primary">
-                        {userPath.progress_percentage}%
-                      </p>
-                      <p className="text-sm text-muted-foreground">Complete</p>
-                    </div>
+                    <Button>Continue</Button>
                   </div>
-                  
-                  <Progress value={userPath.progress_percentage} className="mb-4" />
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {userPath.learning_paths.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Suggested Learning Paths */}
-      {suggestedPaths.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Suggested Learning Paths</h3>
-          <div className="grid gap-4">
-            {suggestedPaths.slice(0, 3).map((path) => (
-              <Card key={path.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-lg font-semibold">{path.title}</h4>
-                        {path.is_premium && (
-                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                            <Star className="h-3 w-3 mr-1" />
-                            Premium
-                          </Badge>
+      {/* My Courses */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            My Courses
+          </CardTitle>
+          <CardDescription>
+            Track your progress across all enrolled courses
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {enrollments.length === 0 ? (
+            <div className="text-center py-8">
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Enroll in your first course to start learning
+              </p>
+              <Button onClick={() => document.getElementById('available-courses')?.scrollIntoView()}>
+                Browse Courses
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {enrollments.map(enrollment => (
+                <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                      {enrollment.completed_at ? (
+                        <CheckCircle className="h-8 w-8 text-green-600" />
+                      ) : (
+                        <BookOpen className="h-8 w-8 text-primary" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{enrollment.courses.title}</h3>
+                        {enrollment.completed_at && (
+                          <Badge className="bg-green-100 text-green-800">Completed</Badge>
                         )}
                       </div>
-                      <p className="text-muted-foreground mb-3">{path.description}</p>
-                      <div className="flex gap-2 mb-4">
-                        <Badge className={getDifficultyColor(path.difficulty_level)}>
-                          {path.difficulty_level}
-                        </Badge>
-                        <Badge variant="outline">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {path.estimated_hours}h
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {path.tags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
+                      <p className="text-sm text-muted-foreground">{enrollment.courses.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Progress 
+                          value={enrollment.progress_percentage}
+                          className={`w-32 h-2 ${getProgressColor(enrollment.progress_percentage)}`}
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {enrollment.progress_percentage}%
+                        </span>
                       </div>
                     </div>
-                    <Button onClick={() => joinLearningPath(path.id)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Join Path
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Bookmark className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm">
+                      {enrollment.completed_at ? 'Review' : 'Continue'}
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Available Courses */}
+      <Card id="available-courses">
+        <CardHeader>
+          <CardTitle>Available Courses</CardTitle>
+          <CardDescription>
+            Discover new courses to expand your skills
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {availableCourses.map(course => {
+              const isEnrolled = enrollments.some(e => e.course_id === course.id);
+              
+              return (
+                <Card key={course.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="w-full h-32 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center mb-4">
+                      <BookOpen className="h-12 w-12 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg">{course.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {course.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge className={getDifficultyColor(course.difficulty_level)}>
+                        {course.difficulty_level}
+                      </Badge>
+                      <span className="font-semibold">
+                        {course.is_free ? 'Free' : `₹${course.price}`}
+                      </span>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => enrollInCourse(course.id)}
+                      disabled={isEnrolled}
+                    >
+                      {isEnrolled ? 'Enrolled' : 'Enroll Now'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        </div>
-      )}
+
+          {availableCourses.length === 0 && (
+            <div className="text-center py-8">
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No courses available</h3>
+              <p className="text-muted-foreground">
+                New courses will appear here soon
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
