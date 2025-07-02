@@ -47,7 +47,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             supabase.rpc('invalidate_previous_sessions', {
               p_user_id: session.user.id,
               p_new_session_token: sessionToken
-            }).catch(console.error);
+            }).then(({ error }) => {
+              if (error) {
+                console.error('Session management error:', error);
+              }
+            });
           }, 0);
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
