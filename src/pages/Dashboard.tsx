@@ -1,6 +1,6 @@
 
 import Layout from "../components/Layout";
-import UserDashboard from "../components/dashboard/UserDashboard";
+import { UserDashboard } from "../components/dashboard/UserDashboard";
 import OnboardingTour from "../components/OnboardingTour";
 
 const Dashboard = () => {
