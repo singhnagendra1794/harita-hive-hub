@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,18 +47,30 @@ export const EbookUpload = () => {
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `ebooks/${fileName}`;
 
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
       const { error: uploadError } = await supabase.storage
         .from('course-content')
-        .upload(filePath, file, {
-          onUploadProgress: (progress) => {
-            setUploadProgress((progress.loaded / progress.total) * 100);
-          }
-        });
+        .upload(filePath, file);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (uploadError) throw uploadError;
 
@@ -87,7 +98,7 @@ export const EbookUpload = () => {
       });
     } finally {
       setUploading(false);
-      setUploadProgress(0);
+      setTimeout(() => setUploadProgress(0), 1000);
     }
   };
 

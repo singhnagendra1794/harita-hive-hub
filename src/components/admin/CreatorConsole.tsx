@@ -13,7 +13,7 @@ import { NotesEditor } from './NotesEditor';
 import { EbookUpload } from './EbookUpload';
 import { CodeSnippetEditor } from './CodeSnippetEditor';
 import { PluginToolsUpload } from './PluginToolsUpload';
-import { Upload, Save, Eye, FileVideo, FileText, BookOpen, Code, Plugin } from 'lucide-react';
+import { Upload, Save, Eye, FileVideo, FileText, BookOpen, Code, Plug } from 'lucide-react';
 
 interface ContentItem {
   id: string;
@@ -37,7 +37,7 @@ export const CreatorConsole = () => {
     { id: 'notes', label: 'Notes', icon: FileText, description: 'Create rich text content' },
     { id: 'ebooks', label: 'E-books', icon: BookOpen, description: 'Upload PDFs and documents' },
     { id: 'code', label: 'Code Snippets', icon: Code, description: 'Share code examples' },
-    { id: 'plugins', label: 'Plugin Tools', icon: Plugin, description: 'Upload tools and resources' }
+    { id: 'plugins', label: 'Plugin Tools', icon: Plug, description: 'Upload tools and resources' }
   ];
 
   const getTabContent = () => {
@@ -148,7 +148,7 @@ export const CreatorConsole = () => {
                       {item.type === 'notes' && <FileText className="h-8 w-8 text-green-500" />}
                       {item.type === 'ebook' && <BookOpen className="h-8 w-8 text-purple-500" />}
                       {item.type === 'code' && <Code className="h-8 w-8 text-orange-500" />}
-                      {item.type === 'plugin' && <Plugin className="h-8 w-8 text-red-500" />}
+                      {item.type === 'plugin' && <Plug className="h-8 w-8 text-red-500" />}
                     </div>
                     <div>
                       <h3 className="font-semibold">{item.title}</h3>
