@@ -33,20 +33,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
         
         // Handle different auth events
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in successfully');
+          // Generate and store session token for single-session management
+          const sessionToken = crypto.randomUUID() + '-' + Date.now();
+          localStorage.setItem('session_token', sessionToken);
+          
+          // Defer session management to prevent deadlocks
+          setTimeout(() => {
+            supabase.rpc('invalidate_previous_sessions', {
+              p_user_id: session.user.id,
+              p_new_session_token: sessionToken
+            }).catch(console.error);
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
-          // Clear any cached data
+          localStorage.removeItem('session_token');
           setSession(null);
           setUser(null);
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed');
         }
-        
-        setLoading(false);
       }
     );
 
@@ -79,7 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      // Clear local state first
+      // Clear local storage first
+      localStorage.removeItem('session_token');
+      
+      // Clear local state
       setUser(null);
       setSession(null);
       

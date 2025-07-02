@@ -888,6 +888,54 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          course_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          payment_data: Json | null
+          payment_gateway_id: string | null
+          payment_method: string
+          status: string | null
+          subscription_type: string | null
+          user_id: string
+          webhook_data: Json | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_data?: Json | null
+          payment_gateway_id?: string | null
+          payment_method: string
+          status?: string | null
+          subscription_type?: string | null
+          user_id: string
+          webhook_data?: Json | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_data?: Json | null
+          payment_gateway_id?: string | null
+          payment_method?: string
+          status?: string | null
+          subscription_type?: string | null
+          user_id?: string
+          webhook_data?: Json | null
+        }
+        Relationships: []
+      }
       premium_content: {
         Row: {
           content_id: string
@@ -1415,6 +1463,36 @@ export type Database = {
           },
         ]
       }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          session_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          session_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          session_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string | null
@@ -1510,6 +1588,14 @@ export type Database = {
       hnswhandler: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      invalidate_previous_sessions: {
+        Args: { p_user_id: string; p_new_session_token: string }
+        Returns: undefined
+      }
+      is_session_valid: {
+        Args: { p_user_id: string; p_session_token: string }
+        Returns: boolean
       }
       ivfflat_bit_support: {
         Args: { "": unknown }
