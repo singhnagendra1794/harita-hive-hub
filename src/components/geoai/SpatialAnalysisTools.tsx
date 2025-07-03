@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calculator, Target, Scissors, Layers, Union, Zap } from 'lucide-react';
+import { Calculator, Target, Scissors, Layers, Plus, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GeoData, AnalysisResult } from '../../pages/GeoAILab';
 
@@ -45,7 +45,7 @@ const SpatialAnalysisTools: React.FC<SpatialAnalysisToolsProps> = ({
     {
       id: 'union',
       name: 'Union Analysis',
-      icon: <Union className="h-4 w-4" />,
+      icon: <Plus className="h-4 w-4" />,
       description: 'Combine all features from multiple layers',
       category: 'overlay'
     },
