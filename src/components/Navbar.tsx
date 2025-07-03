@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { cleanupAuthState } from "@/components/auth/AuthCleanup";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,12 +17,19 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Perform logout
       await logout();
+      
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
       });
-      navigate('/home');
+      
+      // Force page refresh for clean state
+      window.location.href = '/home';
     } catch (error) {
       console.error('Logout error:', error);
       toast({
