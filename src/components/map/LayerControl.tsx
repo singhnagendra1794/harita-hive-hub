@@ -75,7 +75,6 @@ const LayerControl: React.FC<LayerControlProps> = ({
                   <Switch
                     checked={layer.visible}
                     onCheckedChange={() => onLayerToggle(layer.id)}
-                    size="sm"
                   />
                   <Button
                     variant="ghost"
