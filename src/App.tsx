@@ -26,6 +26,7 @@ import ResumePosting from "./pages/ResumePosting";
 import QgisProject from "./pages/QgisProject";
 import GeoDashboard from "./pages/GeoDashboard";
 import AIStudio from "./pages/AIStudio";
+import GeoAILab from "./pages/GeoAILab";
 import Search from "./pages/Search";
 import Payment from "./pages/Payment";
 import PremiumUpgrade from "./pages/PremiumUpgrade";
@@ -102,6 +103,11 @@ function App() {
               <Route path="/spatial-analysis" element={
                 <ProtectedRoute>
                   <SpatialAnalysis />
+                </ProtectedRoute>
+              } />
+              <Route path="/geoai-lab" element={
+                <ProtectedRoute>
+                  <GeoAILab />
                 </ProtectedRoute>
               } />
               <Route path="/code-snippets" element={

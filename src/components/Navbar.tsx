@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown } from "lucide-react";
+import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown, Brain } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +36,7 @@ const Navbar = () => {
     { name: "Home", href: "/home", icon: null },
     { name: "Learn", href: "/learn", icon: BookOpen, protected: true },
     { name: "Map Playground", href: "/map-playground", icon: MapPin, protected: true },
+    { name: "GeoAI Lab", href: "/geoai-lab", icon: Brain, protected: true },
     { name: "Code Snippets", href: "/code-snippets", icon: Code, protected: true },
     { name: "Community", href: "/community", icon: Users, protected: true },
     { name: "Job Board", href: "/job-posting", icon: Briefcase, protected: true },
@@ -202,7 +202,7 @@ const Navbar = () => {
                     >
                       <LogOut className="h-5 w-5" />
                       <span>Logout</span>
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-2 pt-4 border-t">
