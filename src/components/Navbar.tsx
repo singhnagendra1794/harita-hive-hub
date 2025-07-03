@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -193,12 +194,13 @@ const Navbar = () => {
                       <Search className="h-5 w-5" />
                       <span>Search</span>
                     </Link>
-                    <button
+                    <Button
                       onClick={() => {
                         handleLogout();
                         setIsOpen(false);
                       }}
-                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md text-red-600"
+                      variant="ghost"
+                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md text-red-600 justify-start"
                     >
                       <LogOut className="h-5 w-5" />
                       <span>Logout</span>
