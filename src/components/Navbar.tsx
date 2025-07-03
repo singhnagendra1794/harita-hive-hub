@@ -73,9 +73,11 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link to="/home" className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">HH</span>
-            </div>
+            <img 
+              src="/lovable-uploads/8518d6cf-fcf9-411c-8949-5bc139aa26d5.png" 
+              alt="HaritaHive Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <span className="font-bold text-xl">HaritaHive</span>
           </Link>
         </div>
