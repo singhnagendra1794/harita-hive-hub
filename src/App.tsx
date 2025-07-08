@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatbotProvider } from "@/components/ai/ChatbotProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
@@ -48,129 +49,131 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/beta" element={<Beta />} />
-                <Route path="/investors" element={<Investors />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/newsletter" element={<Newsletter />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                
-                {/* Protected Routes */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/learn" element={
-                  <ProtectedRoute>
-                    <Learn />
-                  </ProtectedRoute>
-                } />
-                <Route path="/projects" element={
-                  <ProtectedRoute>
-                    <Projects />
-                  </ProtectedRoute>
-                } />
-                <Route path="/project-templates" element={
-                  <ProtectedRoute>
-                    <ProjectTemplates />
-                  </ProtectedRoute>
-                } />
-                <Route path="/map-playground" element={
-                  <ProtectedRoute>
-                    <MapPlayground />
-                  </ProtectedRoute>
-                } />
-                <Route path="/notes" element={
-                  <ProtectedRoute>
-                    <Notes />
-                  </ProtectedRoute>
-                } />
-                <Route path="/community" element={
-                  <ProtectedRoute>
-                    <Community />
-                  </ProtectedRoute>
-                } />
-                <Route path="/spatial-analysis" element={
-                  <ProtectedRoute>
-                    <SpatialAnalysis />
-                  </ProtectedRoute>
-                } />
-                <Route path="/geoai-lab" element={
-                  <ProtectedRoute>
-                    <GeoAILab />
-                  </ProtectedRoute>
-                } />
-                <Route path="/code-snippets" element={
-                  <ProtectedRoute>
-                    <CodeSnippets />
-                  </ProtectedRoute>
-                } />
-                <Route path="/live-classes" element={
-                  <ProtectedRoute>
-                    <LiveClasses />
-                  </ProtectedRoute>
-                } />
-                <Route path="/job-posting" element={
-                  <ProtectedRoute>
-                    <JobPosting />
-                  </ProtectedRoute>
-                } />
-                <Route path="/resume-posting" element={
-                  <ProtectedRoute>
-                    <ResumePosting />
-                  </ProtectedRoute>
-                } />
-                <Route path="/qgis-project" element={
-                  <ProtectedRoute>
-                    <QgisProject />
-                  </ProtectedRoute>
-                } />
-                <Route path="/geo-dashboard" element={
-                  <ProtectedRoute>
-                    <GeoDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/ai-studio" element={
-                  <ProtectedRoute>
-                    <AIStudio />
-                  </ProtectedRoute>
-                } />
-                <Route path="/search" element={
-                  <ProtectedRoute>
-                    <Search />
-                  </ProtectedRoute>
-                } />
-                <Route path="/payment" element={
-                  <ProtectedRoute>
-                    <Payment />
-                  </ProtectedRoute>
-                } />
-                <Route path="/premium-upgrade" element={
-                  <ProtectedRoute>
-                    <PremiumUpgrade />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+          <ChatbotProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/beta" element={<Beta />} />
+                  <Route path="/investors" element={<Investors />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/newsletter" element={<Newsletter />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  
+                  {/* Protected Routes */}
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/learn" element={
+                    <ProtectedRoute>
+                      <Learn />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/projects" element={
+                    <ProtectedRoute>
+                      <Projects />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/project-templates" element={
+                    <ProtectedRoute>
+                      <ProjectTemplates />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/map-playground" element={
+                    <ProtectedRoute>
+                      <MapPlayground />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notes" element={
+                    <ProtectedRoute>
+                      <Notes />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/community" element={
+                    <ProtectedRoute>
+                      <Community />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/spatial-analysis" element={
+                    <ProtectedRoute>
+                      <SpatialAnalysis />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/geoai-lab" element={
+                    <ProtectedRoute>
+                      <GeoAILab />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/code-snippets" element={
+                    <ProtectedRoute>
+                      <CodeSnippets />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/live-classes" element={
+                    <ProtectedRoute>
+                      <LiveClasses />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/job-posting" element={
+                    <ProtectedRoute>
+                      <JobPosting />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/resume-posting" element={
+                    <ProtectedRoute>
+                      <ResumePosting />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/qgis-project" element={
+                    <ProtectedRoute>
+                      <QgisProject />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/geo-dashboard" element={
+                    <ProtectedRoute>
+                      <GeoDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/ai-studio" element={
+                    <ProtectedRoute>
+                      <AIStudio />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/search" element={
+                    <ProtectedRoute>
+                      <Search />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/payment" element={
+                    <ProtectedRoute>
+                      <Payment />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/premium-upgrade" element={
+                    <ProtectedRoute>
+                      <PremiumUpgrade />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ChatbotProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
