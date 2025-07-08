@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Bell, CheckCircle, MapPin, Code, BarChart3 } from 'lucide-react';
+import { Clock, Bell, CheckCircle, MapPin, Code, BarChart3, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ComingSoonCourse {
@@ -18,6 +18,15 @@ interface ComingSoonCourse {
 }
 
 const upcomingCourses: ComingSoonCourse[] = [
+  {
+    id: 'arcgis-enterprise-mastery',
+    title: 'ArcGIS Enterprise Mastery',
+    description: 'From Server Setup to Custom Web Apps & Widgets. Master the full ArcGIS Enterprise stack with hands-on labs and certification.',
+    icon: Globe,
+    estimatedLaunch: 'February 2025',
+    features: ['Enterprise Stack Setup', 'Custom Widgets Development', 'Web AppBuilder & Experience Builder', 'Security & Access Control'],
+    difficulty: 'Advanced'
+  },
   {
     id: 'advanced-python-gis',
     title: 'Advanced Python for GIS Automation',
@@ -96,11 +105,18 @@ const ComingSoonSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
           {upcomingCourses.map((course) => (
             <Card key={course.id} className="relative bg-background hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">
+              {/* Coming Soon Ribbon */}
+              <div className="absolute top-2 right-2 z-10">
+                <Badge className="bg-orange-100 text-orange-800 text-xs font-bold">
+                  🔒 COMING SOON
+                </Badge>
+              </div>
+              
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 rounded-lg bg-primary/10">
                       <course.icon className="h-6 w-6 text-primary" />
@@ -113,7 +129,7 @@ const ComingSoonSection: React.FC = () => {
                     {course.estimatedLaunch}
                   </Badge>
                 </div>
-                <CardTitle className="text-xl">{course.title}</CardTitle>
+                <CardTitle className="text-xl leading-tight">{course.title}</CardTitle>
                 <CardDescription className="text-base leading-relaxed">
                   {course.description}
                 </CardDescription>
@@ -155,7 +171,7 @@ const ComingSoonSection: React.FC = () => {
                         size="sm"
                       >
                         <Bell className="h-4 w-4 mr-2" />
-                        Notify Me
+                        {course.id === 'arcgis-enterprise-mastery' ? 'Join Waitlist' : 'Notify Me'}
                       </Button>
                     </div>
                   )}
