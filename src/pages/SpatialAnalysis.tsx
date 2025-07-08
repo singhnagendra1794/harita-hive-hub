@@ -73,10 +73,10 @@ const SpatialAnalysis = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold mb-8">Spatial Analysis Tools</h1>
+        <h1 className="text-3xl font-bold mb-8">QGIS Processing Tools</h1>
         
         <p className="text-lg text-muted-foreground mb-8">
-          Powerful tools for analyzing and visualizing geospatial data, with integrations for Python, SQL, and other analysis platforms.
+          Powerful QGIS processing tools for analyzing and visualizing geospatial data, with integrations for Python, SQL, and other analysis platforms.
         </p>
         
         {selectedTool ? (
@@ -93,7 +93,7 @@ const SpatialAnalysis = () => {
         ) : (
           <Tabs defaultValue="tools">
             <TabsList className="mb-6">
-              <TabsTrigger value="tools">Analysis Tools</TabsTrigger>
+              <TabsTrigger value="tools">Processing Tools</TabsTrigger>
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
               <TabsTrigger value="examples">Examples</TabsTrigger>
             </TabsList>
@@ -134,7 +134,7 @@ const SpatialAnalysis = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Python Integration</CardTitle>
-                    <CardDescription>Connect your spatial analysis workflows with Python</CardDescription>
+                    <CardDescription>Connect your QGIS processing workflows with Python</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="mb-4">Integrate with popular Python libraries:</p>
@@ -143,7 +143,7 @@ const SpatialAnalysis = () => {
                       <li>Rasterio for raster data processing</li>
                       <li>Shapely for geometry operations</li>
                       <li>PySAL for spatial statistics</li>
-                      <li>Folium for interactive maps</li>
+                      <li>QGIS Python API (PyQGIS)</li>
                     </ul>
                     <Button className="mt-4">Connect Python</Button>
                   </CardContent>

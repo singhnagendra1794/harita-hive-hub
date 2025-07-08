@@ -116,7 +116,7 @@ const SpatialAnalysisTools: React.FC<SpatialAnalysisToolsProps> = ({
       console.error('Analysis error:', error);
       toast({
         title: "Analysis failed",
-        description: "There was an error running the spatial analysis.",
+        description: "There was an error running the QGIS processing analysis.",
         variant: "destructive",
       });
     } finally {
@@ -143,9 +143,9 @@ const SpatialAnalysisTools: React.FC<SpatialAnalysisToolsProps> = ({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Spatial Analysis Tools</CardTitle>
+          <CardTitle className="text-sm">QGIS Processing Tools</CardTitle>
           <CardDescription className="text-xs">
-            Advanced vector analysis operations
+            Advanced vector processing operations
           </CardDescription>
         </CardHeader>
         <CardContent>
