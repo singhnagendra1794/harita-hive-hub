@@ -1,245 +1,170 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Download, Trash2, BarChart3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { GeoData, AnalysisResult } from '../../pages/GeoAILab';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Download, Eye, EyeOff, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResultsPanelProps {
-  results: AnalysisResult[];
-  uploadedData: GeoData[];
+  results: any[];
+  uploadedData: any[];
   onDataToggle: (id: string) => void;
 }
 
-const ResultsPanel: React.FC<ResultsPanelProps> = ({
-  results,
-  uploadedData,
-  onDataToggle
-}) => {
-  const [selectedResult, setSelectedResult] = useState<string | null>(null);
+const ResultsPanel = ({ results, uploadedData, onDataToggle }: ResultsPanelProps) => {
+  const { toast } = useToast();
 
-  const getStatusIcon = (status: AnalysisResult['status']) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'processing': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default: return <Clock className="h-4 w-4 text-gray-500" />;
-    }
+  const downloadResult = (result: any) => {
+    toast({
+      title: "Download started",
+      description: `Downloading ${result.output.name}...`,
+    });
+    // In real implementation, this would trigger actual download
   };
 
-  const getDataTypeIcon = (type: GeoData['type']) => {
-    switch (type) {
-      case 'vector': return '📍';
-      case 'raster': return '🗺️';
-      case 'satellite': return '🛰️';
-      default: return '📄';
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'processing':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   return (
-    <div className="h-full p-4">
-      <Tabs defaultValue="results" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="results" className="text-xs">Results</TabsTrigger>
-          <TabsTrigger value="layers" className="text-xs">Layers</TabsTrigger>
-          <TabsTrigger value="stats" className="text-xs">Stats</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="results" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Analysis Results ({results.length})</CardTitle>
-              <CardDescription className="text-xs">
-                Recent analysis outputs and processing status
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {results.length === 0 ? (
-                <div className="text-center py-8">
-                  <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    No analysis results yet. Run some spatial analysis tools to see results here.
-                  </p>
+    <div className="space-y-4">
+      {/* Layer Control */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Map Layers</CardTitle>
+          <CardDescription className="text-xs">
+            Toggle layer visibility
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-32">
+            <div className="space-y-2">
+              {uploadedData.map((data) => (
+                <div key={data.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                    <span className="text-xs font-medium">{data.name}</span>
+                  </div>
+                  <Switch
+                    checked={data.visible}
+                    onCheckedChange={() => onDataToggle(data.id)}
+                    size="sm"
+                  />
                 </div>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {results.map((result) => (
-                    <div
-                      key={result.id}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                        selectedResult === result.id ? 'bg-accent' : 'hover:bg-accent/50'
-                      }`}
-                      onClick={() => setSelectedResult(selectedResult === result.id ? null : result.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {getStatusIcon(result.status)}
-                            <span className="font-medium text-sm truncate">{result.tool}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Input: {result.input}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {result.timestamp.toLocaleString()}
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" className="p-1 h-6 w-6">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="ghost" className="p-1 h-6 w-6">
-                            <Download className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      {selectedResult === result.id && (
-                        <div className="mt-3 pt-3 border-t space-y-2">
-                          <div className="text-xs">
-                            <strong>Parameters:</strong>
-                            <pre className="mt-1 text-xs bg-muted p-2 rounded overflow-x-auto">
-                              {JSON.stringify(result.parameters, null, 2)}
-                            </pre>
-                          </div>
-                          <div className="flex gap-1">
-                            <Badge variant="secondary" className="text-xs">
-                              {result.output.format}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {result.status}
-                            </Badge>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+              ))}
+              {uploadedData.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  No data uploaded yet
+                </p>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="layers" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Active Layers ({uploadedData.length})</CardTitle>
-              <CardDescription className="text-xs">
-                Manage visibility and properties of data layers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {uploadedData.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📂</div>
-                  <p className="text-sm text-muted-foreground">
-                    No data layers yet. Upload some geospatial data to get started.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {uploadedData.map((data) => (
-                    <div
-                      key={data.id}
-                      className="flex items-center justify-between p-2 border rounded"
-                    >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="text-sm">{getDataTypeIcon(data.type)}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{data.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {data.format} • {data.type}
-                          </div>
+      {/* Analysis Results */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Analysis Results</CardTitle>
+          <CardDescription className="text-xs">
+            View and download processed data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-96">
+            <div className="space-y-3">
+              {results.map((result, index) => (
+                <div key={result.id}>
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(result.status)}
+                        <div>
+                          <p className="text-xs font-medium">{result.tool}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Input: {result.input}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {result.status}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {result.timestamp.toLocaleString()}
+                      </span>
+                      <div className="flex space-x-1">
                         <Button
-                          size="sm"
                           variant="ghost"
-                          className="p-1 h-6 w-6"
-                          onClick={() => onDataToggle(data.id)}
+                          size="sm"
+                          onClick={() => onDataToggle(result.output.id)}
+                          disabled={result.status !== 'completed'}
                         >
-                          {data.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                          {result.output.visible ? (
+                            <Eye className="h-3 w-3" />
+                          ) : (
+                            <EyeOff className="h-3 w-3" />
+                          )}
                         </Button>
-                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => downloadResult(result)}
+                          disabled={result.status !== 'completed'}
+                        >
                           <Download className="h-3 w-3" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6 text-red-500">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                  {index < results.length - 1 && <Separator className="mt-3" />}
                 </div>
+              ))}
+              {results.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No analysis results yet
+                </p>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="stats" className="mt-4">
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Processing Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">{results.length}</div>
-                    <div className="text-xs text-muted-foreground">Total Analyses</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-500">
-                      {results.filter(r => r.status === 'completed').length}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Completed</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-blue-500">{uploadedData.length}</div>
-                    <div className="text-xs text-muted-foreground">Data Layers</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-purple-500">
-                      {uploadedData.filter(d => d.visible).length}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Visible</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Data Types</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Vector Data</span>
-                    <Badge variant="secondary">
-                      {uploadedData.filter(d => d.type === 'vector').length}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Raster Data</span>
-                    <Badge variant="secondary">
-                      {uploadedData.filter(d => d.type === 'raster').length}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Satellite Data</span>
-                    <Badge variant="secondary">
-                      {uploadedData.filter(d => d.type === 'satellite').length}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* Analysis History Summary */}
+      {results.length > 0 && (
+        <Card>
+          <CardContent className="pt-4">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-lg font-bold text-green-600">
+                  {results.filter(r => r.status === 'completed').length}
+                </p>
+                <p className="text-xs text-muted-foreground">Completed</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-yellow-600">
+                  {results.filter(r => r.status === 'processing').length}
+                </p>
+                <p className="text-xs text-muted-foreground">Processing</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

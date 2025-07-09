@@ -1,122 +1,119 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Calculator, Target, Scissors, Layers, Plus, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { GeoData, AnalysisResult } from '../../pages/GeoAILab';
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Calculator, Layers, TrendingUp, Zap } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SpatialAnalysisToolsProps {
-  availableData: GeoData[];
-  selectedData: GeoData | null;
-  onAnalysisComplete: (result: AnalysisResult) => void;
+  availableData: any[];
+  selectedData: any;
+  onAnalysisComplete: (result: any) => void;
 }
 
-const SpatialAnalysisTools: React.FC<SpatialAnalysisToolsProps> = ({
-  availableData,
-  selectedData,
-  onAnalysisComplete
-}) => {
-  const [activeTool, setActiveTool] = useState<string>('');
-  const [bufferDistance, setBufferDistance] = useState<number>(100);
-  const [bufferUnit, setBufferUnit] = useState<string>('meters');
-  const [overlayLayer, setOverlayLayer] = useState<string>('');
+const SpatialAnalysisTools = ({ availableData, selectedData, onAnalysisComplete }: SpatialAnalysisToolsProps) => {
+  const [selectedTool, setSelectedTool] = useState<string>("");
+  const [parameters, setParameters] = useState<any>({});
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
 
-  const spatialTools = [
+  const analysisTools = [
     {
-      id: 'buffer',
-      name: 'Buffer Analysis',
-      icon: <Target className="h-4 w-4" />,
-      description: 'Create buffer zones around features',
-      category: 'proximity'
+      id: "ndvi",
+      name: "NDVI Calculator",
+      description: "Calculate Normalized Difference Vegetation Index",
+      icon: TrendingUp,
+      inputTypes: ["raster", "satellite"],
+      parameters: [
+        { name: "threshold", type: "slider", min: 0, max: 1, step: 0.1, default: 0.3, label: "NDVI Threshold" }
+      ]
     },
     {
-      id: 'intersect',
-      name: 'Spatial Intersection',
-      icon: <Scissors className="h-4 w-4" />,
-      description: 'Find overlapping areas between layers',
-      category: 'overlay'
+      id: "buffer",
+      name: "Buffer Analysis",
+      description: "Create buffer zones around features",
+      icon: Layers,
+      inputTypes: ["vector"],
+      parameters: [
+        { name: "distance", type: "slider", min: 10, max: 1000, step: 10, default: 100, label: "Buffer Distance (m)" }
+      ]
     },
     {
-      id: 'union',
-      name: 'Union Analysis',
-      icon: <Plus className="h-4 w-4" />,
-      description: 'Combine all features from multiple layers',
-      category: 'overlay'
+      id: "lulc",
+      name: "Land Use Classification",
+      description: "Classify land use from satellite imagery",
+      icon: Calculator,
+      inputTypes: ["raster", "satellite"],
+      parameters: [
+        { name: "confidence", type: "slider", min: 0.5, max: 1, step: 0.05, default: 0.8, label: "Confidence Threshold" }
+      ]
     },
     {
-      id: 'clip',
-      name: 'Clip/Extract',
-      icon: <Layers className="h-4 w-4" />,
-      description: 'Extract features within boundary',
-      category: 'overlay'
-    },
-    {
-      id: 'dissolve',
-      name: 'Dissolve Features',
-      icon: <Zap className="h-4 w-4" />,
-      description: 'Merge adjacent features with same attributes',
-      category: 'generalization'
-    },
-    {
-      id: 'point-in-polygon',
-      name: 'Point in Polygon',
-      icon: <Calculator className="h-4 w-4" />,
-      description: 'Count points within polygons',
-      category: 'analysis'
+      id: "change_detection",
+      name: "Change Detection",
+      description: "Detect changes between two time periods",
+      icon: Zap,
+      inputTypes: ["raster", "satellite"],
+      parameters: [
+        { name: "sensitivity", type: "slider", min: 0.1, max: 1, step: 0.1, default: 0.5, label: "Change Sensitivity" }
+      ]
     }
   ];
 
-  const runSpatialAnalysis = async (toolId: string) => {
-    if (!selectedData) {
+  const compatibleTools = analysisTools.filter(tool => 
+    !selectedData || tool.inputTypes.includes(selectedData.type)
+  );
+
+  const runAnalysis = async () => {
+    if (!selectedTool || !selectedData) {
       toast({
-        title: "No data selected",
-        description: "Please select a dataset to analyze.",
+        title: "Missing requirements",
+        description: "Please select both a tool and input data.",
         variant: "destructive",
       });
       return;
     }
 
     setProcessing(true);
-    const tool = spatialTools.find(t => t.id === toolId);
-    
-    try {
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const result: AnalysisResult = {
-        id: Date.now().toString(),
-        tool: tool?.name || toolId,
+    try {
+      // Simulate analysis processing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      const result = {
+        id: Math.random().toString(36).substr(2, 9),
+        tool: selectedTool,
         input: selectedData.name,
-        parameters: getToolParameters(toolId),
+        parameters,
         output: {
-          id: `result-${Date.now()}`,
-          name: `${tool?.name || toolId} Result`,
+          id: Math.random().toString(36).substr(2, 9),
+          name: `${selectedTool}_result_${Date.now()}`,
           type: selectedData.type,
-          format: 'Analysis Result',
-          url: '', // Would be generated from actual processing
-          visible: true
+          format: selectedData.format,
+          url: selectedData.url, // In real implementation, this would be the processed result
+          visible: true,
         },
         timestamp: new Date(),
-        status: 'completed'
+        status: 'completed' as const,
       };
 
       onAnalysisComplete(result);
-      
+
       toast({
-        title: "Analysis Complete",
-        description: `${tool?.name} completed successfully.`,
+        title: "Analysis completed",
+        description: `${selectedTool} analysis has been completed successfully.`,
       });
+
+      // Reset form
+      setSelectedTool("");
+      setParameters({});
     } catch (error) {
-      console.error('Analysis error:', error);
       toast({
         title: "Analysis failed",
-        description: "There was an error running the QGIS processing analysis.",
+        description: "There was an error processing your analysis. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -124,160 +121,88 @@ const SpatialAnalysisTools: React.FC<SpatialAnalysisToolsProps> = ({
     }
   };
 
-  const getToolParameters = (toolId: string) => {
-    switch (toolId) {
-      case 'buffer':
-        return { distance: bufferDistance, unit: bufferUnit };
-      case 'intersect':
-      case 'union':
-      case 'clip':
-        return { overlayLayer };
-      default:
-        return {};
-    }
-  };
-
-  const vectorData = availableData.filter(d => d.type === 'vector');
+  const selectedToolConfig = analysisTools.find(tool => tool.id === selectedTool);
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">QGIS Processing Tools</CardTitle>
-          <CardDescription className="text-xs">
-            Advanced vector processing operations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {spatialTools.map((tool) => (
-              <Button
-                key={tool.id}
-                variant={activeTool === tool.id ? "default" : "outline"}
-                className="w-full h-auto p-2 justify-start text-left"
-                onClick={() => setActiveTool(activeTool === tool.id ? '' : tool.id)}
-                disabled={processing}
-              >
-                <div className="flex items-start gap-2 w-full">
-                  {tool.icon}
-                  <div className="flex-1">
-                    <div className="font-medium text-xs">{tool.name}</div>
-                    <div className="text-xs text-muted-foreground">{tool.description}</div>
-                    <Badge variant="secondary" className="text-xs mt-1">
-                      {tool.category}
-                    </Badge>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">AI Analysis Tools</CardTitle>
+        <CardDescription className="text-xs">
+          Choose from pre-built spatial analysis tools
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Label className="text-xs">Select Analysis Tool</Label>
+          <Select value={selectedTool} onValueChange={setSelectedTool}>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Choose analysis tool..." />
+            </SelectTrigger>
+            <SelectContent>
+              {compatibleTools.map((tool) => (
+                <SelectItem key={tool.id} value={tool.id}>
+                  <div className="flex items-center space-x-2">
+                    <tool.icon className="h-4 w-4" />
+                    <div>
+                      <p className="font-medium">{tool.name}</p>
+                      <p className="text-xs text-muted-foreground">{tool.description}</p>
+                    </div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {selectedData && (
+          <div className="p-3 bg-accent/50 rounded-lg">
+            <Label className="text-xs">Input Data</Label>
+            <p className="text-sm font-medium">{selectedData.name}</p>
+            <p className="text-xs text-muted-foreground">{selectedData.format} • {selectedData.type}</p>
+          </div>
+        )}
+
+        {selectedToolConfig && (
+          <div className="space-y-3">
+            <Label className="text-xs">Parameters</Label>
+            {selectedToolConfig.parameters.map((param) => (
+              <div key={param.name}>
+                <Label className="text-xs">{param.label}</Label>
+                <div className="mt-1">
+                  <Slider
+                    value={[parameters[param.name] || param.default]}
+                    onValueChange={(value) => setParameters({...parameters, [param.name]: value[0]})}
+                    min={param.min}
+                    max={param.max}
+                    step={param.step}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>{param.min}</span>
+                    <span>{parameters[param.name] || param.default}</span>
+                    <span>{param.max}</span>
                   </div>
                 </div>
-              </Button>
+              </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {selectedData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Selected Dataset</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-2 bg-accent/50 rounded border">
-              <div className="font-medium text-sm">{selectedData.name}</div>
-              <div className="text-xs text-muted-foreground">
-                {selectedData.format} • {selectedData.type}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+        <Button 
+          onClick={runAnalysis} 
+          disabled={!selectedTool || !selectedData || processing}
+          className="w-full"
+        >
+          {processing ? "Processing..." : "Run Analysis"}
+        </Button>
 
-      {/* Tool Parameters */}
-      {activeTool === 'buffer' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Buffer Parameters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="Distance"
-                  value={bufferDistance}
-                  onChange={(e) => setBufferDistance(Number(e.target.value))}
-                  className="flex-1"
-                />
-                <Select value={bufferUnit} onValueChange={setBufferUnit}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="meters">m</SelectItem>
-                    <SelectItem value="kilometers">km</SelectItem>
-                    <SelectItem value="feet">ft</SelectItem>
-                    <SelectItem value="miles">mi</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                onClick={() => runSpatialAnalysis('buffer')}
-                disabled={!selectedData || processing}
-                className="w-full"
-              >
-                {processing ? "Processing..." : "Run Buffer Analysis"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {['intersect', 'union', 'clip'].includes(activeTool) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Overlay Parameters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Select value={overlayLayer} onValueChange={setOverlayLayer}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select overlay layer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {vectorData.filter(d => d.id !== selectedData?.id).map((data) => (
-                    <SelectItem key={data.id} value={data.id}>
-                      {data.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={() => runSpatialAnalysis(activeTool)}
-                disabled={!selectedData || !overlayLayer || processing}
-                className="w-full"
-              >
-                {processing ? "Processing..." : `Run ${spatialTools.find(t => t.id === activeTool)?.name}`}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {['dissolve', 'point-in-polygon'].includes(activeTool) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Analysis Parameters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => runSpatialAnalysis(activeTool)}
-              disabled={!selectedData || processing}
-              className="w-full"
-            >
-              {processing ? "Processing..." : `Run ${spatialTools.find(t => t.id === activeTool)?.name}`}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        {!selectedData && availableData.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-4">
+            Upload spatial data to begin analysis
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
