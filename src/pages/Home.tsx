@@ -11,7 +11,7 @@ import FeedbackWidget from "../components/FeedbackWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Rocket, ArrowRight, CheckCircle } from "lucide-react";
+import { Rocket, ArrowRight, CheckCircle, Users, Building, Package, Briefcase, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Home = () => {
@@ -54,6 +54,44 @@ const Home = () => {
     }
   ];
 
+  const monetizationFeatures = [
+    {
+      title: "Hire GIS Talent",
+      description: "Connect with verified GIS professionals and browse our talent pool.",
+      href: "/talent-pool",
+      icon: <Users className="h-6 w-6" />,
+      badge: "For Companies"
+    },
+    {
+      title: "Corporate Training",
+      description: "Custom GIS training programs for your team and organization.",
+      href: "/corporate-training",
+      icon: <Building className="h-6 w-6" />,
+      badge: "B2B"
+    },
+    {
+      title: "GIS Marketplace",
+      description: "Download tools, scripts, and templates created by the community.",
+      href: "/gis-marketplace",
+      icon: <Package className="h-6 w-6" />,
+      badge: "Tools"
+    },
+    {
+      title: "Task Board",
+      description: "Earn while you learn with real GIS projects and micro-tasks.",
+      href: "/task-board",
+      icon: <Briefcase className="h-6 w-6" />,
+      badge: "Earn Money"
+    },
+    {
+      title: "Certifications",
+      description: "Industry-recognized credentials with blockchain verification.",
+      href: "/certifications",
+      icon: <Award className="h-6 w-6" />,
+      badge: "Verified"
+    }
+  ];
+
   const benefits = [
     "Free access to core features",
     "Community-driven learning",
@@ -92,6 +130,51 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Monetization Features Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">Professional GIS Services</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Whether you're a company looking to hire talent, or a professional looking to grow your career, 
+              we have the tools and community to help you succeed.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {monetizationFeatures.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        {feature.icon}
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{feature.title}</CardTitle>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {feature.badge}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="mb-4 text-muted-foreground">
+                    {feature.description}
+                  </CardDescription>
+                  <Link to={feature.href}>
+                    <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors w-full">
+                      Explore <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
       
       {/* About Section */}
       <section className="py-20 bg-background">
@@ -114,7 +197,7 @@ const Home = () => {
             ))}
           </div>
           
-          {/* Features Grid */}
+          {/* Learning Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">

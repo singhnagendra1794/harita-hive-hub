@@ -42,6 +42,11 @@ import MapPlayground from "./pages/MapPlayground";
 import ProjectTemplates from "./pages/ProjectTemplates";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import TalentPool from "./pages/TalentPool";
+import CorporateTraining from "./pages/CorporateTraining";
+import GISMarketplace from "./pages/GISMarketplace";
+import TaskBoard from "./pages/TaskBoard";
+import CertificationHub from "./pages/CertificationHub";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +73,13 @@ function App() {
                   <Route path="/newsletter" element={<Newsletter />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
+                  
+                  {/* Public monetization pages */}
+                  <Route path="/talent-pool" element={<TalentPool />} />
+                  <Route path="/corporate-training" element={<CorporateTraining />} />
+                  <Route path="/gis-marketplace" element={<GISMarketplace />} />
+                  <Route path="/task-board" element={<TaskBoard />} />
+                  <Route path="/certifications" element={<CertificationHub />} />
                   
                   {/* Protected Routes */}
                   <Route path="/dashboard" element={

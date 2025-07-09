@@ -142,6 +142,39 @@ export type Database = {
           },
         ]
       }
+      certifications: {
+        Row: {
+          badge_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_blockchain_verified: boolean | null
+          price: number | null
+          requirements: Json | null
+          title: string
+        }
+        Insert: {
+          badge_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_blockchain_verified?: boolean | null
+          price?: number | null
+          requirements?: Json | null
+          title: string
+        }
+        Update: {
+          badge_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_blockchain_verified?: boolean | null
+          price?: number | null
+          requirements?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
       class_enrollments: {
         Row: {
           class_date: string
@@ -205,6 +238,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      company_subscriptions: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          monthly_fee: number | null
+          starts_at: string | null
+          status: string | null
+          subscription_type: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          monthly_fee?: number | null
+          starts_at?: string | null
+          status?: string | null
+          subscription_type: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          monthly_fee?: number | null
+          starts_at?: string | null
+          status?: string | null
+          subscription_type?: string
         }
         Relationships: []
       }
@@ -685,6 +751,213 @@ export type Database = {
         }
         Relationships: []
       }
+      freelance_projects: {
+        Row: {
+          applications_count: number | null
+          budget_max: number | null
+          budget_min: number | null
+          client_id: string
+          created_at: string | null
+          deadline: string | null
+          description: string
+          difficulty_level: string | null
+          id: string
+          required_skills: string[] | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          applications_count?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          client_id: string
+          created_at?: string | null
+          deadline?: string | null
+          description: string
+          difficulty_level?: string | null
+          id?: string
+          required_skills?: string[] | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          applications_count?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          client_id?: string
+          created_at?: string | null
+          deadline?: string | null
+          description?: string
+          difficulty_level?: string | null
+          id?: string
+          required_skills?: string[] | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      gis_profiles: {
+        Row: {
+          available_for_hire: boolean | null
+          bio: string | null
+          created_at: string | null
+          experience_level: string | null
+          github_url: string | null
+          hourly_rate: number | null
+          id: string
+          linkedin_url: string | null
+          location: string | null
+          portfolio_url: string | null
+          skills: string[] | null
+          title: string | null
+          tools: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          available_for_hire?: boolean | null
+          bio?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          github_url?: string | null
+          hourly_rate?: number | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          title?: string | null
+          tools?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          available_for_hire?: boolean | null
+          bio?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          github_url?: string | null
+          hourly_rate?: number | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          title?: string | null
+          tools?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gis_tools: {
+        Row: {
+          category: string | null
+          compatible_software: string[] | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          download_url: string | null
+          downloads_count: number | null
+          id: string
+          is_featured: boolean | null
+          price: number | null
+          programming_language: string | null
+          rating: number | null
+          title: string
+          tool_type: string | null
+        }
+        Insert: {
+          category?: string | null
+          compatible_software?: string[] | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          download_url?: string | null
+          downloads_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          price?: number | null
+          programming_language?: string | null
+          rating?: number | null
+          title: string
+          tool_type?: string | null
+        }
+        Update: {
+          category?: string | null
+          compatible_software?: string[] | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          download_url?: string | null
+          downloads_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          price?: number | null
+          programming_language?: string | null
+          rating?: number | null
+          title?: string
+          tool_type?: string | null
+        }
+        Relationships: []
+      }
+      job_postings: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string
+          employment_type: string | null
+          experience_level: string | null
+          expires_at: string | null
+          id: string
+          is_premium: boolean | null
+          location: string | null
+          remote_allowed: boolean | null
+          required_skills: string[] | null
+          salary_max: number | null
+          salary_min: number | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description: string
+          employment_type?: string | null
+          experience_level?: string | null
+          expires_at?: string | null
+          id?: string
+          is_premium?: boolean | null
+          location?: string | null
+          remote_allowed?: boolean | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string
+          employment_type?: string | null
+          experience_level?: string | null
+          expires_at?: string | null
+          id?: string
+          is_premium?: boolean | null
+          location?: string | null
+          remote_allowed?: boolean | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       learning_paths: {
         Row: {
           content_order: Json | null
@@ -998,6 +1271,47 @@ export type Database = {
         }
         Relationships: []
       }
+      project_applications: {
+        Row: {
+          created_at: string | null
+          estimated_days: number | null
+          freelancer_id: string
+          id: string
+          project_id: string
+          proposal: string
+          quoted_price: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_days?: number | null
+          freelancer_id: string
+          id?: string
+          project_id: string
+          proposal: string
+          quoted_price?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          estimated_days?: number | null
+          freelancer_id?: string
+          id?: string
+          project_id?: string
+          proposal?: string
+          quoted_price?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "freelance_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_content: {
         Row: {
           collection_name: string | null
@@ -1106,6 +1420,42 @@ export type Database = {
         }
         Relationships: []
       }
+      training_modules: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          duration_hours: number | null
+          id: string
+          is_custom: boolean | null
+          price: number | null
+          syllabus: Json | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string
+          is_custom?: boolean | null
+          price?: number | null
+          syllabus?: Json | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string
+          is_custom?: boolean | null
+          price?: number | null
+          syllabus?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
       user_analytics: {
         Row: {
           created_at: string | null
@@ -1132,6 +1482,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_certifications: {
+        Row: {
+          blockchain_hash: string | null
+          certificate_url: string | null
+          certification_id: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          blockchain_hash?: string | null
+          certificate_url?: string | null
+          certification_id: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          blockchain_hash?: string | null
+          certificate_url?: string | null
+          certification_id?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_certifications_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "certifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_email_preferences: {
         Row: {
