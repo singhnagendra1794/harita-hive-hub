@@ -15,7 +15,7 @@ const Footer = () => {
               <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">HH</span>
               </div>
-              <span className="font-bold text-xl">HaritaHive</span>
+              <span className="font-bold text-xl">Harita Hive</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Your comprehensive platform for geospatial learning, tools, and community.
@@ -103,7 +103,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>&copy; {currentYear} HaritaHive. All rights reserved.</p>
+          <p>&copy; {currentYear} Harita Hive. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link to="/privacy" className="hover:text-primary">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-primary">Terms of Service</Link>

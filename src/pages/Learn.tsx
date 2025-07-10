@@ -28,6 +28,14 @@ const Learn = () => {
       duration: "6 hours",
       level: "Intermediate",
       type: "course"
+    },
+    {
+      title: "ArcGIS Enterprise Mastery",
+      description: "Master enterprise-level GIS deployment, configuration, and administration",
+      duration: "12 hours",
+      level: "Expert",
+      type: "course",
+      coming_soon: true
     }
   ];
 
@@ -114,9 +122,14 @@ const Learn = () => {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{course.title}</CardTitle>
-                    <Badge variant={course.level === 'Beginner' ? 'secondary' : course.level === 'Intermediate' ? 'default' : 'destructive'}>
-                      {course.level}
-                    </Badge>
+                    <div className="flex gap-2">
+                      {course.coming_soon && (
+                        <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                      )}
+                      <Badge variant={course.level === 'Beginner' ? 'secondary' : course.level === 'Intermediate' ? 'default' : course.level === 'Expert' ? 'destructive' : 'destructive'}>
+                        {course.level}
+                      </Badge>
+                    </div>
                   </div>
                   <CardDescription>{course.description}</CardDescription>
                 </CardHeader>
@@ -131,8 +144,8 @@ const Learn = () => {
                       {course.type}
                     </div>
                   </div>
-                  <Button className="w-full">
-                    Start Learning
+                  <Button className="w-full" variant={course.coming_soon ? "outline" : "default"}>
+                    {course.coming_soon ? "Join Waitlist" : "Start Learning"}
                   </Button>
                 </CardContent>
               </Card>

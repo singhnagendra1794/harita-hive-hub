@@ -23,7 +23,7 @@ const testimonials: Testimonial[] = [
     company: 'Urban Planning Solutions',
     content: 'HaritaHive transformed how I approach geospatial analysis. The interactive tutorials and real-world projects gave me confidence to tackle complex mapping challenges at work.',
     rating: 5,
-    avatar: '/placeholder.svg'
+    avatar: 'SC'
   },
   {
     id: '2',
@@ -32,7 +32,7 @@ const testimonials: Testimonial[] = [
     company: 'EcoTech Research',
     content: 'The community aspect is incredible. I\'ve connected with experts who\'ve helped me solve problems I was stuck on for weeks. The code snippets library is a game-changer!',
     rating: 5,
-    avatar: '/placeholder.svg'
+    avatar: 'MR'
   },
   {
     id: '3',
@@ -41,7 +41,7 @@ const testimonials: Testimonial[] = [
     company: 'Space Research Institute',
     content: 'As someone transitioning from traditional GIS to modern web-based solutions, HaritaHive provided exactly what I needed. The learning path is well-structured and practical.',
     rating: 5,
-    avatar: '/placeholder.svg'
+    avatar: 'PP'
   }
 ];
 
@@ -87,9 +87,8 @@ const TestimonialsSection: React.FC = () => {
                     
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
-                        <AvatarFallback>
-                          {testimonial.name.split(' ').map(n => n[0]).join('')}
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                          {testimonial.avatar}
                         </AvatarFallback>
                       </Avatar>
                       <div>

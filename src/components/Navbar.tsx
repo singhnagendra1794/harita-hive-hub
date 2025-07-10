@@ -52,7 +52,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="text-2xl font-bold text-primary">
-              GeoLearn Pro
+              Harita Hive
             </Link>
           </div>
 
