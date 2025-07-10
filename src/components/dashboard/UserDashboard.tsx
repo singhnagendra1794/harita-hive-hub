@@ -1,279 +1,280 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, Play, Clock, Award, TrendingUp, Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { LearningPathProgress } from './LearningPathProgress';
-import { SavedContentGrid } from './SavedContentGrid';
-import { NotificationCenter } from './NotificationCenter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
+import { 
+  BookOpen, 
+  MapPin, 
+  Code, 
+  Users, 
+  Brain,
+  Layers,
+  Puzzle,
+  TrendingUp,
+  Clock,
+  Award,
+  Play,
+  FileText,
+  Zap
+} from "lucide-react";
 
-interface Enrollment {
-  id: string;
-  progress_percentage: number;
-  enrolled_at: string;
-  completed_at?: string;
-  courses: {
-    id: string;
-    title: string;
-    description: string;
-    thumbnail_url?: string;
-    category: string;
-    difficulty_level: string;
+const UserDashboard = () => {
+  // Mock user progress data
+  const userStats = {
+    coursesCompleted: 3,
+    totalCourses: 12,
+    projectsCreated: 7,
+    skillLevel: "Intermediate",
+    streakDays: 5,
+    totalPoints: 2450
   };
-}
 
-interface UserStats {
-  totalCourses: number;
-  completedCourses: number;
-  totalWatchTime: number;
-  currentStreak: number;
-}
+  const recentActivity = [
+    { id: 1, type: "course", title: "Advanced QGIS Analysis", progress: 85, icon: BookOpen },
+    { id: 2, type: "project", title: "Urban Planning Map", status: "In Progress", icon: MapPin },
+    { id: 3, type: "geoai", title: "NDVI Analysis", result: "Completed", icon: Brain },
+    { id: 4, type: "webgis", title: "Environmental Dashboard", status: "Draft", icon: Layers }
+  ];
 
-export const UserDashboard = () => {
-  const { user } = useAuth();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [stats, setStats] = useState<UserStats>({
-    totalCourses: 0,
-    completedCourses: 0,
-    totalWatchTime: 0,
-    currentStreak: 0
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
+  const quickActions = [
+    {
+      title: "Start Learning",
+      description: "Continue your GIS education",
+      icon: BookOpen,
+      href: "/learn",
+      color: "bg-blue-500"
+    },
+    {
+      title: "Map Playground",
+      description: "Create interactive maps",
+      icon: MapPin,
+      href: "/map-playground", 
+      color: "bg-green-500"
+    },
+    {
+      title: "GeoAI Lab",
+      description: "AI-powered spatial analysis",
+      icon: Brain,
+      href: "/geoai-lab",
+      color: "bg-purple-500"
+    },
+    {
+      title: "Web GIS Builder",
+      description: "Build GIS applications",
+      icon: Layers,
+      href: "/webgis-builder",
+      color: "bg-orange-500"
+    },
+    {
+      title: "Plugin Store",
+      description: "Browse GIS tools & plugins",
+      icon: Puzzle,
+      href: "/plugin-marketplace",
+      color: "bg-pink-500"
+    },
+    {
+      title: "Code Snippets",
+      description: "Ready-to-use GIS code",
+      icon: Code,
+      href: "/code-snippets",
+      color: "bg-indigo-500"
     }
-  }, [user]);
+  ];
 
-  const fetchUserData = async () => {
-    if (!user) return;
-
-    try {
-      // Fetch enrollments with course details
-      const { data: enrollmentsData, error: enrollmentsError } = await supabase
-        .from('course_enrollments')
-        .select(`
-          *,
-          courses (
-            id,
-            title,
-            description,
-            thumbnail_url,
-            category,
-            difficulty_level
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('enrolled_at', { ascending: false });
-
-      if (enrollmentsError) throw enrollmentsError;
-
-      setEnrollments(enrollmentsData || []);
-
-      // Calculate stats
-      const totalCourses = enrollmentsData?.length || 0;
-      const completedCourses = enrollmentsData?.filter(e => e.completed_at).length || 0;
-      
-      setStats({
-        totalCourses,
-        completedCourses,
-        totalWatchTime: 0, // Will be calculated from lesson progress
-        currentStreak: 0 // Will be calculated from engagement data
-      });
-
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getContinueLearningCourse = () => {
-    return enrollments.find(e => 
-      e.progress_percentage > 0 && 
-      e.progress_percentage < 100 && 
-      !e.completed_at
-    );
-  };
-
-  const getRecentCourses = () => {
-    return enrollments.slice(0, 3);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  const continueCourse = getContinueLearningCourse();
-  const recentCourses = getRecentCourses();
+  const achievements = [
+    { name: "First Map Created", earned: true, icon: MapPin },
+    { name: "Course Completed", earned: true, icon: BookOpen },
+    { name: "AI Analysis Expert", earned: false, icon: Brain },
+    { name: "Community Contributor", earned: false, icon: Users }
+  ];
 
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {user?.user_metadata?.full_name || 'Learner'}!
-        </h1>
-        <p className="text-blue-100 mb-6">
-          Continue your learning journey and expand your GIS expertise
-        </p>
-        
-        {continueCourse && (
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold mb-1">{continueCourse.courses.title}</h3>
-                <p className="text-sm text-blue-100 mb-2">
-                  {continueCourse.progress_percentage}% complete
-                </p>
-                <Progress 
-                  value={continueCourse.progress_percentage} 
-                  className="w-64 h-2 bg-white/20"
-                />
-              </div>
-              <Button className="bg-white text-blue-600 hover:bg-gray-100">
-                <Play className="h-4 w-4 mr-2" />
-                Continue Learning
-              </Button>
-            </div>
-          </div>
-        )}
+      <div className="text-center py-8 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
+        <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
+        <p className="text-muted-foreground">Ready to continue your GIS journey?</p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCourses}</div>
-            <p className="text-xs text-muted-foreground">
-              Enrolled courses
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Courses</p>
+                <p className="text-2xl font-bold">
+                  {userStats.coursesCompleted}/{userStats.totalCourses}
+                </p>
+              </div>
+              <BookOpen className="h-8 w-8 text-blue-500" />
+            </div>
+            <Progress 
+              value={(userStats.coursesCompleted / userStats.totalCourses) * 100} 
+              className="mt-3"
+            />
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completedCourses}</div>
-            <p className="text-xs text-muted-foreground">
-              Courses finished
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Projects</p>
+                <p className="text-2xl font-bold">{userStats.projectsCreated}</p>
+              </div>
+              <MapPin className="h-8 w-8 text-green-500" />
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Watch Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalWatchTime}h</div>
-            <p className="text-xs text-muted-foreground">
-              Total learning time
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Streak</p>
+                <p className="text-2xl font-bold">{userStats.streakDays} days</p>
+              </div>
+              <Zap className="h-8 w-8 text-yellow-500" />
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Streak</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.currentStreak}</div>
-            <p className="text-xs text-muted-foreground">
-              Days learning
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Level</p>
+                <p className="text-2xl font-bold">{userStats.skillLevel}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Recent Courses */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Courses</CardTitle>
-              <CardDescription>
-                Track your progress and continue learning
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {recentCourses.length > 0 ? (
-                <div className="space-y-4">
-                  {recentCourses.map((enrollment) => (
-                    <div key={enrollment.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                      <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                        <BookOpen className="h-8 w-8 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{enrollment.courses.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {enrollment.courses.category} • {enrollment.courses.difficulty_level}
-                        </p>
-                        <div className="flex items-center space-x-2">
-                          <Progress value={enrollment.progress_percentage} className="flex-1" />
-                          <span className="text-sm text-muted-foreground">
-                            {enrollment.progress_percentage}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {enrollment.completed_at && (
-                          <Badge className="bg-green-100 text-green-800">
-                            <Award className="h-3 w-3 mr-1" />
-                            Completed
-                          </Badge>
-                        )}
-                        <Button variant="outline" size="sm">
-                          <Play className="h-4 w-4 mr-2" />
-                          {enrollment.progress_percentage > 0 ? 'Continue' : 'Start'}
-                        </Button>
-                      </div>
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {quickActions.map((action, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
+              <Link to={action.href}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center`}>
+                      <action.icon className="h-6 w-6 text-white" />
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Start your learning journey by enrolling in a course
-                  </p>
-                  <Button>
-                    Browse Courses
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <LearningPathProgress />
-        </div>
-
-        {/* Right Column - Notifications & Saved Content */}
-        <div className="space-y-6">
-          <NotificationCenter />
-          <SavedContentGrid />
+                    <div>
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        {action.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{action.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          ))}
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {'progress' in item ? `${item.progress}% complete` : item.status || item.result}
+                    </p>
+                  </div>
+                  {'progress' in item && (
+                    <div className="w-20">
+                      <Progress value={item.progress} className="h-2" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Achievements */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {achievements.map((achievement, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-lg border-2 text-center transition-colors ${
+                    achievement.earned 
+                      ? 'border-green-200 bg-green-50 text-green-800' 
+                      : 'border-gray-200 bg-gray-50 text-gray-500'
+                  }`}
+                >
+                  <achievement.icon className={`h-8 w-8 mx-auto mb-2 ${
+                    achievement.earned ? 'text-green-600' : 'text-gray-400'
+                  }`} />
+                  <p className="text-sm font-medium">{achievement.name}</p>
+                  {achievement.earned && (
+                    <Badge variant="secondary" className="mt-1">
+                      Earned
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Continue Learning Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Continue Learning</CardTitle>
+          <CardDescription>Pick up where you left off</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
+                <Play className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Advanced Spatial Analysis</h3>
+                <p className="text-sm text-muted-foreground">Chapter 3: Network Analysis</p>
+                <Progress value={65} className="w-32 h-2 mt-2" />
+              </div>
+            </div>
+            <Button asChild>
+              <Link to="/learn">Continue</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default UserDashboard;

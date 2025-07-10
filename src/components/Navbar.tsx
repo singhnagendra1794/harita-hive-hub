@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown, Brain, Building, Package, Award } from "lucide-react";
+import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown, Brain, Building, Package, Award, Layers, Puzzle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,11 +50,13 @@ const Navbar = () => {
     { name: "Community", href: "/community", icon: Users, protected: true },
     { name: "Job Board", href: "/job-posting", icon: Briefcase, protected: true },
     { name: "Live Classes", href: "/live-classes", icon: GraduationCap, protected: true },
+    { name: "Web GIS Builder", href: "/webgis-builder", icon: Layers, protected: true },
     
     // New monetization features
     { name: "Hire Talent", href: "/talent-pool", icon: Users, protected: false },
     { name: "Corporate Training", href: "/corporate-training", icon: Building, protected: false },
     { name: "GIS Marketplace", href: "/gis-marketplace", icon: Package, protected: false },
+    { name: "Plugin Store", href: "/plugin-marketplace", icon: Puzzle, protected: false },
     { name: "Task Board", href: "/task-board", icon: Briefcase, protected: false },
     { name: "Certifications", href: "/certifications", icon: Award, protected: false },
   ];

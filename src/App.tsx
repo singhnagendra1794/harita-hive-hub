@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -47,6 +48,8 @@ import CorporateTraining from "./pages/CorporateTraining";
 import GISMarketplace from "./pages/GISMarketplace";
 import TaskBoard from "./pages/TaskBoard";
 import CertificationHub from "./pages/CertificationHub";
+import PluginMarketplace from "./pages/PluginMarketplace";
+import WebGISBuilder from "./pages/WebGISBuilder";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +83,7 @@ function App() {
                   <Route path="/gis-marketplace" element={<GISMarketplace />} />
                   <Route path="/task-board" element={<TaskBoard />} />
                   <Route path="/certifications" element={<CertificationHub />} />
+                  <Route path="/plugin-marketplace" element={<PluginMarketplace />} />
                   
                   {/* Protected Routes */}
                   <Route path="/dashboard" element={
@@ -180,6 +184,11 @@ function App() {
                   <Route path="/admin" element={
                     <ProtectedRoute>
                       <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/webgis-builder" element={
+                    <ProtectedRoute>
+                      <WebGISBuilder />
                     </ProtectedRoute>
                   } />
                   
