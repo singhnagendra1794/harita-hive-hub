@@ -75,7 +75,7 @@ const PluginMarketplace = () => {
     return matchesSearch && matchesCategory && matchesTech;
   });
 
-  const featuredPlugins = plugins.filter(p => p.featured);
+  const featuredPlugins = plugins.filter(p => p.is_featured);
   const totalDownloads = plugins.reduce((sum, p) => sum + p.download_count, 0);
 
   return (
