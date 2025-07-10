@@ -60,7 +60,6 @@ const ResultsPanel = ({ results, uploadedData, onDataToggle }: ResultsPanelProps
                   <Switch
                     checked={data.visible}
                     onCheckedChange={() => onDataToggle(data.id)}
-                    size="sm"
                   />
                 </div>
               ))}
