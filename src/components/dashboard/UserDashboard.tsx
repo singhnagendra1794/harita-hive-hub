@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRight } from "lucide-react";
-import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FilePieChart2 } from "lucide-react";
+import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 
 interface Stat {
   title: string;
@@ -21,7 +22,7 @@ const UserDashboard = () => {
     { title: "Courses Enrolled", value: "7", icon: BookOpen },
     { title: "Projects Completed", value: "12", icon: FileCode2 },
     { title: "Community Posts", value: "45", icon: Users },
-    { title: "Spatial Analyses", value: "28", icon: FilePieChart2 },
+    { title: "Spatial Analyses", value: "28", icon: FileBarChart },
   ];
 
   const quickActions = [
