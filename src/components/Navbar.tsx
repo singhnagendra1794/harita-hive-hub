@@ -2,253 +2,284 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogOut, Settings, BookOpen, MapPin, Code, Users, Briefcase, GraduationCap, Search, Crown, Brain, Building, Package, Award, Layers, Puzzle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
-import { cleanupAuthState } from "@/components/auth/AuthCleanup";
+import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleLogout = async () => {
-    try {
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Perform logout
-      await logout();
-      
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account.",
-      });
-      
-      // Force page refresh for clean state
-      window.location.href = '/home';
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Logout failed",
-        description: "There was an error logging out. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
   };
 
-  const navigationItems = [
-    { name: "Home", href: "/home", icon: null },
-    { name: "Learn", href: "/learn", icon: BookOpen, protected: true },
-    { name: "Map Playground", href: "/map-playground", icon: MapPin, protected: true },
-    { name: "GeoAI Lab", href: "/geoai-lab", icon: Brain, protected: true },
-    { name: "Code Snippets", href: "/code-snippets", icon: Code, protected: true },
-    { name: "Community", href: "/community", icon: Users, protected: true },
-    { name: "Job Board", href: "/job-posting", icon: Briefcase, protected: true },
-    { name: "Live Classes", href: "/live-classes", icon: GraduationCap, protected: true },
-    { name: "Web GIS Builder", href: "/webgis-builder", icon: Layers, protected: true },
-    
-    // New monetization features
-    { name: "Hire Talent", href: "/talent-pool", icon: Users, protected: false },
-    { name: "Corporate Training", href: "/corporate-training", icon: Building, protected: false },
-    { name: "GIS Marketplace", href: "/gis-marketplace", icon: Package, protected: false },
-    { name: "Plugin Store", href: "/plugin-marketplace", icon: Puzzle, protected: false },
-    { name: "Task Board", href: "/task-board", icon: Briefcase, protected: false },
-    { name: "Certifications", href: "/certifications", icon: Award, protected: false },
+  const learningLinks = [
+    { href: "/learn", label: "Browse Courses" },
+    { href: "/project-templates", label: "Project Templates" },
+    { href: "/code-snippets", label: "Code Library" },
+    { href: "/live-classes", label: "Live Classes" },
   ];
 
-  const NavItems = ({ mobile = false, onItemClick = () => {} }) => (
-    <>
-      {navigationItems.map((item) => {
-        if (item.protected && !user) return null;
-        
-        return (
-          <Link
-            key={item.name}
-            to={item.href}
-            className={`${
-              mobile
-                ? "flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
-                : "text-sm font-medium hover:text-primary transition-colors"
-            }`}
-            onClick={onItemClick}
-          >
-            {item.icon && mobile && <item.icon className="h-5 w-5" />}
-            <span>{item.name}</span>
-          </Link>
-        );
-      })}
-    </>
-  );
+  const toolsLinks = [
+    { href: "/map-playground", label: "Map Playground" },
+    { href: "/spatial-analysis", label: "Spatial Analysis" },
+    { href: "/geoai-lab", label: "GeoAI Lab" },
+    { href: "/webgis-builder", label: "Web GIS Builder" },
+  ];
+
+  const marketplaceLinks = [
+    { href: "/gis-marketplace", label: "GIS Tools" },
+    { href: "/plugin-marketplace", label: "Plugins & Scripts" },
+    { href: "/talent-pool", label: "Hire Talent" },
+    { href: "/task-board", label: "Freelance Projects" },
+    { href: "/certifications", label: "Certifications" },
+    { href: "/corporate-training", label: "Corporate Training" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/home" className="flex items-center space-x-2">
-            <img 
-              src="/lovable-uploads/8518d6cf-fcf9-411c-8949-5bc139aa26d5.png" 
-              alt="HaritaHive Logo" 
-              className="h-10 w-10 object-contain"
-            />
-            <span className="font-bold text-xl">HaritaHive</span>
-          </Link>
-        </div>
+    <nav className="bg-background border-b sticky top-0 z-50">
+      <div className="container">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link to="/" className="text-2xl font-bold text-primary">
+              GeoLearn Pro
+            </Link>
+          </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <NavItems />
-        </nav>
-
-        {/* Desktop Auth Section */}
-        <div className="hidden md:flex items-center space-x-4">
-          {user ? (
-            <div className="flex items-center space-x-2">
-              <Link to="/search">
-                <Button variant="ghost" size="sm">
-                  <Search className="h-4 w-4" />
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {/* Learning Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center">
+                  Learning <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {learningLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href}>{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Tools Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center">
+                  Tools <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {toolsLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href}>{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Marketplace Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center">
+                  Marketplace <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {marketplaceLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href}>{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link to="/community">
+              <Button variant="ghost">Community</Button>
+            </Link>
+
+            <Link to="/pricing">
+              <Button variant="ghost">Pricing</Button>
+            </Link>
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
-                      <AvatarFallback>
-                        {user.email?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                  <Button variant="ghost" className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    {user.user_metadata?.full_name || user.email}
+                    <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{user.user_metadata?.full_name || "User"}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center">
-                      <User className="mr-2 h-4 w-4" />
+                      <User className="h-4 w-4 mr-2" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/premium-upgrade" className="flex items-center">
-                      <Crown className="mr-2 h-4 w-4" />
-                      Upgrade to Premium
+                    <Link to="/notes" className="flex items-center">
+                      <Settings className="h-4 w-4 mr-2" />
+                      My Notes
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <Link to="/login">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link to="/signup">
-                <Button>Sign Up</Button>
-              </Link>
-            </div>
-          )}
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button>Get Started</Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] bg-background">
-              <div className="flex flex-col space-y-6 mt-6">
-                {user && (
-                  <div className="flex items-center space-x-3 p-4 bg-accent/50 rounded-lg">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
-                      <AvatarFallback>
-                        {user.email?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user.user_metadata?.full_name || "User"}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                )}
-                
-                <nav className="flex flex-col space-y-2">
-                  <NavItems mobile onItemClick={() => setIsOpen(false)} />
-                </nav>
+        {/* Mobile Navigation Menu */}
+        {isOpen && (
+          <div className="md:hidden border-t">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-background">
+              {/* Learning Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Learning</div>
+                {learningLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
 
+              {/* Tools Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Tools</div>
+                {toolsLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Marketplace Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Marketplace</div>
+                {marketplaceLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              <Link
+                to="/community"
+                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Community
+              </Link>
+
+              <Link
+                to="/pricing"
+                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Pricing
+              </Link>
+
+              {/* Auth section */}
+              <div className="border-t pt-4">
                 {user ? (
-                  <div className="flex flex-col space-y-2 pt-4 border-t">
+                  <>
                     <Link
                       to="/dashboard"
-                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
+                      className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
                       onClick={() => setIsOpen(false)}
                     >
-                      <User className="h-5 w-5" />
-                      <span>Dashboard</span>
+                      Dashboard
                     </Link>
-                    <Link
-                      to="/search"
-                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Search className="h-5 w-5" />
-                      <span>Search</span>
-                    </Link>
-                    <Button
+                    <button
                       onClick={() => {
-                        handleLogout();
+                        handleSignOut();
                         setIsOpen(false);
                       }}
-                      variant="ghost"
-                      className="flex items-center space-x-2 px-4 py-2 text-lg hover:bg-accent rounded-md text-red-600 justify-start"
+                      className="block w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md"
                     >
-                      <LogOut className="h-5 w-5" />
-                      <span>Logout</span>
-                    </Button>
-                  </div>
+                      Sign Out
+                    </button>
+                  </>
                 ) : (
-                  <div className="flex flex-col space-y-2 pt-4 border-t">
+                  <>
                     <Link
                       to="/login"
-                      className="flex items-center justify-center px-4 py-2 text-lg hover:bg-accent rounded-md"
+                      className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
                       onClick={() => setIsOpen(false)}
                     >
-                      Login
+                      Sign In
                     </Link>
                     <Link
                       to="/signup"
-                      className="flex items-center justify-center px-4 py-2 text-lg bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+                      className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
                       onClick={() => setIsOpen(false)}
                     >
-                      Sign Up
+                      Get Started
                     </Link>
-                  </div>
+                  </>
                 )}
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+            </div>
+          </div>
+        )}
       </div>
-    </header>
+    </nav>
   );
 };
 

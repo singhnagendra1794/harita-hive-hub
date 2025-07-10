@@ -1,113 +1,135 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Upload } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Upload, X, Plus } from "lucide-react";
 
 const PluginUploadForm = () => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    tech_stack: [] as string[],
-    github_url: '',
-    download_url: ''
+    title: "",
+    description: "",
+    category: "",
+    techStack: [] as string[],
+    githubUrl: "",
+    documentationUrl: "",
+    version: "1.0.0",
+    license: "MIT"
   });
-  const [newTech, setNewTech] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [files, setFiles] = useState<File[]>([]);
+  const [newTech, setNewTech] = useState("");
+  const { toast } = useToast();
 
   const categories = [
-    'QGIS Plugin',
-    'Python Script',
-    'JavaScript Widget',
-    'ArcGIS Tool',
-    'Web Component',
-    'Data Processing',
-    'Visualization',
-    'Analysis Tool'
+    "QGIS Plugin",
+    "Python Script", 
+    "JavaScript Widget",
+    "ArcGIS Tool",
+    "Web Component",
+    "Data Processing",
+    "Visualization"
   ];
 
-  const commonTechStack = [
-    'Python', 'JavaScript', 'TypeScript', 'QGIS', 'ArcGIS', 
-    'PostGIS', 'GDAL', 'React', 'Vue', 'Leaflet', 'OpenLayers'
+  const techOptions = [
+    "Python", "JavaScript", "TypeScript", "QGIS", "ArcGIS", 
+    "Leaflet", "OpenLayers", "D3.js", "React", "Vue.js",
+    "GDAL", "PostGIS", "PostgreSQL", "NumPy", "Pandas"
   ];
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    setFiles(prev => [...prev, ...selectedFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   const addTechStack = (tech: string) => {
-    if (tech && !formData.tech_stack.includes(tech)) {
+    if (tech && !formData.techStack.includes(tech)) {
       setFormData(prev => ({
         ...prev,
-        tech_stack: [...prev.tech_stack, tech]
+        techStack: [...prev.techStack, tech]
       }));
-      setNewTech('');
     }
   };
 
   const removeTechStack = (tech: string) => {
     setFormData(prev => ({
       ...prev,
-      tech_stack: prev.tech_stack.filter(t => t !== tech)
+      techStack: prev.techStack.filter(t => t !== tech)
     }));
+  };
+
+  const handleAddNewTech = () => {
+    if (newTech.trim()) {
+      addTechStack(newTech.trim());
+      setNewTech("");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Here you would submit to your backend
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      
+    
+    if (!formData.title || !formData.description || !formData.category) {
       toast({
-        title: "Plugin submitted successfully!",
-        description: "Your plugin is now under review and will be published soon.",
-      });
-      
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        category: '',
-        tech_stack: [],
-        github_url: '',
-        download_url: ''
-      });
-    } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: "There was an error submitting your plugin. Please try again.",
+        title: "Missing Required Fields",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    if (files.length === 0) {
+      toast({
+        title: "No Files Selected",
+        description: "Please upload at least one file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Simulate upload process
+    toast({
+      title: "Plugin Submitted",
+      description: "Your plugin has been submitted for review. You'll be notified once it's approved.",
+    });
+
+    // Reset form
+    setFormData({
+      title: "",
+      description: "",
+      category: "",
+      techStack: [],
+      githubUrl: "",
+      documentationUrl: "",
+      version: "1.0.0",
+      license: "MIT"
+    });
+    setFiles([]);
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Submit Your Plugin</CardTitle>
-        <CardDescription>
-          Share your GIS tools with the community. All submissions are reviewed before publishing.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Plugin Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Plugin Title *</Label>
+              <Label htmlFor="title">Plugin Name *</Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="My Awesome GIS Tool"
-                required
+                placeholder="e.g., Advanced Buffer Tool"
               />
             </div>
             
@@ -132,91 +154,158 @@ const PluginUploadForm = () => {
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe what your plugin does and how it helps GIS professionals..."
-              rows={4}
-              required
+              placeholder="Describe what your plugin does and its key features..."
+              rows={3}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Tech Stack</Label>
-            <div className="flex gap-2 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="version">Version</Label>
               <Input
-                value={newTech}
-                onChange={(e) => setNewTech(e.target.value)}
-                placeholder="Add technology..."
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechStack(newTech))}
+                id="version"
+                value={formData.version}
+                onChange={(e) => setFormData(prev => ({ ...prev, version: e.target.value }))}
+                placeholder="1.0.0"
               />
-              <Button type="button" onClick={() => addTechStack(newTech)} size="sm">
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
             
-            <div className="flex flex-wrap gap-2 mb-2">
-              {commonTechStack.map(tech => (
-                <Button
-                  key={tech}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addTechStack(tech)}
-                  disabled={formData.tech_stack.includes(tech)}
-                >
-                  {tech}
-                </Button>
-              ))}
+            <div className="space-y-2">
+              <Label htmlFor="license">License</Label>
+              <Select value={formData.license} onValueChange={(value) => setFormData(prev => ({ ...prev, license: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MIT">MIT</SelectItem>
+                  <SelectItem value="GPL-3.0">GPL-3.0</SelectItem>
+                  <SelectItem value="Apache-2.0">Apache-2.0</SelectItem>
+                  <SelectItem value="BSD-3-Clause">BSD-3-Clause</SelectItem>
+                  <SelectItem value="Custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            <div className="flex flex-wrap gap-2">
-              {formData.tech_stack.map(tech => (
+          <div className="space-y-2">
+            <Label>Technology Stack</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.techStack.map(tech => (
                 <Badge key={tech} variant="secondary" className="flex items-center gap-1">
                   {tech}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => removeTechStack(tech)} />
+                  <button
+                    type="button"
+                    onClick={() => removeTechStack(tech)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
+            </div>
+            <div className="flex gap-2">
+              <Select onValueChange={addTechStack}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Add technology" />
+                </SelectTrigger>
+                <SelectContent>
+                  {techOptions.filter(tech => !formData.techStack.includes(tech)).map(tech => (
+                    <SelectItem key={tech} value={tech}>{tech}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-1">
+                <Input
+                  placeholder="Custom tech"
+                  value={newTech}
+                  onChange={(e) => setNewTech(e.target.value)}
+                  className="w-32"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={handleAddNewTech}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="github_url">GitHub URL</Label>
+              <Label htmlFor="github">GitHub Repository</Label>
               <Input
-                id="github_url"
-                value={formData.github_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, github_url: e.target.value }))}
-                placeholder="https://github.com/username/repo"
-                type="url"
+                id="github"
+                value={formData.githubUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, githubUrl: e.target.value }))}
+                placeholder="https://github.com/username/plugin"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="download_url">Download URL</Label>
+              <Label htmlFor="docs">Documentation URL</Label>
               <Input
-                id="download_url"
-                value={formData.download_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, download_url: e.target.value }))}
-                placeholder="https://example.com/download/plugin.zip"
-                type="url"
+                id="docs"
+                value={formData.documentationUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, documentationUrl: e.target.value }))}
+                placeholder="https://docs.example.com"
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? (
-              <>
-                <Upload className="h-4 w-4 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4 mr-2" />
-                Submit Plugin
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>File Upload</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground mb-2">
+              Drag & drop files here, or click to select
+            </p>
+            <Input
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              className="hidden"
+              id="file-upload"
+            />
+            <Label htmlFor="file-upload" className="cursor-pointer">
+              <Button variant="outline" size="sm" asChild>
+                <span>Choose Files</span>
+              </Button>
+            </Label>
+          </div>
+
+          {files.length > 0 && (
+            <div className="space-y-2">
+              <Label>Selected Files</Label>
+              {files.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span className="text-sm">{file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end gap-4">
+        <Button type="button" variant="outline">
+          Save as Draft
+        </Button>
+        <Button type="submit">
+          Submit for Review
+        </Button>
+      </div>
+    </form>
   );
 };
 
