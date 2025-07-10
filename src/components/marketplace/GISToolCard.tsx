@@ -1,116 +1,139 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Star, Code, Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Download, Star, ExternalLink, Heart } from "lucide-react";
+import { useState } from "react";
 
-interface GISTool {
+interface GISToolCardProps {
   id: string;
   title: string;
   description: string;
   category: string;
   price: number;
-  tool_type: string;
-  programming_language?: string;
-  compatible_software: string[];
-  downloads_count: number;
+  downloads: number;
   rating: number;
-  is_featured: boolean;
-  creator: {
-    full_name: string;
-  };
+  author: string;
+  downloadUrl: string;
+  isFeatured?: boolean;
+  programmingLanguage?: string;
+  compatibleSoftware?: string[];
 }
 
-interface GISToolCardProps {
-  tool: GISTool;
-}
+const GISToolCard = ({ 
+  id,
+  title, 
+  description, 
+  category, 
+  price, 
+  downloads, 
+  rating, 
+  author, 
+  downloadUrl,
+  isFeatured,
+  programmingLanguage,
+  compatibleSoftware 
+}: GISToolCardProps) => {
+  const [isLiked, setIsLiked] = useState(false);
 
-const GISToolCard = ({ tool }: GISToolCardProps) => {
-  const getToolIcon = (type: string) => {
-    switch (type) {
-      case 'script':
-        return <Code className="h-5 w-5" />;
-      case 'plugin':
-        return <Zap className="h-5 w-5" />;
-      default:
-        return <Download className="h-5 w-5" />;
+  const handleDownload = () => {
+    if (price === 0) {
+      window.open(downloadUrl, '_blank');
+    } else {
+      // Handle payment flow
+      console.log('Redirect to payment for tool:', id);
     }
   };
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${tool.is_featured ? 'border-primary' : ''}`}>
+    <Card className="group hover:shadow-lg transition-all duration-300 relative">
+      {isFeatured && (
+        <Badge className="absolute top-2 right-2 z-10" variant="secondary">
+          Featured
+        </Badge>
+      )}
+      
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              {getToolIcon(tool.tool_type)}
-            </div>
-            <div>
-              <CardTitle className="text-lg">{tool.title}</CardTitle>
-              <CardDescription>by {tool.creator.full_name}</CardDescription>
-            </div>
+          <div className="flex-1">
+            <CardTitle className="text-lg group-hover:text-primary transition-colors">
+              {title}
+            </CardTitle>
+            <CardDescription className="mt-1">
+              by {author}
+            </CardDescription>
           </div>
-          {tool.is_featured && (
-            <Badge variant="default" className="bg-gradient-to-r from-primary to-accent">
-              Featured
-            </Badge>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsLiked(!isLiked)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+          </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{tool.description}</p>
-        
+        <p className="text-muted-foreground mb-4 line-clamp-2">
+          {description}
+        </p>
+
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {tool.category}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {tool.tool_type}
-            </Badge>
-            {tool.programming_language && (
-              <Badge variant="outline" className="text-xs">
-                {tool.programming_language}
-              </Badge>
-            )}
+          <div className="flex items-center justify-between text-sm">
+            <Badge variant="outline">{category}</Badge>
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span>{rating.toFixed(1)}</span>
+            </div>
           </div>
-          
-          <div>
-            <h4 className="font-medium mb-2">Compatible Software</h4>
+
+          {programmingLanguage && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Language:</span>
+              <Badge variant="secondary" className="text-xs">{programmingLanguage}</Badge>
+            </div>
+          )}
+
+          {compatibleSoftware && compatibleSoftware.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {tool.compatible_software.slice(0, 3).map((software, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+              <span className="text-xs text-muted-foreground">Compatible:</span>
+              {compatibleSoftware.slice(0, 2).map((software, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
                   {software}
                 </Badge>
               ))}
-              {tool.compatible_software.length > 3 && (
+              {compatibleSoftware.length > 2 && (
                 <Badge variant="outline" className="text-xs">
-                  +{tool.compatible_software.length - 3} more
+                  +{compatibleSoftware.length - 2}
                 </Badge>
               )}
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
+          )}
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-500" />
-              <span>{tool.rating.toFixed(1)}</span>
+              <Download className="h-3 w-3" />
+              <span>{downloads.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Download className="h-4 w-4" />
-              <span>{tool.downloads_count.toLocaleString()} downloads</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-foreground">
+                {price === 0 ? 'Free' : `$${price}`}
+              </span>
             </div>
           </div>
-        </div>
-        
-        <div className="flex justify-between items-center mt-4 pt-4 border-t">
-          <div className="text-lg font-bold">
-            {tool.price === 0 ? 'Free' : `$${tool.price}`}
-          </div>
-          <Button>{tool.price === 0 ? 'Download' : 'Purchase'}</Button>
         </div>
       </CardContent>
+
+      <CardFooter className="flex gap-2">
+        <Button onClick={handleDownload} className="flex-1">
+          <Download className="h-4 w-4 mr-2" />
+          {price === 0 ? 'Download' : 'Purchase'}
+        </Button>
+        <Button variant="outline" size="sm">
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

@@ -1,278 +1,199 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { 
-  BookOpen, 
-  MapPin, 
-  Code, 
-  Users, 
-  Brain,
-  Layers,
-  Puzzle,
-  TrendingUp,
-  Clock,
-  Award,
-  Play,
-  FileText,
-  Zap
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowRight } from "lucide-react";
+import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FilePieChart2 } from "lucide-react";
+
+interface Stat {
+  title: string;
+  value: string;
+  icon: React.ComponentType<any>;
+}
 
 const UserDashboard = () => {
-  // Mock user progress data
-  const userStats = {
-    coursesCompleted: 3,
-    totalCourses: 12,
-    projectsCreated: 7,
-    skillLevel: "Intermediate",
-    streakDays: 5,
-    totalPoints: 2450
-  };
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("quick-actions");
 
-  const recentActivity = [
-    { id: 1, type: "course", title: "Advanced QGIS Analysis", progress: 85, icon: BookOpen },
-    { id: 2, type: "project", title: "Urban Planning Map", status: "In Progress", icon: MapPin },
-    { id: 3, type: "geoai", title: "NDVI Analysis", result: "Completed", icon: Brain },
-    { id: 4, type: "webgis", title: "Environmental Dashboard", status: "Draft", icon: Layers }
+  const stats: Stat[] = [
+    { title: "Courses Enrolled", value: "7", icon: BookOpen },
+    { title: "Projects Completed", value: "12", icon: FileCode2 },
+    { title: "Community Posts", value: "45", icon: Users },
+    { title: "Spatial Analyses", value: "28", icon: FilePieChart2 },
   ];
 
   const quickActions = [
-    {
-      title: "Start Learning",
-      description: "Continue your GIS education",
-      icon: BookOpen,
-      href: "/learn",
-      color: "bg-blue-500"
-    },
-    {
-      title: "Map Playground",
-      description: "Create interactive maps",
-      icon: MapPin,
-      href: "/map-playground", 
-      color: "bg-green-500"
-    },
-    {
-      title: "GeoAI Lab",
-      description: "AI-powered spatial analysis",
-      icon: Brain,
-      href: "/geoai-lab",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Web GIS Builder",
-      description: "Build GIS applications",
-      icon: Layers,
-      href: "/webgis-builder",
-      color: "bg-orange-500"
-    },
-    {
-      title: "Plugin Store",
-      description: "Browse GIS tools & plugins",
-      icon: Puzzle,
-      href: "/plugin-marketplace",
-      color: "bg-pink-500"
-    },
-    {
-      title: "Code Snippets",
-      description: "Ready-to-use GIS code",
-      icon: Code,
-      href: "/code-snippets",
-      color: "bg-indigo-500"
-    }
+    { title: "Start Learning", description: "Browse courses and tutorials", href: "/learn", icon: BookOpen },
+    { title: "Interactive Map", description: "Explore our mapping tools", href: "/map-playground", icon: Map },
+    { title: "GeoAI Lab", description: "AI-powered geospatial analysis", href: "/geoai-lab", icon: Brain },
+    { title: "Community", description: "Connect with other GIS professionals", href: "/community", icon: Users },
+    { title: "Code Snippets", description: "Ready-to-use GIS code examples", href: "/code-snippets", icon: Code },
+    { title: "Job Board", description: "Find GIS career opportunities", href: "/job-posting", icon: Briefcase },
+    { title: "Live Classes", description: "Join live GIS training sessions", href: "/live-classes", icon: Calendar },
+    { title: "Web GIS Builder", description: "Create web-based GIS applications", href: "/webgis-builder", icon: Layers },
   ];
 
-  const achievements = [
-    { name: "First Map Created", earned: true, icon: MapPin },
-    { name: "Course Completed", earned: true, icon: BookOpen },
-    { name: "AI Analysis Expert", earned: false, icon: Brain },
-    { name: "Community Contributor", earned: false, icon: Users }
+  const monetizationFeatures = [
+    { title: "Hire GIS Talent", description: "Find verified professionals", href: "/talent-pool", icon: Users, badge: "Hiring" },
+    { title: "Corporate Training", description: "Custom team training programs", href: "/corporate-training", icon: Building, badge: "B2B" },
+    { title: "GIS Marketplace", description: "Tools, scripts & templates", href: "/gis-marketplace", icon: Package, badge: "Tools" },
+    { title: "Plugin Store", description: "Extend your GIS capabilities", href: "/plugin-marketplace", icon: Puzzle, badge: "Plugins" },
+    { title: "Task Board", description: "Freelance projects & micro-tasks", href: "/task-board", icon: Briefcase, badge: "Earn" },
+    { title: "Certifications", description: "Industry-recognized credentials", href: "/certifications", icon: Award, badge: "Certified" },
+  ];
+
+  const recentActivities = [
+    { title: "Completed 'Spatial Analysis with Python' course", date: "2 days ago" },
+    { title: "Joined the 'Web Mapping' community forum", date: "5 days ago" },
+    { title: "Submitted a code snippet for raster processing", date: "1 week ago" },
+    { title: "Applied for a GIS Analyst position", date: "2 weeks ago" },
+  ];
+
+  const recommendations = [
+    { title: "Advanced Remote Sensing Techniques", description: "Explore advanced methods for analyzing satellite imagery" },
+    { title: "Building a GeoAI Application", description: "Learn how to integrate AI into your GIS workflows" },
+    { title: "Contributing to Open Source GIS", description: "Discover how to contribute to open source GIS projects" },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="container py-8">
       {/* Welcome Section */}
-      <div className="text-center py-8 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
-        <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
-        <p className="text-muted-foreground">Ready to continue your GIS journey?</p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">
+          Welcome back, {user?.user_metadata?.full_name || 'GIS Professional'}! 👋
+        </h1>
+        <p className="text-muted-foreground">
+          Continue your geospatial journey and explore new opportunities
+        </p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Courses</p>
-                <p className="text-2xl font-bold">
-                  {userStats.coursesCompleted}/{userStats.totalCourses}
-                </p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                </div>
+                <stat.icon className="h-8 w-8 text-primary" />
               </div>
-              <BookOpen className="h-8 w-8 text-blue-500" />
-            </div>
-            <Progress 
-              value={(userStats.coursesCompleted / userStats.totalCourses) * 100} 
-              className="mt-3"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Projects</p>
-                <p className="text-2xl font-bold">{userStats.projectsCreated}</p>
-              </div>
-              <MapPin className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Streak</p>
-                <p className="text-2xl font-bold">{userStats.streakDays} days</p>
-              </div>
-              <Zap className="h-8 w-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Level</p>
-                <p className="text-2xl font-bold">{userStats.skillLevel}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {quickActions.map((action, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
-              <Link to={action.href}>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="quick-actions" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="quick-actions">Quick Actions</TabsTrigger>
+          <TabsTrigger value="monetization">Earn Money</TabsTrigger>
+          <TabsTrigger value="recent-activity">Recent Activity</TabsTrigger>
+          <TabsTrigger value="recommendations">For You</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="quick-actions">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center`}>
-                      <action.icon className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        {action.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">{action.description}</p>
-                    </div>
-                  </div>
+                  <Link to={action.href} className="block">
+                    <action.icon className="h-8 w-8 text-primary mb-4 group-hover:scale-110 transition-transform" />
+                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
+                      {action.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {action.description}
+                    </p>
+                  </Link>
                 </CardContent>
-              </Link>
-            </Card>
-          ))}
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="monetization">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {monetizationFeatures.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-primary/20">
+                <CardContent className="p-6">
+                  <Link to={feature.href} className="block">
+                    <div className="flex items-center justify-between mb-4">
+                      <feature.icon className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+                      <Badge variant="secondary" className="text-xs">
+                        {feature.badge}
+                      </Badge>
+                    </div>
+                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </p>
+                    <div className="mt-4">
+                      <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        Explore <ArrowRight className="ml-2 h-3 w-3" />
+                      </Button>
+                    </div>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="recent-activity">
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+              <ul className="list-none space-y-3">
+                {recentActivities.map((activity, index) => (
+                  <li key={index} className="border-b pb-3 last:border-none">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">{activity.title}</p>
+                      <p className="text-xs text-muted-foreground">{activity.date}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recommendations">
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Recommended for You</h2>
+              <ul className="list-none space-y-4">
+                {recommendations.map((recommendation, index) => (
+                  <li key={index} className="border-b pb-4 last:border-none">
+                    <h3 className="font-semibold">{recommendation.title}</h3>
+                    <p className="text-sm text-muted-foreground">{recommendation.description}</p>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      Explore
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Call to Action Section */}
+      <div className="mt-12 text-center">
+        <h2 className="text-2xl font-bold mb-4">Ready to take your GIS skills to the next level?</h2>
+        <p className="text-muted-foreground mb-6">
+          Explore our learning resources, connect with the community, and discover new opportunities.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Button size="lg">Start Learning</Button>
+          <Button variant="outline" size="lg">Join Community</Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {'progress' in item ? `${item.progress}% complete` : item.status || item.result}
-                    </p>
-                  </div>
-                  {'progress' in item && (
-                    <div className="w-20">
-                      <Progress value={item.progress} className="h-2" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Achievements */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" />
-              Achievements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {achievements.map((achievement, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg border-2 text-center transition-colors ${
-                    achievement.earned 
-                      ? 'border-green-200 bg-green-50 text-green-800' 
-                      : 'border-gray-200 bg-gray-50 text-gray-500'
-                  }`}
-                >
-                  <achievement.icon className={`h-8 w-8 mx-auto mb-2 ${
-                    achievement.earned ? 'text-green-600' : 'text-gray-400'
-                  }`} />
-                  <p className="text-sm font-medium">{achievement.name}</p>
-                  {achievement.earned && (
-                    <Badge variant="secondary" className="mt-1">
-                      Earned
-                    </Badge>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Continue Learning Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Continue Learning</CardTitle>
-          <CardDescription>Pick up where you left off</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
-                <Play className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Advanced Spatial Analysis</h3>
-                <p className="text-sm text-muted-foreground">Chapter 3: Network Analysis</p>
-                <Progress value={65} className="w-32 h-2 mt-2" />
-              </div>
-            </div>
-            <Button asChild>
-              <Link to="/learn">Continue</Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

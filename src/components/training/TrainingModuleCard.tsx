@@ -1,82 +1,119 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, BookOpen, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Users, Star, BookOpen, DollarSign } from "lucide-react";
 
-interface TrainingModule {
+interface TrainingModuleCardProps {
   id: string;
   title: string;
   description: string;
   category: string;
-  duration_hours: number;
+  duration: number; // in hours
   price: number;
-  is_custom: boolean;
-  syllabus?: any;
+  isCustom: boolean;
+  features: string[];
+  maxParticipants?: number;
+  rating?: number;
+  onRequestInfo: (id: string) => void;
 }
 
-interface TrainingModuleCardProps {
-  module: TrainingModule;
-}
-
-const TrainingModuleCard = ({ module }: TrainingModuleCardProps) => {
+const TrainingModuleCard = ({
+  id,
+  title,
+  description,
+  category,
+  duration,
+  price,
+  isCustom,
+  features,
+  maxParticipants,
+  rating,
+  onRequestInfo
+}: TrainingModuleCardProps) => {
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${module.is_custom ? 'border-primary' : ''}`}>
+    <Card className="group hover:shadow-lg transition-all duration-300 relative">
+      {isCustom && (
+        <Badge className="absolute top-4 right-4 z-10" variant="secondary">
+          Custom
+        </Badge>
+      )}
+      
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{module.title}</CardTitle>
-              <CardDescription>{module.category}</CardDescription>
-            </div>
+          <div className="flex-1">
+            <Badge variant="outline" className="mb-2">{category}</Badge>
+            <CardTitle className="text-lg group-hover:text-primary transition-colors">
+              {title}
+            </CardTitle>
+            <CardDescription className="mt-2">
+              {description}
+            </CardDescription>
           </div>
-          {module.is_custom && (
-            <Badge variant="default" className="bg-gradient-to-r from-primary to-accent">
-              <Star className="h-3 w-3 mr-1" />
-              Custom
-            </Badge>
-          )}
         </div>
       </CardHeader>
-      
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{module.description}</p>
-        
-        <div className="space-y-3">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {module.duration_hours} hours
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{duration}h</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              Corporate Training
-            </div>
-          </div>
-          
-          {module.syllabus && (
-            <div>
-              <h4 className="font-medium mb-2">Topics Covered</h4>
-              <div className="text-sm text-muted-foreground">
-                {Array.isArray(module.syllabus) ? 
-                  module.syllabus.slice(0, 3).map((topic: string, index: number) => (
-                    <div key={index}>• {topic}</div>
-                  ))
-                  : "Comprehensive curriculum available"
-                }
+            {maxParticipants && (
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span>Up to {maxParticipants}</span>
               </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex justify-between items-center mt-4 pt-4 border-t">
-          <div className="text-lg font-bold">
-            ${module.price.toLocaleString()}
+            )}
+            {rating && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span>{rating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
-          <Button>Get Quote</Button>
+        </div>
+
+        <div>
+          <h4 className="font-medium mb-2 flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            What's Included
+          </h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            {features.slice(0, 4).map((feature, index) => (
+              <li key={index} className="flex items-center gap-2">
+                <div className="w-1 h-1 bg-primary rounded-full" />
+                {feature}
+              </li>
+            ))}
+            {features.length > 4 && (
+              <li className="text-xs text-muted-foreground">
+                +{features.length - 4} more features
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center gap-1">
+            <DollarSign className="h-5 w-5 text-green-600" />
+            <span className="text-2xl font-bold">
+              {price === 0 ? 'Custom Quote' : `$${price.toLocaleString()}`}
+            </span>
+            {price > 0 && (
+              <span className="text-sm text-muted-foreground">/training</span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <Button onClick={() => onRequestInfo(id)} className="flex-1">
+            Request Information
+          </Button>
+          <Button variant="outline">
+            View Details
+          </Button>
         </div>
       </CardContent>
     </Card>
