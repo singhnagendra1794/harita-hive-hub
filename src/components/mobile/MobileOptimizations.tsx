@@ -1,18 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+// Mobile app optimization for Capacitor
+declare global {
+  interface Window {
+    Capacitor?: any;
+  }
+}
+
 const MobileOptimizations: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 768 || !!window.Capacitor;
       setIsMobile(mobile);
     };
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    // Capacitor-specific optimizations
+    if (window.Capacitor) {
+      document.body.classList.add('capacitor-app');
+      console.log('Running in Capacitor mobile app');
+    }
 
     // Add mobile-specific CSS classes
     if (isMobile) {
@@ -109,6 +122,37 @@ const MobileOptimizations: React.FC = () => {
         /* Better button spacing on mobile */
         .mobile-optimized .mobile-button-group > * {
           margin: 4px 0 !important;
+        }
+        
+        /* Capacitor-specific optimizations */
+        .capacitor-app {
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        .capacitor-app .safe-area-top {
+          padding-top: env(safe-area-inset-top);
+        }
+        
+        .capacitor-app .safe-area-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Enhanced touch targets for mobile */
+        .mobile-optimized button,
+        .mobile-optimized a,
+        .mobile-optimized [role="button"] {
+          min-height: 44px !important;
+          min-width: 44px !important;
+        }
+        
+        /* Prevent zoom on input focus */
+        .mobile-optimized input,
+        .mobile-optimized select,
+        .mobile-optimized textarea {
+          font-size: 16px !important;
         }
       `;
       document.head.appendChild(style);
