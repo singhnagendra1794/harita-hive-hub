@@ -85,22 +85,33 @@ const Footer = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>support@haritahive.com</span>
+                <a href="mailto:contact@haritahive.com" className="hover:text-primary">
+                  contact@haritahive.com
+                </a>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <a href="tel:+919027608557" className="hover:text-primary">
+                  +91 9027608557
+                </a>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>Global Remote</span>
+                <span>Sambhal, UP, India</span>
               </div>
             </div>
-            <Link to="/newsletter" className="inline-block">
-              <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90 transition-colors">
-                Subscribe to Newsletter
-              </button>
-            </Link>
+            <div className="space-y-2">
+              <Link to="/newsletter" className="inline-block">
+                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90 transition-colors">
+                  Subscribe to Newsletter
+                </button>
+              </Link>
+              <div>
+                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary">
+                  Contact Us
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 

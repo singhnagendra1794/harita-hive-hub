@@ -50,8 +50,14 @@ const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => 
       <CardContent className="space-y-4">
         {/* QR Code Section */}
         <div className="text-center p-4 bg-muted rounded-lg">
-          <QrCode className="h-8 w-8 mx-auto mb-2" />
-          <p className="text-sm font-medium">Scan QR Code to Pay</p>
+          <div className="mb-4">
+            <img 
+              src="/lovable-uploads/upi-qr-code.png" 
+              alt="UPI QR Code for Payment" 
+              className="w-48 h-48 mx-auto object-contain bg-white rounded-lg p-2"
+            />
+          </div>
+          <p className="text-sm font-medium">Scan QR Code to Pay (Indian Clients)</p>
           <div className="mt-2 p-2 bg-background rounded border">
             <p className="text-xs text-muted-foreground">UPI ID:</p>
             <p className="font-mono text-sm">{upiId}</p>
@@ -91,6 +97,9 @@ const UPIPayment = ({ amount, planName, onPaymentSuccess }: UPIPaymentProps) => 
           <p className="text-lg font-bold">₹{amount}</p>
           <p className="text-xs text-muted-foreground mt-1">
             Payee: Choudhary Nagendra Singh Jhund
+          </p>
+          <p className="text-xs text-primary mt-1">
+            Pay via UPI (for Indian Clients)
           </p>
         </div>
 

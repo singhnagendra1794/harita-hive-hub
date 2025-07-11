@@ -231,13 +231,16 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.252-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9L7.6 21.425h4.87c.435 0 .81-.316.88-.74l.036-.156.673-3.352.043-.186c.07-.424.444-.74.88-.74h.553c3.585 0 6.39-1.455 7.208-5.66.342-1.756.166-3.226-.607-4.27z"/>
             </svg>
-            PayPal
+            PayPal (International Clients)
           </Button>
           
           {paymentMethod === 'paypal' && (
             <div className="pl-6 space-y-2">
               <p className="text-sm text-muted-foreground">
-                International payments via PayPal
+                Secure payment via PayPal for international clients
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Link: <a href="https://paypal.me/nagendrasingh1794" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">paypal.me/nagendrasingh1794</a>
               </p>
               <Button onClick={handlePayPalPayment} disabled={loading} className="w-full">
                 {loading ? 'Processing...' : 'Pay with PayPal'}
@@ -256,13 +259,21 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
             className="w-full justify-start"
           >
             <Smartphone className="mr-2 h-4 w-4" />
-            Direct UPI Transfer
+            Direct UPI Transfer (Indian Clients)
           </Button>
           
           {paymentMethod === 'upi_manual' && (
             <div className="pl-6 space-y-4">
+              <div className="text-center mb-4">
+                <img 
+                  src="/lovable-uploads/upi-qr-code.png" 
+                  alt="UPI QR Code for Payment" 
+                  className="w-40 h-40 mx-auto object-contain bg-white rounded-lg p-2 border"
+                />
+                <p className="text-xs text-muted-foreground mt-2">Scan with any UPI app to pay</p>
+              </div>
               <div className="p-4 bg-muted rounded-lg">
-                <Label className="text-sm font-medium">Pay to UPI ID:</Label>
+                <Label className="text-sm font-medium">Pay to UPI ID (Indian Clients):</Label>
                 <div className="flex items-center justify-between mt-2">
                   <code className="text-sm bg-background px-2 py-1 rounded">
                     {UPI_ID}
@@ -276,6 +287,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                     {upiIdCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">Payee: Choudhary Nagendra Singh Jhund</p>
               </div>
               
               <div className="space-y-2">

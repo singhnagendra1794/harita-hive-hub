@@ -46,6 +46,7 @@ import MapPlayground from "./pages/MapPlayground";
 import ProjectTemplates from "./pages/ProjectTemplates";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
 import TalentPool from "./pages/TalentPool";
 import CorporateTraining from "./pages/CorporateTraining";
 import GISMarketplace from "./pages/GISMarketplace";
@@ -86,8 +87,9 @@ function App() {
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/newsletter" element={<Newsletter />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
                   
                   {/* Plan selection */}
                   <Route path="/choose-plan" element={

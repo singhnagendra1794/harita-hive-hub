@@ -22,8 +22,8 @@ const PayPalPayment = ({ amount, planName, onPaymentSuccess }: PayPalPaymentProp
     // In a real implementation, this would integrate with PayPal SDK
     // For now, we'll simulate the PayPal payment process
     
-    // Simulate PayPal redirect
-    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-email@example.com&item_name=${encodeURIComponent(planName)}&amount=${usdAmount}&currency_code=USD`;
+    // Use the official PayPal.me link
+    const paypalUrl = `https://paypal.me/nagendrasingh1794/${usdAmount}`;
     
     // Open PayPal in new window
     const paypalWindow = window.open(paypalUrl, 'paypal', 'width=800,height=600');
@@ -56,9 +56,10 @@ const PayPalPayment = ({ amount, planName, onPaymentSuccess }: PayPalPaymentProp
         </div>
 
         <div className="text-sm text-muted-foreground">
-          <p>• Secure payment through PayPal</p>
+          <p>• Secure payment via PayPal (International Clients)</p>
           <p>• Supports credit cards, debit cards, and PayPal balance</p>
           <p>• International payment accepted</p>
+          <p>• Payment link: paypal.me/nagendrasingh1794</p>
         </div>
 
         <Button 

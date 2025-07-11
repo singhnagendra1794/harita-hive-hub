@@ -108,7 +108,7 @@ const Pricing = () => {
                 </li>
               </ul>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="space-y-3">
               <Button 
                 className="w-full"
                 onClick={() => handleSubscribe("Professional Plan", 50, 3999, [
@@ -122,6 +122,10 @@ const Pricing = () => {
               >
                 Subscribe Now
               </Button>
+              <div className="text-xs text-muted-foreground text-center space-y-1">
+                <div>💳 International: <a href="https://paypal.me/nagendrasingh1794" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PayPal</a></div>
+                <div>🇮🇳 India: UPI - cnsj05061993-3@okicici</div>
+              </div>
             </CardFooter>
           </Card>
           
@@ -166,7 +170,7 @@ const Pricing = () => {
                 </li>
               </ul>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="space-y-3">
               <Button 
                 variant="outline" 
                 className="w-full"
@@ -182,6 +186,10 @@ const Pricing = () => {
               >
                 Contact Sales
               </Button>
+              <div className="text-xs text-muted-foreground text-center space-y-1">
+                <div>💳 International: <a href="https://paypal.me/nagendrasingh1794" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PayPal</a></div>
+                <div>🇮🇳 India: UPI - cnsj05061993-3@okicici</div>
+              </div>
             </CardFooter>
           </Card>
         </div>
