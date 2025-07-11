@@ -9,7 +9,7 @@ import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { toast } from 'sonner';
 
 interface PricingTier {
-  id: 'premium' | 'pro' | 'enterprise';
+  id: 'pro' | 'enterprise';
   name: string;
   price: string;
   description: string;
@@ -20,62 +20,50 @@ interface PricingTier {
 
 const PremiumUpgradePage: React.FC = () => {
   const { subscription, hasPremiumAccess, upgradeSubscription, loading } = usePremiumAccess();
-  const [selectedTier, setSelectedTier] = useState<'premium' | 'pro' | 'enterprise'>('premium');
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'enterprise'>('pro');
   const [upgrading, setUpgrading] = useState(false);
 
   const pricingTiers: PricingTier[] = [
     {
-      id: 'premium',
-      name: 'Premium',
-      price: '₹999/month',
-      description: 'Perfect for individual learners',
-      icon: <Crown className="h-6 w-6 text-yellow-500" />,
-      features: [
-        'Access to all premium content',
-        'Downloadable PDFs and resources',
-        'Priority customer support',
-        'Advanced code snippets',
-        'Exclusive newsletters',
-        'Ad-free experience'
-      ]
-    },
-    {
       id: 'pro',
-      name: 'Pro',
-      price: '₹1,999/month',
-      description: 'Best for professionals and teams',
+      name: 'Professional',
+      price: '₹3,999/month ($50)',
+      description: 'Perfect for GIS professionals and freelancers',
       icon: <Star className="h-6 w-6 text-blue-500" />,
       popular: true,
       features: [
-        'Everything in Premium',
-        'Live class recordings',
-        'One-on-one mentorship sessions',
-        'Project collaboration tools',
-        'API access for integrations',
-        'Custom learning paths',
-        'Analytics dashboard'
+        'Full access to Learn Section',
+        'Map Playground & Spatial Analysis',
+        'GeoAI Lab & Geo Processing Lab', 
+        'WebGIS Builder & QGIS Integration',
+        'Plugin Marketplace access',
+        'Job posting & talent pool',
+        'Live classes & premium content',
+        'Community support'
       ]
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
-      price: '₹4,999/month',
-      description: 'For organizations and large teams',
+      price: '₹7,999/month ($99)',
+      description: 'For organizations and enterprise teams',
       icon: <Shield className="h-6 w-6 text-purple-500" />,
       features: [
-        'Everything in Pro',
-        'Team management dashboard',
-        'Custom branding options',
-        'Dedicated account manager',
-        'SLA guarantees',
-        'Custom integrations',
-        'Advanced analytics',
-        'Bulk user management'
+        'Everything in Professional',
+        'Enterprise Data Integration',
+        'Real-time IoT Data Processing',
+        'Advanced GeoAI Engine',
+        'Regulatory Compliance Toolkit',
+        'Spatial Risk Analysis Engine',
+        'Developer API & SDK Access',
+        'White-label portal options',
+        'Dedicated support & SLA',
+        'Custom integrations'
       ]
     }
   ];
 
-  const handleUpgrade = async (tier: 'premium' | 'pro' | 'enterprise') => {
+  const handleUpgrade = async (tier: 'pro' | 'enterprise') => {
     setUpgrading(true);
     try {
       await upgradeSubscription(tier);

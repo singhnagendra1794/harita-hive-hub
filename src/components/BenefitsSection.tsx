@@ -24,7 +24,7 @@ const BenefitsSection = () => {
   return (
     <section className="py-16 bg-background">
       <div className="container">
-        <h2 className="text-3xl font-bold text-center mb-12">How HaritaHive Helps You</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">How Harita Hive Helps You</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {benefitsData.map((benefit, index) => (
             <Card key={index} className="h-full">

@@ -12,9 +12,11 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">HH</span>
-              </div>
+              <img 
+                src="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" 
+                alt="Harita Hive Logo" 
+                className="h-8 w-8"
+              />
               <span className="font-bold text-xl">Harita Hive</span>
             </div>
             <p className="text-sm text-muted-foreground">

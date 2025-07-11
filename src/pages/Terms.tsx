@@ -20,7 +20,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                By accessing and using HaritaHive, you accept and agree to be bound by the terms 
+                By accessing and using Harita Hive, you accept and agree to be bound by the terms 
                 and provision of this agreement. If you do not agree to abide by the above, 
                 please do not use this service.
               </p>
@@ -33,7 +33,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Permission is granted to temporarily access HaritaHive for personal, 
+                Permission is granted to temporarily access Harita Hive for personal, 
                 non-commercial transitory viewing only. This is the grant of a license, not a transfer of title.
               </p>
               <div>
@@ -84,7 +84,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                The materials on HaritaHive are provided on an 'as is' basis. HaritaHive makes no 
+                The materials on Harita Hive are provided on an 'as is' basis. Harita Hive makes no 
                 warranties, expressed or implied, and hereby disclaims and negates all other warranties 
                 including without limitation, implied warranties or conditions of merchantability, 
                 fitness for a particular purpose, or non-infringement of intellectual property.

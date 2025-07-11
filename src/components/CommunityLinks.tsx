@@ -9,18 +9,18 @@ const CommunityLinks: React.FC = () => {
   const communityChannels = [
     {
       name: 'Discord Community',
-      description: 'Join our active Discord server for real-time discussions, Q&A, and networking with fellow GIS professionals.',
+      description: 'Join our growing GIS community on Discord for real-time discussions, Q&A, and networking with fellow GIS professionals.',
       icon: MessageCircle,
       link: 'https://discord.gg/haritahive',
-      members: '2,500+',
+      members: '125+',
       color: 'bg-indigo-500'
     },
     {
-      name: 'WhatsApp Groups',
-      description: 'Connect with local GIS communities and get instant help with your projects.',
+      name: 'WhatsApp Community',
+      description: 'Connect with our active WhatsApp community for instant help, project discussions, and networking.',
       icon: MessageCircle,
-      link: 'https://chat.whatsapp.com/haritahive',
-      members: '1,200+',
+      link: 'https://chat.whatsapp.com/EMJJZCTuiuD0zQ66IhhZpA',
+      members: '75+',
       color: 'bg-green-500'
     }
   ];

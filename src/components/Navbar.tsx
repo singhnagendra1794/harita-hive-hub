@@ -52,8 +52,13 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              Harita Hive
+            <Link to="/" className="flex items-center space-x-2">
+              <img 
+                src="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" 
+                alt="Harita Hive Logo" 
+                className="h-8 w-8"
+              />
+              <span className="text-2xl font-bold text-primary">Harita Hive</span>
             </Link>
           </div>
 
