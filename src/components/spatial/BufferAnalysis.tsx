@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { usePremiumAccess } from '@/hooks/usePremiumAccess';
+import PremiumContentGate from '@/components/premium/PremiumContentGate';
 import { MapPin, Play } from 'lucide-react';
 
 const BufferAnalysis = () => {
@@ -13,6 +15,7 @@ const BufferAnalysis = () => {
   const [unit, setUnit] = useState<string>('meters');
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
+  const { hasAccess } = usePremiumAccess();
 
   const handleRunAnalysis = async () => {
     setProcessing(true);
@@ -36,7 +39,7 @@ const BufferAnalysis = () => {
     }
   };
 
-  return (
+  const toolContent = (
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -109,6 +112,17 @@ const BufferAnalysis = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <PremiumContentGate
+      contentType="spatial-tool"
+      contentId="buffer-analysis"
+      title="Advanced Buffer Analysis"
+      description="Create precise buffer zones with advanced geometric calculations for professional spatial analysis."
+    >
+      {toolContent}
+    </PremiumContentGate>
   );
 };
 
