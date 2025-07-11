@@ -171,17 +171,28 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       if (error) throw error;
 
       setOtpSent(true);
+      setOtpSent(true);
       toast({
         title: "OTP Sent!",
         description: "Please check your phone for the verification code.",
       });
     } catch (error: any) {
       console.error('Phone auth error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send OTP. Please check your phone number.",
-        variant: "destructive",
-      });
+      
+      // Check if SMTP is not configured
+      if (error.message?.includes('SMTP') || error.message?.includes('email')) {
+        toast({
+          title: "Email Service Unavailable",
+          description: "SMS/Email OTP is currently unavailable. Please try email/password login or contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to send OTP. Please check your phone number.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

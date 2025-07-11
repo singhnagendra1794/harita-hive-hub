@@ -11,16 +11,16 @@ const CommunityLinks: React.FC = () => {
       name: 'Discord Community',
       description: 'Join our growing GIS community on Discord for real-time discussions, Q&A, and networking with fellow GIS professionals.',
       icon: MessageCircle,
-      link: 'https://discord.gg/haritahive',
-      members: '125+',
+      link: 'https://discord.gg/invite', // Placeholder - admin needs to create actual Discord server
+      members: 'Join our growing community',
       color: 'bg-indigo-500'
     },
     {
-      name: 'WhatsApp Community',
-      description: 'Connect with our active WhatsApp community for instant help, project discussions, and networking.',
+      name: 'WhatsApp Group',
+      description: 'Connect with our active WhatsApp group for instant help, project discussions, and networking.',
       icon: MessageCircle,
       link: 'https://chat.whatsapp.com/EMJJZCTuiuD0zQ66IhhZpA',
-      members: '75+',
+      members: '75+ members',
       color: 'bg-green-500'
     }
   ];
