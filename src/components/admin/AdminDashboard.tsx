@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, BookOpen, Users, BarChart3, Settings } from 'lucide-react';
+import { Plus, BookOpen, Users, BarChart3, Settings, Search } from 'lucide-react';
 import { CourseManagement } from './CourseManagement';
 import { UserAnalytics } from './UserAnalytics';
 import { ContentUpload } from './ContentUpload';
+import TopRequestedTopics from './TopRequestedTopics';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,10 +50,11 @@ export const AdminDashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="search-insights">Search Insights</TabsTrigger>
           <TabsTrigger value="upload">Upload</TabsTrigger>
         </TabsList>
 
@@ -123,6 +125,10 @@ export const AdminDashboard = () => {
 
         <TabsContent value="analytics">
           <UserAnalytics />
+        </TabsContent>
+
+        <TabsContent value="search-insights">
+          <TopRequestedTopics />
         </TabsContent>
 
         <TabsContent value="upload">

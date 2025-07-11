@@ -119,9 +119,17 @@ const SearchPage = () => {
                 <CardContent className="text-center py-12">
                   <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No results found</h3>
-                  <p className="text-muted-foreground">
-                    Try different keywords or adjust your filters
+                  <p className="text-muted-foreground mb-4">
+                    We couldn't find any content matching "{query}". Your search has been logged to help us improve our content library.
                   </p>
+                  <div className="text-sm text-muted-foreground">
+                    <p>Try:</p>
+                    <ul className="mt-2 text-left inline-block">
+                      <li>• Different or simpler keywords</li>
+                      <li>• Adjusting your content filters</li>
+                      <li>• Checking spelling</li>
+                    </ul>
+                  </div>
                 </CardContent>
               </Card>
             )}

@@ -1175,6 +1175,45 @@ export type Database = {
           },
         ]
       }
+      missing_search_queries: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          resolved_at: string | null
+          resolved_with: Json | null
+          search_filters: Json | null
+          status: string | null
+          times_requested: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          resolved_at?: string | null
+          resolved_with?: Json | null
+          search_filters?: Json | null
+          status?: string | null
+          times_requested?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          resolved_at?: string | null
+          resolved_with?: Json | null
+          search_filters?: Json | null
+          status?: string | null
+          times_requested?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           class_reminders: boolean | null
@@ -2023,6 +2062,18 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_top_missing_queries: {
+        Args: { p_limit?: number; p_status?: string }
+        Returns: {
+          id: string
+          query: string
+          times_requested: number
+          status: string
+          created_at: string
+          updated_at: string
+          days_old: number
+        }[]
+      }
       get_user_recommendations: {
         Args: { p_user_id: string; p_limit?: number }
         Returns: {
@@ -2103,6 +2154,10 @@ export type Database = {
       sparsevec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      track_missing_search_query: {
+        Args: { p_user_id: string; p_query: string; p_filters?: Json }
+        Returns: string
       }
       track_user_interaction: {
         Args: {

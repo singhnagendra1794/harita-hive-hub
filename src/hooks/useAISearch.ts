@@ -110,6 +110,19 @@ export const useAISearch = () => {
     return filteredResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
   };
 
+  // Track missing search query function
+  const trackMissingQuery = async (query: string, filters?: SearchFilters) => {
+    try {
+      await supabase.rpc('track_missing_search_query', {
+        p_user_id: user?.id || null,
+        p_query: query.trim(),
+        p_filters: JSON.parse(JSON.stringify(filters || {}))
+      });
+    } catch (error) {
+      console.error('Error tracking missing query:', error);
+    }
+  };
+
   // Main search function
   const search = async (query: string, filters?: SearchFilters) => {
     if (!query.trim()) {
@@ -133,6 +146,11 @@ export const useAISearch = () => {
       const results = await keywordSearch(query, filters);
       
       setSearchResults(results);
+      
+      // Track missing queries if no results found
+      if (results.length === 0) {
+        await trackMissingQuery(query, filters);
+      }
       
       // Update search history
       const newHistory = [query, ...searchHistory.filter(h => h !== query)].slice(0, 10);
@@ -194,6 +212,7 @@ export const useAISearch = () => {
     isSearching,
     searchHistory,
     popularSearches,
+    trackMissingQuery,
   };
 };
 

@@ -10,6 +10,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import SubscriptionRoute from "@/components/SubscriptionRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
+import NotificationWrapper from "@/components/NotificationWrapper";
 
 // Page imports
 import Index from "./pages/Index";
@@ -61,11 +62,12 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ChatbotProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+          <NotificationWrapper>
+            <ChatbotProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
                 <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -212,6 +214,7 @@ function App() {
               </BrowserRouter>
             </TooltipProvider>
           </ChatbotProvider>
+          </NotificationWrapper>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
