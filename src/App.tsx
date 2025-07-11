@@ -89,13 +89,23 @@ function App() {
                     </ProtectedRoute>
                   } />
                   
-                  {/* Public monetization pages */}
-                  <Route path="/talent-pool" element={<TalentPool />} />
-                  <Route path="/corporate-training" element={<CorporateTraining />} />
-                  <Route path="/gis-marketplace" element={<GISMarketplace />} />
-                  <Route path="/task-board" element={<TaskBoard />} />
-                  <Route path="/certifications" element={<CertificationHub />} />
-                  <Route path="/plugin-marketplace" element={<PluginMarketplace />} />
+                   {/* Public monetization pages */}
+                   <Route path="/talent-pool" element={<TalentPool />} />
+                   <Route path="/corporate-training" element={<CorporateTraining />} />
+                   <Route path="/task-board" element={<TaskBoard />} />
+                   <Route path="/certifications" element={<CertificationHub />} />
+                   
+                   {/* Premium marketplace features */}
+                   <Route path="/gis-marketplace" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <GISMarketplace />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/plugin-marketplace" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <PluginMarketplace />
+                     </SubscriptionRoute>
+                   } />
                   
                   {/* Protected Routes */}
                   <Route path="/dashboard" element={
@@ -103,11 +113,11 @@ function App() {
                       <Dashboard />
                     </ProtectedRoute>
                   } />
-                  <Route path="/learn" element={
-                    <SubscriptionRoute requiredTier="premium">
-                      <Learn />
-                    </SubscriptionRoute>
-                  } />
+                   <Route path="/learn" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <Learn />
+                     </SubscriptionRoute>
+                   } />
                   <Route path="/projects" element={
                     <ProtectedRoute>
                       <Projects />
@@ -138,16 +148,16 @@ function App() {
                       <SpatialAnalysis />
                     </ProtectedRoute>
                   } />
-                  <Route path="/geoai-lab" element={
-                    <SubscriptionRoute requiredTier="premium">
-                      <GeoAILab />
-                    </SubscriptionRoute>
-                  } />
-                  <Route path="/geo-processing-lab" element={
-                    <SubscriptionRoute requiredTier="premium">
-                      <GeoProcessingLab />
-                    </SubscriptionRoute>
-                  } />
+                   <Route path="/geoai-lab" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <GeoAILab />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/geo-processing-lab" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <GeoProcessingLab />
+                     </SubscriptionRoute>
+                   } />
                   <Route path="/code-snippets" element={
                     <ProtectedRoute>
                       <CodeSnippets />
@@ -168,21 +178,21 @@ function App() {
                       <ResumePosting />
                     </ProtectedRoute>
                   } />
-                  <Route path="/qgis-project" element={
-                    <ProtectedRoute>
-                      <QgisProject />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/qgis-project" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <QgisProject />
+                     </SubscriptionRoute>
+                   } />
                   <Route path="/geo-dashboard" element={
                     <ProtectedRoute>
                       <GeoDashboard />
                     </ProtectedRoute>
                   } />
-                  <Route path="/ai-studio" element={
-                    <ProtectedRoute>
-                      <AIStudio />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/ai-studio" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <AIStudio />
+                     </SubscriptionRoute>
+                   } />
                   <Route path="/search" element={
                     <ProtectedRoute>
                       <Search />
@@ -203,11 +213,11 @@ function App() {
                       <AdminDashboard />
                     </ProtectedRoute>
                   } />
-                  <Route path="/webgis-builder" element={
-                    <SubscriptionRoute requiredTier="premium">
-                      <WebGISBuilder />
-                    </SubscriptionRoute>
-                  } />
+                   <Route path="/webgis-builder" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <WebGISBuilder />
+                     </SubscriptionRoute>
+                   } />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

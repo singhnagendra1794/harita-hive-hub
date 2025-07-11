@@ -235,23 +235,35 @@ export const usePremiumAccess = () => {
   };
 
   const canAccessLearnSection = (): boolean => {
-    return hasAccess('premium');
+    return hasAccess('pro');
   };
 
   const canAccessGeoAILab = (): boolean => {
-    return hasAccess('premium');
+    return hasAccess('pro');
   };
 
   const canAccessWebGISBuilder = (): boolean => {
-    return hasAccess('premium');
+    return hasAccess('pro');
+  };
+
+  const canAccessGeoProcessingLab = (): boolean => {
+    return hasAccess('pro');
+  };
+
+  const canAccessPluginMarketplace = (): boolean => {
+    return hasAccess('pro');
+  };
+
+  const canAccessQGISIntegration = (): boolean => {
+    return hasAccess('pro');
   };
 
   const canPostJobs = (): boolean => {
-    return hasAccess('premium');
+    return hasAccess('pro');
   };
 
   const getJobPostingLimit = (): number => {
-    if (!hasAccess('premium')) return 0;
+    if (!hasAccess('pro')) return 0;
     if (hasAccess('enterprise')) return -1; // Unlimited
     return 5; // Professional plan limit
   };
@@ -282,6 +294,9 @@ export const usePremiumAccess = () => {
     canAccessLearnSection,
     canAccessGeoAILab,
     canAccessWebGISBuilder,
+    canAccessGeoProcessingLab,
+    canAccessPluginMarketplace,
+    canAccessQGISIntegration,
     canPostJobs,
     getJobPostingLimit,
     canAccessAdvancedDashboard,

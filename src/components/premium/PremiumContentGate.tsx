@@ -86,18 +86,18 @@ const PremiumContentGate: React.FC<PremiumContentGateProps> = ({
                   <Crown className="h-8 w-8 text-primary" />
                 </div>
               </div>
-              <CardTitle className="flex items-center justify-center gap-2">
-                <Lock className="h-5 w-5" />
-                Premium Content
-              </CardTitle>
-              <CardDescription>
-                {title && (
-                  <span className="font-medium text-foreground block mb-1">
-                    {title}
-                  </span>
-                )}
-                {description || 'This content is available to premium subscribers only.'}
-              </CardDescription>
+               <CardTitle className="flex items-center justify-center gap-2">
+                 <Lock className="h-5 w-5" />
+                 Professional Feature
+               </CardTitle>
+               <CardDescription>
+                 {title && (
+                   <span className="font-medium text-foreground block mb-1">
+                     {title}
+                   </span>
+                 )}
+                 {description || 'This content is available to Professional and Enterprise subscribers only.'}
+               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-4">
@@ -117,19 +117,19 @@ const PremiumContentGate: React.FC<PremiumContentGateProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Link to="/pricing">
-                  <Button className="w-full" size="lg">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Upgrade to Premium
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-                
-                <div className="text-center">
-                  <Badge variant="secondary" className="text-xs">
-                    Starting from ₹999/month
-                  </Badge>
-                </div>
+                 <Link to="/premium-upgrade">
+                   <Button className="w-full" size="lg">
+                     <Crown className="h-4 w-4 mr-2" />
+                     Upgrade to Professional
+                     <ArrowRight className="h-4 w-4 ml-2" />
+                   </Button>
+                 </Link>
+                 
+                 <div className="text-center">
+                   <Badge variant="secondary" className="text-xs">
+                     Professional or Enterprise required
+                   </Badge>
+                 </div>
               </div>
             </CardContent>
           </Card>

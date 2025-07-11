@@ -14,8 +14,8 @@ interface SubscriptionRouteProps {
 
 const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({ 
   children, 
-  requiredTier = 'premium',
-  redirectTo = '/choose-plan'
+  requiredTier = 'pro',
+  redirectTo = '/premium-upgrade'
 }) => {
   const { user, session, loading: authLoading } = useAuth();
   const { hasAccess, loading: subscriptionLoading, subscription } = usePremiumAccess();
@@ -95,9 +95,10 @@ const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({
 
   // Check if user has required access level
   if (!hasAccess(requiredTier)) {
+    const subscriptionName = requiredTier === 'pro' ? 'Professional' : requiredTier === 'enterprise' ? 'Enterprise' : requiredTier;
     toast({
-      title: "Access Denied",
-      description: `This feature requires a ${requiredTier} subscription. Please upgrade your plan.`,
+      title: "Professional Subscription Required",
+      description: `This premium feature requires a ${subscriptionName} or Enterprise subscription. Please upgrade your plan.`,
       variant: "destructive",
     });
     return <Navigate to={redirectTo} replace />;
