@@ -1,10 +1,10 @@
 import Layout from "../components/Layout";
-import GeoProcessingWorkspace from "../components/geoprocessing/GeoProcessingWorkspace";
+import EnhancedGeoProcessingWorkspace from "../components/geoprocessing/EnhancedGeoProcessingWorkspace";
 
 const GeoProcessingLab = () => {
   return (
     <Layout>
-      <GeoProcessingWorkspace />
+      <EnhancedGeoProcessingWorkspace />
     </Layout>
   );
 };
