@@ -2144,6 +2144,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_uploads: {
+        Row: {
+          coordinate_system: string | null
+          created_at: string
+          file_format: string
+          file_name: string
+          file_size: number
+          file_type: string
+          id: string
+          metadata: Json | null
+          status: string | null
+          storage_url: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          coordinate_system?: string | null
+          created_at?: string
+          file_format: string
+          file_name: string
+          file_size: number
+          file_type: string
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          storage_url: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          coordinate_system?: string | null
+          created_at?: string
+          file_format?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          storage_url?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

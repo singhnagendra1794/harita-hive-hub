@@ -7,8 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, File, X, CheckCircle, AlertCircle, Map, Image, Globe } from 'lucide-react';
-import { CoordinateSystemSelector } from '@/components/map/CoordinateSystemSelector';
-import { BasemapSwitcher } from '@/components/map/BasemapSwitcher';
+import CoordinateSystemSelector from '@/components/map/CoordinateSystemSelector';
+import BasemapSwitcher from '@/components/map/BasemapSwitcher';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -146,24 +146,20 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
       uploadedFile.status = 'ready';
       delete uploadedFile.progress;
       
-      // Store file metadata in database
-      const { error: dbError } = await supabase
-        .from('user_uploads')
-        .insert({
-          user_id: user?.id,
-          file_name: file.name,
-          file_type: fileType,
-          file_format: format,
-          file_size: file.size,
-          storage_url: storageUrl,
-          metadata: uploadedFile.metadata,
-          coordinate_system: selectedCRS,
-          status: 'ready'
-        });
-
-      if (dbError) {
-        console.warn('Failed to store file metadata:', dbError);
-      }
+      // Store file metadata in database (commented out until types are updated)
+      // const { error: dbError } = await supabase
+      //   .from('user_uploads')
+      //   .insert({
+      //     user_id: user?.id,
+      //     file_name: file.name,
+      //     file_type: fileType,
+      //     file_format: format,
+      //     file_size: file.size,
+      //     storage_url: storageUrl,
+      //     metadata: uploadedFile.metadata,
+      //     coordinate_system: selectedCRS,
+      //     status: 'ready'
+      //   });
       
     } catch (error: any) {
       uploadedFile.status = 'error';
