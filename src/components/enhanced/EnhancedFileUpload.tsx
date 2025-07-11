@@ -7,8 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, File, X, CheckCircle, AlertCircle, Map, Image, Globe } from 'lucide-react';
-import CoordinateSystemSelector from '@/components/map/CoordinateSystemSelector';
-import BasemapSwitcher from '@/components/map/BasemapSwitcher';
+import CoordinateSystemSelector, { type CoordinateSystem } from '@/components/map/CoordinateSystemSelector';
+import BasemapSwitcher, { type BasemapOption } from '@/components/map/BasemapSwitcher';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -38,8 +38,8 @@ interface EnhancedFileUploadProps {
   uploadedFiles: UploadedFile[];
   selectedCRS?: string;
   selectedBasemap?: string;
-  onCRSChange?: (crs: string) => void;
-  onBasemapChange?: (basemap: string) => void;
+  onCRSChange?: (crs: CoordinateSystem) => void;
+  onBasemapChange?: (basemap: BasemapOption) => void;
   maxFileSize?: number; // in MB
   allowedFormats?: string[];
 }
@@ -266,14 +266,14 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
             <div className="space-y-2">
               <Label>Coordinate Reference System</Label>
               <CoordinateSystemSelector
-                selectedCRS={selectedCRS}
+                currentCRS={selectedCRS}
                 onCRSChange={onCRSChange || (() => {})}
               />
             </div>
             <div className="space-y-2">
               <Label>Preferred Basemap</Label>
               <BasemapSwitcher
-                selectedBasemap={selectedBasemap}
+                currentBasemap={selectedBasemap}
                 onBasemapChange={onBasemapChange || (() => {})}
               />
             </div>
