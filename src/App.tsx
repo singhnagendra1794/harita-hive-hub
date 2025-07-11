@@ -54,6 +54,10 @@ import CertificationHub from "./pages/CertificationHub";
 import PluginMarketplace from "./pages/PluginMarketplace";
 import WebGISBuilder from "./pages/WebGISBuilder";
 import ChoosePlan from "./pages/ChoosePlan";
+import EnterpriseDataIntegration from "./pages/EnterpriseDataIntegration";
+import IoTDataProcessing from "./pages/IoTDataProcessing";
+import GeoAIEngine from "./pages/GeoAIEngine";
+import ComplianceToolkit from "./pages/ComplianceToolkit";
 
 const queryClient = new QueryClient();
 
