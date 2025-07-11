@@ -1,10 +1,11 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import PremiumContentGate from "@/components/premium/PremiumContentGate";
 import DataUploadPanel from "./DataUploadPanel";
 import VectorAnalysisTools from "./VectorAnalysisTools";
 import RasterAnalysisTools from "./RasterAnalysisTools";
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 
 const GeoAIWorkspace = () => {
+  const { hasAccess } = usePremiumAccess();
   const [uploadedData, setUploadedData] = useState<any[]>([]);
   const [selectedData, setSelectedData] = useState<any>(null);
   const [analysisResults, setAnalysisResults] = useState<any[]>([]);
@@ -29,6 +31,22 @@ const GeoAIWorkspace = () => {
   const [mapZoom, setMapZoom] = useState(4);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+
+  // Check if user has access to premium GeoAI features
+  if (!hasAccess('premium')) {
+    return (
+      <div className="container py-8">
+        <PremiumContentGate 
+          contentType="feature"
+          contentId="geoai-lab"
+          title="GeoAI Laboratory"
+          description="Access cutting-edge AI-powered geospatial analysis tools including object detection, change detection, and automated feature extraction from satellite imagery."
+        >
+          <div />
+        </PremiumContentGate>
+      </div>
+    );
+  }
 
   const handleDataUpload = (data: any) => {
     setUploadedData(prev => [...prev, data]);
@@ -53,10 +71,10 @@ const GeoAIWorkspace = () => {
     setIsProcessing(true);
     setProcessingProgress(0);
     
-    // Simulate batch processing
-    for (let i = 0; i <= 100; i += 10) {
+    // Simulate batch AI processing
+    for (let i = 0; i <= 100; i += 5) {
       setProcessingProgress(i);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     
     setIsProcessing(false);
@@ -115,7 +133,7 @@ const GeoAIWorkspace = () => {
         {isProcessing && (
           <div className="mt-4">
             <div className="flex items-center justify-between text-sm mb-2">
-              <span>Processing batch analysis...</span>
+              <span>Processing AI analysis...</span>
               <span>{processingProgress}%</span>
             </div>
             <Progress value={processingProgress} className="w-full" />
@@ -177,7 +195,7 @@ const GeoAIWorkspace = () => {
                 <CardContent className="space-y-3">
                   {analysisResults.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      No analysis results yet
+                      No AI analysis results yet
                     </p>
                   ) : (
                     analysisResults.map((result, index) => (
@@ -209,7 +227,7 @@ const GeoAIWorkspace = () => {
                       disabled={isProcessing}
                     >
                       <Play className="h-3 w-3 mr-2" />
-                      {isProcessing ? 'Processing...' : 'Run Batch Analysis'}
+                      {isProcessing ? 'Processing...' : 'Run Batch AI Analysis'}
                     </Button>
                   )}
                 </CardContent>
