@@ -1,15 +1,37 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Check, X, Crown, Users, Zap } from 'lucide-react';
+import { usePremiumAccess } from '@/hooks/usePremiumAccess';
+import { toast } from 'sonner';
+import Layout from '@/components/Layout';
 
-import Layout from "../components/Layout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-const Pricing = () => {
+const ChoosePlan: React.FC = () => {
   const navigate = useNavigate();
+  const { upgradeSubscription } = usePremiumAccess();
+  const [upgrading, setUpgrading] = useState(false);
 
-  const handleSubscribe = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
+  const handlePlanSelection = async (tier: 'free' | 'professional' | 'enterprise') => {
+    if (tier === 'free') {
+      navigate('/dashboard');
+      return;
+    }
+
+    setUpgrading(true);
+    try {
+      await upgradeSubscription(tier === 'professional' ? 'premium' : 'enterprise');
+      toast.success(`Successfully upgraded to ${tier} plan!`);
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error('Failed to upgrade subscription. Please try again.');
+    } finally {
+      setUpgrading(false);
+    }
+  };
+
+  const handlePayment = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
     navigate('/payment', {
       state: {
         planName,
@@ -22,18 +44,22 @@ const Pricing = () => {
 
   return (
     <Layout>
-      <div className="container py-12">
+      <div className="container max-w-6xl py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
+          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your needs. All plans include access to our community and basic features.
+            Welcome to Harita Hive! Please select a plan to get started with your GIS learning journey.
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Free Plan */}
           <Card className="border-muted">
             <CardHeader>
-              <CardTitle className="text-xl">Free</CardTitle>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-xl">Free</CardTitle>
+              </div>
               <div className="text-3xl font-bold">₹0<span className="text-lg text-muted-foreground font-normal">/month</span></div>
               <CardDescription>Get started with basic community features</CardDescription>
             </CardHeader>
@@ -59,21 +85,38 @@ const Pricing = () => {
                   <X className="h-4 w-4 mr-2 text-red-500" />
                   <span className="text-muted-foreground">No access to Learn section</span>
                 </li>
+                <li className="flex items-center">
+                  <X className="h-4 w-4 mr-2 text-red-500" />
+                  <span className="text-muted-foreground">No GeoAI Lab access</span>
+                </li>
+                <li className="flex items-center">
+                  <X className="h-4 w-4 mr-2 text-red-500" />
+                  <span className="text-muted-foreground">No Web GIS Builder</span>
+                </li>
               </ul>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
-                Get Started Free
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handlePlanSelection('free')}
+                disabled={upgrading}
+              >
+                Continue with Free
               </Button>
             </CardFooter>
           </Card>
-          
-          <Card className="border-primary relative">
+
+          {/* Professional Plan */}
+          <Card className="border-primary relative scale-105 shadow-lg">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <Badge className="bg-primary text-primary-foreground px-3 py-1">Popular</Badge>
             </div>
             <CardHeader className="pt-8">
-              <CardTitle className="text-xl">Professional</CardTitle>
+              <div className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-primary" />
+                <CardTitle className="text-xl">Professional</CardTitle>
+              </div>
               <div className="space-y-1">
                 <div className="text-3xl font-bold">$50<span className="text-lg text-muted-foreground font-normal">/month</span></div>
                 <div className="text-xl font-semibold text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
@@ -96,11 +139,15 @@ const Pricing = () => {
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
-                  <span>Post up to 5 job listings</span>
+                  <span>GeoAI Lab & Tools</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
-                  <span>Enhanced profile features</span>
+                  <span>Web GIS Builder</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 mr-2 text-green-500" />
+                  <span>Post up to 5 job listings</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
@@ -111,23 +158,29 @@ const Pricing = () => {
             <CardFooter>
               <Button 
                 className="w-full"
-                onClick={() => handleSubscribe("Professional Plan", 50, 3999, [
+                onClick={() => handlePayment("Professional Plan", 50, 3999, [
                   "Full access to Learn section",
                   "QGIS Project integration", 
                   "Basic Geo-Dashboard features",
+                  "GeoAI Lab & Tools",
+                  "Web GIS Builder",
                   "Post up to 5 job listings",
-                  "Enhanced profile features",
                   "Priority support"
                 ])}
+                disabled={upgrading}
               >
                 Subscribe Now
               </Button>
             </CardFooter>
           </Card>
-          
+
+          {/* Enterprise Plan */}
           <Card className="border-muted">
             <CardHeader>
-              <CardTitle className="text-xl">Enterprise</CardTitle>
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-purple-500" />
+                <CardTitle className="text-xl">Enterprise</CardTitle>
+              </div>
               <div className="space-y-1">
                 <div className="text-3xl font-bold">$99<span className="text-lg text-muted-foreground font-normal">/month</span></div>
                 <div className="text-xl font-semibold text-muted-foreground">₹7,999<span className="text-sm font-normal">/month</span></div>
@@ -170,7 +223,7 @@ const Pricing = () => {
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => handleSubscribe("Enterprise Plan", 99, 7999, [
+                onClick={() => handlePayment("Enterprise Plan", 99, 7999, [
                   "Everything in Professional",
                   "Team collaboration features",
                   "Advanced Geo-Dashboard",
@@ -179,23 +232,22 @@ const Pricing = () => {
                   "Dedicated support",
                   "Custom integration options"
                 ])}
+                disabled={upgrading}
               >
                 Contact Sales
               </Button>
             </CardFooter>
           </Card>
         </div>
-        
+
         <div className="mt-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Need a custom solution?</h2>
-          <p className="text-muted-foreground mb-6">
-            We offer tailored plans for large organizations and special requirements.
+          <p className="text-sm text-muted-foreground">
+            You can always upgrade or change your plan later in your dashboard settings.
           </p>
-          <Button variant="secondary">Get in Touch</Button>
         </div>
       </div>
     </Layout>
   );
 };
 
-export default Pricing;
+export default ChoosePlan;

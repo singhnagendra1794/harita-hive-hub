@@ -34,6 +34,8 @@ export const usePremiumAccess = () => {
     if (user) {
       fetchUserSubscription();
       checkPremiumAccess();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -188,6 +190,62 @@ export const usePremiumAccess = () => {
     }
   };
 
+  const hasAccess = (requiredTier: 'free' | 'premium' | 'pro' | 'enterprise' = 'premium'): boolean => {
+    if (!user || !subscription) return requiredTier === 'free';
+    
+    const tierHierarchy = {
+      'free': 0,
+      'premium': 1,
+      'pro': 2,
+      'enterprise': 3
+    };
+    
+    const userTierLevel = tierHierarchy[subscription.subscription_tier] || 0;
+    const requiredLevel = tierHierarchy[requiredTier];
+    
+    // Check if subscription is active and not expired
+    const isActive = subscription.status === 'active' && 
+      (subscription.expires_at === null || new Date(subscription.expires_at) > new Date());
+    
+    return userTierLevel >= requiredLevel && (requiredTier === 'free' || isActive);
+  };
+
+  const canAccessLearnSection = (): boolean => {
+    return hasAccess('premium');
+  };
+
+  const canAccessGeoAILab = (): boolean => {
+    return hasAccess('premium');
+  };
+
+  const canAccessWebGISBuilder = (): boolean => {
+    return hasAccess('premium');
+  };
+
+  const canPostJobs = (): boolean => {
+    return hasAccess('premium');
+  };
+
+  const getJobPostingLimit = (): number => {
+    if (!hasAccess('premium')) return 0;
+    if (hasAccess('enterprise')) return -1; // Unlimited
+    return 5; // Professional plan limit
+  };
+
+  const canAccessAdvancedDashboard = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessAPI = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const hasTrialAccess = (feature: 'qgis' | 'dashboard'): boolean => {
+    // For now, return true for free users to allow 1-day trial
+    // In a real implementation, you'd check trial start dates and limits
+    return !hasAccess('premium');
+  };
+
   return {
     subscription,
     hasPremiumAccess,
@@ -196,6 +254,15 @@ export const usePremiumAccess = () => {
     upgradeSubscription,
     cancelSubscription,
     markContentAsPremium,
+    hasAccess,
+    canAccessLearnSection,
+    canAccessGeoAILab,
+    canAccessWebGISBuilder,
+    canPostJobs,
+    getJobPostingLimit,
+    canAccessAdvancedDashboard,
+    canAccessAPI,
+    hasTrialAccess,
     refetch: () => {
       fetchUserSubscription();
       checkPremiumAccess();

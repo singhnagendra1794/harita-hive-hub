@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatbotProvider } from "@/components/ai/ChatbotProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SubscriptionRoute from "@/components/SubscriptionRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -50,6 +51,7 @@ import TaskBoard from "./pages/TaskBoard";
 import CertificationHub from "./pages/CertificationHub";
 import PluginMarketplace from "./pages/PluginMarketplace";
 import WebGISBuilder from "./pages/WebGISBuilder";
+import ChoosePlan from "./pages/ChoosePlan";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +79,13 @@ function App() {
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   
+                  {/* Plan selection */}
+                  <Route path="/choose-plan" element={
+                    <ProtectedRoute>
+                      <ChoosePlan />
+                    </ProtectedRoute>
+                  } />
+                  
                   {/* Public monetization pages */}
                   <Route path="/talent-pool" element={<TalentPool />} />
                   <Route path="/corporate-training" element={<CorporateTraining />} />
@@ -92,9 +101,9 @@ function App() {
                     </ProtectedRoute>
                   } />
                   <Route path="/learn" element={
-                    <ProtectedRoute>
+                    <SubscriptionRoute requiredTier="premium">
                       <Learn />
-                    </ProtectedRoute>
+                    </SubscriptionRoute>
                   } />
                   <Route path="/projects" element={
                     <ProtectedRoute>
@@ -127,9 +136,9 @@ function App() {
                     </ProtectedRoute>
                   } />
                   <Route path="/geoai-lab" element={
-                    <ProtectedRoute>
+                    <SubscriptionRoute requiredTier="premium">
                       <GeoAILab />
-                    </ProtectedRoute>
+                    </SubscriptionRoute>
                   } />
                   <Route path="/code-snippets" element={
                     <ProtectedRoute>
@@ -187,9 +196,9 @@ function App() {
                     </ProtectedRoute>
                   } />
                   <Route path="/webgis-builder" element={
-                    <ProtectedRoute>
+                    <SubscriptionRoute requiredTier="premium">
                       <WebGISBuilder />
-                    </ProtectedRoute>
+                    </SubscriptionRoute>
                   } />
                   
                   <Route path="*" element={<NotFound />} />
