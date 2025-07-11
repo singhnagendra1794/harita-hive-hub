@@ -31,12 +31,36 @@ export const usePremiumAccess = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchUserSubscription();
-      checkPremiumAccess();
-    } else {
-      setLoading(false);
-    }
+    const initializeAccess = async () => {
+      if (!user) {
+        setSubscription(null);
+        setHasPremiumAccess(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Validate user session first
+        const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+        
+        if (error || !currentUser) {
+          console.log('User session invalid in usePremiumAccess');
+          setSubscription(null);
+          setHasPremiumAccess(false);
+          setLoading(false);
+          return;
+        }
+
+        await Promise.all([fetchUserSubscription(), checkPremiumAccess()]);
+      } catch (error) {
+        console.error('Error initializing premium access:', error);
+        setSubscription(null);
+        setHasPremiumAccess(false);
+        setLoading(false);
+      }
+    };
+
+    initializeAccess();
   }, [user]);
 
   const fetchUserSubscription = async () => {

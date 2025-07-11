@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
-import { ArrowRight, Crown, Zap, Lock } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { ArrowRight, Crown, Zap, Lock, Loader2 } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 
 interface Stat {
@@ -16,8 +17,9 @@ interface Stat {
 }
 
 const UserDashboard = () => {
-  const { user } = useAuth();
-  const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder } = usePremiumAccess();
+  const { user, loading: authLoading } = useAuth();
+  const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder, loading: premiumLoading } = usePremiumAccess();
+  const { isValid: isSessionValid, isLoading: sessionValidating } = useSessionValidation();
   const [activeTab, setActiveTab] = useState("quick-actions");
 
   const stats: Stat[] = [
@@ -59,6 +61,34 @@ const UserDashboard = () => {
     { title: "Building a GeoAI Application", description: "Learn how to integrate AI into your GIS workflows" },
     { title: "Contributing to Open Source GIS", description: "Discover how to contribute to open source GIS projects" },
   ];
+
+  // Show loading state while validating session
+  if (authLoading || premiumLoading || sessionValidating) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? "Loading user data..." : 
+             sessionValidating ? "Validating session..." : 
+             "Loading dashboard..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If session is invalid, the useSessionValidation hook will handle redirect
+  if (!isSessionValid) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-8">

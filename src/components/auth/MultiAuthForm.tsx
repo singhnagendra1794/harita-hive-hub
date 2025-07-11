@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,12 +10,30 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Phone, Github } from 'lucide-react';
 
 interface MultiAuthFormProps {
   mode: 'signin' | 'signup';
   onToggleMode: () => void;
 }
+
+// Cleanup function for auth state
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-') || key === 'session_token') {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  if (typeof sessionStorage !== 'undefined') {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  }
+};
 
 export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode }) => {
   const [loading, setLoading] = useState(false);
@@ -27,6 +45,14 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [activeTab, setActiveTab] = useState('email');
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   // Generate unique session token
   const generateSessionToken = () => {
