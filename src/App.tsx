@@ -58,6 +58,9 @@ import EnterpriseDataIntegration from "./pages/EnterpriseDataIntegration";
 import IoTDataProcessing from "./pages/IoTDataProcessing";
 import GeoAIEngine from "./pages/GeoAIEngine";
 import ComplianceToolkit from "./pages/ComplianceToolkit";
+import SpatialRiskAnalysis from "./pages/SpatialRiskAnalysis";
+import DeveloperPortal from "./pages/DeveloperPortal";
+import EnterpriseDashboard from "./pages/EnterpriseDashboard";
 
 const queryClient = new QueryClient();
 
@@ -223,7 +226,45 @@ function App() {
                      </SubscriptionRoute>
                    } />
                   
-                  <Route path="*" element={<NotFound />} />
+                   
+                   {/* Enterprise-only routes */}
+                   <Route path="/enterprise-data-integration" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <EnterpriseDataIntegration />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/iot-data-processing" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <IoTDataProcessing />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/geoai-engine" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <GeoAIEngine />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/compliance-toolkit" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <ComplianceToolkit />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/spatial-risk-analysis" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <SpatialRiskAnalysis />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/developer-portal" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <DeveloperPortal />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/enterprise-dashboard" element={
+                     <SubscriptionRoute requiredTier="enterprise">
+                       <EnterpriseDashboard />
+                     </SubscriptionRoute>
+                   } />
+                   
+                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>

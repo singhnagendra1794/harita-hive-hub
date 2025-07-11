@@ -276,6 +276,34 @@ export const usePremiumAccess = () => {
     return hasAccess('enterprise');
   };
 
+  const canAccessEnterpriseDataIntegration = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessIoTProcessing = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessAdvancedGeoAI = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessComplianceToolkit = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessSpatialRiskAnalysis = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessDeveloperPortal = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
+  const canAccessWhiteLabeling = (): boolean => {
+    return hasAccess('enterprise');
+  };
+
   const hasTrialAccess = (feature: 'qgis' | 'dashboard'): boolean => {
     // For now, return true for free users to allow 1-day trial
     // In a real implementation, you'd check trial start dates and limits
@@ -301,6 +329,13 @@ export const usePremiumAccess = () => {
     getJobPostingLimit,
     canAccessAdvancedDashboard,
     canAccessAPI,
+    canAccessEnterpriseDataIntegration,
+    canAccessIoTProcessing,
+    canAccessAdvancedGeoAI,
+    canAccessComplianceToolkit,
+    canAccessSpatialRiskAnalysis,
+    canAccessDeveloperPortal,
+    canAccessWhiteLabeling,
     hasTrialAccess,
     refetch: () => {
       fetchUserSubscription();
