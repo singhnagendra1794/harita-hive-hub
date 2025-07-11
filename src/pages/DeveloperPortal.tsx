@@ -401,7 +401,7 @@ plot(change_analysis$results)`
                       <Label>Endpoint</Label>
                       <select className="w-full p-2 border rounded mt-1">
                         <option>POST /api/v1/geoai/analyze</option>
-                        <option>GET /api/v1/spatial/analysis/{id}</option>
+                        <option>GET /api/v1/spatial/analysis/&#123;id&#125;</option>
                         <option>POST /api/v1/processing/raster</option>
                       </select>
                     </div>
