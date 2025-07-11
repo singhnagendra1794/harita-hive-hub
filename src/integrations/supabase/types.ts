@@ -796,6 +796,87 @@ export type Database = {
         }
         Relationships: []
       }
+      geo_processing_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          estimated_completion_at: string | null
+          id: string
+          input_files: Json
+          job_type: string
+          output_files: Json | null
+          parameters: Json
+          progress: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_completion_at?: string | null
+          id?: string
+          input_files?: Json
+          job_type: string
+          output_files?: Json | null
+          parameters?: Json
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_completion_at?: string | null
+          id?: string
+          input_files?: Json
+          job_type?: string
+          output_files?: Json | null
+          parameters?: Json
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      geo_processing_usage: {
+        Row: {
+          created_at: string
+          file_size_mb: number | null
+          id: string
+          job_type: string
+          processing_time_seconds: number | null
+          subscription_tier: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_size_mb?: number | null
+          id?: string
+          job_type: string
+          processing_time_seconds?: number | null
+          subscription_tier: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_size_mb?: number | null
+          id?: string
+          job_type?: string
+          processing_time_seconds?: number | null
+          subscription_tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gis_profiles: {
         Row: {
           available_for_hire: boolean | null
@@ -1933,6 +2014,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      check_geo_processing_limits: {
+        Args: { p_user_id: string; p_job_type: string }
+        Returns: Json
       }
       generate_referral_code: {
         Args: { user_id: string }

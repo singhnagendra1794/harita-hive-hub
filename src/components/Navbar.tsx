@@ -33,6 +33,7 @@ const Navbar = () => {
     { href: "/map-playground", label: "Map Playground" },
     { href: "/spatial-analysis", label: "Spatial Analysis" },
     { href: "/geoai-lab", label: "GeoAI Lab" },
+    { href: "/geo-processing-lab", label: "Geo Processing Lab" },
     { href: "/webgis-builder", label: "Web GIS Builder" },
   ];
 
