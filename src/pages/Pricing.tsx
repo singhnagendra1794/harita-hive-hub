@@ -4,20 +4,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { PaymentModal } from "@/components/payment/PaymentModal";
 
 const Pricing = () => {
-  const navigate = useNavigate();
+
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    planName: string;
+    priceUSD: number;
+    priceINR: number;
+    features: string[];
+  } | null>(null);
 
   const handleSubscribe = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
-    navigate('/payment', {
-      state: {
-        planName,
-        priceUSD,
-        priceINR,
-        features
-      }
-    });
+    setSelectedPlan({ planName, priceUSD, priceINR, features });
+    setPaymentModalOpen(true);
   };
 
   return (
@@ -122,10 +124,6 @@ const Pricing = () => {
               >
                 Subscribe Now
               </Button>
-              <div className="text-xs text-muted-foreground text-center space-y-1">
-                <div>💳 International: <a href="https://paypal.me/nagendrasingh1794" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PayPal</a></div>
-                <div>🇮🇳 India: UPI - cnsj05061993-3@okicici</div>
-              </div>
             </CardFooter>
           </Card>
           
@@ -184,12 +182,8 @@ const Pricing = () => {
                   "Custom integration options"
                 ])}
               >
-                Contact Sales
+                Subscribe Now
               </Button>
-              <div className="text-xs text-muted-foreground text-center space-y-1">
-                <div>💳 International: <a href="https://paypal.me/nagendrasingh1794" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PayPal</a></div>
-                <div>🇮🇳 India: UPI - cnsj05061993-3@okicici</div>
-              </div>
             </CardFooter>
           </Card>
         </div>
@@ -201,6 +195,21 @@ const Pricing = () => {
           </p>
           <Button variant="secondary">Get in Touch</Button>
         </div>
+
+        {/* Payment Modal */}
+        {selectedPlan && (
+          <PaymentModal
+            isOpen={paymentModalOpen}
+            onClose={() => {
+              setPaymentModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            planName={selectedPlan.planName}
+            priceUSD={selectedPlan.priceUSD}
+            priceINR={selectedPlan.priceINR}
+            features={selectedPlan.features}
+          />
+        )}
       </div>
     </Layout>
   );

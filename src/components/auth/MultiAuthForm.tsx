@@ -128,9 +128,29 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       }
     } catch (error: any) {
       console.error('Email auth error:', error);
+      
+      // Provide specific error messaging based on error type
+      let errorTitle = mode === 'signup' ? "Signup Failed" : "Login Failed";
+      let errorDescription = error.message || "Please try again.";
+      
+      // Handle specific error cases
+      if (error.message?.includes('User already registered')) {
+        errorTitle = "Account Already Exists";
+        errorDescription = "This email is already registered. Please try logging in instead.";
+      } else if (error.message?.includes('Invalid login credentials')) {
+        errorTitle = "Invalid Credentials";
+        errorDescription = "Please check your email and password and try again.";
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorTitle = "Email Not Verified";
+        errorDescription = "Please check your email and click the verification link.";
+      } else if (error.message?.includes('signup_disabled')) {
+        errorTitle = "Signup Disabled";
+        errorDescription = "New registrations are temporarily disabled. Please try again later.";
+      }
+      
       toast({
-        title: "Authentication Error",
-        description: error.message || "Authentication failed. Please try again.",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {

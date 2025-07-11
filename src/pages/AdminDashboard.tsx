@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CreatorConsole } from '@/components/admin/CreatorConsole';
 import { BetaAnalyticsDashboard } from '@/components/beta/BetaAnalyticsDashboard';
+import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,6 +66,7 @@ const AdminDashboardPage = () => {
             <TabsTrigger value="creator">Creator Console</TabsTrigger>
             <TabsTrigger value="general">General Admin</TabsTrigger>
             <TabsTrigger value="beta">Beta Analytics</TabsTrigger>
+            <TabsTrigger value="payments">Payment Approvals</TabsTrigger>
           </TabsList>
 
           <TabsContent value="creator">
@@ -107,6 +109,10 @@ const AdminDashboardPage = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <PaymentApprovalDashboard />
           </TabsContent>
         </Tabs>
       </div>
