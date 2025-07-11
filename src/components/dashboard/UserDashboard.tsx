@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import LiveClassBanner from "./LiveClassBanner";
 import { ArrowRight, Crown, Zap, Lock, Loader2 } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 

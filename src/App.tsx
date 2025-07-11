@@ -26,6 +26,7 @@ import Community from "./pages/Community";
 import SpatialAnalysis from "./pages/SpatialAnalysis";
 import CodeSnippets from "./pages/CodeSnippets";
 import LiveClasses from "./pages/LiveClasses";
+import LiveClassViewer from "./pages/LiveClassViewer";
 import JobPosting from "./pages/JobPosting";
 import ResumePosting from "./pages/ResumePosting";
 import QgisProject from "./pages/QgisProject";
@@ -172,11 +173,16 @@ function App() {
                       <CodeSnippets />
                     </ProtectedRoute>
                   } />
-                  <Route path="/live-classes" element={
-                    <ProtectedRoute>
-                      <LiveClasses />
-                    </ProtectedRoute>
-                  } />
+        <Route path="/live-classes" element={
+          <ProtectedRoute>
+            <LiveClasses />
+          </ProtectedRoute>
+        } />
+        <Route path="/live-classes/:id" element={
+          <ProtectedRoute>
+            <LiveClassViewer />
+          </ProtectedRoute>
+        } />
                   <Route path="/job-posting" element={
                     <ProtectedRoute>
                       <JobPosting />

@@ -5,11 +5,12 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CreatorConsole } from '@/components/admin/CreatorConsole';
 import { BetaAnalyticsDashboard } from '@/components/beta/BetaAnalyticsDashboard';
 import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDashboard';
+import LiveClassManager from '@/components/admin/LiveClassManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, BarChart, Upload } from 'lucide-react';
+import { Shield, BarChart, Upload, Video } from 'lucide-react';
 
 const AdminDashboardPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -64,6 +65,7 @@ const AdminDashboardPage = () => {
         <Tabs defaultValue="creator" className="space-y-4">
           <TabsList>
             <TabsTrigger value="creator">Creator Console</TabsTrigger>
+            <TabsTrigger value="live-classes">Live Classes</TabsTrigger>
             <TabsTrigger value="general">General Admin</TabsTrigger>
             <TabsTrigger value="beta">Beta Analytics</TabsTrigger>
             <TabsTrigger value="payments">Payment Approvals</TabsTrigger>
@@ -83,6 +85,25 @@ const AdminDashboardPage = () => {
                 </CardHeader>
                 <CardContent>
                   <CreatorConsole />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="live-classes">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Video className="h-5 w-5" />
+                    YouTube Live Class Manager
+                  </CardTitle>
+                  <CardDescription>
+                    Manage YouTube Live streaming sessions for students
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <LiveClassManager />
                 </CardContent>
               </Card>
             </div>

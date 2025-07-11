@@ -1175,6 +1175,57 @@ export type Database = {
           },
         ]
       }
+      live_classes: {
+        Row: {
+          access_tier: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          instructor: string | null
+          is_live: boolean
+          starts_at: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+          youtube_video_id: string
+        }
+        Insert: {
+          access_tier?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          instructor?: string | null
+          is_live?: boolean
+          starts_at: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+          youtube_video_id: string
+        }
+        Update: {
+          access_tier?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          instructor?: string | null
+          is_live?: boolean
+          starts_at?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+          youtube_video_id?: string
+        }
+        Relationships: []
+      }
       missing_search_queries: {
         Row: {
           created_at: string

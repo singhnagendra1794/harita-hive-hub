@@ -1,50 +1,91 @@
 
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from "../components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Calendar, Clock, Users, Play } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, AlertCircle } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { usePremiumAccess } from '@/hooks/usePremiumAccess';
+import { toast } from '@/hooks/use-toast';
+
+interface LiveClass {
+  id: string;
+  title: string;
+  description: string;
+  video_url: string;
+  youtube_video_id: string;
+  starts_at: string;
+  ends_at: string | null;
+  is_live: boolean;
+  access_tier: string;
+  thumbnail_url: string | null;
+  instructor: string;
+  created_at: string;
+}
 
 const LiveClasses = () => {
-  const upcomingClasses = [
-    {
-      id: 1,
-      title: "Advanced QGIS Techniques",
-      description: "Learn advanced spatial analysis and automation in QGIS",
-      instructor: "Nagendra Singh",
-      date: "2024-06-25",
-      time: "10:00 AM IST",
-      duration: "2 hours",
-      enrolled: 45,
-      maxCapacity: 100,
-      status: "upcoming"
-    },
-    {
-      id: 2,
-      title: "Python for GIS Automation",
-      description: "Automate GIS workflows using Python and ArcPy",
-      instructor: "Nagendra Singh",
-      date: "2024-06-27",
-      time: "2:00 PM IST",
-      duration: "1.5 hours",
-      enrolled: 32,
-      maxCapacity: 50,
-      status: "upcoming"
-    }
-  ];
+  const navigate = useNavigate();
+  const { hasAccess } = usePremiumAccess();
+  const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pastClasses = [
-    {
-      id: 3,
-      title: "Introduction to Remote Sensing",
-      description: "Fundamentals of satellite imagery and analysis",
-      instructor: "Nagendra Singh",
-      date: "2024-06-20",
-      recordingUrl: "#",
-      duration: "2 hours",
-      status: "completed"
+  useEffect(() => {
+    fetchLiveClasses();
+  }, []);
+
+  const fetchLiveClasses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('live_classes')
+        .select('*')
+        .order('starts_at', { ascending: false });
+
+      if (error) throw error;
+      setLiveClasses(data || []);
+    } catch (error) {
+      console.error('Error fetching live classes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch live classes",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const isLive = (startsAt: string, endsAt: string | null, isLiveFlag: boolean) => {
+    const now = new Date();
+    const start = new Date(startsAt);
+    const end = endsAt ? new Date(endsAt) : null;
+    
+    return isLiveFlag && now >= start && (!end || now <= end);
+  };
+
+  const isUpcoming = (startsAt: string) => {
+    return new Date(startsAt) > new Date();
+  };
+
+  const handleJoinClass = (liveClass: LiveClass) => {
+    const requiredTier = liveClass.access_tier as 'free' | 'premium' | 'pro' | 'enterprise';
+    
+    if (!hasAccess(requiredTier)) {
+      toast({
+        title: "Upgrade Required",
+        description: `Upgrade to ${requiredTier} or Enterprise to access live sessions`,
+        variant: "destructive",
+      });
+      navigate('/premium-upgrade');
+      return;
+    }
+
+    navigate(`/live-classes/${liveClass.id}`);
+  };
+
+  const upcomingClasses = liveClasses.filter(cls => isUpcoming(cls.starts_at));
+  const pastClasses = liveClasses.filter(cls => !isUpcoming(cls.starts_at));
 
   return (
     <Layout>
@@ -62,47 +103,68 @@ const LiveClasses = () => {
             <Calendar className="h-6 w-6" />
             Upcoming Classes
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {upcomingClasses.map((class_) => (
-              <Card key={class_.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{class_.title}</CardTitle>
-                    <Badge variant="secondary">Live</Badge>
-                  </div>
-                  <CardDescription>{class_.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {class_.date}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {class_.time}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : upcomingClasses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {upcomingClasses.map((liveClass) => (
+                <Card key={liveClass.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{liveClass.title}</CardTitle>
+                      <div className="flex gap-2">
+                        {isLive(liveClass.starts_at, liveClass.ends_at, liveClass.is_live) && (
+                          <Badge variant="destructive" className="animate-pulse">
+                            🔴 LIVE
+                          </Badge>
+                        )}
+                        <Badge variant="outline">{liveClass.access_tier}</Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Video className="h-4 w-4" />
-                        {class_.duration}
+                    <CardDescription>{liveClass.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(liveClass.starts_at).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {new Date(liveClass.starts_at).toLocaleTimeString()}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {class_.enrolled}/{class_.maxCapacity} enrolled
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Video className="h-4 w-4" />
+                          {liveClass.instructor}
+                        </div>
                       </div>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => handleJoinClass(liveClass)}
+                      >
+                        {isLive(liveClass.starts_at, liveClass.ends_at, liveClass.is_live) ? 'Join Live Class' : 'View Class'}
+                      </Button>
                     </div>
-                    <p className="text-sm">Instructor: <span className="font-medium">{class_.instructor}</span></p>
-                    <Button className="w-full">
-                      Join Live Class
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Upcoming Classes</h3>
+                <p className="text-muted-foreground">
+                  Live classes will appear here when scheduled
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Past Classes (Recordings) */}
@@ -111,37 +173,55 @@ const LiveClasses = () => {
             <Play className="h-6 w-6" />
             Recorded Classes
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pastClasses.map((class_) => (
-              <Card key={class_.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{class_.title}</CardTitle>
-                    <Badge variant="outline">Recorded</Badge>
-                  </div>
-                  <CardDescription>{class_.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {class_.date}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Video className="h-4 w-4" />
-                        {class_.duration}
+          {pastClasses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastClasses.map((liveClass) => (
+                <Card key={liveClass.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{liveClass.title}</CardTitle>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">Recorded</Badge>
+                        <Badge variant="secondary">{liveClass.access_tier}</Badge>
                       </div>
                     </div>
-                    <p className="text-sm">Instructor: <span className="font-medium">{class_.instructor}</span></p>
-                    <Button variant="outline" className="w-full">
-                      Watch Recording
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardDescription>{liveClass.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(liveClass.starts_at).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Video className="h-4 w-4" />
+                          {liveClass.instructor}
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleJoinClass(liveClass)}
+                      >
+                        Watch Recording
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Play className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Recorded Classes</h3>
+                <p className="text-muted-foreground">
+                  Past live sessions will appear here for replay
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Integration Info */}
