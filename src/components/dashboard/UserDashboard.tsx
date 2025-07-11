@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowRight } from "lucide-react";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { ArrowRight, Crown, Zap, Lock } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 
 interface Stat {
@@ -16,6 +17,7 @@ interface Stat {
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder } = usePremiumAccess();
   const [activeTab, setActiveTab] = useState("quick-actions");
 
   const stats: Stat[] = [
@@ -62,12 +64,35 @@ const UserDashboard = () => {
     <div className="container py-8">
       {/* Welcome Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {user?.user_metadata?.full_name || 'GIS Professional'}! 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Continue your geospatial journey and explore new opportunities
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {user?.user_metadata?.full_name || 'GIS Professional'}! 👋
+            </h1>
+            <p className="text-muted-foreground">
+              Continue your geospatial journey and explore new opportunities
+            </p>
+          </div>
+          {!hasAccess('premium') && (
+            <Card className="max-w-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Crown className="h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Free Plan</p>
+                    <p className="text-xs text-muted-foreground">Upgrade for full access</p>
+                  </div>
+                  <Link to="/pricing">
+                    <Button size="sm">
+                      <Zap className="h-3 w-3 mr-1" />
+                      Upgrade
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Stats Overview */}
@@ -98,21 +123,48 @@ const UserDashboard = () => {
 
         <TabsContent value="quick-actions">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {quickActions.map((action, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-                <CardContent className="p-6">
-                  <Link to={action.href} className="block">
-                    <action.icon className="h-8 w-8 text-primary mb-4 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
+            {quickActions.map((action, index) => {
+              const isPremiumFeature = action.href === '/learn' || action.href === '/geoai-lab' || action.href === '/webgis-builder';
+              const hasFeatureAccess = action.href === '/learn' ? canAccessLearnSection() :
+                                     action.href === '/geoai-lab' ? canAccessGeoAILab() :
+                                     action.href === '/webgis-builder' ? canAccessWebGISBuilder() : true;
+              
+              return (
+                <Card key={index} className={`group hover:shadow-lg transition-all duration-300 ${!hasFeatureAccess ? 'opacity-75' : 'cursor-pointer'}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <action.icon className={`h-8 w-8 group-hover:scale-110 transition-transform ${!hasFeatureAccess ? 'text-muted-foreground' : 'text-primary'}`} />
+                      {isPremiumFeature && !hasFeatureAccess && (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                    <h3 className={`font-semibold mb-2 group-hover:text-primary transition-colors ${!hasFeatureAccess ? 'text-muted-foreground' : ''}`}>
                       {action.title}
+                      {isPremiumFeature && !hasFeatureAccess && (
+                        <Badge variant="secondary" className="ml-2 text-xs">Premium</Badge>
+                      )}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mb-4">
                       {action.description}
                     </p>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+                    {hasFeatureAccess ? (
+                      <Link to={action.href}>
+                        <Button variant="outline" size="sm" className="w-full">
+                          Access <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link to="/pricing">
+                        <Button variant="outline" size="sm" className="w-full">
+                          <Crown className="h-3 w-3 mr-2" />
+                          Upgrade to Access
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
 
