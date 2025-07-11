@@ -18,7 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
     <ErrorBoundary>
       <NotificationWrapper>
         <MobileOptimizations />
-        <GoogleAnalytics trackingId={process.env.GOOGLE_ANALYTICS_ID} />
+        <GoogleAnalytics trackingId={undefined} />
         <div className="min-h-screen flex flex-col bg-background">
           <Navbar />
           <main className="flex-1">
