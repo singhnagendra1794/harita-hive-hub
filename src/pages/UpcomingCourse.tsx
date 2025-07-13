@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, BookOpen, Brain, Target, Users, ArrowRight, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, BookOpen, Brain, Target, Users, ArrowRight, CheckCircle, Globe, Code, MapPin, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -272,109 +272,237 @@ const UpcomingCourse: React.FC = () => {
           )}
         </div>
 
-        {/* Course Card - Matching the image format */}
-        <div className="max-w-md mx-auto">
+        {/* Course Cards Grid - All 4 courses from the image */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {/* Course 1: ArcGIS Enterprise Mastery */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-background to-secondary/5 border-2">
             <CardHeader className="pb-4">
-              {/* Coming Soon Badge */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-300">
                   <span className="text-sm">🔒</span>
                   <span className="text-sm font-medium">COMING SOON</span>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  August 2025
-                </div>
+                <div className="text-sm text-muted-foreground">September 2025</div>
               </div>
 
-              {/* Course Icon and Level */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-primary" />
+                  <Globe className="h-6 w-6 text-primary" />
                 </div>
                 <Badge className="bg-red-100 text-red-800 border-red-300" variant="outline">
                   Advanced
                 </Badge>
               </div>
 
-              {/* Course Title */}
-              <CardTitle className="text-2xl mb-3">
-                GeoAI Mastery Program
-              </CardTitle>
-
-              {/* Course Description */}
-              <CardDescription className="text-base mb-6">
-                Master the intersection of AI and geospatial technology. Learn to build intelligent mapping solutions, 
-                process satellite imagery with deep learning, and create automated GIS workflows that transform how we understand our world.
+              <CardTitle className="text-xl mb-3">ArcGIS Enterprise Mastery</CardTitle>
+              <CardDescription className="text-sm mb-6">
+                From Server Setup to Custom Web Apps & Widgets. Master the full ArcGIS Enterprise stack with hands-on labs and certification.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* What you'll learn */}
               <div>
-                <h4 className="font-semibold text-lg mb-4">What you'll learn:</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Advanced GeoAI & Machine Learning</span>
+                <h4 className="font-semibold mb-3">What you'll learn:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Enterprise Stack Setup</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Deep Learning for Satellite Imagery</span>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Custom Widgets Development</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Automated Spatial Analysis</span>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Web AppBuilder & Experience Builder</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Production-Ready Web GIS Apps</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Enterprise AI Deployment</span>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Security & Access Control</span>
                   </div>
                 </div>
               </div>
 
-              {/* Email Input */}
               <div className="space-y-3">
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full"
-                />
-                
-                <Button 
-                  onClick={submitWaitlist} 
-                  disabled={isSubmitting || !email.trim()}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white"
-                  size="lg"
-                >
-                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                <Input type="email" placeholder="Enter your email" className="w-full" />
+                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
+                  Join Waitlist
                 </Button>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Additional Info */}
-              {cohort && (
-                <div className="text-center pt-4 border-t">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    <strong>Duration:</strong> 8 weeks intensive program
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    <strong>Next Cohort:</strong> {new Date(cohort.start_date).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Spots Available:</strong> {cohort.max_students - cohort.current_enrollments}/{cohort.max_students}
-                  </p>
+          {/* Course 2: Advanced Python for GIS Automation */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-background to-secondary/5 border-2">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-300">
+                  <span className="text-sm">🔒</span>
+                  <span className="text-sm font-medium">COMING SOON</span>
                 </div>
-              )}
+                <div className="text-sm text-muted-foreground">October 2025</div>
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Code className="h-6 w-6 text-primary" />
+                </div>
+                <Badge className="bg-red-100 text-red-800 border-red-300" variant="outline">
+                  Advanced
+                </Badge>
+              </div>
+
+              <CardTitle className="text-xl mb-3">Advanced Python for GIS Automation</CardTitle>
+              <CardDescription className="text-sm mb-6">
+                Master Python scripting for complex geospatial workflows, including ArcPy, GDAL, and custom tool development.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="font-semibold mb-3">What you'll learn:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">ArcPy Mastery</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">GDAL/OGR Deep Dive</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Custom Tool Development</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Workflow Automation</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Input type="email" placeholder="Enter your email" className="w-full" />
+                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
+                  Notify Me
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Course 3: Drone Mapping & Photogrammetry */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-background to-secondary/5 border-2">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-300">
+                  <span className="text-sm">🔒</span>
+                  <span className="text-sm font-medium">COMING SOON</span>
+                </div>
+                <div className="text-sm text-muted-foreground">December 2025</div>
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300" variant="outline">
+                  Intermediate
+                </Badge>
+              </div>
+
+              <CardTitle className="text-xl mb-3">Drone Mapping & Photogrammetry</CardTitle>
+              <CardDescription className="text-sm mb-6">
+                Learn to process drone imagery, create orthomosaics, and generate 3D models for various applications.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="font-semibold mb-3">What you'll learn:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Flight Planning</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Image Processing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">3D Modeling</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Precision Agriculture</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Input type="email" placeholder="Enter your email" className="w-full" />
+                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
+                  Notify Me
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Course 4: GIS Data Science & Machine Learning */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-background to-secondary/5 border-2">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-300">
+                  <span className="text-sm">🔒</span>
+                  <span className="text-sm font-medium">COMING SOON</span>
+                </div>
+                <div className="text-sm text-muted-foreground">January 2025</div>
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-primary" />
+                </div>
+                <Badge className="bg-red-100 text-red-800 border-red-300" variant="outline">
+                  Advanced
+                </Badge>
+              </div>
+
+              <CardTitle className="text-xl mb-3">GIS Data Science & Machine Learning</CardTitle>
+              <CardDescription className="text-sm mb-6">
+                Apply machine learning techniques to geospatial data for predictive modeling and pattern recognition.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="font-semibold mb-3">What you'll learn:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Spatial Statistics</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">ML Algorithms</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Predictive Modeling</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Big Data Processing</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Input type="email" placeholder="Enter your email" className="w-full" />
+                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
+                  Notify Me
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
