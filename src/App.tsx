@@ -65,6 +65,11 @@ import SpatialRiskAnalysis from "./pages/SpatialRiskAnalysis";
 import DeveloperPortal from "./pages/DeveloperPortal";
 import EnterpriseDashboard from "./pages/EnterpriseDashboard";
 import UpcomingCourse from "./pages/UpcomingCourse";
+import SkillRoadmap from "./pages/SkillRoadmap";
+import ProjectsGallery from "./pages/ProjectsGallery";
+import Leaderboard from "./pages/Leaderboard";
+import JobBoard from "./pages/JobBoard";
+import CompanyDashboard from "./pages/CompanyDashboard";
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 
@@ -92,7 +97,12 @@ function App() {
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/newsletter" element={<Newsletter />} />
-                  <Route path="/upcoming-course" element={<UpcomingCourse />} />
+          <Route path="/upcoming-course" element={<UpcomingCourse />} />
+          <Route path="/skill-roadmap" element={<SkillRoadmap />} />
+          <Route path="/projects-gallery" element={<ProjectsGallery />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/jobs" element={<JobBoard />} />
+          <Route path="/for-companies" element={<CompanyDashboard />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />

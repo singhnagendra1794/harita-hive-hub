@@ -253,6 +253,76 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_submissions: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          description: string
+          id: string
+          submission_link: string
+          updated_at: string
+          user_id: string
+          votes: number | null
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          description: string
+          id?: string
+          submission_link: string
+          updated_at?: string
+          user_id: string
+          votes?: number | null
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          submission_link?: string
+          updated_at?: string
+          user_id?: string
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_votes: {
+        Row: {
+          created_at: string
+          id: string
+          submission_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          submission_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          submission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_votes_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_enrollments: {
         Row: {
           class_date: string
@@ -316,6 +386,48 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      company_profiles: {
+        Row: {
+          account_status: string | null
+          company_name: string
+          company_size: string | null
+          created_at: string
+          description: string | null
+          id: string
+          industry: string | null
+          logo_url: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          account_status?: string | null
+          company_name: string
+          company_size?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          account_status?: string | null
+          company_name?: string
+          company_size?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -1132,6 +1244,114 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_invitations: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          interview_date: string | null
+          job_id: string | null
+          message: string | null
+          status: string | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          interview_date?: string | null
+          job_id?: string | null
+          message?: string | null
+          status?: string | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          interview_date?: string | null
+          job_id?: string | null
+          message?: string | null
+          status?: string | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_invitations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_listings: {
+        Row: {
+          apply_url: string
+          company: string
+          created_at: string
+          description: string
+          experience_level: string | null
+          expires_at: string | null
+          id: string
+          job_type: string | null
+          location: string | null
+          posted_by: string | null
+          requirements: string | null
+          salary_range: string | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          apply_url: string
+          company: string
+          created_at?: string
+          description: string
+          experience_level?: string | null
+          expires_at?: string | null
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          posted_by?: string | null
+          requirements?: string | null
+          salary_range?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          apply_url?: string
+          company?: string
+          created_at?: string
+          description?: string
+          experience_level?: string | null
+          expires_at?: string | null
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          posted_by?: string | null
+          requirements?: string | null
+          salary_range?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_postings: {
         Row: {
           company_id: string
@@ -1681,6 +1901,54 @@ export type Database = {
           },
         ]
       }
+      project_templates: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          difficulty_level: string | null
+          download_count: number | null
+          id: string
+          is_featured: boolean | null
+          preview_url: string | null
+          resource_url: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          difficulty_level?: string | null
+          download_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          preview_url?: string | null
+          resource_url?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          difficulty_level?: string | null
+          download_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          preview_url?: string | null
+          resource_url?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saved_content: {
         Row: {
           collection_name: string | null
@@ -1741,6 +2009,54 @@ export type Database = {
           tags?: string[] | null
           title?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      student_portfolios: {
+        Row: {
+          achievements: Json | null
+          availability: string | null
+          bio: string | null
+          created_at: string
+          github_url: string | null
+          id: string
+          linkedin_url: string | null
+          portfolio_url: string | null
+          projects: Json | null
+          resume_url: string | null
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements?: Json | null
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          portfolio_url?: string | null
+          projects?: Json | null
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements?: Json | null
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          portfolio_url?: string | null
+          projects?: Json | null
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2168,6 +2484,42 @@ export type Database = {
           },
         ]
       }
+      user_learning_roadmaps: {
+        Row: {
+          career_goal: string
+          created_at: string
+          field_of_interest: string
+          id: string
+          input_data: Json
+          roadmap_json: Json
+          skill_level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          career_goal: string
+          created_at?: string
+          field_of_interest: string
+          id?: string
+          input_data?: Json
+          roadmap_json?: Json
+          skill_level: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          career_goal?: string
+          created_at?: string
+          field_of_interest?: string
+          id?: string
+          input_data?: Json
+          roadmap_json?: Json
+          skill_level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_onboarding: {
         Row: {
           completed_at: string | null
@@ -2456,6 +2808,45 @@ export type Database = {
           storage_url?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      weekly_challenges: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          end_date: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          end_date: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          end_date?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          start_date?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
