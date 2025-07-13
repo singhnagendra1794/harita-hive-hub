@@ -108,10 +108,9 @@ const ProjectsGallery = () => {
 
     try {
       // Update download count
-      await supabase
-        .from('project_templates')
-        .update({ download_count: supabase.raw('download_count + 1') })
-        .eq('id', projectId);
+      await supabase.rpc('increment_download_count', { 
+        template_id: projectId 
+      });
 
       // Open download link
       window.open(resourceUrl, '_blank');
