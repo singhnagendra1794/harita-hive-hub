@@ -11,7 +11,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 // Initialize pdfMake with fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+pdfMake.vfs = pdfFonts.vfs;
 
 interface CertificateData {
   id: string;
