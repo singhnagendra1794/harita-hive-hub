@@ -11,6 +11,7 @@ import SubscriptionRoute from "@/components/SubscriptionRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
 import NotificationWrapper from "@/components/NotificationWrapper";
+import AILearningAssistant from "@/components/ai/AILearningAssistant";
 
 // Page imports
 import Index from "./pages/Index";
@@ -63,6 +64,9 @@ import ComplianceToolkit from "./pages/ComplianceToolkit";
 import SpatialRiskAnalysis from "./pages/SpatialRiskAnalysis";
 import DeveloperPortal from "./pages/DeveloperPortal";
 import EnterpriseDashboard from "./pages/EnterpriseDashboard";
+import UpcomingCourse from "./pages/UpcomingCourse";
+import FAQ from "./pages/FAQ";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +92,9 @@ function App() {
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/newsletter" element={<Newsletter />} />
+                  <Route path="/upcoming-course" element={<UpcomingCourse />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
@@ -271,10 +278,13 @@ function App() {
                        <EnterpriseDashboard />
                      </SubscriptionRoute>
                    } />
-                   
-                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+                    
+                    <Route path="*" element={<NotFound />} />
+                 </Routes>
+                 
+                 {/* AI Learning Assistant - Available on all pages */}
+                 <AILearningAssistant />
+               </BrowserRouter>
             </TooltipProvider>
           </ChatbotProvider>
           </NotificationWrapper>

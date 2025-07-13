@@ -494,6 +494,45 @@ export type Database = {
           },
         ]
       }
+      course_cohorts: {
+        Row: {
+          created_at: string
+          current_enrollments: number | null
+          end_date: string | null
+          enrollment_deadline: string | null
+          id: string
+          max_students: number | null
+          name: string
+          price: number | null
+          start_date: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_enrollments?: number | null
+          end_date?: string | null
+          enrollment_deadline?: string | null
+          id?: string
+          max_students?: number | null
+          name: string
+          price?: number | null
+          start_date: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_enrollments?: number | null
+          end_date?: string | null
+          enrollment_deadline?: string | null
+          id?: string
+          max_students?: number | null
+          name?: string
+          price?: number | null
+          start_date?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           completed_at: string | null
@@ -1825,6 +1864,84 @@ export type Database = {
           price?: number | null
           syllabus?: Json | null
           title?: string
+        }
+        Relationships: []
+      }
+      upcoming_course_schedule: {
+        Row: {
+          created_at: string
+          day: number
+          description: string | null
+          estimated_duration: string | null
+          id: string
+          is_active: boolean | null
+          learning_goal: string | null
+          phase: string
+          topic: string
+          updated_at: string
+          week: number
+        }
+        Insert: {
+          created_at?: string
+          day: number
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          is_active?: boolean | null
+          learning_goal?: string | null
+          phase: string
+          topic: string
+          updated_at?: string
+          week: number
+        }
+        Update: {
+          created_at?: string
+          day?: number
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          is_active?: boolean | null
+          learning_goal?: string | null
+          phase?: string
+          topic?: string
+          updated_at?: string
+          week?: number
+        }
+        Relationships: []
+      }
+      upcoming_course_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          experience_level: string | null
+          full_name: string | null
+          id: string
+          motivation: string | null
+          notified: boolean | null
+          phone: string | null
+          referral_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string
+          motivation?: string | null
+          notified?: boolean | null
+          phone?: string | null
+          referral_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string
+          motivation?: string | null
+          notified?: boolean | null
+          phone?: string | null
+          referral_source?: string | null
         }
         Relationships: []
       }

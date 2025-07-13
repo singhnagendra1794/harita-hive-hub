@@ -116,6 +116,10 @@ const Navbar = () => {
               <Button variant="ghost">Community</Button>
             </Link>
 
+            <Link to="/upcoming-course">
+              <Button variant="ghost">Upcoming Course</Button>
+            </Link>
+
             <Link to="/pricing">
               <Button variant="ghost">Pricing</Button>
             </Link>
@@ -231,6 +235,14 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Community
+              </Link>
+
+              <Link
+                to="/upcoming-course"
+                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Upcoming Course
               </Link>
 
               <Link
