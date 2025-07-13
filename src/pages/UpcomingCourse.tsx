@@ -272,201 +272,151 @@ const UpcomingCourse: React.FC = () => {
           )}
         </div>
 
-        {/* Program Overview */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Program Duration
+        {/* Course Card - Matching the image format */}
+        <div className="max-w-md mx-auto">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-background to-secondary/5 border-2">
+            <CardHeader className="pb-4">
+              {/* Coming Soon Badge */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-300">
+                  <span className="text-sm">🔒</span>
+                  <span className="text-sm font-medium">COMING SOON</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  August 2025
+                </div>
+              </div>
+
+              {/* Course Icon and Level */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <Badge className="bg-red-100 text-red-800 border-red-300" variant="outline">
+                  Advanced
+                </Badge>
+              </div>
+
+              {/* Course Title */}
+              <CardTitle className="text-2xl mb-3">
+                GeoAI Mastery Program
               </CardTitle>
+
+              {/* Course Description */}
+              <CardDescription className="text-base mb-6">
+                Master the intersection of AI and geospatial technology. Learn to build intelligent mapping solutions, 
+                process satellite imagery with deep learning, and create automated GIS workflows that transform how we understand our world.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold mb-2">8 Weeks</p>
-              <p className="text-muted-foreground">
-                Intensive hands-on learning with real-world projects and industry mentorship
-              </p>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Time Commitment
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold mb-2">3-6 hours/day</p>
-              <p className="text-muted-foreground">
-                Flexible schedule with live sessions, recorded content, and self-paced learning
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Learning Phases */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Learning Journey</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(phaseDescriptions).map(([phase, description], index) => (
-              <Card key={phase} className="relative">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getPhaseColor(phase)} variant="outline">
-                      <div className="flex items-center gap-1">
-                        {getPhaseIcon(phase)}
-                        <span className="capitalize">{phase}</span>
-                      </div>
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Week{phase === 'fundamentals' ? 's 1-2' : 
-                           phase === 'ml' ? 's 3-4' :
-                           phase === 'geoai' ? 's 5-6' : 's 7-8'}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">{description}</p>
-                </CardContent>
-                {index < 3 && (
-                  <ArrowRight className="absolute -right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hidden lg:block" />
-                )}
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Detailed Schedule */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Detailed Course Schedule</h2>
-          <div className="space-y-8">
-            {Object.entries(groupedSchedule).map(([phase, items]) => (
-              <div key={phase}>
-                <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-                  {getPhaseIcon(phase)}
-                  <span className="capitalize">{phase} Phase</span>
-                  <Badge className={getPhaseColor(phase)} variant="outline">
-                    {items.length} sessions
-                  </Badge>
-                </h3>
-                <div className="grid gap-4">
-                  {items.map((item) => (
-                    <Card key={item.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="secondary">Day {item.day}</Badge>
-                            <Badge variant="outline">Week {item.week}</Badge>
-                          </div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {item.estimated_duration}
-                          </div>
-                        </div>
-                        <h4 className="text-lg font-semibold mb-2">{item.topic}</h4>
-                        <p className="text-muted-foreground mb-3">{item.description}</p>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Target className="h-4 w-4 text-primary" />
-                          <span className="font-medium">Goal:</span>
-                          <span>{item.learning_goal}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Waitlist Form */}
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Join the Waitlist</CardTitle>
-            <CardDescription className="text-center">
-              Be the first to know when enrollment opens for the next cohort
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={submitWaitlist} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Email Address *
-                  </label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Full Name
-                  </label>
-                  <Input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Your full name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Phone Number
-                  </label>
-                  <Input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Experience Level
-                  </label>
-                  <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
+            <CardContent className="space-y-6">
+              {/* What you'll learn */}
               <div>
-                <label className="text-sm font-medium mb-2 block">
-                  What motivates you to learn GeoAI?
-                </label>
-                <Textarea
-                  value={motivation}
-                  onChange={(e) => setMotivation(e.target.value)}
-                  placeholder="Tell us about your goals and what you hope to achieve..."
-                  rows={3}
-                />
+                <h4 className="font-semibold text-lg mb-4">What you'll learn:</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Advanced GeoAI & Machine Learning</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Deep Learning for Satellite Imagery</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Automated Spatial Analysis</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Production-Ready Web GIS Apps</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Enterprise AI Deployment</span>
+                  </div>
+                </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isSubmitting}
-                size="lg"
-              >
-                {isSubmitting ? 'Joining...' : 'Join Waitlist'}
-                <CheckCircle className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              {/* Email Input */}
+              <div className="space-y-3">
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full"
+                />
+                
+                <Button 
+                  onClick={submitWaitlist} 
+                  disabled={isSubmitting || !email.trim()}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+                  size="lg"
+                >
+                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                </Button>
+              </div>
+
+              {/* Additional Info */}
+              {cohort && (
+                <div className="text-center pt-4 border-t">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    <strong>Duration:</strong> 8 weeks intensive program
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    <strong>Next Cohort:</strong> {new Date(cohort.start_date).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Spots Available:</strong> {cohort.max_students - cohort.current_enrollments}/{cohort.max_students}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Details Section */}
+        <div className="mt-16 max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Program Overview</h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <BookOpen className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">Fundamentals</h3>
+                <p className="text-sm text-muted-foreground">GIS, Python & Spatial Thinking</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <Brain className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">Machine Learning</h3>
+                <p className="text-sm text-muted-foreground">ML for Geospatial Data</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <Target className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                <h3 className="font-semibent mb-2">Advanced GeoAI</h3>
+                <p className="text-sm text-muted-foreground">Deep Learning & Computer Vision</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <Users className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">Web GIS</h3>
+                <p className="text-sm text-muted-foreground">Deploy & Scale Applications</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
