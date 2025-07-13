@@ -292,6 +292,13 @@ export type Database = {
             referencedRelation: "weekly_challenges"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "challenge_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       challenge_votes: {
@@ -2058,7 +2065,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "student_portfolios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -2919,6 +2934,10 @@ export type Database = {
       hnswhandler: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      increment_download_count: {
+        Args: { template_id: string }
+        Returns: undefined
       }
       invalidate_previous_sessions: {
         Args: { p_user_id: string; p_new_session_token: string }

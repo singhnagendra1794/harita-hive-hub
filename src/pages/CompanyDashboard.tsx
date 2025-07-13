@@ -60,7 +60,7 @@ const CompanyDashboard = () => {
         .from('student_portfolios')
         .select(`
           *,
-          profiles:user_id (
+          profiles (
             full_name
           )
         `);
@@ -72,7 +72,7 @@ const CompanyDashboard = () => {
         .from('challenge_submissions')
         .select(`
           *,
-          profiles:user_id (
+          profiles (
             full_name
           )
         `)
@@ -81,8 +81,18 @@ const CompanyDashboard = () => {
 
       if (leaderboardError) throw leaderboardError;
 
-      setStudents(studentData || []);
-      setLeaderboard(leaderboardData || []);
+      const studentsWithProfiles = (studentData || []).map(student => ({
+        ...student,
+        profiles: student.profiles || { full_name: 'Anonymous' }
+      }));
+
+      const leaderboardWithProfiles = (leaderboardData || []).map(entry => ({
+        ...entry,
+        profiles: entry.profiles || { full_name: 'Anonymous' }
+      }));
+
+      setStudents(studentsWithProfiles);
+      setLeaderboard(leaderboardWithProfiles);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({

@@ -89,12 +89,17 @@ const Leaderboard = () => {
         .from('challenge_submissions')
         .select(`
           *,
-          profiles:user_id (full_name)
+          profiles (full_name)
         `)
         .eq('challenge_id', currentChallenge.id)
         .order('votes', { ascending: false });
 
       if (error) throw error;
+
+      const submissionsWithProfiles = (data || []).map(submission => ({
+        ...submission,
+        profiles: submission.profiles || { full_name: 'Anonymous' }
+      }));
 
       // Check if current user has voted for each submission
       if (user) {
@@ -105,16 +110,16 @@ const Leaderboard = () => {
 
         if (!votesError && votes) {
           const votedSubmissionIds = new Set(votes.map(v => v.submission_id));
-          const submissionsWithVoteStatus = (data || []).map(sub => ({
+          const submissionsWithVoteStatus = submissionsWithProfiles.map(sub => ({
             ...sub,
             hasVoted: votedSubmissionIds.has(sub.id)
           }));
           setSubmissions(submissionsWithVoteStatus);
         } else {
-          setSubmissions(data || []);
+          setSubmissions(submissionsWithProfiles);
         }
       } else {
-        setSubmissions(data || []);
+        setSubmissions(submissionsWithProfiles);
       }
     } catch (error: any) {
       console.error('Error fetching submissions:', error);
