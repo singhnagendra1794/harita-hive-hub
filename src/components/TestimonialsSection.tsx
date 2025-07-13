@@ -1,51 +1,50 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Star, Quote } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Testimonial {
   id: string;
   name: string;
-  role: string;
+  title: string;
   company: string;
-  content: string;
+  testimonial: string;
   rating: number;
-  avatar?: string;
+  avatar_url?: string;
+  is_featured: boolean;
+  created_at: string;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    role: 'GIS Analyst',
-    company: 'Urban Planning Solutions',
-    content: 'HaritaHive transformed how I approach geospatial analysis. The interactive tutorials and real-world projects gave me confidence to tackle complex mapping challenges at work.',
-    rating: 5,
-    avatar: 'SC'
-  },
-  {
-    id: '2',
-    name: 'Michael Rodriguez',
-    role: 'Environmental Scientist',
-    company: 'EcoTech Research',
-    content: 'The community aspect is incredible. I\'ve connected with experts who\'ve helped me solve problems I was stuck on for weeks. The code snippets library is a game-changer!',
-    rating: 5,
-    avatar: 'MR'
-  },
-  {
-    id: '3',
-    name: 'Dr. Priya Patel',
-    role: 'Remote Sensing Researcher',
-    company: 'Space Research Institute',
-    content: 'As someone transitioning from traditional GIS to modern web-based solutions, HaritaHive provided exactly what I needed. The learning path is well-structured and practical.',
-    rating: 5,
-    avatar: 'PP'
-  }
-];
-
 const TestimonialsSection: React.FC = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('is_featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      setTestimonials(data || []);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -56,6 +55,49 @@ const TestimonialsSection: React.FC = () => {
       />
     ));
   };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4">
+              What Our Community Says
+            </Badge>
+            <h2 className="text-4xl font-bold mb-4">Trusted by GIS Professionals</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of professionals who are advancing their geospatial careers with HaritaHive
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-4 bg-muted rounded w-1/3 mb-4"></div>
+                  <div className="space-y-2 mb-6">
+                    <div className="h-4 bg-muted rounded"></div>
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-muted rounded-full mr-3"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted rounded w-24"></div>
+                      <div className="h-3 bg-muted rounded w-32"></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-20 bg-muted/30">
@@ -82,19 +124,22 @@ const TestimonialsSection: React.FC = () => {
                     </div>
                     
                     <p className="text-muted-foreground mb-4 leading-relaxed">
-                      "{testimonial.content}"
+                      "{testimonial.testimonial}"
                     </p>
                     
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
+                        {testimonial.avatar_url ? (
+                          <AvatarImage src={testimonial.avatar_url} alt={testimonial.name} />
+                        ) : null}
                         <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {testimonial.avatar}
+                          {testimonial.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-semibold text-sm">{testimonial.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {testimonial.role} at {testimonial.company}
+                          {testimonial.title} at {testimonial.company}
                         </p>
                       </div>
                     </div>

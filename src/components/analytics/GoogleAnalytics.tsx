@@ -11,11 +11,34 @@ interface GoogleAnalyticsProps {
   trackingId?: string;
 }
 
-const GoogleAnalytics: React.FC<GoogleAnalyticsProps> = ({ trackingId }) => {
+const GoogleAnalytics: React.FC<GoogleAnalyticsProps> = ({ trackingId: providedTrackingId }) => {
   const location = useLocation();
+  const [trackingId, setTrackingId] = useState<string | null>(providedTrackingId || null);
 
   useEffect(() => {
-    // Only load if tracking ID is provided
+    // Fetch GA tracking ID from Supabase secrets if not provided
+    const fetchTrackingId = async () => {
+      if (providedTrackingId) {
+        setTrackingId(providedTrackingId);
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/get-ga-tracking-id');
+        if (response.ok) {
+          const data = await response.json();
+          setTrackingId(data.trackingId);
+        }
+      } catch (error) {
+        console.warn('Could not fetch GA tracking ID:', error);
+      }
+    };
+
+    fetchTrackingId();
+  }, [providedTrackingId]);
+
+  useEffect(() => {
+    // Only load if tracking ID is available
     if (!trackingId) return;
 
     // Load Google Analytics script

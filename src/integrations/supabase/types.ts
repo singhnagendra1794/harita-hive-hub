@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_sections: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          order_index: number | null
+          section_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          order_index?: number | null
+          section_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          order_index?: number | null
+          section_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automated_tasks: {
         Row: {
           config: Json | null
@@ -141,6 +177,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      certificates: {
+        Row: {
+          certificate_hash: string
+          certificate_type: string
+          completion_date: string
+          course_id: string | null
+          course_name: string
+          id: string
+          is_valid: boolean | null
+          issued_at: string
+          learning_path_id: string | null
+          student_name: string
+          user_id: string
+        }
+        Insert: {
+          certificate_hash: string
+          certificate_type: string
+          completion_date: string
+          course_id?: string | null
+          course_name: string
+          id?: string
+          is_valid?: boolean | null
+          issued_at?: string
+          learning_path_id?: string | null
+          student_name: string
+          user_id: string
+        }
+        Update: {
+          certificate_hash?: string
+          certificate_type?: string
+          completion_date?: string
+          course_id?: string | null
+          course_name?: string
+          id?: string
+          is_valid?: boolean | null
+          issued_at?: string
+          learning_path_id?: string | null
+          student_name?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       certifications: {
         Row: {
@@ -748,6 +826,39 @@ export type Database = {
           template_type?: string
           text_content?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      faqs: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          order_index: number | null
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+          question?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1636,6 +1747,48 @@ export type Database = {
           status?: string | null
           transaction_id?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          company: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          rating: number | null
+          testimonial: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          rating?: number | null
+          testimonial: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          rating?: number | null
+          testimonial?: string
+          title?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
