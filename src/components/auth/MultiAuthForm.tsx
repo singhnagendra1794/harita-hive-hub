@@ -18,22 +18,7 @@ interface MultiAuthFormProps {
   onToggleMode: () => void;
 }
 
-// Cleanup function for auth state
-const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-') || key === 'session_token') {
-      localStorage.removeItem(key);
-    }
-  });
-  
-  if (typeof sessionStorage !== 'undefined') {
-    Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  }
-};
+// Remove manual session token management - let Supabase handle it
 
 export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode }) => {
   const [loading, setLoading] = useState(false);
@@ -54,24 +39,15 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
     }
   }, [user, navigate]);
 
-  // Generate unique session token
-  const generateSessionToken = () => {
-    return crypto.randomUUID() + '-' + Date.now();
-  };
-
-  // Handle session management
-  const handleSessionManagement = async (user: any) => {
-    try {
-      toast({
-        title: "Welcome!",
-        description: "You have successfully signed in.",
-      });
-      
-      // Simple redirect without session token management
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Session management failed:', error);
-    }
+  // Handle post-auth success
+  const handleAuthSuccess = (user: any, isSignup: boolean = false) => {
+    toast({
+      title: isSignup ? "Account Created!" : "Welcome Back!",
+      description: isSignup ? "Please check your email to verify your account." : "You have successfully signed in.",
+    });
+    
+    // Let the AuthContext handle the redirect via useEffect
+    // Don't manually navigate here to avoid conflicts
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -100,13 +76,15 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       if (result.error) throw result.error;
 
       if (result.data.user) {
-        if (mode === 'signup' && !result.data.user.email_confirmed_at) {
+        if (mode === 'signup') {
+          // For signup, always show email confirmation message
           toast({
             title: "Check your email!",
-            description: "We've sent you a confirmation link. If you don't see it, check your spam folder.",
+            description: "We've sent you a confirmation link. Please check your email to complete registration.",
           });
         } else {
-          await handleSessionManagement(result.data.user);
+          // For signin, let AuthContext handle the redirect
+          handleAuthSuccess(result.data.user, false);
         }
       }
     } catch (error: any) {
@@ -154,7 +132,6 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       if (error) throw error;
 
       setOtpSent(true);
-      setOtpSent(true);
       toast({
         title: "OTP Sent!",
         description: "Please check your phone for the verification code.",
@@ -195,7 +172,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       if (error) throw error;
 
       if (data.user) {
-        await handleSessionManagement(data.user);
+        handleAuthSuccess(data.user, false);
       }
     } catch (error: any) {
       console.error('OTP verification error:', error);
