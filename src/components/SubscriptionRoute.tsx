@@ -19,72 +19,22 @@ const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({
 }) => {
   const { user, session, loading: authLoading } = useAuth();
   const { hasAccess, loading: subscriptionLoading, subscription } = usePremiumAccess();
-  const [isValidating, setIsValidating] = useState(true);
-  const [isSessionValid, setIsSessionValid] = useState(false);
+  // Simplified - rely on AuthContext and ProtectedRoute for session validation
 
-  useEffect(() => {
-    const validateSession = async () => {
-      if (authLoading || subscriptionLoading) return;
-      
-      if (!user || !session) {
-        setIsSessionValid(false);
-        setIsValidating(false);
-        return;
-      }
-
-      try {
-        // Validate the session with Supabase
-        const { data: { user: currentUser }, error } = await supabase.auth.getUser();
-        
-        if (error || !currentUser) {
-          console.log('Session validation failed in SubscriptionRoute:', error?.message || 'No user found');
-          toast({
-            title: "Session Invalid",
-            description: "Your session is no longer valid. Please login again.",
-            variant: "destructive",
-          });
-          setIsSessionValid(false);
-        } else if (session.expires_at && session.expires_at * 1000 < Date.now()) {
-          console.log('Session expired in SubscriptionRoute');
-          toast({
-            title: "Session Expired",
-            description: "Your session has expired. Please login again.",
-            variant: "destructive",
-          });
-          setIsSessionValid(false);
-        } else {
-          setIsSessionValid(true);
-        }
-      } catch (error) {
-        console.error('Error validating session in SubscriptionRoute:', error);
-        toast({
-          title: "Authentication Error",
-          description: "There was an error validating your session. Please login again.",
-          variant: "destructive",
-        });
-        setIsSessionValid(false);
-      } finally {
-        setIsValidating(false);
-      }
-    };
-
-    validateSession();
-  }, [user, session, authLoading, subscriptionLoading]);
-
-  if (authLoading || subscriptionLoading || isValidating) {
+  if (authLoading || subscriptionLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">
-            {authLoading || isValidating ? "Validating session..." : "Loading subscription details..."}
+            {authLoading ? "Loading user data..." : "Loading subscription details..."}
           </p>
         </div>
       </div>
     );
   }
 
-  if (!user || !session || !isSessionValid) {
+  if (!user || !session) {
     return <Navigate to="/auth" replace />;
   }
 
