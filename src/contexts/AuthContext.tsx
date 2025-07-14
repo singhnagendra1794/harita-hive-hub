@@ -87,9 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Handle different auth events
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in successfully');
-          // Generate and store session token for single-session management
-          const sessionToken = crypto.randomUUID() + '-' + Date.now();
-          localStorage.setItem('session_token', sessionToken);
           
           // Set up auto-refresh timer
           if (session.expires_at) {
@@ -119,17 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
           
-          // Defer session management to prevent deadlocks
-          setTimeout(() => {
-            supabase.rpc('invalidate_previous_sessions', {
-              p_user_id: session.user.id,
-              p_new_session_token: sessionToken
-            }).then(({ error }) => {
-              if (error) {
-                console.error('Session management error:', error);
-              }
-            });
-          }, 0);
+          console.log('Session setup completed');
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
           cleanupAuthState();

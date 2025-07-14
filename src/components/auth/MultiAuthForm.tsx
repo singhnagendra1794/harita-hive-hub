@@ -62,30 +62,13 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   // Handle session management
   const handleSessionManagement = async (user: any) => {
     try {
-      const sessionToken = generateSessionToken();
-      
-      // Store session token in localStorage for validation
-      localStorage.setItem('session_token', sessionToken);
-      
-      // Invalidate previous sessions and create new one
-      setTimeout(() => {
-        supabase.rpc('invalidate_previous_sessions', {
-          p_user_id: user.id,
-          p_new_session_token: sessionToken
-        }).then(({ error }) => {
-          if (error) {
-            console.error('Session management error:', error);
-          }
-        });
-      }, 0);
-      
       toast({
         title: "Welcome!",
         description: "You have successfully signed in.",
       });
       
-      // Use window.location for full page refresh to ensure clean state
-      window.location.href = '/dashboard';
+      // Simple redirect without session token management
+      navigate('/dashboard');
     } catch (error) {
       console.error('Session management failed:', error);
     }
