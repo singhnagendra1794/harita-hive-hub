@@ -2031,6 +2031,65 @@ export type Database = {
         }
         Relationships: []
       }
+      sharing_analytics: {
+        Row: {
+          content_id: string
+          content_type: string
+          id: string
+          metadata: Json | null
+          platform: string
+          shared_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          id?: string
+          metadata?: Json | null
+          platform: string
+          shared_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          id?: string
+          metadata?: Json | null
+          platform?: string
+          shared_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      showcase_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          showcase_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          showcase_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          showcase_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_likes_showcase_id_fkey"
+            columns: ["showcase_id"]
+            isOneToOne: false
+            referencedRelation: "tool_showcases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stream_sessions: {
         Row: {
           created_at: string | null
@@ -2221,6 +2280,54 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_showcases: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          likes_count: number | null
+          project_url: string | null
+          screenshot_url: string | null
+          tags: string[] | null
+          title: string
+          tool_id: string
+          updated_at: string | null
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          project_url?: string | null
+          screenshot_url?: string | null
+          tags?: string[] | null
+          title: string
+          tool_id: string
+          updated_at?: string | null
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          project_url?: string | null
+          screenshot_url?: string | null
+          tags?: string[] | null
+          title?: string
+          tool_id?: string
+          updated_at?: string | null
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       training_modules: {
         Row: {
           category: string | null
@@ -2332,6 +2439,39 @@ export type Database = {
           notified?: boolean | null
           phone?: string | null
           referral_source?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at: string | null
+          icon_url: string | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at?: string | null
+          icon_url?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_name?: string
+          achievement_type?: string
+          earned_at?: string | null
+          icon_url?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2469,6 +2609,27 @@ export type Database = {
           total_time_spent?: number | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_followers: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
         }
         Relationships: []
       }
@@ -2657,6 +2818,72 @@ export type Database = {
           preferred_topics?: string[] | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          badge_count: number | null
+          bio: string | null
+          courses_completed: number | null
+          created_at: string | null
+          display_name: string | null
+          follower_count: number | null
+          following_count: number | null
+          github_url: string | null
+          id: string
+          linkedin_url: string | null
+          location: string | null
+          public_profile: boolean | null
+          tools_contributed: number | null
+          twitter_url: string | null
+          updated_at: string | null
+          user_id: string
+          username: string
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_count?: number | null
+          bio?: string | null
+          courses_completed?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          public_profile?: boolean | null
+          tools_contributed?: number | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          user_id: string
+          username: string
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_count?: number | null
+          bio?: string | null
+          courses_completed?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          public_profile?: boolean | null
+          tools_contributed?: number | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string
+          website?: string | null
         }
         Relationships: []
       }
