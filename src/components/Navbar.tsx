@@ -23,7 +23,7 @@ const Navbar = () => {
   };
 
   const learningLinks = [
-    { href: "/learn", label: "Browse Courses" },
+    { href: "/browse-courses", label: "Browse Courses" },
     { href: "/project-templates", label: "Project Templates" },
     { href: "/code-snippets", label: "Code Library" },
     { href: "/live-classes", label: "Live Classes" },

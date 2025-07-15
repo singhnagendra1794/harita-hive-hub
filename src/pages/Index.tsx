@@ -83,7 +83,7 @@ const Index = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <Link to="/learn">
+          <Link to="/browse-courses">
             <Button variant="outline" size="lg" className="min-w-[200px]">
               Browse Courses
             </Button>

@@ -118,7 +118,7 @@ const ChoosePlan: React.FC = () => {
                 <CardTitle className="text-xl">Professional</CardTitle>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-bold">$50<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                <div className="text-3xl font-bold">$49<span className="text-lg text-muted-foreground font-normal">/month</span></div>
                 <div className="text-xl font-semibold text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
               </div>
               <CardDescription>For serious GIS professionals</CardDescription>
@@ -158,7 +158,7 @@ const ChoosePlan: React.FC = () => {
             <CardFooter>
               <Button 
                 className="w-full"
-                onClick={() => handlePayment("Professional Plan", 50, 3999, [
+                onClick={() => handlePayment("Professional Plan", 49, 3999, [
                   "Full access to Learn section",
                   "QGIS Project integration", 
                   "Basic Geo-Dashboard features",
