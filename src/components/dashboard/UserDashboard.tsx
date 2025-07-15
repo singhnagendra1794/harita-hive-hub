@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 // Removed useSessionValidation to avoid conflicts with Supabase auth
 import LiveClassBanner from "./LiveClassBanner";
-import { ArrowRight, Crown, Zap, Lock, Loader2 } from "lucide-react";
+import { ArrowRight, Crown, Zap, Lock, Loader2, Shield } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 
 interface Stat {
@@ -19,6 +20,7 @@ interface Stat {
 
 const UserDashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
   const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder, loading: premiumLoading } = usePremiumAccess();
   // Simplified - rely on AuthContext for session validation
   const [activeTab, setActiveTab] = useState("quick-actions");
@@ -64,13 +66,13 @@ const UserDashboard = () => {
   ];
 
   // Show loading state while validating session
-  if (authLoading || premiumLoading) {
+  if (authLoading || premiumLoading || rolesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">
-            {authLoading ? "Loading user data..." : "Loading dashboard..."}
+            {authLoading ? "Loading user data..." : rolesLoading ? "Loading user roles..." : "Loading dashboard..."}
           </p>
         </div>
       </div>
@@ -90,7 +92,25 @@ const UserDashboard = () => {
               Continue your geospatial journey and explore new opportunities
             </p>
           </div>
-          {!hasAccess('premium') && (
+          {isSuperAdmin() ? (
+            <Card className="max-w-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Super Admin</p>
+                    <p className="text-xs text-muted-foreground">Full platform access</p>
+                  </div>
+                  <Link to="/admin">
+                    <Button size="sm">
+                      <Shield className="h-3 w-3 mr-1" />
+                      Admin Panel
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ) : !hasAccess('premium') && (
             <Card className="max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -142,9 +162,11 @@ const UserDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
               const isPremiumFeature = action.href === '/learn' || action.href === '/geoai-lab' || action.href === '/webgis-builder';
-              const hasFeatureAccess = action.href === '/learn' ? canAccessLearnSection() :
-                                     action.href === '/geoai-lab' ? canAccessGeoAILab() :
-                                     action.href === '/webgis-builder' ? canAccessWebGISBuilder() : true;
+              // Super admins have access to all features
+              const hasFeatureAccess = isSuperAdmin() || 
+                (action.href === '/learn' ? canAccessLearnSection() :
+                 action.href === '/geoai-lab' ? canAccessGeoAILab() :
+                 action.href === '/webgis-builder' ? canAccessWebGISBuilder() : true);
               
               return (
                 <Card key={index} className={`group hover:shadow-lg transition-all duration-300 ${!hasFeatureAccess ? 'opacity-75' : 'cursor-pointer'}`}>
