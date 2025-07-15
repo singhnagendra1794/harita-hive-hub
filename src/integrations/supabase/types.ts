@@ -2935,14 +2935,14 @@ export type Database = {
       }
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
-        Returns: string
+        Returns: undefined
       }
       generate_referral_code: {
         Args: { user_id: string }
         Returns: string
       }
       generate_stream_key: {
-        Args: Record<PropertyKey, never>
+        Args: { user_id: string }
         Returns: string
       }
       get_top_missing_queries: {
@@ -2979,16 +2979,16 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: {
-        Args: Record<PropertyKey, never>
+        Args: { user_id: string }
         Returns: boolean
       }
       start_stream_session: {
-        Args: { p_live_class_id: string }
-        Returns: Json
+        Args: { user_id: string }
+        Returns: string
       }
       stop_stream_session: {
-        Args: { p_live_class_id: string }
-        Returns: Json
+        Args: { session_id: string }
+        Returns: undefined
       }
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }
