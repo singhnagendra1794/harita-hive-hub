@@ -13,24 +13,77 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
-  console.log('AI Learning Assistant function called');
+// Security: Rate limiting
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(identifier: string, maxRequests = 20, windowMs = 60000): boolean {
+  const now = Date.now();
+  const userLimit = rateLimitMap.get(identifier);
   
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (userLimit.count >= maxRequests) {
+    return false;
+  }
+  
+  userLimit.count++;
+  return true;
+}
+
+function sanitizeError(error: any): string {
+  if (error?.message) {
+    return error.message.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP]')
+                       .replace(/password/gi, '[CREDENTIAL]')
+                       .replace(/token/gi, '[TOKEN]')
+                       .replace(/key/gi, '[KEY]');
+  }
+  return 'An error occurred';
+}
+
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { message, context, userId } = await req.json();
-    console.log('Received message:', message);
+    const clientIP = req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For') || 'unknown';
+    
+    // Security: Rate limiting
+    if (!checkRateLimit(clientIP, 20, 60000)) {
+      return new Response(JSON.stringify({ error: 'Too many requests' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await req.json();
+    const { message, context, userId } = body;
+    
+    // Security: Input validation
+    if (!message || typeof message !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid message parameter' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Security: Limit message length
+    if (message.length > 2000) {
+      return new Response(JSON.stringify({ error: 'Message too long' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!openAIApiKey) {
-      console.error('OpenAI API key not configured');
       return new Response(JSON.stringify({ 
-        error: 'AI service not configured. Please contact support.' 
+        error: 'AI service temporarily unavailable' 
       }), {
-        status: 500,
+        status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -38,14 +91,12 @@ serve(async (req) => {
     // Get course context if available
     let courseContext = '';
     if (context?.courseId) {
-      console.log('Fetching course context for:', context.courseId);
-      
       // Get course details
       const { data: course } = await supabase
         .from('courses')
         .select('title, description, category, tags')
         .eq('id', context.courseId)
-        .single();
+        .maybeSingle();
       
       if (course) {
         courseContext += `Current Course: ${course.title}\nDescription: ${course.description}\nCategory: ${course.category}\nTags: ${course.tags?.join(', ')}\n\n`;
@@ -103,7 +154,6 @@ Guidelines:
 
 Remember: You're helping students master the intersection of AI and geospatial technology to build their careers in this exciting field.`;
 
-    console.log('Making OpenAI API call...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -123,28 +173,31 @@ Remember: You're helping students master the intersection of AI and geospatial t
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('OpenAI API error:', response.status, sanitizeError(errorText));
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
 
-    console.log('AI response generated successfully');
-
-    // Log the interaction for analytics (optional)
-    if (userId) {
-      await supabase
-        .from('user_analytics')
-        .insert({
-          user_id: userId,
-          event_type: 'ai_assistant_query',
-          event_data: {
-            message: message.substring(0, 100), // Truncate for privacy
-            response_length: aiResponse.length,
-            context: context
-          }
-        });
+    // Log the interaction for analytics (optional) - only if user is authenticated
+    if (userId && typeof userId === 'string') {
+      try {
+        await supabase
+          .from('user_analytics')
+          .insert({
+            user_id: userId,
+            event_type: 'ai_assistant_query',
+            event_data: {
+              message: message.substring(0, 100), // Truncate for privacy
+              response_length: aiResponse.length,
+              context: context
+            }
+          });
+      } catch (analyticsError) {
+        // Don't fail the request if analytics fails
+        console.error('Analytics error:', sanitizeError(analyticsError));
+      }
     }
 
     return new Response(JSON.stringify({ 
@@ -155,10 +208,9 @@ Remember: You're helping students master the intersection of AI and geospatial t
     });
 
   } catch (error) {
-    console.error('Error in AI Learning Assistant function:', error);
+    console.error('Error in AI Learning Assistant function:', sanitizeError(error));
     return new Response(JSON.stringify({ 
-      error: 'Failed to process your request. Please try again.',
-      details: error.message 
+      error: 'Failed to process your request. Please try again.'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -116,14 +116,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
           
-          console.log('Session setup completed');
+          // Session setup completed
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out');
+          // User signed out
           cleanupAuthState();
           setSession(null);
           setUser(null);
         } else if (event === 'TOKEN_REFRESHED' && session) {
-          console.log('Token refreshed successfully');
+          // Token refreshed successfully
           setSession(session);
           setUser(session.user);
         }
