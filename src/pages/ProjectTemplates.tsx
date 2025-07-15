@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   FolderPlus, 
   Download, 
@@ -14,13 +15,18 @@ import {
   Truck, 
   Activity,
   Clock,
-  Users
+  Users,
+  ExternalLink,
+  Copy,
+  Github
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const ProjectTemplates = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [previewModal, setPreviewModal] = useState({ open: false, template: null });
+  const [useTemplateModal, setUseTemplateModal] = useState({ open: false, template: null });
   const { toast } = useToast();
 
   const templates = [
@@ -48,7 +54,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 234,
       rating: 4.8,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/urban-planning-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/urban-planning-template",
+      downloadUrl: "/templates/urban-planning.zip",
+      longDescription: "This comprehensive urban planning template provides a complete workflow for analyzing urban development patterns. It includes advanced spatial analysis techniques, demographic data integration, and visualization tools specifically designed for urban planners and policy makers. The template covers everything from initial data preparation to final report generation.",
+      tags: ["Urban Planning", "Zoning", "Demographics", "QGIS", "Python"]
     },
     {
       id: 2,
@@ -74,7 +85,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 189,
       rating: 4.9,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/environmental-monitoring-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/environmental-monitoring-template",
+      downloadUrl: "/templates/environmental-monitoring.zip",
+      longDescription: "Advanced environmental monitoring template using satellite imagery analysis and machine learning techniques. This template includes workflows for vegetation health assessment, water quality monitoring, and climate change impact analysis using remote sensing data.",
+      tags: ["Environmental", "Remote Sensing", "NDVI", "Python", "Machine Learning"]
     },
     {
       id: 3,
@@ -100,7 +116,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 312,
       rating: 4.7,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/business-location-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/business-location-template",
+      downloadUrl: "/templates/business-location.zip",
+      longDescription: "Strategic business location analysis template designed for retail and service businesses. Includes demographic analysis, competitor mapping, foot traffic analysis, and market penetration modeling to identify optimal business locations.",
+      tags: ["Business Analysis", "Demographics", "Site Selection", "Market Research", "GIS"]
     },
     {
       id: 4,
@@ -126,7 +147,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 156,
       rating: 4.6,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/transportation-network-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/transportation-network-template",
+      downloadUrl: "/templates/transportation-network.zip",
+      longDescription: "Comprehensive transportation network analysis template covering route optimization, accessibility analysis, and network connectivity assessment. Perfect for transportation planners and logistics companies.",
+      tags: ["Transportation", "Network Analysis", "Route Optimization", "Accessibility", "GTFS"]
     },
     {
       id: 5,
@@ -152,7 +178,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 198,
       rating: 4.5,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/precision-farming-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/precision-farming-template",
+      downloadUrl: "/templates/precision-farming.zip",
+      longDescription: "Modern precision farming template utilizing drone imagery, IoT sensor data, and machine learning for crop optimization. Includes soil health mapping, yield prediction, and irrigation planning workflows.",
+      tags: ["Agriculture", "Precision Farming", "Drones", "IoT", "Crop Monitoring"]
     },
     {
       id: 6,
@@ -178,7 +209,12 @@ const ProjectTemplates = () => {
       ],
       downloads: 145,
       rating: 4.8,
-      sampleData: true
+      sampleData: true,
+      githubUrl: "https://github.com/haritahive/disaster-risk-template",
+      colabUrl: "https://colab.research.google.com/github/haritahive/disaster-risk-template",
+      downloadUrl: "/templates/disaster-risk.zip",
+      longDescription: "Advanced disaster risk assessment template for emergency management professionals. Includes flood modeling, vulnerability mapping, evacuation planning, and real-time risk monitoring capabilities.",
+      tags: ["Disaster Management", "Risk Assessment", "Emergency Planning", "Flood Modeling", "GIS"]
     }
   ];
 
@@ -205,22 +241,50 @@ const ProjectTemplates = () => {
     }
   };
 
-  const useTemplate = (templateId: number) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      toast({
-        title: "Template downloaded!",
-        description: `${template.title} project template has been prepared for you.`,
-      });
-    }
+  const openPreview = (template) => {
+    setPreviewModal({ open: true, template });
   };
 
-  const previewTemplate = (templateId: number) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
+  const openUseTemplate = (template) => {
+    setUseTemplateModal({ open: true, template });
+  };
+
+  const handleDownload = (template) => {
+    window.open(template.downloadUrl, '_blank');
+    toast({
+      title: "Download Started",
+      description: `${template.title} template is being downloaded.`,
+    });
+  };
+
+  const handleGitHub = (template) => {
+    window.open(template.githubUrl, '_blank');
+    toast({
+      title: "GitHub Opened",
+      description: `Viewing ${template.title} on GitHub.`,
+    });
+  };
+
+  const handleColab = (template) => {
+    window.open(template.colabUrl, '_blank');
+    toast({
+      title: "Google Colab Opened",
+      description: `Running ${template.title} in Google Colab.`,
+    });
+  };
+
+  const handleCopyGitHub = async (template) => {
+    try {
+      await navigator.clipboard.writeText(template.githubUrl);
       toast({
-        title: "Preview opened",
-        description: `Viewing ${template.title} template preview.`,
+        title: "Copied to Clipboard",
+        description: "GitHub URL copied to clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Copy Failed",
+        description: "Unable to copy to clipboard.",
+        variant: "destructive",
       });
     }
   };
@@ -331,19 +395,23 @@ const ProjectTemplates = () => {
                     <div className="flex gap-2 pt-2">
                       <Button 
                         className="flex-1"
-                        onClick={() => useTemplate(template.id)}
+                        onClick={() => openUseTemplate(template)}
                       >
                         <FolderPlus className="h-4 w-4 mr-2" />
                         Use Template
                       </Button>
                       <Button 
                         variant="outline"
-                        onClick={() => previewTemplate(template.id)}
+                        onClick={() => openPreview(template)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </Button>
-                      <Button variant="outline" size="icon">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => handleDownload(template)}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
@@ -401,6 +469,185 @@ const ProjectTemplates = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Preview Modal */}
+        <Dialog open={previewModal.open} onOpenChange={(open) => setPreviewModal({ open, template: null })}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            {previewModal.template && (
+              <>
+                <DialogHeader>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <previewModal.template.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl">{previewModal.template.title}</DialogTitle>
+                      <DialogDescription className="mt-1">
+                        {previewModal.template.description}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                <div className="space-y-6">
+                  {/* Metadata */}
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className={getDifficultyColor(previewModal.template.difficulty)}>
+                      {previewModal.template.difficulty}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {previewModal.template.estimatedTime}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {previewModal.template.downloads} downloads
+                    </Badge>
+                    <div className="flex items-center">
+                      {"★".repeat(Math.floor(previewModal.template.rating))}
+                      <span className="text-sm text-muted-foreground ml-1">
+                        {previewModal.template.rating}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <h4 className="font-medium mb-2">Tags:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {previewModal.template.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Long Description */}
+                  <div>
+                    <h4 className="font-medium mb-2">About This Template:</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {previewModal.template.longDescription}
+                    </p>
+                  </div>
+
+                  {/* Features */}
+                  <div>
+                    <h4 className="font-medium mb-2">What's Included:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {previewModal.template.features.map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-1 h-1 bg-primary rounded-full" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Files */}
+                  <div>
+                    <h4 className="font-medium mb-2">Template Files:</h4>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {previewModal.template.files.map((file, index) => (
+                          <div key={index} className="text-sm text-muted-foreground font-mono">
+                            📄 {file}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-4 border-t">
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        setPreviewModal({ open: false, template: null });
+                        openUseTemplate(previewModal.template);
+                      }}
+                    >
+                      <FolderPlus className="h-4 w-4 mr-2" />
+                      Use This Template
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleDownload(previewModal.template)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Use Template Modal */}
+        <Dialog open={useTemplateModal.open} onOpenChange={(open) => setUseTemplateModal({ open, template: null })}>
+          <DialogContent className="max-w-md">
+            {useTemplateModal.template && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Use Template: {useTemplateModal.template.title}</DialogTitle>
+                  <DialogDescription>
+                    Choose how you'd like to access this template
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleDownload(useTemplateModal.template);
+                      setUseTemplateModal({ open: false, template: null });
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download ZIP Archive
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleGitHub(useTemplateModal.template);
+                      setUseTemplateModal({ open: false, template: null });
+                    }}
+                  >
+                    <Github className="h-4 w-4 mr-2" />
+                    Open in GitHub
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleColab(useTemplateModal.template);
+                      setUseTemplateModal({ open: false, template: null });
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Run in Google Colab
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleCopyGitHub(useTemplateModal.template);
+                      setUseTemplateModal({ open: false, template: null });
+                    }}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy GitHub URL
+                  </Button>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
