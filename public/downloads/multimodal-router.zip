@@ -1,0 +1,32 @@
+PK                  multimodal_router/README.md
+# Multi-Modal Route Planner
+
+Calculate optimal routes combining walking, cycling, public transit, and driving modes.
+
+## Features
+- Multi-modal route optimization
+- Real-time transit integration
+- Cost and time comparison
+- Accessibility routing
+- Carbon footprint calculation
+
+## License
+Apache 2.0
+
+## Dependencies
+- NetworkX
+- GTFS-realtime
+- OSMnx
+- Requests
+
+## API Usage
+```python
+from multimodal_router import RouteCalculator
+
+calculator = RouteCalculator()
+route = calculator.plan_route(
+    origin=(lat1, lon1),
+    destination=(lat2, lon2),
+    modes=['walking', 'transit', 'cycling']
+)
+```

@@ -412,25 +412,320 @@ const PluginMarketplace = () => {
       license: "MIT",
       is_featured: false,
       created_at: "2024-03-12"
+    },
+
+    // 3D Visualization & Analysis
+    {
+      id: "24",
+      title: "3D Terrain Visualizer",
+      description: "Create stunning 3D terrain models from DEM data with customizable lighting and materials.",
+      category: "3D Visualization",
+      tech_stack: ["Python", "Three.js", "WebGL"],
+      tags: ["3D", "Terrain", "Visualization"],
+      download_count: 1340,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/3d-terrain.zip",
+      github_url: "https://github.com/haritahive/3d-terrain",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-03-15"
+    },
+    {
+      id: "25",
+      title: "LiDAR Point Cloud Processor",
+      description: "Process and analyze LiDAR point clouds for forestry, urban planning, and archaeology applications.",
+      category: "3D Visualization",
+      tech_stack: ["Python", "Open3D", "NumPy"],
+      tags: ["LiDAR", "Point Cloud", "3D"],
+      download_count: 980,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/lidar-processor.py",
+      github_url: "https://github.com/haritahive/lidar-processor",
+      license: "BSD-3",
+      is_featured: false,
+      created_at: "2024-03-18"
+    },
+
+    // Interpolation & Geostatistics
+    {
+      id: "26",
+      title: "Kriging Interpolation Suite",
+      description: "Advanced geostatistical interpolation using ordinary, universal, and indicator kriging methods.",
+      category: "Geostatistics",
+      tech_stack: ["Python", "PyKrige", "scikit-learn"],
+      tags: ["Interpolation", "Kriging", "Statistics"],
+      download_count: 1560,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/kriging-suite.py",
+      github_url: "https://github.com/haritahive/kriging-suite",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-03-20"
+    },
+    {
+      id: "27",
+      title: "Spatial Autocorrelation Analyzer",
+      description: "Calculate Moran's I, Geary's C, and other spatial autocorrelation statistics.",
+      category: "Geostatistics",
+      tech_stack: ["Python", "PySAL", "SciPy"],
+      tags: ["Statistics", "Autocorrelation", "Spatial Analysis"],
+      download_count: 890,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/autocorrelation.py",
+      github_url: "https://github.com/haritahive/autocorrelation",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-03-22"
+    },
+
+    // Agriculture & Environmental
+    {
+      id: "28",
+      title: "Precision Agriculture Toolkit",
+      description: "Variable rate application mapping, yield analysis, and field boundary detection for precision farming.",
+      category: "Agriculture",
+      tech_stack: ["Python", "GDAL", "scikit-image"],
+      tags: ["Agriculture", "Precision Farming", "Yield Analysis"],
+      download_count: 1120,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/precision-agriculture.zip",
+      github_url: "https://github.com/haritahive/precision-agriculture",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-03-25"
+    },
+    {
+      id: "29",
+      title: "Water Quality Monitor",
+      description: "Analyze water quality parameters from satellite imagery using machine learning algorithms.",
+      category: "Environmental",
+      tech_stack: ["Python", "TensorFlow", "GDAL"],
+      tags: ["Water Quality", "Environmental", "ML & AI"],
+      download_count: 760,
+      rating: 4.5,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/water-quality.py",
+      github_url: "https://github.com/haritahive/water-quality",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-03-28"
+    },
+    {
+      id: "30",
+      title: "Forest Cover Change Detector",
+      description: "Detect deforestation and reforestation using time-series satellite imagery analysis.",
+      category: "Environmental",
+      tech_stack: ["Python", "OpenCV", "NumPy"],
+      tags: ["Forest", "Change Detection", "Environmental"],
+      download_count: 1450,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/forest-change.py",
+      github_url: "https://github.com/haritahive/forest-change",
+      license: "BSD-3",
+      is_featured: true,
+      created_at: "2024-04-01"
+    },
+
+    // Navigation & Transportation
+    {
+      id: "31",
+      title: "Multi-Modal Route Planner",
+      description: "Calculate optimal routes combining walking, cycling, public transit, and driving modes.",
+      category: "Transportation",
+      tech_stack: ["Python", "NetworkX", "GTFS"],
+      tags: ["Routing", "Multi-Modal", "Transportation"],
+      download_count: 2100,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/multimodal-router.zip",
+      github_url: "https://github.com/haritahive/multimodal-router",
+      license: "Apache 2.0",
+      is_featured: true,
+      created_at: "2024-04-03"
+    },
+    {
+      id: "32",
+      title: "Traffic Flow Simulator",
+      description: "Simulate traffic patterns and congestion using agent-based modeling and real traffic data.",
+      category: "Transportation",
+      tech_stack: ["Python", "SUMO", "OSMnx"],
+      tags: ["Traffic", "Simulation", "Transportation"],
+      download_count: 890,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/traffic-simulator.py",
+      github_url: "https://github.com/haritahive/traffic-simulator",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-04-05"
+    },
+
+    // Mining & Geology
+    {
+      id: "33",
+      title: "Geological Structure Mapper",
+      description: "Identify and map geological structures, faults, and formations from DEM and imagery data.",
+      category: "Geology",
+      tech_stack: ["Python", "GDAL", "scikit-image"],
+      tags: ["Geology", "Structure", "Mapping"],
+      download_count: 670,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/geological-mapper.py",
+      github_url: "https://github.com/haritahive/geological-mapper",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-04-08"
+    },
+    {
+      id: "34",
+      title: "Mineral Prospectivity Analyzer",
+      description: "Analyze geological, geochemical, and geophysical data for mineral exploration targeting.",
+      category: "Geology",
+      tech_stack: ["Python", "scikit-learn", "GDAL"],
+      tags: ["Mining", "Prospectivity", "ML & AI"],
+      download_count: 540,
+      rating: 4.5,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/mineral-prospectivity.zip",
+      github_url: "https://github.com/haritahive/mineral-prospectivity",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-04-10"
+    },
+
+    // Climate & Weather
+    {
+      id: "35",
+      title: "Climate Data Processor",
+      description: "Process and analyze climate model outputs, weather station data, and reanalysis datasets.",
+      category: "Climate",
+      tech_stack: ["Python", "xarray", "NetCDF4"],
+      tags: ["Climate", "Weather", "Data Processing"],
+      download_count: 1230,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/climate-processor.py",
+      github_url: "https://github.com/haritahive/climate-processor",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-04-12"
+    },
+    {
+      id: "36",
+      title: "Extreme Weather Detector",
+      description: "Identify and track extreme weather events using satellite imagery and meteorological data.",
+      category: "Climate",
+      tech_stack: ["Python", "OpenCV", "TensorFlow"],
+      tags: ["Weather", "Extreme Events", "Detection"],
+      download_count: 980,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/weather-detector.zip",
+      github_url: "https://github.com/haritahive/weather-detector",
+      license: "BSD-3",
+      is_featured: false,
+      created_at: "2024-04-15"
+    },
+
+    // Maritime & Coastal
+    {
+      id: "37",
+      title: "Coastal Erosion Monitor",
+      description: "Monitor coastal changes and erosion patterns using multi-temporal satellite imagery.",
+      category: "Coastal",
+      tech_stack: ["Python", "GDAL", "OpenCV"],
+      tags: ["Coastal", "Erosion", "Change Detection"],
+      download_count: 780,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/coastal-erosion.py",
+      github_url: "https://github.com/haritahive/coastal-erosion",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-04-18"
+    },
+    {
+      id: "38",
+      title: "Bathymetry Interpolator",
+      description: "Generate high-resolution bathymetric surfaces from sparse depth soundings and sonar data.",
+      category: "Coastal",
+      tech_stack: ["Python", "SciPy", "GDAL"],
+      tags: ["Bathymetry", "Marine", "Interpolation"],
+      download_count: 450,
+      rating: 4.4,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/bathymetry-interpolator.py",
+      github_url: "https://github.com/haritahive/bathymetry-interpolator",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-04-20"
+    },
+
+    // Advanced Analytics
+    {
+      id: "39",
+      title: "Spatial Deep Learning Framework",
+      description: "Pre-trained models and tools for applying deep learning to geospatial data analysis.",
+      category: "ML & AI",
+      tech_stack: ["Python", "PyTorch", "torchgeo"],
+      tags: ["Deep Learning", "ML & AI", "Framework"],
+      download_count: 2450,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/spatial-deeplearning.zip",
+      github_url: "https://github.com/haritahive/spatial-deeplearning",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-04-22"
+    },
+    {
+      id: "40",
+      title: "Time Series Analyzer",
+      description: "Analyze temporal patterns in geospatial time series data with trend detection and forecasting.",
+      category: "ML & AI",
+      tech_stack: ["Python", "Prophet", "pandas"],
+      tags: ["Time Series", "Forecasting", "Trends"],
+      download_count: 1680,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/timeseries-analyzer.py",
+      github_url: "https://github.com/haritahive/timeseries-analyzer",
+      license: "BSD-3",
+      is_featured: false,
+      created_at: "2024-04-25"
     }
   ];
 
   const categories = [
     "all", "Vector", "Raster", "Remote Sensing", "Spatial Analysis", 
-    "Web GIS", "Data Conversion", "Urban Planning", "Disaster Management", "ML & AI"
+    "Web GIS", "Data Conversion", "Urban Planning", "Disaster Management", 
+    "ML & AI", "3D Visualization", "Geostatistics", "Agriculture", 
+    "Environmental", "Transportation", "Geology", "Climate", "Coastal"
   ];
   
   const techStack = [
     "all", "Python", "JavaScript", "QGIS", "GDAL", "Leaflet", "Mapbox GL", 
-    "TensorFlow", "scikit-learn", "NumPy", "OpenCV", "React"
+    "TensorFlow", "PyTorch", "scikit-learn", "NumPy", "OpenCV", "React", 
+    "Three.js", "WebGL", "xarray", "NetCDF4"
   ];
 
   // Add state for tag filtering
   const [selectedTag, setSelectedTag] = useState("all");
   const [selectedLicense, setSelectedLicense] = useState("all");
   
-  const allTags = ["all", "Vector", "Raster", "Remote Sensing", "ML & AI", "Web GIS", 
-                   "Spatial Analysis", "Urban Planning", "Disaster Management", "Data Conversion"];
+  const allTags = [
+    "all", "Vector", "Raster", "Remote Sensing", "ML & AI", "Web GIS", 
+    "Spatial Analysis", "Urban Planning", "Disaster Management", "Data Conversion",
+    "3D", "LiDAR", "Interpolation", "Statistics", "Agriculture", "Environmental",
+    "Transportation", "Geology", "Climate", "Coastal"
+  ];
   const licenses = ["all", "MIT", "Apache 2.0", "BSD-3"];
 
   const filteredPlugins = plugins.filter(plugin => {

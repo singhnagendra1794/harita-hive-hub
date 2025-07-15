@@ -1,0 +1,35 @@
+PK                  spatial_deeplearning/README.md
+# Spatial Deep Learning Framework
+
+Pre-trained models and tools for applying deep learning to geospatial data analysis.
+
+## Features
+- Pre-trained models for land cover classification
+- Object detection in satellite imagery
+- Semantic segmentation tools
+- Change detection networks
+- Custom dataset preparation utilities
+
+## Models Included
+- ResNet-50 for land cover (8 classes)
+- U-Net for semantic segmentation
+- YOLO v5 for object detection
+- Siamese networks for change detection
+
+## License
+MIT
+
+## Requirements
+- PyTorch >= 1.9
+- torchgeo
+- rasterio
+- numpy
+- pillow
+
+## Quick Start
+```python
+from spatial_dl import LandCoverClassifier
+
+classifier = LandCoverClassifier()
+predictions = classifier.predict('satellite_image.tif')
+```

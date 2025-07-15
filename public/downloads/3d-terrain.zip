@@ -1,0 +1,20 @@
+PK                  3d_terrain/README.md
+# 3D Terrain Visualizer
+
+Create stunning 3D terrain models from DEM data with customizable lighting and materials.
+
+## Features
+- WebGL-based 3D rendering
+- Multiple lighting options
+- Texture mapping support
+- Real-time manipulation
+
+## License
+MIT
+
+## Usage
+```javascript
+import TerrainVisualizer from './terrain-visualizer.js';
+const visualizer = new TerrainVisualizer('container-id');
+visualizer.loadDEM('path/to/dem.tif');
+```

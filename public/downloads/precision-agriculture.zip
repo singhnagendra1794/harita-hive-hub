@@ -1,0 +1,26 @@
+PK                  precision_agriculture/README.md
+# Precision Agriculture Toolkit
+
+Variable rate application mapping, yield analysis, and field boundary detection for precision farming.
+
+## Features
+- Yield data analysis and mapping
+- Variable rate prescription generation
+- Field boundary detection
+- Soil sampling optimization
+- Equipment path planning
+
+## License
+MIT
+
+## Requirements
+- Python 3.8+
+- GDAL
+- scikit-image
+- scikit-learn
+- matplotlib
+
+## Usage
+```bash
+python precision_agriculture.py --yield-data yields.csv --field-boundary field.shp
+```
