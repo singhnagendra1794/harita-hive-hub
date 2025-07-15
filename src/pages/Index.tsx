@@ -61,6 +61,21 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5">
+      {/* Launch Banner */}
+      <section className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-4">
+        <div className="container text-center">
+          <p className="font-medium">
+            🚀 Geospatial Full Stack Developer Bootcamp launches October 6, 2025 — 
+            <Link to="/courses/geospatial-fullstack-developer#waitlist" className="underline font-bold ml-2">
+              Join Waitlist Now!
+            </Link>
+            <Link to="/courses/geospatial-fullstack-developer#curriculum" className="underline ml-4">
+              Preview Course
+            </Link>
+          </p>
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="container py-20 text-center">
         <Badge variant="secondary" className="mb-6 px-4 py-2">
@@ -102,6 +117,56 @@ const Index = () => {
         <p className="text-sm text-muted-foreground opacity-75">
           Note: These numbers reflect our current early access phase. Help us grow!
         </p>
+      </section>
+
+      {/* Featured Course Section */}
+      <section className="container py-20">
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 mb-16">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <Badge variant="outline" className="mb-2">LAUNCHING OCTOBER 6, 2025</Badge>
+                  <CardTitle className="text-2xl">Become a Certified Geospatial Full Stack Developer</CardTitle>
+                  <CardDescription className="text-lg">Master Web GIS, PostGIS, React + AI-powered learning</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6 items-center">
+                <div>
+                  <h4 className="font-semibold mb-3">Meet Harita AI Mentor:</h4>
+                  <p className="text-muted-foreground mb-4">
+                    Learn from a cutting-edge AI mentor powered by OpenAI + OBS with screen-share, voice, and live Q&A.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="outline">12 Weeks</Badge>
+                    <Badge variant="outline">AI Instructor</Badge>
+                    <Badge variant="outline">Capstone Projects</Badge>
+                  </div>
+                  <Link to="/courses/geospatial-fullstack-developer">
+                    <Button className="w-full md:w-auto">
+                      View Program
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+                <div className="bg-background/50 rounded-lg p-6 text-center">
+                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Brain className="h-10 w-10 text-primary" />
+                  </div>
+                  <h4 className="font-semibold mb-2">AI Avatar Instructor</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Interactive learning with real-time Q&A
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </section>
 
       {/* Features Section */}

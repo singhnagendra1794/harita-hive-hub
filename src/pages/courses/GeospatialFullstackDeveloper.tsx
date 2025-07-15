@@ -128,7 +128,7 @@ const GeospatialFullstackDeveloper = () => {
       
       toast({
         title: "Successfully joined waitlist!",
-        description: "We'll notify you when enrollment opens on August 1, 2025.",
+        description: "We'll notify you when enrollment opens on October 6, 2025.",
       });
       
       setEmail("");
@@ -149,7 +149,7 @@ const GeospatialFullstackDeveloper = () => {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4 bg-primary/10 text-primary border-primary/20">
-            LAUNCHING AUGUST 1, 2025
+            LAUNCHING OCTOBER 6, 2025
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Geospatial Full Stack Developer
@@ -166,7 +166,7 @@ const GeospatialFullstackDeveloper = () => {
             </Badge>
             <Badge variant="outline" className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              August 1, 2025
+              October 6, 2025
             </Badge>
             <Badge variant="outline" className="flex items-center gap-1">
               <Trophy className="h-3 w-3" />
@@ -193,8 +193,8 @@ const GeospatialFullstackDeveloper = () => {
                 <Brain className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Meet Your AI Instructor</CardTitle>
-                <CardDescription>Realistic humanoid GIS expert with live screen-sharing</CardDescription>
+                <CardTitle className="text-2xl">Meet Harita AI Mentor</CardTitle>
+                <CardDescription>Cutting-edge AI mentor powered by OpenAI + OBS with screen-share, voice, and live Q&A</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -384,13 +384,13 @@ const GeospatialFullstackDeveloper = () => {
         </div>
 
         {/* Capstone Projects */}
-        <Card className="mb-12">
+        <Card className="mb-12" id="curriculum">
           <CardHeader>
             <CardTitle className="text-2xl text-center">Real-World Capstone Projects</CardTitle>
-            <CardDescription className="text-center">Choose from 4 industry-focused applications</CardDescription>
+            <CardDescription className="text-center">Choose from 4 industry-focused applications - explore project templates</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
               {capstoneProjects.map((project, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-secondary/10 rounded-lg">
                   <Target className="h-5 w-5 text-primary" />
@@ -398,15 +398,32 @@ const GeospatialFullstackDeveloper = () => {
                 </div>
               ))}
             </div>
+            <div className="text-center">
+              <h4 className="font-semibold mb-3">Explore Project Templates:</h4>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Link to="/project-templates/fleet-tracker">
+                  <Badge variant="outline" className="hover:bg-primary/10">Fleet Tracker</Badge>
+                </Link>
+                <Link to="/project-templates/forest-fire-classifier">
+                  <Badge variant="outline" className="hover:bg-primary/10">Forest Fire Classifier</Badge>
+                </Link>
+                <Link to="/project-templates/urban-traffic-dashboard">
+                  <Badge variant="outline" className="hover:bg-primary/10">Urban Traffic Dashboard</Badge>
+                </Link>
+                <Link to="/project-templates/web-tourist-map">
+                  <Badge variant="outline" className="hover:bg-primary/10">Web Tourist Map</Badge>
+                </Link>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Waitlist Form */}
-        <Card className="max-w-md mx-auto">
+        <Card className="max-w-md mx-auto" id="waitlist">
           <CardHeader>
             <CardTitle className="text-center">Join the Waitlist</CardTitle>
             <CardDescription className="text-center">
-              Be the first to know when enrollment opens on August 1, 2025
+              Be the first to know when enrollment opens on October 6, 2025
             </CardDescription>
           </CardHeader>
           <CardContent>
