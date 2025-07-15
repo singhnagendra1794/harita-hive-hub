@@ -43,7 +43,10 @@ const PluginMarketplace = () => {
       github_url: "https://github.com/haritahive/buffer-tool",
       license: "MIT",
       is_featured: true,
-      created_at: "2024-01-15"
+      created_at: "2024-01-15",
+      version: "1.2.0",
+      qgis_version: "3.22+",
+      last_updated: "2024-07-10"
     },
     {
       id: "2",
@@ -59,7 +62,10 @@ const PluginMarketplace = () => {
       github_url: "https://github.com/haritahive/polygon-simplifier",
       license: "MIT",
       is_featured: false,
-      created_at: "2024-01-18"
+      created_at: "2024-01-18",
+      version: "1.0.0",
+      qgis_version: "3.16+",
+      last_updated: "2024-06-15"
     },
     {
       id: "3",
@@ -94,7 +100,10 @@ const PluginMarketplace = () => {
       license: "MIT",
       is_featured: true,
       created_at: "2024-01-01",
-      is_signature: true
+      is_signature: true,
+      version: "2.1.0",
+      qgis_version: "3.22+",
+      last_updated: "2024-07-12"
     },
     {
       id: "4",
