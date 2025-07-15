@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { Menu, X, ChevronDown, User, LogOut, Settings, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -143,6 +145,14 @@ const Navbar = () => {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
+                  {isSuperAdmin() && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/notes" className="flex items-center">
                       <Settings className="h-4 w-4 mr-2" />
@@ -264,6 +274,15 @@ const Navbar = () => {
                     >
                       Dashboard
                     </Link>
+                    {isSuperAdmin() && (
+                      <Link
+                        to="/admin"
+                        className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleSignOut();
