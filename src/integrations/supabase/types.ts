@@ -1562,7 +1562,11 @@ export type Database = {
           id: string
           instructor: string | null
           is_live: boolean
+          rtmp_endpoint: string | null
           starts_at: string
+          stream_key: string | null
+          stream_type: string | null
+          stream_url: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -1578,7 +1582,11 @@ export type Database = {
           id?: string
           instructor?: string | null
           is_live?: boolean
+          rtmp_endpoint?: string | null
           starts_at: string
+          stream_key?: string | null
+          stream_type?: string | null
+          stream_url?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -1594,7 +1602,11 @@ export type Database = {
           id?: string
           instructor?: string | null
           is_live?: boolean
+          rtmp_endpoint?: string | null
           starts_at?: string
+          stream_key?: string | null
+          stream_type?: string | null
+          stream_url?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
@@ -2018,6 +2030,53 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      stream_sessions: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean | null
+          live_class_id: string | null
+          rtmp_endpoint: string
+          started_at: string | null
+          stream_key: string
+          updated_at: string | null
+          viewer_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          live_class_id?: string | null
+          rtmp_endpoint: string
+          started_at?: string | null
+          stream_key: string
+          updated_at?: string | null
+          viewer_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          live_class_id?: string | null
+          rtmp_endpoint?: string
+          started_at?: string | null
+          stream_key?: string
+          updated_at?: string | null
+          viewer_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_sessions_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_portfolios: {
         Row: {
@@ -2882,6 +2941,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      generate_stream_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
@@ -2918,6 +2981,14 @@ export type Database = {
       is_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      start_stream_session: {
+        Args: { p_live_class_id: string }
+        Returns: Json
+      }
+      stop_stream_session: {
+        Args: { p_live_class_id: string }
+        Returns: Json
       }
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }

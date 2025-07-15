@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Video, Edit, Trash2, Plus, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Calendar, Clock, Video, Edit, Trash2, Plus, ExternalLink, Play, Square, Copy, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,6 +24,10 @@ interface LiveClass {
   thumbnail_url: string | null;
   instructor: string;
   created_at: string;
+  stream_key?: string;
+  stream_url?: string;
+  stream_type?: string;
+  rtmp_endpoint?: string;
 }
 
 const LiveClassManager = () => {
@@ -30,6 +35,8 @@ const LiveClassManager = () => {
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [editingClass, setEditingClass] = useState<LiveClass | null>(null);
+  const [obsModal, setObsModal] = useState({ open: false, liveClass: null as LiveClass | null });
+  const [streamStatus, setStreamStatus] = useState<{ [key: string]: any }>({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -38,7 +45,8 @@ const LiveClassManager = () => {
     ends_at: '',
     is_live: true,
     access_tier: 'pro',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    stream_type: 'youtube'
   });
 
   useEffect(() => {
@@ -84,7 +92,7 @@ const LiveClassManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.video_url || !formData.starts_at) {
+    if (!formData.title || !formData.starts_at) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -94,15 +102,26 @@ const LiveClassManager = () => {
     }
 
     try {
-      const videoId = extractVideoId(formData.video_url);
-      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      
-      const classData = {
-        ...formData,
-        youtube_video_id: videoId,
-        video_url: embedUrl,
-        ends_at: formData.ends_at || null
+      let classData: any = {
+        title: formData.title,
+        description: formData.description,
+        starts_at: formData.starts_at,
+        ends_at: formData.ends_at || null,
+        is_live: formData.is_live,
+        access_tier: formData.access_tier,
+        thumbnail_url: formData.thumbnail_url,
+        stream_type: formData.stream_type
       };
+
+      if (formData.stream_type === 'youtube' && formData.video_url) {
+        const videoId = extractVideoId(formData.video_url);
+        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        classData = {
+          ...classData,
+          youtube_video_id: videoId,
+          video_url: embedUrl
+        };
+      }
 
       if (editingClass) {
         const { error } = await supabase
@@ -137,7 +156,8 @@ const LiveClassManager = () => {
         ends_at: '',
         is_live: true,
         access_tier: 'pro',
-        thumbnail_url: ''
+        thumbnail_url: '',
+        stream_type: 'youtube'
       });
       setIsCreating(false);
       setEditingClass(null);
@@ -156,12 +176,13 @@ const LiveClassManager = () => {
     setFormData({
       title: liveClass.title,
       description: liveClass.description || '',
-      video_url: `https://youtube.com/watch?v=${liveClass.youtube_video_id}`,
+      video_url: liveClass.youtube_video_id ? `https://youtube.com/watch?v=${liveClass.youtube_video_id}` : '',
       starts_at: new Date(liveClass.starts_at).toISOString().slice(0, 16),
       ends_at: liveClass.ends_at ? new Date(liveClass.ends_at).toISOString().slice(0, 16) : '',
       is_live: liveClass.is_live,
       access_tier: liveClass.access_tier,
-      thumbnail_url: liveClass.thumbnail_url || ''
+      thumbnail_url: liveClass.thumbnail_url || '',
+      stream_type: liveClass.stream_type || 'youtube'
     });
     setEditingClass(liveClass);
     setIsCreating(true);
@@ -201,6 +222,61 @@ const LiveClassManager = () => {
     return isLiveFlag && now >= start && (!end || now <= end);
   };
 
+  const handleOBSStream = async (liveClass: LiveClass, action: 'start' | 'stop') => {
+    try {
+      const { data, error } = await supabase.functions.invoke('stream-management', {
+        body: {
+          action,
+          liveClassId: liveClass.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (action === 'start') {
+        setObsModal({ open: true, liveClass });
+        setStreamStatus(prev => ({ ...prev, [liveClass.id]: data }));
+        
+        toast({
+          title: "Stream Started",
+          description: "OBS stream session is ready. Use the provided stream key in OBS.",
+        });
+      } else {
+        setStreamStatus(prev => ({ ...prev, [liveClass.id]: null }));
+        
+        toast({
+          title: "Stream Stopped",
+          description: "OBS stream session has been ended.",
+        });
+      }
+
+      fetchLiveClasses(); // Refresh data
+    } catch (error) {
+      console.error('Error managing OBS stream:', error);
+      toast({
+        title: "Error",
+        description: `Failed to ${action} stream: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: `${label} copied to clipboard`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
@@ -210,7 +286,7 @@ const LiveClassManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Live Class Manager</h2>
-          <p className="text-muted-foreground">Manage YouTube Live streaming sessions</p>
+          <p className="text-muted-foreground">Manage YouTube Live streaming and OBS integration</p>
         </div>
         <Button onClick={() => setIsCreating(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -223,7 +299,7 @@ const LiveClassManager = () => {
           <CardHeader>
             <CardTitle>{editingClass ? 'Edit' : 'Create'} Live Class</CardTitle>
             <CardDescription>
-              Set up a YouTube Live streaming session for students
+              Set up a live streaming session using YouTube or OBS
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -251,7 +327,20 @@ const LiveClassManager = () => {
                     <option value="enterprise">Enterprise</option>
                   </select>
                 </div>
-              </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="stream_type">Stream Type</Label>
+                  <select
+                    id="stream_type"
+                    value={formData.stream_type}
+                    onChange={(e) => setFormData({ ...formData, stream_type: e.target.value })}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="youtube">YouTube Live</option>
+                    <option value="obs">OBS Studio</option>
+                  </select>
+                </div>
 
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -264,16 +353,18 @@ const LiveClassManager = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="video_url">YouTube Video URL/ID *</Label>
-                <Input
-                  id="video_url"
-                  value={formData.video_url}
-                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                  placeholder="https://youtube.com/watch?v=VIDEO_ID or just VIDEO_ID"
-                  required
-                />
-              </div>
+              {formData.stream_type === 'youtube' && (
+                <div>
+                  <Label htmlFor="video_url">YouTube Video URL/ID *</Label>
+                  <Input
+                    id="video_url"
+                    value={formData.video_url}
+                    onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                    placeholder="https://youtube.com/watch?v=VIDEO_ID or just VIDEO_ID"
+                    required={formData.stream_type === 'youtube'}
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -334,7 +425,8 @@ const LiveClassManager = () => {
                       ends_at: '',
                       is_live: true,
                       access_tier: 'pro',
-                      thumbnail_url: ''
+                      thumbnail_url: '',
+                      stream_type: 'youtube'
                     });
                   }}
                 >
@@ -360,6 +452,7 @@ const LiveClassManager = () => {
                       </Badge>
                     )}
                     <Badge variant="outline">{liveClass.access_tier}</Badge>
+                    <Badge variant="secondary">{liveClass.stream_type || 'youtube'}</Badge>
                   </div>
                   
                   {liveClass.description && (
@@ -383,6 +476,34 @@ const LiveClassManager = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  {liveClass.stream_type === 'obs' && (
+                    <>
+                      <Button
+                        variant={streamStatus[liveClass.id] ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => handleOBSStream(liveClass, streamStatus[liveClass.id] ? 'stop' : 'start')}
+                      >
+                        {streamStatus[liveClass.id] ? (
+                          <>
+                            <Square className="h-4 w-4 mr-1" />
+                            Stop Stream
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4 mr-1" />
+                            Start Stream
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setObsModal({ open: true, liveClass })}
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -416,7 +537,7 @@ const LiveClassManager = () => {
               <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No Live Classes</h3>
               <p className="text-muted-foreground mb-4">
-                Create your first YouTube Live streaming session
+                Create your first live streaming session using YouTube or OBS
               </p>
               <Button onClick={() => setIsCreating(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -426,6 +547,84 @@ const LiveClassManager = () => {
           </Card>
         )}
       </div>
+
+      {/* OBS Stream Modal */}
+      <Dialog open={obsModal.open} onOpenChange={(open) => setObsModal({ open, liveClass: null })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>OBS Stream Configuration</DialogTitle>
+            <DialogDescription>
+              Use these settings in OBS Studio to start streaming
+            </DialogDescription>
+          </DialogHeader>
+
+          {obsModal.liveClass && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Stream Server</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input 
+                    value={obsModal.liveClass.rtmp_endpoint || "Generate stream key first"} 
+                    readOnly 
+                    className="text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(obsModal.liveClass.rtmp_endpoint || "", "RTMP Endpoint")}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium">Stream Key</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input 
+                    value={obsModal.liveClass.stream_key || "Generate stream key first"} 
+                    readOnly 
+                    type="password"
+                    className="text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(obsModal.liveClass.stream_key || "", "Stream Key")}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2">OBS Setup Instructions:</h4>
+                <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
+                  <li>Open OBS Studio</li>
+                  <li>Go to Settings → Stream</li>
+                  <li>Set Service to "Custom"</li>
+                  <li>Copy the Server URL above</li>
+                  <li>Copy the Stream Key above</li>
+                  <li>Click "Start Streaming"</li>
+                </ol>
+              </div>
+
+              {!streamStatus[obsModal.liveClass.id] && (
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    handleOBSStream(obsModal.liveClass, 'start');
+                    setObsModal({ open: false, liveClass: null });
+                  }}
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Generate Stream Key & Start Session
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

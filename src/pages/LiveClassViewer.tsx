@@ -22,6 +22,10 @@ interface LiveClass {
   thumbnail_url: string | null;
   instructor: string;
   created_at: string;
+  stream_key?: string;
+  stream_url?: string;
+  stream_type?: string;
+  rtmp_endpoint?: string;
 }
 
 const LiveClassViewer = () => {
@@ -29,6 +33,7 @@ const LiveClassViewer = () => {
   const [liveClass, setLiveClass] = useState<LiveClass | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerCount, setViewerCount] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -95,6 +100,67 @@ const LiveClassViewer = () => {
     return `${minutes}m`;
   };
 
+  const getStreamPlayer = () => {
+    if (!liveClass) return null;
+
+    const streamType = liveClass.stream_type || 'youtube';
+
+    if (streamType === 'youtube' && liveClass.youtube_video_id) {
+      return (
+        <div className="aspect-video">
+          <iframe
+            src={`${liveClass.video_url}?autoplay=1&modestbranding=1&rel=0`}
+            className="w-full h-full rounded-lg"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={liveClass.title}
+          />
+        </div>
+      );
+    }
+
+    if (streamType === 'obs' && liveClass.stream_url) {
+      return (
+        <div className="aspect-video">
+          {classIsLive ? (
+            <video
+              controls
+              autoPlay
+              className="w-full h-full rounded-lg bg-black"
+              poster={liveClass.thumbnail_url || undefined}
+            >
+              <source src={liveClass.stream_url} type="application/x-mpegURL" />
+              <p className="text-white text-center p-8">Your browser doesn't support video streaming.</p>
+            </video>
+          ) : (
+            <div className="aspect-video bg-black rounded-lg flex items-center justify-center">
+              <div className="text-center text-white">
+                <Video className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p className="text-lg mb-2">OBS Stream Not Active</p>
+                <p className="text-sm opacity-75">
+                  {classIsUpcoming 
+                    ? "Stream will start when the instructor goes live" 
+                    : "This stream has ended"}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+        <div className="text-center text-muted-foreground">
+          <AlertCircle className="h-16 w-16 mx-auto mb-4" />
+          <p className="text-lg mb-2">Stream Configuration Error</p>
+          <p className="text-sm">No valid stream source configured</p>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -156,6 +222,7 @@ const LiveClassViewer = () => {
                         </Badge>
                       )}
                       <Badge variant="secondary">{liveClass.access_tier}</Badge>
+                      <Badge variant="outline">{liveClass.stream_type || 'youtube'}</Badge>
                     </div>
                     {liveClass.description && (
                       <CardDescription className="text-base">
@@ -184,6 +251,12 @@ const LiveClassViewer = () => {
                       Starts in {timeUntilStart}
                     </div>
                   )}
+                  {classIsLive && (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <Users className="h-4 w-4" />
+                      {viewerCount} watching
+                    </div>
+                  )}
                 </div>
               </CardHeader>
             </Card>
@@ -202,16 +275,7 @@ const LiveClassViewer = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="aspect-video">
-                    <iframe
-                      src={`${liveClass.video_url}?autoplay=1&modestbranding=1&rel=0`}
-                      className="w-full h-full rounded-lg"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={liveClass.title}
-                    />
-                  </div>
+                  getStreamPlayer()
                 )}
               </CardContent>
             </Card>
@@ -229,6 +293,10 @@ const LiveClassViewer = () => {
                   <div>
                     <h4 className="font-medium mb-1">Instructor</h4>
                     <p className="text-muted-foreground">{liveClass.instructor}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-1">Stream Type</h4>
+                    <Badge variant="outline">{liveClass.stream_type || 'YouTube'}</Badge>
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Access Level</h4>
@@ -259,13 +327,20 @@ const LiveClassViewer = () => {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(`https://youtube.com/watch?v=${liveClass.youtube_video_id}`, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in YouTube
-                  </Button>
+                  {liveClass.stream_type === 'youtube' && liveClass.youtube_video_id && (
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(`https://youtube.com/watch?v=${liveClass.youtube_video_id}`, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in YouTube
+                    </Button>
+                  )}
+                  {liveClass.stream_type === 'obs' && (
+                    <div className="text-sm text-muted-foreground">
+                      <p>This is an OBS live stream. The instructor is streaming directly from their setup.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

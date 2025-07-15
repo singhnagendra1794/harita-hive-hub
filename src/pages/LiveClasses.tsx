@@ -23,6 +23,7 @@ interface LiveClass {
   thumbnail_url: string | null;
   instructor: string;
   created_at: string;
+  stream_type?: string;
 }
 
 const LiveClasses = () => {
@@ -121,6 +122,7 @@ const LiveClasses = () => {
                           </Badge>
                         )}
                         <Badge variant="outline">{liveClass.access_tier}</Badge>
+                        <Badge variant="secondary">{liveClass.stream_type || 'YouTube'}</Badge>
                       </div>
                     </div>
                     <CardDescription>{liveClass.description}</CardDescription>
@@ -183,6 +185,7 @@ const LiveClasses = () => {
                       <div className="flex gap-2">
                         <Badge variant="outline">Recorded</Badge>
                         <Badge variant="secondary">{liveClass.access_tier}</Badge>
+                        <Badge variant="outline">{liveClass.stream_type || 'YouTube'}</Badge>
                       </div>
                     </div>
                     <CardDescription>{liveClass.description}</CardDescription>
@@ -228,7 +231,7 @@ const LiveClasses = () => {
         <div className="mt-12 p-6 bg-accent/10 rounded-lg border border-accent/20">
           <h3 className="text-lg font-semibold mb-2">🎥 Live Streaming Integration</h3>
           <p className="text-muted-foreground mb-4">
-            Classes are streamed using industry-standard platforms for the best experience. Automatic recording available for all sessions.
+            Classes are streamed using YouTube Live or OBS Studio for the best experience. Automatic recording available for all sessions.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
