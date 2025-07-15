@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { Menu, X, ChevronDown, User, LogOut, Settings, Shield } from "lucide-react";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
   const { isSuperAdmin } = useUserRoles();
+  const { hasAccess } = usePremiumAccess();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -26,22 +28,22 @@ const Navbar = () => {
 
   const learningLinks = [
     { href: "/browse-courses", label: "Browse Courses" },
-    { href: "/project-templates", label: "Project Templates" },
+    ...(user && hasAccess('pro') ? [{ href: "/project-templates", label: "Project Templates" }] : []),
     { href: "/code-snippets", label: "Code Library" },
     { href: "/live-classes", label: "Live Classes" },
   ];
 
   const toolsLinks = [
-    { href: "/map-playground", label: "Map Playground" },
+    ...(user && hasAccess('pro') ? [{ href: "/map-playground", label: "Map Playground" }] : []),
     { href: "/spatial-analysis", label: "Spatial Analysis" },
-    { href: "/geoai-lab", label: "GeoAI Lab" },
-    { href: "/geo-processing-lab", label: "Geo Processing Lab" },
-    { href: "/webgis-builder", label: "Web GIS Builder" },
+    ...(user && hasAccess('pro') ? [{ href: "/geoai-lab", label: "GeoAI Lab" }] : []),
+    ...(user && hasAccess('pro') ? [{ href: "/geo-processing-lab", label: "Geo Processing Lab" }] : []),
+    ...(user && hasAccess('enterprise') ? [{ href: "/webgis-builder", label: "Web GIS Builder" }] : []),
   ];
 
   const marketplaceLinks = [
-    { href: "/gis-marketplace", label: "GIS Tools" },
-    { href: "/plugin-marketplace", label: "Plugins & Scripts" },
+    ...(user && hasAccess('pro') ? [{ href: "/gis-marketplace", label: "GIS Tools" }] : []),
+    ...(user && hasAccess('pro') ? [{ href: "/plugin-marketplace", label: "Plugins & Scripts" }] : []),
     { href: "/talent-pool", label: "Hire Talent" },
     { href: "/task-board", label: "Freelance Projects" },
     { href: "/certifications", label: "Certifications" },

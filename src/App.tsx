@@ -154,16 +154,16 @@ function App() {
                       <Projects />
                     </ProtectedRoute>
                   } />
-                  <Route path="/project-templates" element={
-                    <ProtectedRoute>
-                      <ProjectTemplates />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/map-playground" element={
-                    <ProtectedRoute>
-                      <MapPlayground />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/project-templates" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <ProjectTemplates />
+                     </SubscriptionRoute>
+                   } />
+                   <Route path="/map-playground" element={
+                     <SubscriptionRoute requiredTier="pro">
+                       <MapPlayground />
+                     </SubscriptionRoute>
+                   } />
                   <Route path="/notes" element={
                     <ProtectedRoute>
                       <Notes />
