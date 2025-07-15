@@ -28,17 +28,13 @@ export const useUserRoles = () => {
     if (!user) return;
 
     try {
-      console.log('Fetching user roles for user:', user.id);
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', user.id);
+        .rpc('get_user_roles_bypass_rls', { p_user_id: user.id });
 
       if (error) {
         console.error('Error fetching user roles:', error);
         throw error;
       }
-      console.log('User roles data:', data);
       setRoles(data || []);
     } catch (error) {
       console.error('Error fetching user roles:', error);
@@ -52,8 +48,6 @@ export const useUserRoles = () => {
   };
 
   const isSuperAdmin = (): boolean => {
-    console.log('isSuperAdmin check - roles:', roles);
-    console.log('isSuperAdmin check - hasRole("super_admin"):', hasRole('super_admin'));
     return hasRole('super_admin');
   };
 

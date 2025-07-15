@@ -2966,6 +2966,16 @@ export type Database = {
           reason: string
         }[]
       }
+      get_user_roles_bypass_rls: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          granted_at: string
+          granted_by: string
+        }[]
+      }
       has_role_bypass_rls: {
         Args: {
           p_user_id: string

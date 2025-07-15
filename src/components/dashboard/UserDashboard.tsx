@@ -92,12 +92,7 @@ const UserDashboard = () => {
             Continue your geospatial journey and explore new opportunities
             </p>
           </div>
-          {(() => {
-            console.log('Dashboard: isSuperAdmin():', isSuperAdmin());
-            console.log('Dashboard: hasAccess("premium"):', hasAccess('premium'));
-            console.log('Dashboard: roles loading:', rolesLoading);
-            return isSuperAdmin();
-          })() ? (
+          {isSuperAdmin() ? (
             <Card className="max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
