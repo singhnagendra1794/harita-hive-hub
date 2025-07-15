@@ -11,6 +11,7 @@ import PluginCard from "../components/marketplace/PluginCard";
 import PluginUploadForm from "../components/marketplace/PluginUploadForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useNavigate } from "react-router-dom";
 
 const PluginMarketplace = () => {
@@ -19,7 +20,11 @@ const PluginMarketplace = () => {
   const [selectedTech, setSelectedTech] = useState("all");
   const [showUploadForm, setShowUploadForm] = useState(false);
   const { canAccessPluginMarketplace, subscription } = usePremiumAccess();
+  const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
+  
+  // Super admin has full access
+  const hasFullAccess = isSuperAdmin() || canAccessPluginMarketplace();
 
   // Mock data - replace with real data from your backend
   const plugins = [
@@ -90,7 +95,7 @@ const PluginMarketplace = () => {
     <Layout>
       <div className="container py-8">
         {/* Access Gate for Non-Pro Users */}
-        {!canAccessPluginMarketplace() && (
+        {!hasFullAccess && (
           <div className="mb-8">
             <Card className="border-primary bg-gradient-to-r from-primary/5 to-secondary/5">
               <CardContent className="p-6">
@@ -121,7 +126,7 @@ const PluginMarketplace = () => {
           <h1 className="text-4xl font-bold mb-4">GIS Plugin Marketplace</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Discover, download, and share powerful GIS tools created by the community.
-            {!canAccessPluginMarketplace() && (
+            {!hasFullAccess && (
               <span className="block mt-2 text-primary font-medium">
                 Upgrade to Professional plan for full access
               </span>
@@ -154,12 +159,12 @@ const PluginMarketplace = () => {
             <DialogTrigger asChild>
               <Button 
                 size="lg" 
-                disabled={!canAccessPluginMarketplace()}
-                onClick={canAccessPluginMarketplace() ? undefined : handleUpgradeClick}
+                disabled={!hasFullAccess}
+                onClick={hasFullAccess ? undefined : handleUpgradeClick}
               >
-                {!canAccessPluginMarketplace() && <Lock className="h-5 w-5 mr-2" />}
+                {!hasFullAccess && <Lock className="h-5 w-5 mr-2" />}
                 <Plus className="h-5 w-5 mr-2" />
-                {canAccessPluginMarketplace() ? "Submit Your Plugin" : "Pro Required"}
+                {hasFullAccess ? "Submit Your Plugin" : "Pro Required"}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -237,7 +242,7 @@ const PluginMarketplace = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredPlugins.map(plugin => (
-                <div key={plugin.id} className={!canAccessPluginMarketplace() ? "opacity-60" : ""}>
+                <div key={plugin.id} className={!hasFullAccess ? "opacity-60" : ""}>
                   <PluginCard plugin={plugin} />
                 </div>
               ))}
@@ -265,7 +270,7 @@ const PluginMarketplace = () => {
           {filteredPlugins.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPlugins.map(plugin => (
-                <div key={plugin.id} className={!canAccessPluginMarketplace() ? "opacity-60" : ""}>
+                <div key={plugin.id} className={!hasFullAccess ? "opacity-60" : ""}>
                   <PluginCard plugin={plugin} />
                 </div>
               ))}
