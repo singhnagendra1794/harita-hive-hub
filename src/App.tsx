@@ -73,6 +73,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 import BrowseCourses from "./pages/BrowseCourses";
+import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/about" element={<About />} />
           <Route path="/browse-courses" element={<BrowseCourses />} />
+          <Route path="/courses/geospatial-fullstack-developer" element={<GeospatialFullstackDeveloper />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />

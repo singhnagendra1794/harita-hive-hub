@@ -16,10 +16,13 @@ import {
   Layers,
   BarChart3,
   Satellite,
-  TreePine
+  TreePine,
+  Code
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import geospatialThumbnail from "@/assets/courses/geospatial-fullstack-thumbnail.jpg";
 
 const BrowseCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -252,6 +255,44 @@ const BrowseCourses = () => {
         "Excellent hands-on web development course!",
         "Alex is a fantastic instructor with real industry experience."
       ]
+    },
+    {
+      id: 7,
+      title: "Geospatial Full Stack Developer",
+      description: "Master Web GIS, PostGIS, React Leaflet, and real-time mapping with AI-powered instruction",
+      instructor: "AI Avatar Instructor",
+      timeline: "August 2025 - October 2025",
+      duration: "12 weeks",
+      level: "Advanced",
+      category: "fullstack",
+      icon: Code,
+      features: [
+        "PostGIS + Express API development",
+        "React + Leaflet integration",
+        "MapLibre GL for 3D visualizations",
+        "Real-time GIS with WebSockets",
+        "Supabase spatial backend",
+        "Production deployment"
+      ],
+      learningOutcomes: [
+        "Build full-stack geospatial applications",
+        "Master modern GIS web stack",
+        "Implement real-time mapping features",
+        "Deploy production-ready apps",
+        "Integrate AI/ML with spatial data"
+      ],
+      prerequisites: "JavaScript, React basics, and GIS fundamentals",
+      price: "₹14,999",
+      earlyBird: "₹11,999",
+      enrolled: 0,
+      maxStudents: 100,
+      rating: 5.0,
+      testimonials: [
+        "Revolutionary approach with AI instructor!",
+        "Perfect blend of modern tech and GIS expertise."
+      ],
+      isNew: true,
+      courseUrl: "/courses/geospatial-fullstack-developer"
     }
   ];
 
@@ -262,7 +303,8 @@ const BrowseCourses = () => {
     { value: "remote-sensing", label: "Remote Sensing", count: upcomingCourses.filter(c => c.category === "remote-sensing").length },
     { value: "urban-planning", label: "Urban Planning", count: upcomingCourses.filter(c => c.category === "urban-planning").length },
     { value: "environmental", label: "Environmental", count: upcomingCourses.filter(c => c.category === "environmental").length },
-    { value: "web-development", label: "Web Development", count: upcomingCourses.filter(c => c.category === "web-development").length }
+    { value: "web-development", label: "Web Development", count: upcomingCourses.filter(c => c.category === "web-development").length },
+    { value: "fullstack", label: "Full Stack", count: upcomingCourses.filter(c => c.category === "fullstack").length }
   ];
 
   const filteredCourses = upcomingCourses.filter(course => {
@@ -354,6 +396,15 @@ const BrowseCourses = () => {
             
             return (
               <Card key={course.id} className="hover:shadow-lg transition-shadow">
+                {course.isNew && (
+                  <div className="aspect-video relative overflow-hidden rounded-t-lg">
+                    <img 
+                      src={geospatialThumbnail} 
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
@@ -367,9 +418,15 @@ const BrowseCourses = () => {
                         </CardDescription>
                       </div>
                     </div>
-                    <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                      COMING SOON
-                    </Badge>
+                    {course.isNew ? (
+                      <Badge className="bg-primary text-primary-foreground">
+                        NEW - LAUNCHING AUG 2025
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                        COMING SOON
+                      </Badge>
+                    )}
                   </div>
                   
                   {/* Course Metadata */}
@@ -488,12 +545,20 @@ const BrowseCourses = () => {
                     )}
 
                     {/* Action Button */}
-                    <Button 
-                      className="w-full"
-                      onClick={() => handleJoinWaitlist(course.id)}
-                    >
-                      Join Waitlist - Get Early Access
-                    </Button>
+                    {course.courseUrl ? (
+                      <Link to={course.courseUrl}>
+                        <Button className="w-full">
+                          View Course Details
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button 
+                        className="w-full"
+                        onClick={() => handleJoinWaitlist(course.id)}
+                      >
+                        Join Waitlist - Get Early Access
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
