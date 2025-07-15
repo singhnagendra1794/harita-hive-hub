@@ -14,11 +14,13 @@ interface Plugin {
   description: string;
   category: string;
   tech_stack: string[];
+  tags: string[];
   download_count: number;
   rating: number;
   author: string;
   download_url?: string;
   github_url?: string;
+  license: string;
   is_featured: boolean;
   created_at: string;
 }
@@ -98,18 +100,24 @@ const PluginCard = ({ plugin }: PluginCardProps) => {
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{plugin.description}</p>
         
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className="text-xs">
               {plugin.category}
             </Badge>
-            {plugin.tech_stack.slice(0, 3).map((tech, index) => (
+            <Badge variant="outline" className="text-xs">
+              {plugin.license}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center gap-1 flex-wrap">
+            {plugin.tags.slice(0, 3).map((tag, index) => (
               <Badge key={index} variant="secondary" className="text-xs">
-                {getTechIcon(tech)} {tech}
+                #{tag}
               </Badge>
             ))}
-            {plugin.tech_stack.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{plugin.tech_stack.length - 3} more
+            {plugin.tags.length > 3 && (
+              <Badge variant="secondary" className="text-xs">
+                +{plugin.tags.length - 3} more
               </Badge>
             )}
           </div>

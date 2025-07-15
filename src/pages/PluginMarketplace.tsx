@@ -26,90 +26,423 @@ const PluginMarketplace = () => {
   // Super admin has full access
   const hasFullAccess = isSuperAdmin() || canAccessPluginMarketplace();
 
-  // Plugin data with HaritaHive-hosted downloads
+  // Comprehensive geospatial tools collection
   const plugins = [
+    // Vector Tools
     {
       id: "1",
       title: "Advanced Buffer Tool",
       description: "Create complex buffers with varying distances and custom shapes for advanced spatial analysis.",
-      category: "QGIS Plugin",
+      category: "Vector",
       tech_stack: ["Python", "QGIS", "PyQt"],
+      tags: ["Vector", "Spatial Analysis", "QGIS"],
       download_count: 1250,
       rating: 4.8,
       author: "HaritaHive Team",
       download_url: "https://haritahive.com/downloads/buffer-tool.zip",
       github_url: "https://github.com/haritahive/buffer-tool",
+      license: "MIT",
       is_featured: true,
       created_at: "2024-01-15"
     },
     {
       id: "2",
-      title: "Leaflet Heatmap Widget",
-      description: "Interactive heatmap visualization component for web mapping applications.",
-      category: "JavaScript Widget",
-      tech_stack: ["JavaScript", "Leaflet", "D3.js"],
-      download_count: 850,
+      title: "Polygon Simplifier",
+      description: "Reduce polygon complexity while preserving geometric integrity using Douglas-Peucker algorithm.",
+      category: "Vector",
+      tech_stack: ["Python", "Shapely", "GDAL"],
+      tags: ["Vector", "Optimization", "Geometry"],
+      download_count: 845,
       rating: 4.6,
       author: "HaritaHive Team",
-      download_url: "https://haritahive.com/downloads/heatmap-widget.zip",
-      github_url: "https://github.com/haritahive/heatmap-widget",
+      download_url: "https://haritahive.com/downloads/polygon-simplifier.py",
+      github_url: "https://github.com/haritahive/polygon-simplifier",
+      license: "MIT",
       is_featured: false,
-      created_at: "2024-02-01"
+      created_at: "2024-01-18"
     },
     {
       id: "3",
-      title: "Satellite Image Classifier",
-      description: "Python script for automated land cover classification using machine learning.",
-      category: "Python Script",
-      tech_stack: ["Python", "scikit-learn", "GDAL", "NumPy"],
-      download_count: 2100,
-      rating: 4.9,
+      title: "Vector Topology Validator",
+      description: "Detect and fix topology errors in vector datasets including gaps, overlaps, and slivers.",
+      category: "Vector",
+      tech_stack: ["Python", "QGIS", "PostGIS"],
+      tags: ["Vector", "Quality Control", "Topology"],
+      download_count: 1120,
+      rating: 4.7,
       author: "HaritaHive Team",
-      download_url: "https://haritahive.com/downloads/satellite-classifier.py",
-      github_url: "https://github.com/haritahive/satellite-classifier",
-      is_featured: true,
-      created_at: "2024-01-20"
+      download_url: "https://haritahive.com/downloads/topology-validator.zip",
+      github_url: "https://github.com/haritahive/topology-validator",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-01-22"
     },
+
+    // Raster Tools
     {
       id: "4",
       title: "NDVI Analysis Tool",
       description: "Calculate and visualize Normalized Difference Vegetation Index from satellite imagery.",
-      category: "QGIS Plugin",
+      category: "Raster",
       tech_stack: ["Python", "QGIS", "GDAL"],
+      tags: ["Raster", "Remote Sensing", "Vegetation"],
       download_count: 1680,
       rating: 4.7,
       author: "HaritaHive Team",
       download_url: "https://haritahive.com/downloads/ndvi-analysis.qgz",
       github_url: "https://github.com/haritahive/ndvi-analysis",
+      license: "BSD-3",
       is_featured: true,
       created_at: "2024-02-10"
     },
     {
       id: "5",
+      title: "Raster Mosaic Creator",
+      description: "Seamlessly mosaic multiple raster files with color matching and edge blending.",
+      category: "Raster",
+      tech_stack: ["Python", "GDAL", "OpenCV"],
+      tags: ["Raster", "Processing", "Mosaicking"],
+      download_count: 1450,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/raster-mosaic.py",
+      github_url: "https://github.com/haritahive/raster-mosaic",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-02-05"
+    },
+    {
+      id: "6",
+      title: "DEM Analysis Suite",
+      description: "Extract slope, aspect, hillshade, and watershed from Digital Elevation Models.",
+      category: "Raster",
+      tech_stack: ["Python", "GDAL", "NumPy"],
+      tags: ["Raster", "DEM", "Terrain Analysis"],
+      download_count: 2240,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/dem-analysis.zip",
+      github_url: "https://github.com/haritahive/dem-analysis",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-01-28"
+    },
+
+    // Remote Sensing
+    {
+      id: "7",
+      title: "Satellite Image Classifier",
+      description: "Python script for automated land cover classification using machine learning.",
+      category: "Remote Sensing",
+      tech_stack: ["Python", "scikit-learn", "GDAL", "NumPy"],
+      tags: ["Remote Sensing", "ML & AI", "Classification"],
+      download_count: 2100,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/satellite-classifier.py",
+      github_url: "https://github.com/haritahive/satellite-classifier",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-01-20"
+    },
+    {
+      id: "8",
+      title: "Sentinel-2 Downloader",
+      description: "Automated download and preprocessing of Sentinel-2 satellite imagery.",
+      category: "Remote Sensing",
+      tech_stack: ["Python", "Sentinelsat", "GDAL"],
+      tags: ["Remote Sensing", "Data Download", "Sentinel"],
+      download_count: 1890,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/sentinel-downloader.py",
+      github_url: "https://github.com/haritahive/sentinel-downloader",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-02-12"
+    },
+    {
+      id: "9",
+      title: "Change Detection Tool",
+      description: "Detect land cover changes between multi-temporal satellite images.",
+      category: "Remote Sensing",
+      tech_stack: ["Python", "OpenCV", "scikit-image"],
+      tags: ["Remote Sensing", "Change Detection", "Time Series"],
+      download_count: 1560,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/change-detection.py",
+      github_url: "https://github.com/haritahive/change-detection",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-02-18"
+    },
+
+    // Spatial Analysis
+    {
+      id: "10",
+      title: "Network Analysis Toolkit",
+      description: "Advanced routing, service areas, and network optimization for transportation planning.",
+      category: "Spatial Analysis",
+      tech_stack: ["Python", "NetworkX", "OSMnx"],
+      tags: ["Spatial Analysis", "Network", "Transportation"],
+      download_count: 1340,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/network-analysis.zip",
+      github_url: "https://github.com/haritahive/network-analysis",
+      license: "BSD-3",
+      is_featured: true,
+      created_at: "2024-02-08"
+    },
+    {
+      id: "11",
+      title: "Hotspot Analysis Tool",
+      description: "Identify spatial clusters and hotspots using Getis-Ord Gi* statistics.",
+      category: "Spatial Analysis",
+      tech_stack: ["Python", "PySAL", "NumPy"],
+      tags: ["Spatial Analysis", "Statistics", "Clustering"],
+      download_count: 980,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/hotspot-analysis.py",
+      github_url: "https://github.com/haritahive/hotspot-analysis",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-02-14"
+    },
+
+    // Web GIS
+    {
+      id: "12",
+      title: "Leaflet Heatmap Widget",
+      description: "Interactive heatmap visualization component for web mapping applications.",
+      category: "Web GIS",
+      tech_stack: ["JavaScript", "Leaflet", "D3.js"],
+      tags: ["Web GIS", "Visualization", "JavaScript"],
+      download_count: 850,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/heatmap-widget.zip",
+      github_url: "https://github.com/haritahive/heatmap-widget",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-02-01"
+    },
+    {
+      id: "13",
+      title: "Mapbox GL Clustering Plugin",
+      description: "Advanced point clustering with custom styling for Mapbox GL JS.",
+      category: "Web GIS",
+      tech_stack: ["JavaScript", "Mapbox GL", "WebGL"],
+      tags: ["Web GIS", "Clustering", "Performance"],
+      download_count: 1230,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/mapbox-clustering.js",
+      github_url: "https://github.com/haritahive/mapbox-clustering",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-02-20"
+    },
+    {
+      id: "14",
+      title: "GeoJSON Editor Widget",
+      description: "Interactive web-based editor for creating and modifying GeoJSON features.",
+      category: "Web GIS",
+      tech_stack: ["JavaScript", "Leaflet", "React"],
+      tags: ["Web GIS", "Editor", "GeoJSON"],
+      download_count: 760,
+      rating: 4.5,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/geojson-editor.zip",
+      github_url: "https://github.com/haritahive/geojson-editor",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-02-25"
+    },
+
+    // Data Conversion
+    {
+      id: "15",
       title: "Coordinate Transformer",
       description: "Batch transform coordinates between different coordinate reference systems.",
-      category: "Python Script",
+      category: "Data Conversion",
       tech_stack: ["Python", "pyproj", "pandas"],
+      tags: ["Data Conversion", "CRS", "Batch Processing"],
       download_count: 920,
       rating: 4.5,
       author: "HaritaHive Team",
       download_url: "https://haritahive.com/downloads/coordinate-transformer.py",
       github_url: "https://github.com/haritahive/coordinate-transformer",
+      license: "MIT",
       is_featured: false,
       created_at: "2024-02-15"
+    },
+    {
+      id: "16",
+      title: "Shapefile to GeoJSON Converter",
+      description: "High-performance batch conversion between vector formats with attribute preservation.",
+      category: "Data Conversion",
+      tech_stack: ["Python", "Fiona", "GDAL"],
+      tags: ["Data Conversion", "Vector", "Format Conversion"],
+      download_count: 1680,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/vector-converter.py",
+      github_url: "https://github.com/haritahive/vector-converter",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-01-25"
+    },
+    {
+      id: "17",
+      title: "CSV to Point Layer Tool",
+      description: "Convert CSV files with coordinates to vector point layers with automatic CRS detection.",
+      category: "Data Conversion",
+      tech_stack: ["Python", "GeoPandas", "pandas"],
+      tags: ["Data Conversion", "CSV", "Point Data"],
+      download_count: 1420,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/csv-to-points.py",
+      github_url: "https://github.com/haritahive/csv-to-points",
+      license: "BSD-3",
+      is_featured: false,
+      created_at: "2024-02-03"
+    },
+
+    // Urban Planning
+    {
+      id: "18",
+      title: "Land Use Compatibility Matrix",
+      description: "Analyze land use conflicts and compatibility for urban planning projects.",
+      category: "Urban Planning",
+      tech_stack: ["Python", "QGIS", "NumPy"],
+      tags: ["Urban Planning", "Land Use", "Compatibility"],
+      download_count: 670,
+      rating: 4.4,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/land-use-matrix.zip",
+      github_url: "https://github.com/haritahive/land-use-matrix",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-02-28"
+    },
+    {
+      id: "19",
+      title: "Walkability Index Calculator",
+      description: "Calculate pedestrian walkability scores based on street connectivity and amenities.",
+      category: "Urban Planning",
+      tech_stack: ["Python", "OSMnx", "NetworkX"],
+      tags: ["Urban Planning", "Walkability", "OpenStreetMap"],
+      download_count: 890,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/walkability-index.py",
+      github_url: "https://github.com/haritahive/walkability-index",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-03-02"
+    },
+
+    // Disaster Management
+    {
+      id: "20",
+      title: "Flood Risk Assessment Tool",
+      description: "Multi-criteria flood risk analysis using DEM, precipitation, and land use data.",
+      category: "Disaster Management",
+      tech_stack: ["Python", "GDAL", "NumPy"],
+      tags: ["Disaster Management", "Flood", "Risk Assessment"],
+      download_count: 1120,
+      rating: 4.8,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/flood-risk.zip",
+      github_url: "https://github.com/haritahive/flood-risk",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-03-05"
+    },
+    {
+      id: "21",
+      title: "Emergency Evacuation Router",
+      description: "Calculate optimal evacuation routes considering capacity constraints and hazards.",
+      category: "Disaster Management",
+      tech_stack: ["Python", "NetworkX", "OSMnx"],
+      tags: ["Disaster Management", "Evacuation", "Routing"],
+      download_count: 780,
+      rating: 4.6,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/evacuation-router.py",
+      github_url: "https://github.com/haritahive/evacuation-router",
+      license: "BSD-3",
+      is_featured: false,
+      created_at: "2024-03-08"
+    },
+
+    // AI/ML Tools
+    {
+      id: "22",
+      title: "Object Detection for Satellite Images",
+      description: "Deep learning models for detecting buildings, roads, and vegetation in satellite imagery.",
+      category: "ML & AI",
+      tech_stack: ["Python", "TensorFlow", "OpenCV"],
+      tags: ["ML & AI", "Object Detection", "Deep Learning"],
+      download_count: 1560,
+      rating: 4.9,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/object-detection.zip",
+      github_url: "https://github.com/haritahive/object-detection",
+      license: "Apache 2.0",
+      is_featured: true,
+      created_at: "2024-03-10"
+    },
+    {
+      id: "23",
+      title: "Crop Yield Predictor",
+      description: "Machine learning model for predicting crop yields using satellite data and weather.",
+      category: "ML & AI",
+      tech_stack: ["Python", "scikit-learn", "pandas"],
+      tags: ["ML & AI", "Agriculture", "Prediction"],
+      download_count: 940,
+      rating: 4.5,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/crop-predictor.py",
+      github_url: "https://github.com/haritahive/crop-predictor",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-03-12"
     }
   ];
 
-  const categories = ["all", "QGIS Plugin", "Python Script", "JavaScript Widget", "ArcGIS Tool", "Web Component"];
-  const techStack = ["all", "Python", "JavaScript", "QGIS", "ArcGIS", "Leaflet", "OpenLayers"];
+  const categories = [
+    "all", "Vector", "Raster", "Remote Sensing", "Spatial Analysis", 
+    "Web GIS", "Data Conversion", "Urban Planning", "Disaster Management", "ML & AI"
+  ];
+  
+  const techStack = [
+    "all", "Python", "JavaScript", "QGIS", "GDAL", "Leaflet", "Mapbox GL", 
+    "TensorFlow", "scikit-learn", "NumPy", "OpenCV", "React"
+  ];
+
+  // Add state for tag filtering
+  const [selectedTag, setSelectedTag] = useState("all");
+  const [selectedLicense, setSelectedLicense] = useState("all");
+  
+  const allTags = ["all", "Vector", "Raster", "Remote Sensing", "ML & AI", "Web GIS", 
+                   "Spatial Analysis", "Urban Planning", "Disaster Management", "Data Conversion"];
+  const licenses = ["all", "MIT", "Apache 2.0", "BSD-3"];
 
   const filteredPlugins = plugins.filter(plugin => {
     const matchesSearch = plugin.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plugin.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         plugin.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         plugin.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "all" || plugin.category === selectedCategory;
     const matchesTech = selectedTech === "all" || plugin.tech_stack.includes(selectedTech);
+    const matchesTag = selectedTag === "all" || plugin.tags.includes(selectedTag);
+    const matchesLicense = selectedLicense === "all" || plugin.license === selectedLicense;
     
-    return matchesSearch && matchesCategory && matchesTech;
+    return matchesSearch && matchesCategory && matchesTech && matchesTag && matchesLicense;
   });
 
   const featuredPlugins = plugins.filter(p => p.is_featured);
@@ -242,20 +575,58 @@ const PluginMarketplace = () => {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select value={selectedTag} onValueChange={setSelectedTag}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Tags" />
+              </SelectTrigger>
+              <SelectContent>
+                {allTags.map(tag => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag === "all" ? "All Tags" : tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedLicense} onValueChange={setSelectedLicense}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="License" />
+              </SelectTrigger>
+              <SelectContent>
+                {licenses.map(license => (
+                  <SelectItem key={license} value={license}>
+                    {license === "all" ? "All Licenses" : license}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Active Filters */}
           <div className="flex flex-wrap gap-2">
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="flex items-center gap-1">
-                {selectedCategory}
+                Category: {selectedCategory}
                 <button onClick={() => setSelectedCategory("all")}>×</button>
               </Badge>
             )}
             {selectedTech !== "all" && (
               <Badge variant="secondary" className="flex items-center gap-1">
-                {selectedTech}
+                Tech: {selectedTech}
                 <button onClick={() => setSelectedTech("all")}>×</button>
+              </Badge>
+            )}
+            {selectedTag !== "all" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Tag: {selectedTag}
+                <button onClick={() => setSelectedTag("all")}>×</button>
+              </Badge>
+            )}
+            {selectedLicense !== "all" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                License: {selectedLicense}
+                <button onClick={() => setSelectedLicense("all")}>×</button>
               </Badge>
             )}
           </div>
