@@ -47,7 +47,7 @@ export const useUserRoles = () => {
   };
 
   const isSuperAdmin = (): boolean => {
-    return hasRole('super_admin') && user?.email === 'contact@haritahive.com';
+    return hasRole('super_admin');
   };
 
   const grantRole = async (userId: string, role: AppRole) => {

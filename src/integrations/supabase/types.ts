@@ -2966,6 +2966,13 @@ export type Database = {
           reason: string
         }[]
       }
+      has_role_bypass_rls: {
+        Args: {
+          p_user_id: string
+          p_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
       increment_download_count: {
         Args: { template_id: string }
         Returns: undefined
@@ -2980,6 +2987,10 @@ export type Database = {
       }
       is_super_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_super_admin_bypass_rls: {
+        Args: { p_user_id: string }
         Returns: boolean
       }
       start_stream_session: {
