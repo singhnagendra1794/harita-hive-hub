@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 interface UserSubscription {
   id: string;
@@ -26,16 +27,16 @@ interface PremiumContent {
 
 export const usePremiumAccess = () => {
   const { user } = useAuth();
+  const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initializeAccess = async () => {
-      if (!user) {
+      if (!user || rolesLoading) {
         setSubscription(null);
         setHasPremiumAccess(false);
-        setLoading(false);
         return;
       }
 
@@ -51,17 +52,23 @@ export const usePremiumAccess = () => {
           return;
         }
 
-        await Promise.all([fetchUserSubscription(), checkPremiumAccess()]);
+        await fetchUserSubscription();
       } catch (error) {
         console.error('Error initializing premium access:', error);
         setSubscription(null);
         setHasPremiumAccess(false);
+      } finally {
         setLoading(false);
       }
     };
 
     initializeAccess();
-  }, [user]);
+  }, [user, rolesLoading]);
+
+  // Update premium access whenever subscription or roles change
+  useEffect(() => {
+    checkPremiumAccess();
+  }, [subscription, isSuperAdmin]);
 
   const fetchUserSubscription = async () => {
     if (!user) return;
@@ -87,21 +94,24 @@ export const usePremiumAccess = () => {
     }
   };
 
-  const checkPremiumAccess = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .rpc('user_has_premium_access', { p_user_id: user.id });
-
-      if (error) throw error;
-      setHasPremiumAccess(data || false);
-    } catch (error) {
-      console.error('Error checking premium access:', error);
+  const checkPremiumAccess = () => {
+    if (!user || !subscription) {
       setHasPremiumAccess(false);
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    // Super admin users have access to everything
+    if (isSuperAdmin()) {
+      setHasPremiumAccess(true);
+      return;
+    }
+
+    // Check if user has pro or enterprise subscription
+    const hasProOrEnterprise = subscription.subscription_tier === 'pro' || subscription.subscription_tier === 'enterprise';
+    const isActive = subscription.status === 'active' && 
+      (subscription.expires_at === null || new Date(subscription.expires_at) > new Date());
+    
+    setHasPremiumAccess(hasProOrEnterprise && isActive);
   };
 
   const checkContentAccess = async (contentType: string, contentId: string): Promise<boolean> => {
@@ -215,7 +225,12 @@ export const usePremiumAccess = () => {
   };
 
   const hasAccess = (requiredTier: 'free' | 'premium' | 'pro' | 'enterprise' = 'premium'): boolean => {
-    if (!user || !subscription) return requiredTier === 'free';
+    if (!user) return requiredTier === 'free';
+    
+    // Super admin users have access to everything
+    if (isSuperAdmin()) return true;
+    
+    if (!subscription) return requiredTier === 'free';
     
     const tierHierarchy = {
       'free': 0,
