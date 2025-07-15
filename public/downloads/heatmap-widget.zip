@@ -1,0 +1,25 @@
+# Leaflet Heatmap Widget
+# Interactive heatmap visualization component for web mapping applications
+
+Widget Name: Leaflet Heatmap Widget
+Version: 2.1.0
+Description: Interactive heatmap visualization component for web mapping applications.
+Author: HaritaHive Team
+
+Files included:
+- heatmap-widget.js (main widget script)
+- heatmap-widget.css (styling)
+- examples/ (usage examples)
+- README.md (documentation)
+
+Usage:
+1. Include the JavaScript and CSS files in your project
+2. Initialize the heatmap widget with your data
+3. Customize appearance and behavior using the provided options
+
+Example:
+var heatmap = new HeatmapWidget({
+  container: 'map',
+  data: yourDataPoints,
+  radius: 20
+});

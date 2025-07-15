@@ -1,0 +1,21 @@
+# Advanced Buffer Tool Plugin
+# This is a placeholder file - replace with actual QGIS plugin
+# Contains: Buffer analysis tool with advanced geometric operations
+
+Plugin Name: Advanced Buffer Tool
+Version: 1.2.0
+Description: Create complex buffers with varying distances and custom shapes for advanced spatial analysis.
+Author: HaritaHive Team
+
+Files included:
+- buffer_tool.py (main plugin script)
+- metadata.txt (plugin configuration)
+- __init__.py (plugin initialization)
+- ui/ (user interface files)
+
+Installation:
+1. Download this ZIP file
+2. Open QGIS
+3. Go to Plugins > Manage and Install Plugins
+4. Click "Install from ZIP"
+5. Select this file

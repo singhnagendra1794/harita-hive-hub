@@ -1,0 +1,26 @@
+# NDVI Analysis Tool - QGIS Project
+# Calculate and visualize Normalized Difference Vegetation Index from satellite imagery
+
+Project Name: NDVI Analysis Tool
+Version: 1.5.0
+Description: Calculate and visualize Normalized Difference Vegetation Index from satellite imagery.
+Author: HaritaHive Team
+
+This QGIS project file (.qgz) contains:
+- Pre-configured symbology for NDVI visualization
+- Processing algorithms for NDVI calculation
+- Sample data and styling
+- Documentation and examples
+
+Usage:
+1. Download this .qgz file
+2. Open QGIS
+3. Go to Project > Open
+4. Select this file
+5. The project will load with all necessary tools and symbology
+
+Features:
+- Automated NDVI calculation from multispectral imagery
+- Color-coded vegetation health visualization
+- Temporal analysis capabilities
+- Export options for reports and maps

@@ -54,11 +54,22 @@ const PluginCard = ({ plugin }: PluginCardProps) => {
       return;
     }
     
-    if (plugin.download_url) {
+    if (!plugin.download_url) {
+      toast.error("This plugin is not yet available for download.");
+      return;
+    }
+
+    // Validate HaritaHive hosting
+    if (!plugin.download_url.startsWith('https://haritahive.com/')) {
+      toast.error("Invalid download source. All downloads must be hosted on HaritaHive.");
+      return;
+    }
+    
+    try {
       window.open(plugin.download_url, '_blank');
       toast.success("Download started!");
-    } else {
-      toast.error("Download URL not available");
+    } catch (error) {
+      toast.error("Failed to start download. Please try again.");
     }
   };
 

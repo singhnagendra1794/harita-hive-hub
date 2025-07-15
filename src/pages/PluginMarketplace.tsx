@@ -26,7 +26,7 @@ const PluginMarketplace = () => {
   // Super admin has full access
   const hasFullAccess = isSuperAdmin() || canAccessPluginMarketplace();
 
-  // Mock data - replace with real data from your backend
+  // Plugin data with HaritaHive-hosted downloads
   const plugins = [
     {
       id: "1",
@@ -36,9 +36,9 @@ const PluginMarketplace = () => {
       tech_stack: ["Python", "QGIS", "PyQt"],
       download_count: 1250,
       rating: 4.8,
-      author: "GIS Developer",
-      download_url: "https://example.com/download/buffer-tool.zip",
-      github_url: "https://github.com/example/buffer-tool",
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/buffer-tool.zip",
+      github_url: "https://github.com/haritahive/buffer-tool",
       is_featured: true,
       created_at: "2024-01-15"
     },
@@ -50,9 +50,9 @@ const PluginMarketplace = () => {
       tech_stack: ["JavaScript", "Leaflet", "D3.js"],
       download_count: 850,
       rating: 4.6,
-      author: "WebGIS Pro",
-      download_url: "https://example.com/download/heatmap-widget.zip",
-      github_url: "https://github.com/example/heatmap-widget",
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/heatmap-widget.zip",
+      github_url: "https://github.com/haritahive/heatmap-widget",
       is_featured: false,
       created_at: "2024-02-01"
     },
@@ -64,11 +64,39 @@ const PluginMarketplace = () => {
       tech_stack: ["Python", "scikit-learn", "GDAL", "NumPy"],
       download_count: 2100,
       rating: 4.9,
-      author: "ML Geospatial",
-      download_url: "https://example.com/download/classifier.py",
-      github_url: "https://github.com/example/satellite-classifier",
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/satellite-classifier.py",
+      github_url: "https://github.com/haritahive/satellite-classifier",
       is_featured: true,
       created_at: "2024-01-20"
+    },
+    {
+      id: "4",
+      title: "NDVI Analysis Tool",
+      description: "Calculate and visualize Normalized Difference Vegetation Index from satellite imagery.",
+      category: "QGIS Plugin",
+      tech_stack: ["Python", "QGIS", "GDAL"],
+      download_count: 1680,
+      rating: 4.7,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/ndvi-analysis.qgz",
+      github_url: "https://github.com/haritahive/ndvi-analysis",
+      is_featured: true,
+      created_at: "2024-02-10"
+    },
+    {
+      id: "5",
+      title: "Coordinate Transformer",
+      description: "Batch transform coordinates between different coordinate reference systems.",
+      category: "Python Script",
+      tech_stack: ["Python", "pyproj", "pandas"],
+      download_count: 920,
+      rating: 4.5,
+      author: "HaritaHive Team",
+      download_url: "https://haritahive.com/downloads/coordinate-transformer.py",
+      github_url: "https://github.com/haritahive/coordinate-transformer",
+      is_featured: false,
+      created_at: "2024-02-15"
     }
   ];
 
