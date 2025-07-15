@@ -22,6 +22,7 @@ interface Plugin {
   github_url?: string;
   license: string;
   is_featured: boolean;
+  is_signature?: boolean;
   created_at: string;
 }
 
@@ -88,11 +89,18 @@ const PluginCard = ({ plugin }: PluginCardProps) => {
               <CardDescription>by {plugin.author}</CardDescription>
             </div>
           </div>
-          {plugin.is_featured && (
-            <Badge variant="default" className="bg-gradient-to-r from-primary to-accent">
-              Featured
-            </Badge>
-          )}
+          <div className="flex gap-2">
+            {plugin.is_signature && (
+              <Badge variant="default" className="bg-gradient-to-r from-primary to-secondary text-white">
+                Harita Signature
+              </Badge>
+            )}
+            {plugin.is_featured && (
+              <Badge variant="default" className="bg-gradient-to-r from-primary to-accent">
+                Featured
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       

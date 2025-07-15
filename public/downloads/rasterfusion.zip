@@ -1,0 +1,22 @@
+# Harita Hive RasterFusion - MIT License
+# 
+# This is a placeholder for the RasterFusion tool package.
+# 
+# The actual tool would contain:
+# - Python CLI script for raster merging across projections
+# - QGIS plugin integration
+# - JavaScript wrapper for web use
+# - Documentation and usage examples
+# - Test datasets and benchmarks
+#
+# Key Features:
+# - Multi-CRS raster alignment and merging
+# - Preserves pixel statistics and metadata
+# - Handles large datasets efficiently
+# - Cross-platform compatibility
+#
+# Usage:
+# rasterfusion merge --input dir/*.tif --output merged.tif --crs EPSG:4326
+#
+# For full implementation, see:
+# https://github.com/haritahive/rasterfusion

@@ -80,6 +80,23 @@ const PluginMarketplace = () => {
 
     // Raster Tools
     {
+      id: "rasterfusion",
+      title: "Harita Hive RasterFusion",
+      description: "Industry-leading raster merging and re-projection tool. Align, merge, and preserve statistics across multiple overlapping GeoTIFFs with any CRS. Includes CLI, QGIS plugin, and web integration.",
+      category: "Raster",
+      tech_stack: ["Python", "GDAL", "QGIS", "WebAssembly"],
+      tags: ["Raster", "Merge", "Projection", "Harita Signature"],
+      download_count: 3200,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/rasterfusion.zip",
+      github_url: "https://github.com/haritahive/rasterfusion",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-01-01",
+      is_signature: true
+    },
+    {
       id: "4",
       title: "NDVI Analysis Tool",
       description: "Calculate and visualize Normalized Difference Vegetation Index from satellite imagery.",
