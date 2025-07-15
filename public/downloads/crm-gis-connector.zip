@@ -1,0 +1,35 @@
+# CRM-GIS Connector - Harita Hive Enterprise Tool
+# Apache 2.0 License
+#
+# REST/GraphQL connector to sync GIS data with ERP/CRM systems
+# Real-time bidirectional sync with Salesforce, Zoho, and more
+#
+# Features:
+# - Real-time bidirectional synchronization
+# - Support for major CRM/ERP platforms
+# - Custom field mapping and transformation
+# - Conflict resolution strategies
+# - Audit logging and data lineage
+# - Secure authentication (OAuth2, API keys)
+#
+# Supported Platforms:
+# - Salesforce (Sales Cloud, Service Cloud)
+# - Microsoft Dynamics 365
+# - Zoho CRM
+# - HubSpot
+# - Custom REST/GraphQL APIs
+#
+# Data Flow:
+# - GIS → CRM: Location-based lead scoring
+# - CRM → GIS: Customer location mapping
+# - Bidirectional: Territory management
+#
+# Security Features:
+# - Field-level encryption
+# - Role-based access control
+# - Data masking for sensitive fields
+# - Compliance with GDPR, SOX
+#
+# Usage:
+# crm-gis-connector --platform salesforce --config sync_config.json
+# crm-gis-connector --setup-oauth --platform dynamics365

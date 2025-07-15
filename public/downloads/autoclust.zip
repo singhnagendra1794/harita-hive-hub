@@ -1,0 +1,36 @@
+# AutoClust - Harita Hive AI Clustering Tool
+# MIT License
+#
+# AI-based clustering of spatial points
+# Automatically determines optimal cluster count
+#
+# Features:
+# - Multiple clustering algorithms (DBSCAN, K-means++, HDBSCAN)
+# - Automatic optimal cluster count detection
+# - Spatial constraints and barriers support
+# - Outlier detection and handling
+# - Cluster validation metrics
+# - Interactive visualization
+#
+# Use Cases:
+# - Crime hotspot analysis
+# - Retail location optimization
+# - Utility infrastructure planning
+# - Disease outbreak clustering
+# - Customer segmentation
+#
+# Algorithms:
+# - DBSCAN: Density-based clustering
+# - HDBSCAN: Hierarchical density clustering
+# - K-means++: Improved centroid initialization
+# - Spatial K-means: Geography-aware clustering
+#
+# Cluster Validation:
+# - Silhouette score
+# - Calinski-Harabasz index
+# - Davies-Bouldin index
+# - Spatial autocorrelation metrics
+#
+# Usage:
+# autoclust --input points.shp --algorithm dbscan --auto-optimize
+# autoclust --crime-data incidents.csv --temporal-clustering --export-report

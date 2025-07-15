@@ -1,0 +1,37 @@
+# API Generator - Harita Hive Enterprise Tool
+# MIT License
+#
+# Auto-generates secure APIs for any uploaded geospatial file
+# Includes authentication and rate limiting
+#
+# Features:
+# - Automatic API generation from geospatial files
+# - RESTful and GraphQL endpoint support
+# - Built-in authentication (JWT, OAuth2, API keys)
+# - Rate limiting and quota management
+# - Automatic documentation generation
+# - CORS and security headers
+#
+# Supported Input Formats:
+# - Shapefiles, GeoJSON, KML
+# - PostGIS database tables
+# - GeoTIFF raster files
+# - CSV with coordinate columns
+#
+# Generated Endpoints:
+# - GET /features (list all features)
+# - GET /features/{id} (get specific feature)
+# - POST /features (create new feature)
+# - PUT /features/{id} (update feature)
+# - DELETE /features/{id} (delete feature)
+# - GET /spatial/intersects (spatial queries)
+#
+# Security Features:
+# - Rate limiting (requests per minute/hour)
+# - IP whitelisting/blacklisting
+# - Data encryption in transit
+# - Input validation and sanitization
+#
+# Usage:
+# api-generator --input dataset.shp --name "Properties API" --auth jwt
+# api-generator --postgis --table parcels --rate-limit 1000/hour

@@ -1,0 +1,23 @@
+# CRS Fixer - Harita Hive Professional Tool
+# MIT License
+#
+# Auto-detects & reprojects mismatched CRS in bulk datasets
+# Handles thousands of files with intelligent projection detection
+#
+# Features:
+# - Automatic CRS detection using spatial patterns
+# - Bulk reprojection with parallel processing
+# - Smart projection recommendation based on data extent
+# - Handles corrupted or missing .prj files
+# - Supports 6000+ coordinate reference systems
+# - Batch processing with progress tracking
+#
+# Supported Formats:
+# - All GDAL/OGR supported formats
+# - Automatic format detection
+# - Preserves original data structure
+#
+# Usage:
+# crs-fixer --input-dir datasets/ --target-crs EPSG:4326 --output-dir fixed/
+# crs-fixer --auto-detect file.shp --recommend-crs
+# crs-fixer --batch-process *.tif --parallel 8

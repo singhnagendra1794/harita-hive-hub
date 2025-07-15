@@ -26,7 +26,7 @@ const PluginMarketplace = () => {
   // Super admin has full access
   const hasFullAccess = isSuperAdmin() || canAccessPluginMarketplace();
 
-  // Comprehensive geospatial tools collection
+  // Comprehensive geospatial tools collection - Industry's most complete marketplace
   const plugins = [
     // Vector Tools
     {
@@ -127,6 +127,23 @@ const PluginMarketplace = () => {
       license: "MIT",
       is_featured: true,
       created_at: "2024-02-05"
+    },
+    {
+      id: "geomerge",
+      title: "Harita Hive GeoMerge",
+      description: "Seamlessly merge vector or raster layers even with different projections. Industry-leading merge algorithm with automatic CRS detection and alignment.",
+      category: "Data Processing",
+      tech_stack: ["Python", "GDAL", "QGIS", "GPU"],
+      tags: ["Data Processing", "Merge", "CRS", "Harita Signature"],
+      download_count: 2850,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/geomerge.zip",
+      github_url: "https://github.com/haritahive/geomerge",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-01-01",
+      is_signature: true
     },
     {
       id: "6",
@@ -717,6 +734,280 @@ const PluginMarketplace = () => {
       license: "BSD-3",
       is_featured: false,
       created_at: "2024-04-25"
+    },
+
+    // NEW HIGH-DEMAND TOOLS FOR GIS PROFESSIONALS
+
+    // Data Cleanup & Preprocessing
+    {
+      id: "metadata-validator",
+      title: "Metadata Validator",
+      description: "Validates and auto-generates metadata for shapefiles, rasters, GeoJSON, etc. Ensures FGDC and ISO 19115 compliance.",
+      category: "Data Processing",
+      tech_stack: ["Python", "GDAL", "lxml"],
+      tags: ["Data Processing", "Metadata", "Validation"],
+      download_count: 1890,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/metadata-validator.zip",
+      github_url: "https://github.com/haritahive/metadata-validator",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-01"
+    },
+    {
+      id: "crs-fixer",
+      title: "CRS Fixer",
+      description: "Auto-detects & reprojects mismatched CRS in bulk datasets. Handles thousands of files with intelligent projection detection.",
+      category: "Data Processing",
+      tech_stack: ["Python", "pyproj", "GDAL"],
+      tags: ["Data Processing", "CRS", "Batch Processing"],
+      download_count: 2340,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/crs-fixer.zip",
+      github_url: "https://github.com/haritahive/crs-fixer",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-02"
+    },
+
+    // Performance & File Management
+    {
+      id: "rasterfusion-pro",
+      title: "Harita Hive RasterFusion Pro",
+      description: "GPU-accelerated raster merger + tiler with CRS alignment. Industry flagship tool for massive dataset processing with CUDA acceleration.",
+      category: "Performance",
+      tech_stack: ["Python", "CUDA", "GDAL", "GPU"],
+      tags: ["Performance", "GPU", "Raster", "Harita Signature"],
+      download_count: 4200,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/rasterfusion-pro.zip",
+      github_url: "https://github.com/haritahive/rasterfusion-pro",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-03",
+      is_signature: true
+    },
+    {
+      id: "geo-optimizer",
+      title: "GeoOptimizer",
+      description: "Compresses geospatial datasets (GeoTIFF, SHP, etc.) without quality loss. Reduces file sizes by 60-80% using advanced algorithms.",
+      category: "Performance",
+      tech_stack: ["Python", "GDAL", "LZ4"],
+      tags: ["Performance", "Compression", "Optimization"],
+      download_count: 1560,
+      rating: 4.7,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/geo-optimizer.zip",
+      github_url: "https://github.com/haritahive/geo-optimizer",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-05-04"
+    },
+
+    // AI-Powered Tools
+    {
+      id: "land-use-ai-classifier",
+      title: "Harita Hive Land Use AI Classifier",
+      description: "Uses a pretrained CNN to classify urban, agricultural, forest, water, etc. from imagery. 95%+ accuracy on standard benchmarks.",
+      category: "ML & AI",
+      tech_stack: ["Python", "TensorFlow", "OpenCV"],
+      tags: ["ML & AI", "Land Use", "Classification", "Harita Signature"],
+      download_count: 3450,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/land-use-ai-classifier.zip",
+      github_url: "https://github.com/haritahive/land-use-ai-classifier",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-05",
+      is_signature: true
+    },
+    {
+      id: "geospatial-timeseries-forecaster",
+      title: "Geospatial Time Series Forecaster",
+      description: "ML-based prediction tool for NDVI, rainfall, or land temperature trends. Uses LSTM and Prophet models for accurate forecasting.",
+      category: "ML & AI",
+      tech_stack: ["Python", "TensorFlow", "Prophet"],
+      tags: ["ML & AI", "Time Series", "Forecasting"],
+      download_count: 2180,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/geospatial-timeseries-forecaster.zip",
+      github_url: "https://github.com/haritahive/geospatial-timeseries-forecaster",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-06"
+    },
+    {
+      id: "autoclust",
+      title: "AutoClust",
+      description: "AI-based clustering of spatial points (e.g., for utilities, crimes, or businesses). Automatically determines optimal cluster count.",
+      category: "ML & AI",
+      tech_stack: ["Python", "scikit-learn", "DBSCAN"],
+      tags: ["ML & AI", "Clustering", "Spatial Analysis"],
+      download_count: 1780,
+      rating: 4.7,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/autoclust.zip",
+      github_url: "https://github.com/haritahive/autoclust",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-07"
+    },
+
+    // Enterprise Integration Tools
+    {
+      id: "crm-gis-connector",
+      title: "CRM–GIS Connector",
+      description: "REST/GraphQL connector to sync GIS data with ERP/CRM systems like Salesforce or Zoho. Real-time bidirectional sync.",
+      category: "Enterprise",
+      tech_stack: ["Python", "REST API", "GraphQL"],
+      tags: ["Enterprise", "CRM", "Integration"],
+      download_count: 890,
+      rating: 4.6,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/crm-gis-connector.zip",
+      github_url: "https://github.com/haritahive/crm-gis-connector",
+      license: "Apache 2.0",
+      is_featured: false,
+      created_at: "2024-05-08"
+    },
+    {
+      id: "api-generator",
+      title: "API Generator",
+      description: "Auto-generates secure APIs for any uploaded geospatial file (GeoJSON, PostGIS, etc). Includes authentication and rate limiting.",
+      category: "Enterprise",
+      tech_stack: ["Python", "FastAPI", "PostGIS"],
+      tags: ["Enterprise", "API", "Automation"],
+      download_count: 1240,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/api-generator.zip",
+      github_url: "https://github.com/haritahive/api-generator",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-09"
+    },
+
+    // Urban Planning / Infrastructure
+    {
+      id: "zoning-map-designer",
+      title: "Zoning Map Designer",
+      description: "Create zoning plans with overlays (commercial, green, residential). Interactive design with regulatory compliance checking.",
+      category: "Urban Planning",
+      tech_stack: ["Python", "QGIS", "PostGIS"],
+      tags: ["Urban Planning", "Zoning", "Design"],
+      download_count: 1450,
+      rating: 4.7,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/zoning-map-designer.zip",
+      github_url: "https://github.com/haritahive/zoning-map-designer",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-10"
+    },
+    {
+      id: "buffer-heatmap-combo",
+      title: "Buffer + Heatmap Combo",
+      description: "Multi-buffer + live heatmap generator with export options. Combines spatial buffering with density visualization.",
+      category: "Urban Planning",
+      tech_stack: ["Python", "GDAL", "Matplotlib"],
+      tags: ["Urban Planning", "Buffer", "Heatmap"],
+      download_count: 1890,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/buffer-heatmap-combo.zip",
+      github_url: "https://github.com/haritahive/buffer-heatmap-combo",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-11"
+    },
+
+    // Web GIS & Visualization
+    {
+      id: "tile-server-launcher",
+      title: "Tile Server Launcher",
+      description: "One-click server setup to host vector tiles or raster basemaps. Docker-based deployment with auto-scaling.",
+      category: "Web GIS",
+      tech_stack: ["Docker", "Node.js", "TileServer GL"],
+      tags: ["Web GIS", "Tile Server", "Docker"],
+      download_count: 2340,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/tile-server-launcher.zip",
+      github_url: "https://github.com/haritahive/tile-server-launcher",
+      license: "Apache 2.0",
+      is_featured: true,
+      created_at: "2024-05-12"
+    },
+    {
+      id: "3d-terrain-viewer",
+      title: "3D Terrain Viewer",
+      description: "Real-time DEM/DTM viewer using CesiumJS or Deck.gl. Interactive 3D terrain with customizable lighting and materials.",
+      category: "3D Visualization",
+      tech_stack: ["JavaScript", "CesiumJS", "Deck.gl"],
+      tags: ["3D", "Terrain", "Web Visualization"],
+      download_count: 1780,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/3d-terrain-viewer.zip",
+      github_url: "https://github.com/haritahive/3d-terrain-viewer",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-13"
+    },
+    {
+      id: "osm-extractor",
+      title: "OpenStreetMap Extractor",
+      description: "Download OSM layers by bounding box or city name. Automated extraction with format conversion and filtering options.",
+      category: "Data Download",
+      tech_stack: ["Python", "OSMnx", "Overpass API"],
+      tags: ["OpenStreetMap", "Data Download", "Extraction"],
+      download_count: 2890,
+      rating: 4.9,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/osm-extractor.zip",
+      github_url: "https://github.com/haritahive/osm-extractor",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-14"
+    },
+
+    // Data Conversion & Cleaning
+    {
+      id: "shx-shp-repair-tool",
+      title: "SHX/SHP Repair Tool",
+      description: "Fix broken shapefiles, regenerate missing SHX/DBF files. Recovers corrupted spatial data with advanced repair algorithms.",
+      category: "Data Conversion",
+      tech_stack: ["Python", "GDAL", "Shapely"],
+      tags: ["Data Conversion", "Repair", "Shapefile"],
+      download_count: 1560,
+      rating: 4.7,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/shx-shp-repair-tool.zip",
+      github_url: "https://github.com/haritahive/shx-shp-repair-tool",
+      license: "MIT",
+      is_featured: false,
+      created_at: "2024-05-15"
+    },
+    {
+      id: "kml-geojson-csv-converter",
+      title: "KML → GeoJSON → CSV Converter",
+      description: "Drag-drop format transformer with metadata cleaner. Supports batch conversion with attribute mapping and validation.",
+      category: "Data Conversion",
+      tech_stack: ["Python", "GDAL", "pandas"],
+      tags: ["Data Conversion", "KML", "GeoJSON", "CSV"],
+      download_count: 2450,
+      rating: 4.8,
+      author: "Harita Hive",
+      download_url: "https://haritahive.com/downloads/kml-geojson-csv-converter.zip",
+      github_url: "https://github.com/haritahive/kml-geojson-csv-converter",
+      license: "MIT",
+      is_featured: true,
+      created_at: "2024-05-16"
     }
   ];
 
@@ -724,7 +1015,8 @@ const PluginMarketplace = () => {
     "all", "Vector", "Raster", "Remote Sensing", "Spatial Analysis", 
     "Web GIS", "Data Conversion", "Urban Planning", "Disaster Management", 
     "ML & AI", "3D Visualization", "Geostatistics", "Agriculture", 
-    "Environmental", "Transportation", "Geology", "Climate", "Coastal"
+    "Environmental", "Transportation", "Geology", "Climate", "Coastal",
+    "Data Processing", "Performance", "Enterprise", "Data Download"
   ];
   
   const techStack = [

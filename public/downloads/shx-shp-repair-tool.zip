@@ -1,0 +1,39 @@
+# SHX/SHP Repair Tool - Harita Hive Data Tool
+# MIT License
+#
+# Fix broken shapefiles, regenerate missing SHX/DBF files
+# Recovers corrupted spatial data with advanced repair algorithms
+#
+# Features:
+# - Automatic detection of shapefile corruption
+# - Regeneration of missing .shx index files
+# - Repair of corrupted .dbf attribute tables
+# - Recovery of partial geometry data
+# - Projection file (.prj) reconstruction
+# - Batch repair for multiple files
+#
+# Repair Capabilities:
+# - Missing or corrupted .shx files
+# - Truncated or damaged .shp files
+# - Invalid geometry reconstruction
+# - Attribute table recovery
+# - Character encoding fixes
+# - Spatial index rebuilding
+#
+# Recovery Methods:
+# - Header information analysis
+# - Geometry validation and repair
+# - Attribute type inference
+# - Coordinate system detection
+# - Topology reconstruction
+#
+# Validation Features:
+# - Geometry validity checking
+# - Attribute consistency verification
+# - Spatial reference validation
+# - File integrity assessment
+# - Recovery success reporting
+#
+# Usage:
+# shx-shp-repair --input broken_shapefile.shp --output repaired_shapefile.shp
+# shx-shp-repair --batch-repair corrupted_files/ --validate-output

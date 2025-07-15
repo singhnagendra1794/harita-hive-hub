@@ -1,0 +1,30 @@
+# Geospatial Time Series Forecaster - Harita Hive AI Tool
+# MIT License
+#
+# ML-based prediction tool for NDVI, rainfall, or land temperature trends
+# Uses LSTM and Prophet models for accurate forecasting
+#
+# Features:
+# - LSTM neural networks for complex pattern recognition
+# - Prophet for trend and seasonality analysis
+# - Multi-variate time series support
+# - Uncertainty quantification
+# - Automatic hyperparameter tuning
+# - Support for irregular time intervals
+#
+# Supported Variables:
+# - NDVI and vegetation indices
+# - Temperature (surface and air)
+# - Precipitation and moisture
+# - Land use change rates
+# - Custom environmental variables
+#
+# Model Types:
+# - LSTM: For non-linear patterns
+# - Prophet: For strong seasonal patterns
+# - ARIMA: For linear trends
+# - Ensemble: Combines multiple models
+#
+# Usage:
+# geo-forecaster --input ndvi_timeseries.csv --forecast-periods 12 --model lstm
+# geo-forecaster --multivariate temp_precip.csv --uncertainty --export-plots

@@ -1,0 +1,38 @@
+# Buffer + Heatmap Combo - Harita Hive Analysis Tool
+# MIT License
+#
+# Multi-buffer + live heatmap generator with export options
+# Combines spatial buffering with density visualization
+#
+# Features:
+# - Multiple buffer distances simultaneously
+# - Real-time heatmap generation
+# - Kernel density estimation
+# - Customizable color schemes
+# - Interactive parameter adjustment
+# - High-resolution export options
+#
+# Buffer Types:
+# - Fixed distance buffers
+# - Variable distance by attribute
+# - Multi-ring buffers
+# - Dissolve vs. non-dissolve options
+# - Custom buffer shapes
+#
+# Heatmap Algorithms:
+# - Gaussian kernel density
+# - Quartic kernel density
+# - Triangular kernel density
+# - Adaptive bandwidth selection
+# - Point weight support
+#
+# Visualization Options:
+# - Multiple color ramps
+# - Transparency control
+# - Contour line overlays
+# - 3D surface rendering
+# - Animation for temporal data
+#
+# Usage:
+# buffer-heatmap --input points.shp --buffers 100,300,500 --heatmap-bandwidth auto
+# buffer-heatmap --weighted-points crimes.shp --weight-field severity --animate

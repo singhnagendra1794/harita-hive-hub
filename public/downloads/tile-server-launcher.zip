@@ -1,0 +1,37 @@
+# Tile Server Launcher - Harita Hive Web GIS Tool
+# Apache 2.0 License
+#
+# One-click server setup to host vector tiles or raster basemaps
+# Docker-based deployment with auto-scaling
+#
+# Features:
+# - Docker containerized deployment
+# - Support for vector and raster tiles
+# - Auto-scaling based on traffic
+# - Built-in caching and CDN integration
+# - Load balancing for high availability
+# - SSL certificate automation
+#
+# Supported Tile Formats:
+# - Vector tiles (MVT, PBF)
+# - Raster tiles (PNG, JPEG, WebP)
+# - MBTiles archives
+# - GeoTIFF COG (Cloud Optimized)
+# - PostGIS vector tile serving
+#
+# Server Stack:
+# - TileServer GL for vector tiles
+# - MapProxy for raster tiles
+# - Nginx for load balancing
+# - Redis for caching
+# - Let's Encrypt for SSL
+#
+# Deployment Options:
+# - Local development server
+# - Cloud deployment (AWS, GCP, Azure)
+# - Kubernetes orchestration
+# - Docker Swarm clustering
+#
+# Usage:
+# tile-server-launcher --create-server "My Basemap" --data tiles.mbtiles
+# tile-server-launcher --deploy-cloud aws --domain tiles.mysite.com

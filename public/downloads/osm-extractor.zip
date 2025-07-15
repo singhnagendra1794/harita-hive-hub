@@ -1,0 +1,46 @@
+# OSM Extractor - Harita Hive Data Tool
+# MIT License
+#
+# Download OSM layers by bounding box or city name
+# Automated extraction with format conversion and filtering
+#
+# Features:
+# - Bounding box or place name extraction
+# - Layer-specific filtering (roads, buildings, POIs)
+# - Multiple output formats
+# - Attribute filtering and selection
+# - Automatic topology validation
+# - Batch processing for multiple areas
+#
+# Data Sources:
+# - Overpass API for current data
+# - Planet OSM extracts
+# - Regional OSM mirrors
+# - Custom OSM databases
+#
+# Extraction Methods:
+# - Bounding box coordinates
+# - Administrative boundaries
+# - City/region names
+# - Custom polygon areas
+# - Buffer around points/lines
+#
+# Output Formats:
+# - Shapefile (.shp)
+# - GeoJSON (.geojson)
+# - GeoPackage (.gpkg)
+# - PostGIS database
+# - KML (.kml)
+# - CSV with coordinates
+#
+# Layer Types:
+# - Roads and transportation
+# - Buildings and land use
+# - Points of interest (POIs)
+# - Administrative boundaries
+# - Natural features
+# - Custom tag filtering
+#
+# Usage:
+# osm-extractor --city "San Francisco, CA" --layers roads,buildings --format shp
+# osm-extractor --bbox -122.5,37.7,-122.3,37.8 --filter amenity=restaurant

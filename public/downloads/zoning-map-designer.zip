@@ -1,0 +1,38 @@
+# Zoning Map Designer - Harita Hive Urban Planning Tool
+# MIT License
+#
+# Create zoning plans with overlays (commercial, green, residential)
+# Interactive design with regulatory compliance checking
+#
+# Features:
+# - Interactive zoning map creation
+# - Pre-built zoning templates
+# - Regulatory compliance checking
+# - Multi-layer overlay support
+# - Automatic area calculations
+# - Public comment integration
+#
+# Zoning Types:
+# - Residential (R1, R2, R3, R4)
+# - Commercial (C1, C2, C3)
+# - Industrial (I1, I2, I3)
+# - Mixed-use developments
+# - Green spaces and parks
+# - Special overlay districts
+#
+# Compliance Features:
+# - Setback requirement validation
+# - Height restriction checking
+# - Density limit enforcement
+# - Environmental constraint overlay
+# - Historic district protection
+#
+# Export Formats:
+# - PDF maps for public review
+# - Shapefile for GIS systems
+# - Web maps for online viewing
+# - Legal descriptions for ordinances
+#
+# Usage:
+# zoning-designer --create-project "Downtown Revitalization"
+# zoning-designer --import-basemap parcels.shp --validate-compliance

@@ -1,0 +1,23 @@
+# Metadata Validator - Harita Hive Professional Tool
+# MIT License
+#
+# Validates and auto-generates metadata for shapefiles, rasters, GeoJSON, etc.
+# Ensures FGDC and ISO 19115 compliance
+#
+# Features:
+# - FGDC and ISO 19115 standard compliance checking
+# - Auto-generation of missing metadata fields
+# - Batch validation for large datasets
+# - Custom validation rules support
+# - Export reports in XML, HTML, or PDF
+#
+# Supported Formats:
+# - Shapefiles (.shp, .shx, .dbf, .prj)
+# - GeoTIFF (.tif, .tiff)
+# - GeoJSON (.geojson, .json)
+# - KML/KMZ (.kml, .kmz)
+# - PostGIS databases
+#
+# Usage:
+# metadata-validator --input dataset.shp --standard fgdc --output report.xml
+# metadata-validator --batch-validate directory/ --export-format html

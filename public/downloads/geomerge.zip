@@ -1,0 +1,18 @@
+# GeoMerge - Harita Hive Signature Tool
+# MIT License - Built by Harita Hive
+#
+# Seamlessly merge vector or raster layers even with different projections
+# Industry-leading merge algorithm with automatic CRS detection and alignment
+#
+# Features:
+# - Multi-format support (SHP, GeoTIFF, GeoJSON, KML)
+# - Automatic CRS detection and reprojection
+# - Conflict resolution for overlapping geometries
+# - Metadata preservation and merging
+# - Batch processing capabilities
+#
+# Usage:
+# geomerge --input dir1/ dir2/ --output merged_dataset --format geotiff
+# geomerge --vector shp1.shp shp2.shp --output merged.shp --resolve_conflicts
+#
+# Web Interface: Available at haritahive.com/tools/geomerge

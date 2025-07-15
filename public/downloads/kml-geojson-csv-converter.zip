@@ -1,0 +1,42 @@
+# KML → GeoJSON → CSV Converter - Harita Hive Data Tool
+# MIT License
+#
+# Drag-drop format transformer with metadata cleaner
+# Supports batch conversion with attribute mapping
+#
+# Features:
+# - Drag-and-drop interface
+# - Batch conversion processing
+# - Attribute mapping and transformation
+# - Metadata cleaning and standardization
+# - Coordinate system conversion
+# - Data validation and error reporting
+#
+# Supported Formats:
+# Input: KML, KMZ, GeoJSON, CSV, Shapefile, GPX
+# Output: GeoJSON, CSV, KML, Shapefile, GeoPackage
+#
+# Conversion Features:
+# - Preserve original styling (where possible)
+# - Handle nested folder structures
+# - Extract embedded images and attachments
+# - Coordinate precision control
+# - Attribute name standardization
+#
+# Data Cleaning:
+# - Remove empty attributes
+# - Standardize date formats
+# - Clean special characters
+# - Validate coordinate ranges
+# - Detect and fix encoding issues
+#
+# Attribute Mapping:
+# - Custom field name mapping
+# - Data type conversion
+# - Value transformation rules
+# - Conditional field creation
+# - Calculated field support
+#
+# Usage:
+# kml-converter --input tour.kml --output data.geojson --clean-metadata
+# kml-converter --batch-convert kmz_files/ --output-format csv --mapping config.json
