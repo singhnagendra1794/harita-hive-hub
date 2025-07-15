@@ -89,10 +89,15 @@ const UserDashboard = () => {
               Welcome back, {user?.user_metadata?.full_name || 'GIS Professional'}! 👋
             </h1>
             <p className="text-muted-foreground">
-              Continue your geospatial journey and explore new opportunities
+            Continue your geospatial journey and explore new opportunities
             </p>
           </div>
-          {isSuperAdmin() ? (
+          {(() => {
+            console.log('Dashboard: isSuperAdmin():', isSuperAdmin());
+            console.log('Dashboard: hasAccess("premium"):', hasAccess('premium'));
+            console.log('Dashboard: roles loading:', rolesLoading);
+            return isSuperAdmin();
+          })() ? (
             <Card className="max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
