@@ -15,6 +15,12 @@ interface Layer {
   opacity: number;
   features?: number;
   style?: string;
+  metadata?: {
+    provider?: string;
+    source?: string;
+    geometry?: string;
+    qgisLayerId?: string;
+  };
 }
 
 interface LayerControlProps {
@@ -101,16 +107,34 @@ const LayerControl: React.FC<LayerControlProps> = ({
                       className="w-full"
                     />
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap">
                     <Badge variant="secondary" className="text-xs">
                       {layer.type}
                     </Badge>
+                    {layer.metadata?.geometry && (
+                      <Badge variant="outline" className="text-xs">
+                        {layer.metadata.geometry}
+                      </Badge>
+                    )}
+                    {layer.metadata?.provider && (
+                      <Badge variant="outline" className="text-xs">
+                        {layer.metadata.provider}
+                      </Badge>
+                    )}
                     {layer.style && (
                       <Badge variant="outline" className="text-xs">
                         Styled
                       </Badge>
                     )}
                   </div>
+                  {layer.metadata?.source && (
+                    <div className="text-xs text-muted-foreground mt-1 p-1 bg-muted rounded">
+                      <div className="font-medium">Source:</div>
+                      <div className="break-all">{layer.metadata.source.length > 50 ? 
+                        layer.metadata.source.substring(0, 50) + '...' : 
+                        layer.metadata.source}</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

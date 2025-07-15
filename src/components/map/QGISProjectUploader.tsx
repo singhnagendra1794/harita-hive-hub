@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, FileText, MapPin, Download, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { parseQGISProject, QGISProjectData } from '@/utils/qgisParser';
 
 interface QGISProject {
   id: string;
@@ -17,6 +18,7 @@ interface QGISProject {
   layers: number;
   type: 'qgz' | 'qgs';
   status: 'uploaded' | 'processing' | 'ready' | 'error';
+  projectData?: QGISProjectData;
 }
 
 interface QGISProjectUploaderProps {
@@ -47,6 +49,14 @@ const QGISProjectUploader: React.FC<QGISProjectUploaderProps> = ({ onProjectSele
     setUploading(true);
     
     try {
+      // Parse QGIS project to extract layer information
+      toast({
+        title: "Processing QGIS project",
+        description: "Extracting layer information...",
+      });
+
+      const projectData = await parseQGISProject(file);
+      
       // Upload to Supabase storage
       const fileName = `qgis-projects/${Date.now()}-${file.name}`;
       const { data, error } = await supabase.storage
@@ -57,26 +67,27 @@ const QGISProjectUploader: React.FC<QGISProjectUploaderProps> = ({ onProjectSele
 
       const newProject: QGISProject = {
         id: Date.now().toString(),
-        name: file.name.replace(/\.(qgz|qgs)$/, ''),
+        name: projectData.title || file.name.replace(/\.(qgz|qgs)$/, ''),
         fileName: file.name,
         uploadedAt: new Date(),
         size: file.size,
-        layers: Math.floor(Math.random() * 15) + 5, // Simulated layer count
+        layers: projectData.layers.length,
         type: fileExtension.slice(1) as 'qgz' | 'qgs',
-        status: 'ready'
+        status: 'ready',
+        projectData
       };
 
       setProjects([...projects, newProject]);
       
       toast({
         title: "Project uploaded successfully",
-        description: `${file.name} is now available for use.`,
+        description: `${file.name} with ${projectData.layers.length} layers is now available.`,
       });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your QGIS project.",
+        description: error instanceof Error ? error.message : "There was an error processing your QGIS project.",
         variant: "destructive",
       });
     } finally {

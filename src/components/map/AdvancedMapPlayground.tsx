@@ -8,6 +8,7 @@ import BasemapSwitcher, { BasemapOption, basemapOptions } from './BasemapSwitche
 import LayerControl, { Layer } from './LayerControl';
 import QGISProjectUploader, { QGISProject } from './QGISProjectUploader';
 import GISAnalysisTools from './GISAnalysisTools';
+import { createLayersFromQGISProject } from '@/utils/qgisParser';
 
 const AdvancedMapPlayground = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -81,21 +82,22 @@ const AdvancedMapPlayground = () => {
   };
 
   const handleQGISProjectSelect = (project: QGISProject) => {
-    // Simulate loading QGIS project layers
-    const newLayers: Layer[] = Array.from({ length: project.layers }, (_, i) => ({
-      id: `qgis-${project.id}-layer-${i}`,
-      name: `${project.name} Layer ${i + 1}`,
-      type: Math.random() > 0.5 ? 'vector' : 'raster',
-      visible: true,
-      opacity: 0.8,
-      features: Math.floor(Math.random() * 1000) + 100
-    }));
+    if (!project.projectData) {
+      toast({
+        title: "Error loading project",
+        description: "Project data is not available. Please try uploading the file again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    // Create layers from actual QGIS project data
+    const newLayers = createLayersFromQGISProject(project.projectData, project.id);
     setLayers([...layers, ...newLayers]);
     
     toast({
       title: "QGIS Project Loaded",
-      description: `${project.name} with ${project.layers} layers has been added to the map.`,
+      description: `${project.name} with ${project.projectData.layers.length} layers has been added to the map.`,
     });
   };
 
