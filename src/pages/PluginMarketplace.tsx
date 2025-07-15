@@ -6,16 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Filter, Plus, Star, TrendingUp } from "lucide-react";
+import { Search, Filter, Plus, Star, TrendingUp, Lock, Crown } from "lucide-react";
 import PluginCard from "../components/marketplace/PluginCard";
 import PluginUploadForm from "../components/marketplace/PluginUploadForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { useNavigate } from "react-router-dom";
 
 const PluginMarketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTech, setSelectedTech] = useState("all");
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const { canAccessPluginMarketplace, subscription } = usePremiumAccess();
+  const navigate = useNavigate();
 
   // Mock data - replace with real data from your backend
   const plugins = [
@@ -78,14 +82,50 @@ const PluginMarketplace = () => {
   const featuredPlugins = plugins.filter(p => p.is_featured);
   const totalDownloads = plugins.reduce((sum, p) => sum + p.download_count, 0);
 
+  const handleUpgradeClick = () => {
+    navigate("/premium");
+  };
+
   return (
     <Layout>
       <div className="container py-8">
+        {/* Access Gate for Non-Pro Users */}
+        {!canAccessPluginMarketplace() && (
+          <div className="mb-8">
+            <Card className="border-primary bg-gradient-to-r from-primary/5 to-secondary/5">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <Lock className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Premium Feature</h3>
+                      <p className="text-muted-foreground">
+                        Plugin marketplace access requires Professional plan ($49/₹3999) or higher
+                      </p>
+                    </div>
+                  </div>
+                  <Button onClick={handleUpgradeClick} className="flex items-center gap-2">
+                    <Crown className="h-4 w-4" />
+                    Upgrade to Pro
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Plugin Marketplace</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Discover, download, and share powerful GIS tools created by the community.
+            {!canAccessPluginMarketplace() && (
+              <span className="block mt-2 text-primary font-medium">
+                Upgrade to Professional plan for full access
+              </span>
+            )}
           </p>
           
           {/* Stats */}
@@ -112,9 +152,14 @@ const PluginMarketplace = () => {
 
           <Dialog open={showUploadForm} onOpenChange={setShowUploadForm}>
             <DialogTrigger asChild>
-              <Button size="lg">
+              <Button 
+                size="lg" 
+                disabled={!canAccessPluginMarketplace()}
+                onClick={canAccessPluginMarketplace() ? undefined : handleUpgradeClick}
+              >
+                {!canAccessPluginMarketplace() && <Lock className="h-5 w-5 mr-2" />}
                 <Plus className="h-5 w-5 mr-2" />
-                Submit Your Plugin
+                {canAccessPluginMarketplace() ? "Submit Your Plugin" : "Pro Required"}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -192,7 +237,9 @@ const PluginMarketplace = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredPlugins.map(plugin => (
-                <PluginCard key={plugin.id} plugin={plugin} />
+                <div key={plugin.id} className={!canAccessPluginMarketplace() ? "opacity-60" : ""}>
+                  <PluginCard plugin={plugin} />
+                </div>
               ))}
             </div>
           </div>
@@ -218,7 +265,9 @@ const PluginMarketplace = () => {
           {filteredPlugins.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPlugins.map(plugin => (
-                <PluginCard key={plugin.id} plugin={plugin} />
+                <div key={plugin.id} className={!canAccessPluginMarketplace() ? "opacity-60" : ""}>
+                  <PluginCard plugin={plugin} />
+                </div>
               ))}
             </div>
           ) : (

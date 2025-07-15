@@ -2,8 +2,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Star, Code, Zap, ExternalLink, Heart } from "lucide-react";
+import { Download, Star, Code, Zap, ExternalLink, Heart, Lock } from "lucide-react";
 import { useState } from "react";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Plugin {
   id: string;
@@ -26,6 +29,8 @@ interface PluginCardProps {
 
 const PluginCard = ({ plugin }: PluginCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
+  const { canAccessPluginMarketplace } = usePremiumAccess();
+  const navigate = useNavigate();
 
   const getTechIcon = (tech: string) => {
     switch (tech.toLowerCase()) {
@@ -43,8 +48,17 @@ const PluginCard = ({ plugin }: PluginCardProps) => {
   };
 
   const handleDownload = () => {
+    if (!canAccessPluginMarketplace()) {
+      toast.error("Plugin marketplace access requires Professional plan or higher");
+      navigate("/premium");
+      return;
+    }
+    
     if (plugin.download_url) {
       window.open(plugin.download_url, '_blank');
+      toast.success("Download started!");
+    } else {
+      toast.error("Download URL not available");
     }
   };
 
@@ -112,12 +126,22 @@ const PluginCard = ({ plugin }: PluginCardProps) => {
         </div>
         
         <div className="flex gap-2 mt-4 pt-4 border-t">
-          <Button onClick={handleDownload} className="flex-1">
+          <Button 
+            onClick={handleDownload} 
+            className="flex-1"
+            disabled={!canAccessPluginMarketplace()}
+          >
+            {!canAccessPluginMarketplace() && <Lock className="h-4 w-4 mr-2" />}
             <Download className="h-4 w-4 mr-2" />
-            Download
+            {canAccessPluginMarketplace() ? "Download" : "Pro Required"}
           </Button>
           {plugin.github_url && (
-            <Button variant="outline" size="sm" onClick={() => window.open(plugin.github_url, '_blank')}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.open(plugin.github_url, '_blank')}
+              disabled={!canAccessPluginMarketplace()}
+            >
               <ExternalLink className="h-4 w-4" />
             </Button>
           )}

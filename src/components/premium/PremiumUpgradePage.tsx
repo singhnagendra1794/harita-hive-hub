@@ -27,7 +27,7 @@ const PremiumUpgradePage: React.FC = () => {
     {
       id: 'pro',
       name: 'Professional',
-      price: '₹3,999/month ($50)',
+      price: '₹3,999/month ($49)',
       description: 'Perfect for GIS professionals and freelancers',
       icon: <Star className="h-6 w-6 text-blue-500" />,
       popular: true,
