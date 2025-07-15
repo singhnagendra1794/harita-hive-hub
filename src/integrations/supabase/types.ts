@@ -2874,6 +2874,10 @@ export type Database = {
         Args: { p_user_id: string; p_job_type: string }
         Returns: Json
       }
+      ensure_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_referral_code: {
         Args: { user_id: string }
         Returns: string
@@ -2909,6 +2913,10 @@ export type Database = {
       }
       is_session_valid: {
         Args: { p_user_id: string; p_session_token: string }
+        Returns: boolean
+      }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       track_missing_search_query: {

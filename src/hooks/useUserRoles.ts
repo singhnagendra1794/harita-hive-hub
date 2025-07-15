@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-type AppRole = 'admin' | 'moderator' | 'beta_tester' | 'user';
+type AppRole = 'super_admin' | 'admin' | 'moderator' | 'beta_tester' | 'user';
 
 interface UserRole {
   id: string;
@@ -46,8 +46,12 @@ export const useUserRoles = () => {
     return roles.some(r => r.role === role);
   };
 
+  const isSuperAdmin = (): boolean => {
+    return hasRole('super_admin') && user?.email === 'contact@haritahive.com';
+  };
+
   const grantRole = async (userId: string, role: AppRole) => {
-    if (!user || !hasRole('admin')) return;
+    if (!user || (!hasRole('admin') && !hasRole('super_admin'))) return;
 
     try {
       const { error } = await supabase
@@ -66,7 +70,7 @@ export const useUserRoles = () => {
   };
 
   const revokeRole = async (userId: string, role: AppRole) => {
-    if (!user || !hasRole('admin')) return;
+    if (!user || (!hasRole('admin') && !hasRole('super_admin'))) return;
 
     try {
       const { error } = await supabase
@@ -86,6 +90,7 @@ export const useUserRoles = () => {
     roles,
     loading,
     hasRole,
+    isSuperAdmin,
     grantRole,
     revokeRole,
     refetch: fetchUserRoles

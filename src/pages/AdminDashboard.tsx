@@ -8,13 +8,14 @@ import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDash
 import LiveClassManager from '@/components/admin/LiveClassManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import SuperAdminPanel from '@/components/admin/SuperAdminPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, BarChart, Upload, Video } from 'lucide-react';
 
 const AdminDashboardPage = () => {
   const { user, loading: authLoading } = useAuth();
-  const { hasRole, loading: rolesLoading } = useUserRoles();
+  const { hasRole, isSuperAdmin, loading: rolesLoading } = useUserRoles();
 
   if (authLoading || rolesLoading) {
     return (
@@ -27,7 +28,7 @@ const AdminDashboardPage = () => {
   }
 
   // Check if user has admin privileges
-  if (!user || !hasRole('admin')) {
+  if (!user || (!hasRole('admin') && !hasRole('super_admin'))) {
     return (
       <Layout>
         <div className="container mx-auto py-16 text-center">
@@ -62,14 +63,21 @@ const AdminDashboardPage = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="creator" className="space-y-4">
+        <Tabs defaultValue={isSuperAdmin() ? "super-admin" : "creator"} className="space-y-4">
           <TabsList>
+            {isSuperAdmin() && <TabsTrigger value="super-admin">Super Admin</TabsTrigger>}
             <TabsTrigger value="creator">Creator Console</TabsTrigger>
             <TabsTrigger value="live-classes">Live Classes</TabsTrigger>
             <TabsTrigger value="general">General Admin</TabsTrigger>
             <TabsTrigger value="beta">Beta Analytics</TabsTrigger>
             <TabsTrigger value="payments">Payment Approvals</TabsTrigger>
           </TabsList>
+
+          {isSuperAdmin() && (
+            <TabsContent value="super-admin">
+              <SuperAdminPanel />
+            </TabsContent>
+          )}
 
           <TabsContent value="creator">
             <div className="space-y-6">
