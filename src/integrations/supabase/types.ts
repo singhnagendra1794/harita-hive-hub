@@ -2040,6 +2040,36 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_status: {
+        Row: {
+          component_name: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          last_checked: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          component_name: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          last_checked?: string | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          component_name?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          last_checked?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       premium_content: {
         Row: {
           content_id: string
