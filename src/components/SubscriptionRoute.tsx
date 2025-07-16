@@ -16,12 +16,11 @@ interface SubscriptionRouteProps {
 const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({ 
   children, 
   requiredTier = 'pro',
-  redirectTo = '/premium-upgrade'
+  redirectTo = '/choose-plan'
 }) => {
   const { user, session, loading: authLoading } = useAuth();
   const { hasAccess, loading: subscriptionLoading, subscription } = usePremiumAccess();
   const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
-  // Simplified - rely on AuthContext and ProtectedRoute for session validation
 
   if (authLoading || subscriptionLoading || rolesLoading) {
     return (
@@ -40,22 +39,21 @@ const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Super admin bypasses all subscription checks
-  if (isSuperAdmin()) {
+  // Super admin bypasses all subscription checks - both email and role-based
+  if (user.email === 'contact@haritahive.com' || isSuperAdmin()) {
+    console.log('Super admin access granted for route');
     return <>{children}</>;
-  }
-
-  // If no subscription exists yet, redirect to plan selection
-  if (!subscription) {
-    return <Navigate to="/choose-plan" replace />;
   }
 
   // Check if user has required access level
   if (!hasAccess(requiredTier)) {
-    const subscriptionName = requiredTier === 'pro' ? 'Professional' : requiredTier === 'enterprise' ? 'Enterprise' : requiredTier;
+    const subscriptionName = requiredTier === 'pro' ? 'Professional' : 
+                            requiredTier === 'enterprise' ? 'Enterprise' : 
+                            requiredTier === 'premium' ? 'Premium' : 'Free';
+    
     toast({
-      title: "Professional Subscription Required",
-      description: `This premium feature requires a ${subscriptionName} or Enterprise subscription. Please upgrade your plan.`,
+      title: `${subscriptionName} Subscription Required`,
+      description: `This feature requires a ${subscriptionName} subscription. Please upgrade your plan to continue.`,
       variant: "destructive",
     });
     return <Navigate to={redirectTo} replace />;

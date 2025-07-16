@@ -35,19 +35,28 @@ export const usePremiumAccess = () => {
   useEffect(() => {
     const initializeAccess = async () => {
       if (!user || rolesLoading) {
-        setSubscription(null);
-        setHasPremiumAccess(false);
+        setLoading(true);
         return;
       }
 
       try {
-        // Validate user session first
-        const { data: { user: currentUser }, error } = await supabase.auth.getUser();
-        
-        if (error || !currentUser) {
-          console.log('User session invalid in usePremiumAccess');
-          setSubscription(null);
-          setHasPremiumAccess(false);
+        // Super admin check - hardcoded email bypass
+        if (user.email === 'contact@haritahive.com') {
+          console.log('Super admin detected - granting full access');
+          setSubscription({
+            id: 'super-admin',
+            user_id: user.id,
+            subscription_tier: 'enterprise',
+            status: 'active',
+            started_at: new Date().toISOString(),
+            expires_at: null,
+            payment_method: 'admin',
+            stripe_customer_id: null,
+            stripe_subscription_id: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          setHasPremiumAccess(true);
           setLoading(false);
           return;
         }
@@ -80,7 +89,12 @@ export const usePremiumAccess = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user subscription:', error);
+        // Create default free subscription if none exists
+        await createDefaultSubscription();
+        return;
+      }
       
       if (data) {
         setSubscription({
@@ -88,21 +102,62 @@ export const usePremiumAccess = () => {
           subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
           status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
         });
+      } else {
+        // Create default free subscription
+        await createDefaultSubscription();
       }
     } catch (error) {
       console.error('Error fetching user subscription:', error);
+      await createDefaultSubscription();
+    }
+  };
+
+  const createDefaultSubscription = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .insert({
+          user_id: user.id,
+          subscription_tier: 'free',
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSubscription({
+        ...data,
+        subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
+        status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
+      });
+    } catch (error) {
+      console.error('Error creating default subscription:', error);
     }
   };
 
   const checkPremiumAccess = () => {
-    if (!user || !subscription) {
+    if (!user) {
       setHasPremiumAccess(false);
       return;
     }
 
-    // Super admin users have access to everything
+    // Super admin users (hardcoded email) have access to everything
+    if (user.email === 'contact@haritahive.com') {
+      setHasPremiumAccess(true);
+      return;
+    }
+
+    // Super admin users (role-based) have access to everything
     if (isSuperAdmin()) {
       setHasPremiumAccess(true);
+      return;
+    }
+
+    if (!subscription) {
+      setHasPremiumAccess(false);
       return;
     }
 
@@ -227,7 +282,13 @@ export const usePremiumAccess = () => {
   const hasAccess = (requiredTier: 'free' | 'premium' | 'pro' | 'enterprise' = 'premium'): boolean => {
     if (!user) return requiredTier === 'free';
     
-    // Super admin users have access to everything
+    // Super admin users (hardcoded email) have access to everything
+    if (user.email === 'contact@haritahive.com') {
+      console.log('Super admin email detected - granting access');
+      return true;
+    }
+    
+    // Super admin users (role-based) have access to everything
     if (isSuperAdmin()) return true;
     
     if (!subscription) return requiredTier === 'free';
