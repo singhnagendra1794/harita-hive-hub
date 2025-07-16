@@ -8,8 +8,6 @@
     <meta name="description" content="Transform your career with comprehensive GIS education, cutting-edge geospatial tools, and a thriving professional community. From beginner basics to advanced enterprise solutions." />
     <meta name="author" content="Harita Hive" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
     
     <!-- Mobile App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -17,7 +15,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Harita Hive" />
 
-    <link rel="icon" href="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" type="image/png">
+    <!-- Favicon and App Icons -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="application-name" content="Harita Hive">
 
     <meta property="og:title" content="Harita Hive - Master GIS Technology | Geospatial Learning Platform" />
     <meta property="og:description" content="Transform your career with comprehensive GIS education, cutting-edge geospatial tools, and a thriving professional community. Professional training, AI-powered tools, and enterprise solutions." />
@@ -33,11 +37,12 @@
     
     <!-- Additional Meta Tags -->
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#0066CC" />
+    <meta name="theme-color" content="#004aad" />
     <meta name="msapplication-TileColor" content="#0066CC" />
     <meta name="keywords" content="GIS, geospatial, mapping, spatial analysis, QGIS, remote sensing, cartography, location intelligence, GIS training, geospatial education, spatial data science, GIS certification, professional development" />
     
     <!-- Structured Data -->
+    <!-- Structured Data for Website -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -50,6 +55,17 @@
         "target": "https://haritahive.com/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+    
+    <!-- Structured Data for Organization Logo -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "https://haritahive.com",
+      "name": "Harita Hive",
+      "logo": "https://haritahive.com/logo-512.png"
     }
     </script>
   </head>
