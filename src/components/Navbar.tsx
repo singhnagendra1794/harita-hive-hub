@@ -28,22 +28,27 @@ const Navbar = () => {
 
   const learningLinks = [
     { href: "/browse-courses", label: "Browse Courses" },
+    { href: "/skill-copilot", label: "Skill Copilot" },
     ...(user && hasAccess('pro') ? [{ href: "/project-templates", label: "Project Templates" }] : []),
     { href: "/code-snippets", label: "Code Library" },
     { href: "/live-classes", label: "Live Classes" },
   ];
 
   const toolsLinks = [
+    { href: "/toolkits", label: "Toolkits Hub" },
     ...(user && hasAccess('pro') ? [{ href: "/map-playground", label: "Map Playground" }] : []),
     { href: "/spatial-analysis", label: "Spatial Analysis" },
     ...(user && hasAccess('pro') ? [{ href: "/geoai-lab", label: "GeoAI Lab" }] : []),
     ...(user && hasAccess('pro') ? [{ href: "/geo-processing-lab", label: "Geo Processing Lab" }] : []),
+    ...(user && hasAccess('pro') ? [{ href: "/labs", label: "Live Sandbox Labs" }] : []),
     ...(user && hasAccess('enterprise') ? [{ href: "/webgis-builder", label: "Web GIS Builder" }] : []),
   ];
 
   const marketplaceLinks = [
     ...(user && hasAccess('pro') ? [{ href: "/gis-marketplace", label: "GIS Tools" }] : []),
     ...(user && hasAccess('pro') ? [{ href: "/plugin-marketplace", label: "Plugins & Scripts" }] : []),
+    { href: "/jobs-ai-discovery", label: "Jobs AI Discovery" },
+    ...(user && hasAccess('pro') ? [{ href: "/project-studio", label: "Project Studio" }] : []),
     { href: "/talent-pool", label: "Hire Talent" },
     { href: "/task-board", label: "Freelance Projects" },
     { href: "/certifications", label: "Certifications" },

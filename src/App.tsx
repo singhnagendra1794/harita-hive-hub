@@ -48,6 +48,7 @@ import MapPlayground from "./pages/MapPlayground";
 import ProjectTemplates from "./pages/ProjectTemplates";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import RefundPolicy from "./pages/RefundPolicy";
 import Contact from "./pages/Contact";
 import TalentPool from "./pages/TalentPool";
 import CorporateTraining from "./pages/CorporateTraining";
@@ -74,6 +75,13 @@ import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 import BrowseCourses from "./pages/BrowseCourses";
 import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
+
+// Import the new feature pages
+import SkillCopilot from "./pages/SkillCopilot";
+import Toolkits from "./pages/Toolkits";
+import JobsAIDiscovery from "./pages/JobsAIDiscovery";
+import ProjectStudio from "./pages/ProjectStudio";
+import Labs from "./pages/Labs";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +119,7 @@ function App() {
           <Route path="/courses/geospatial-fullstack-developer" element={<GeospatialFullstackDeveloper />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/contact" element={<Contact />} />
                   
                   {/* Plan selection */}
@@ -291,10 +300,37 @@ function App() {
                      <SubscriptionRoute requiredTier="enterprise">
                        <EnterpriseDashboard />
                      </SubscriptionRoute>
-                   } />
-                    
-                    <Route path="*" element={<NotFound />} />
-                 </Routes>
+                    } />
+                     
+                     {/* New Feature Routes */}
+                     <Route path="/skill-copilot" element={
+                       <ProtectedRoute>
+                         <SkillCopilot />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/toolkits" element={
+                       <ProtectedRoute>
+                         <Toolkits />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/jobs-ai-discovery" element={
+                       <ProtectedRoute>
+                         <JobsAIDiscovery />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/project-studio" element={
+                       <SubscriptionRoute requiredTier="pro">
+                         <ProjectStudio />
+                       </SubscriptionRoute>
+                     } />
+                     <Route path="/labs" element={
+                       <SubscriptionRoute requiredTier="pro">
+                         <Labs />
+                       </SubscriptionRoute>
+                     } />
+                     
+                     <Route path="*" element={<NotFound />} />
+                  </Routes>
                  
                  {/* AI Learning Assistant - Available on all pages */}
                  <AILearningAssistant />
