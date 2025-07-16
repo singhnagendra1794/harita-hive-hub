@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { supabase } from "@/integrations/supabase/client";
 // Removed useSessionValidation to avoid conflicts with Supabase auth
 import LiveClassBanner from "./LiveClassBanner";
 import { ArrowRight, Crown, Zap, Lock, Loader2, Shield } from "lucide-react";
@@ -18,12 +19,39 @@ interface Stat {
   icon: React.ComponentType<any>;
 }
 
+interface UserProfile {
+  id: string;
+  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+}
+
 const UserDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
   const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder, loading: premiumLoading } = usePremiumAccess();
-  // Simplified - rely on AuthContext for session validation
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState("quick-actions");
+
+  // Fetch user profile data
+  useEffect(() => {
+    if (user) {
+      const fetchUserProfile = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, first_name, last_name, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        if (data && !error) {
+          setUserProfile(data);
+        }
+      };
+
+      fetchUserProfile();
+    }
+  }, [user]);
 
   const stats: Stat[] = [
     { title: "Courses Enrolled", value: "7", icon: BookOpen },
@@ -86,7 +114,9 @@ const UserDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user?.user_metadata?.full_name || 'GIS Professional'}! 👋
+              Welcome back, {userProfile?.first_name && userProfile?.last_name 
+                ? `${userProfile.first_name} ${userProfile.last_name}` 
+                : user?.user_metadata?.full_name || 'GIS Professional'}! 👋
             </h1>
             <p className="text-muted-foreground">
             Continue your geospatial journey and explore new opportunities

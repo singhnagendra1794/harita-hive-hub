@@ -25,6 +25,8 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [otpSent, setOtpSent] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [activeTab, setActiveTab] = useState('email');
@@ -53,6 +55,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
+    if (mode === 'signup' && (!firstName || !lastName)) return;
 
     setLoading(true);
     try {
@@ -63,7 +66,12 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              full_name: `${firstName} ${lastName}`
+            }
           }
         });
       } else {
@@ -237,6 +245,32 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
 
           <TabsContent value="email" className="space-y-4">
             <form onSubmit={handleEmailAuth} className="space-y-4">
+              {mode === 'signup' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Doe"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
