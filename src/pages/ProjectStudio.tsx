@@ -10,6 +10,7 @@ import { Heart, MessageCircle, Share2, Github, ExternalLink, Plus, Search, Filte
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
 
 interface ProjectSubmission {
@@ -72,7 +73,17 @@ const ProjectStudio = () => {
         .order('upvotes', { ascending: false })
         .order('created_at', { ascending: false });
 
-      setProjects(data || []);
+      // Transform the data to handle Json type for team_members
+      const transformedData = data?.map(project => ({
+        ...project,
+        team_members: Array.isArray(project.team_members) 
+          ? project.team_members 
+          : project.team_members 
+            ? [project.team_members] 
+            : []
+      })) || [];
+
+      setProjects(transformedData);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
