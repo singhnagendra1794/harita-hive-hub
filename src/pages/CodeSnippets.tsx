@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Code, Plus, Search, Copy, Download, Play, CheckCircle, AlertCircle } from "lucide-react";
+import { Code, Plus, Search, Copy, Download, Play, CheckCircle, AlertCircle, ExternalLink, Globe } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CodeSnippets = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isCreating, setIsCreating] = useState(false);
   const [runningSnippets, setRunningSnippets] = useState<Set<number>>(new Set());
   const [newSnippet, setNewSnippet] = useState({ 
@@ -21,6 +24,8 @@ const CodeSnippets = () => {
     language: "python" 
   });
   const { toast } = useToast();
+  const { hasAccess } = usePremiumAccess();
+  const { user } = useAuth();
 
   const snippets = [
     {
@@ -821,6 +826,1159 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
       downloads: 45,
       runnable: true,
       expectedOutput: "Spatial Autocorrelation Analysis\n========================================\nNumber of points: 50\nStudy area: 10x10 units\nValue range: [min] to [max]\n\nMoran's I at different distance thresholds:\nDistance 1.0: Moran's I = [value]\n                 Interpretation: [interpretation]\n...\n\nLocal Analysis:\nHigh-value points (>75th percentile): [count]\nPoints in high-value clusters: [count]\n\nSpatial autocorrelation analysis completed!"
+    },
+    // Google Earth Engine Snippets
+    {
+      id: 16,
+      title: "NDVI Calculation from Sentinel-2",
+      description: "Calculate NDVI using Sentinel-2 imagery in Google Earth Engine",
+      language: "javascript",
+      code: `// NDVI Calculation from Sentinel-2 in Google Earth Engine
+// Define area of interest (AOI) - Replace with your coordinates
+var geometry = ee.Geometry.Rectangle([-122.4, 37.7, -122.3, 37.8]); // San Francisco Bay Area
+
+// Date range for image collection
+var startDate = '2023-01-01';
+var endDate = '2023-12-31';
+
+// Function to mask clouds using the quality band
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+  // Bits 10 and 11 are clouds and cirrus, respectively
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+  // Both flags should be set to zero, indicating clear conditions
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+  return image.updateMask(mask).divide(10000);
+}
+
+// Load Sentinel-2 Surface Reflectance collection
+var dataset = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                  .filterDate(startDate, endDate)
+                  .filterBounds(geometry)
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+                  .map(maskS2clouds);
+
+// Calculate median composite
+var composite = dataset.median();
+
+// Calculate NDVI: (NIR - Red) / (NIR + Red)
+var ndvi = composite.normalizedDifference(['B8', 'B4']).rename('NDVI');
+
+// Define visualization parameters
+var ndviVis = {
+  min: -1,
+  max: 1,
+  palette: ['blue', 'white', 'green']
+};
+
+// Add layers to map
+Map.centerObject(geometry, 10);
+Map.addLayer(composite, {bands: ['B4', 'B3', 'B2'], min: 0, max: 0.3}, 'RGB');
+Map.addLayer(ndvi, ndviVis, 'NDVI');
+
+// Print NDVI statistics
+var stats = ndvi.reduceRegion({
+  reducer: ee.Reducer.mean().combine({
+    reducer2: ee.Reducer.minMax(),
+    sharedInputs: true
+  }),
+  geometry: geometry,
+  scale: 10,
+  maxPixels: 1e9
+});
+
+print('NDVI Statistics:', stats);
+
+// Export the NDVI image
+Export.image.toDrive({
+  image: ndvi,
+  description: 'NDVI_Sentinel2_Export',
+  folder: 'EarthEngine',
+  scale: 10,
+  region: geometry
+});`,
+      tags: ["google-earth-engine", "ndvi", "sentinel-2", "vegetation", "remote-sensing"],
+      downloads: 245,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: false,
+      geeLink: true
+    },
+    {
+      id: 17,
+      title: "Land Cover Classification with Random Forest",
+      description: "Perform supervised land cover classification using Random Forest in GEE",
+      language: "javascript",
+      code: `// Land Cover Classification using Random Forest in Google Earth Engine
+// Define study area
+var geometry = ee.Geometry.Rectangle([-74.2, 40.5, -73.8, 40.9]); // New York City area
+
+// Date range
+var startDate = '2023-06-01';
+var endDate = '2023-08-31';
+
+// Cloud masking function for Landsat 8
+function maskL8sr(image) {
+  var cloudShadowBitMask = (1 << 3);
+  var cloudsBitMask = (1 << 5);
+  var qa = image.select('pixel_qa');
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+                 .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+  return image.updateMask(mask);
+}
+
+// Load Landsat 8 Surface Reflectance collection
+var l8 = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+            .filterDate(startDate, endDate)
+            .filterBounds(geometry)
+            .map(maskL8sr);
+
+// Create median composite
+var composite = l8.median().clip(geometry);
+
+// Select bands for classification
+var bands = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7'];
+
+// Define training points for different land cover classes
+// You would normally import these as assets or draw them manually
+var water = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-74.01, 40.7]), {landcover: 0}),
+  ee.Feature(ee.Geometry.Point([-73.98, 40.75]), {landcover: 0})
+]);
+
+var urban = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-73.985, 40.748]), {landcover: 1}),
+  ee.Feature(ee.Geometry.Point([-73.98, 40.76]), {landcover: 1})
+]);
+
+var vegetation = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-73.97, 40.78]), {landcover: 2}),
+  ee.Feature(ee.Geometry.Point([-73.95, 40.8]), {landcover: 2})
+]);
+
+// Merge training data
+var trainingData = water.merge(urban).merge(vegetation);
+
+// Sample the input imagery to get a FeatureCollection of training data
+var training = composite.select(bands).sampleRegions({
+  collection: trainingData,
+  properties: ['landcover'],
+  scale: 30
+});
+
+// Train a Random Forest classifier
+var classifier = ee.Classifier.smileRandomForest(50)
+    .train({
+      features: training,
+      classProperty: 'landcover',
+      inputProperties: bands
+    });
+
+// Classify the input imagery
+var classified = composite.select(bands).classify(classifier);
+
+// Define a palette for the land cover classes
+var palette = [
+  '0066cc', // Water (blue)
+  'ff0000', // Urban (red)
+  '00cc00'  // Vegetation (green)
+];
+
+// Display the classification
+Map.centerObject(geometry, 10);
+Map.addLayer(composite, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Landsat 8 RGB');
+Map.addLayer(classified, {min: 0, max: 2, palette: palette}, 'Land Cover Classification');
+
+// Calculate area of each land cover class
+var areaImage = ee.Image.pixelArea().addBands(classified);
+var areas = areaImage.reduceRegion({
+  reducer: ee.Reducer.sum().group({
+    groupField: 1,
+    groupName: 'landcover',
+  }),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+});
+
+print('Land Cover Areas (square meters):', areas);
+
+// Export the classification
+Export.image.toDrive({
+  image: classified,
+  description: 'LandCover_Classification',
+  folder: 'EarthEngine',
+  scale: 30,
+  region: geometry
+});`,
+      tags: ["google-earth-engine", "classification", "random-forest", "landsat", "machine-learning"],
+      downloads: 189,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: true,
+      geeLink: true
+    },
+    {
+      id: 18,
+      title: "Cloud Masking with Sentinel-2 SR",
+      description: "Advanced cloud masking techniques for Sentinel-2 Surface Reflectance data",
+      language: "javascript",
+      code: `// Advanced Cloud Masking for Sentinel-2 Surface Reflectance
+var geometry = ee.Geometry.Rectangle([11.0, 46.4, 11.5, 46.9]); // South Tyrol, Italy
+
+// Date range
+var startDate = '2023-04-01';
+var endDate = '2023-10-31';
+
+// Advanced cloud masking function using multiple quality indicators
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+  var scl = image.select('SCL'); // Scene Classification Layer
+  
+  // Bits 10 and 11 are clouds and cirrus, respectively
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+  
+  // QA60 mask
+  var qaMask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+  
+  // SCL mask: remove clouds (3), cloud shadows (8), cirrus (9), and snow (11)
+  var sclMask = scl.neq(3).and(scl.neq(8)).and(scl.neq(9)).and(scl.neq(11));
+  
+  // Combine masks
+  var finalMask = qaMask.and(sclMask);
+  
+  return image.updateMask(finalMask).divide(10000)
+      .copyProperties(image, ['system:time_start']);
+}
+
+// Additional cloud shadow masking using projection
+function addCloudShadowMask(image) {
+  var cloudMask = image.select('QA60').bitwiseAnd(1 << 10).neq(0);
+  
+  // Calculate cloud shadow direction
+  var shadowAzimuth = ee.Number(90).subtract(
+    ee.Number(image.get('MEAN_SOLAR_AZIMUTH_ANGLE')));
+  
+  // Project cloud shadows
+  var cloudShadows = cloudMask.directionalDistanceTransform(shadowAzimuth, 50)
+      .reproject({crs: image.select(0).projection(), scale: 20})
+      .select('distance')
+      .mask()
+      .rename('cloud_shadow');
+  
+  return image.updateMask(cloudShadows.not());
+}
+
+// Load and process Sentinel-2 collection
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+            .filterDate(startDate, endDate)
+            .filterBounds(geometry)
+            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30))
+            .map(maskS2clouds);
+
+// Calculate cloud-free composite using multiple methods
+var median = s2.median();
+var mosaic = s2.mosaic();
+var mean = s2.mean();
+
+// Quality mosaic - select best pixels based on cloud distance
+var qualityMosaic = s2.qualityMosaic('QA60');
+
+// Visualization parameters
+var trueColorVis = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 0.3
+};
+
+var falseColorVis = {
+  bands: ['B8', 'B4', 'B3'],
+  min: 0,
+  max: 0.3
+};
+
+// Add layers to map
+Map.centerObject(geometry, 10);
+Map.addLayer(median.clip(geometry), trueColorVis, 'Median Composite (True Color)');
+Map.addLayer(median.clip(geometry), falseColorVis, 'Median Composite (False Color)', false);
+Map.addLayer(qualityMosaic.clip(geometry), trueColorVis, 'Quality Mosaic', false);
+
+// Calculate cloud coverage statistics
+var cloudStats = s2.map(function(image) {
+  var clouds = image.select('QA60').bitwiseAnd(1 << 10).neq(0);
+  var cloudCoverage = clouds.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: geometry,
+    scale: 60,
+    maxPixels: 1e9
+  });
+  return image.set('cloud_coverage', cloudCoverage.get('QA60'));
+});
+
+print('Collection size:', s2.size());
+print('Cloud coverage stats:', cloudStats.aggregate_array('cloud_coverage'));
+
+// Export cloud-free composite
+Export.image.toDrive({
+  image: median.clip(geometry),
+  description: 'Sentinel2_CloudFree_Composite',
+  folder: 'EarthEngine',
+  scale: 10,
+  region: geometry,
+  crs: 'EPSG:4326'
+});`,
+      tags: ["google-earth-engine", "sentinel-2", "cloud-masking", "preprocessing"],
+      downloads: 167,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: true,
+      geeLink: true
+    },
+    {
+      id: 19,
+      title: "Time Series Analysis of Vegetation Index",
+      description: "Analyze temporal changes in vegetation using MODIS NDVI time series",
+      language: "javascript",
+      code: `// Time Series Analysis of Vegetation Index using MODIS NDVI
+var geometry = ee.Geometry.Rectangle([-10.0, 35.0, 40.0, 60.0]); // Europe
+
+// Date range for multi-year analysis
+var startDate = '2015-01-01';
+var endDate = '2023-12-31';
+
+// Load MODIS NDVI collection (16-day composite)
+var modisNDVI = ee.ImageCollection('MODIS/006/MOD13Q1')
+                  .filterDate(startDate, endDate)
+                  .filterBounds(geometry)
+                  .select('NDVI');
+
+// Scale NDVI values (MODIS NDVI is scaled by 10000)
+var scaledNDVI = modisNDVI.map(function(image) {
+  var scaled = image.multiply(0.0001);
+  return scaled.copyProperties(image, ['system:time_start']);
+});
+
+// Create time series chart for a specific point
+var point = ee.Geometry.Point([2.35, 48.86]); // Paris, France
+
+var chart = ui.Chart.image.series(scaledNDVI, point, ee.Reducer.mean(), 250)
+    .setOptions({
+      title: 'NDVI Time Series - Paris',
+      vAxis: {title: 'NDVI'},
+      hAxis: {title: 'Date'},
+      lineWidth: 1,
+      pointSize: 3
+    });
+
+print(chart);
+
+// Calculate seasonal statistics
+var monthlyNDVI = scaledNDVI.map(function(image) {
+  var date = ee.Date(image.get('system:time_start'));
+  var month = date.get('month');
+  return image.set('month', month);
+});
+
+// Create monthly composites
+var months = ee.List.sequence(1, 12);
+var monthlyComposites = months.map(function(month) {
+  var monthlyImages = monthlyNDVI.filter(ee.Filter.eq('month', month));
+  var composite = monthlyImages.median();
+  return composite.set('month', month);
+});
+
+var monthlyCollection = ee.ImageCollection.fromImages(monthlyComposites);
+
+// Calculate long-term trends using linear regression
+var trendCoefficients = scaledNDVI
+    .map(function(image) {
+      var date = ee.Date(image.get('system:time_start'));
+      var years = date.difference(ee.Date(startDate), 'year');
+      return image.addBands(ee.Image(years).rename('t').float());
+    })
+    .select(['NDVI', 't'])
+    .reduce(ee.Reducer.linearFit());
+
+// Extract slope (trend) and correlation
+var trend = trendCoefficients.select('scale');
+var correlation = trendCoefficients.select('correlation');
+
+// Visualization parameters
+var ndviVis = {
+  min: 0,
+  max: 1,
+  palette: ['brown', 'yellow', 'green', 'darkgreen']
+};
+
+var trendVis = {
+  min: -0.01,
+  max: 0.01,
+  palette: ['red', 'white', 'green']
+};
+
+// Calculate anomalies for a specific year
+var referenceYear = 2020;
+var currentYearNDVI = scaledNDVI
+    .filter(ee.Filter.calendarRange(referenceYear, referenceYear, 'year'))
+    .median();
+
+var longTermMean = scaledNDVI.median();
+var anomaly = currentYearNDVI.subtract(longTermMean);
+
+// Add layers to map
+Map.centerObject(geometry, 4);
+Map.addLayer(longTermMean.clip(geometry), ndviVis, 'Long-term Mean NDVI');
+Map.addLayer(trend.clip(geometry), trendVis, 'NDVI Trend (slope)', false);
+Map.addLayer(anomaly.clip(geometry), 
+  {min: -0.2, max: 0.2, palette: ['red', 'white', 'blue']}, 
+  '2020 NDVI Anomaly', false);
+
+// Calculate regional statistics
+var stats = scaledNDVI.map(function(image) {
+  var meanNDVI = image.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: geometry,
+    scale: 250,
+    maxPixels: 1e9
+  });
+  return ee.Feature(null, {
+    'date': image.get('system:time_start'),
+    'mean_ndvi': meanNDVI.get('NDVI')
+  });
+});
+
+// Export time series data
+Export.table.toDrive({
+  collection: ee.FeatureCollection(stats),
+  description: 'NDVI_TimeSeries_Europe',
+  folder: 'EarthEngine',
+  fileFormat: 'CSV'
+});
+
+// Calculate phenology metrics (simplified)
+var springOnset = monthlyCollection
+    .filter(ee.Filter.gte('month', 3))
+    .filter(ee.Filter.lte('month', 6))
+    .max();
+
+var autumnSenescence = monthlyCollection
+    .filter(ee.Filter.gte('month', 9))
+    .filter(ee.Filter.lte('month', 11))
+    .min();
+
+print('Analysis complete! Check the time series chart and exported data.');
+print('Spring peak NDVI:', springOnset.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: point,
+  scale: 250
+}));`,
+      tags: ["google-earth-engine", "time-series", "modis", "phenology", "trend-analysis"],
+      downloads: 143,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: false,
+      geeLink: true
+    },
+    {
+      id: 20,
+      title: "Change Detection using Image Difference",
+      description: "Detect land cover changes using before/after image comparison",
+      language: "javascript",
+      code: `// Change Detection using Image Difference in Google Earth Engine
+var geometry = ee.Geometry.Rectangle([-122.5, 37.6, -122.2, 37.9]); // San Francisco Bay Area
+
+// Define before and after periods
+var beforeStart = '2010-06-01';
+var beforeEnd = '2010-08-31';
+var afterStart = '2020-06-01';
+var afterEnd = '2020-08-31';
+
+// Cloud masking function for Landsat
+function maskL8sr(image) {
+  var cloudShadowBitMask = (1 << 3);
+  var cloudsBitMask = (1 << 5);
+  var qa = image.select('pixel_qa');
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+                 .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+  return image.updateMask(mask);
+}
+
+// Function to prepare Landsat images
+function prepareImage(collection, startDate, endDate) {
+  return collection
+    .filterDate(startDate, endDate)
+    .filterBounds(geometry)
+    .map(maskL8sr)
+    .median()
+    .clip(geometry);
+}
+
+// Load Landsat collections for different time periods
+var beforeImage = prepareImage(
+  ee.ImageCollection('LANDSAT/LC08/C01/T1_SR'), 
+  beforeStart, 
+  beforeEnd
+);
+
+var afterImage = prepareImage(
+  ee.ImageCollection('LANDSAT/LC08/C01/T1_SR'), 
+  afterStart, 
+  afterEnd
+);
+
+// Calculate spectral indices for change detection
+function addIndices(image) {
+  // NDVI: (NIR - Red) / (NIR + Red)
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  
+  // NDBI: (SWIR1 - NIR) / (SWIR1 + NIR) - for built-up areas
+  var ndbi = image.normalizedDifference(['B6', 'B5']).rename('NDBI');
+  
+  // MNDWI: (Green - SWIR1) / (Green + SWIR1) - for water bodies
+  var mndwi = image.normalizedDifference(['B3', 'B6']).rename('MNDWI');
+  
+  return image.addBands([ndvi, ndbi, mndwi]);
+}
+
+// Add indices to both images
+var beforeWithIndices = addIndices(beforeImage);
+var afterWithIndices = addIndices(afterImage);
+
+// Calculate differences
+var ndviDiff = afterWithIndices.select('NDVI').subtract(beforeWithIndices.select('NDVI')).rename('NDVI_diff');
+var ndbiBiff = afterWithIndices.select('NDBI').subtract(beforeWithIndices.select('NDBI')).rename('NDBI_diff');
+var mndwiDiff = afterWithIndices.select('MNDWI').subtract(beforeWithIndices.select('MNDWI')).rename('MNDWI_diff');
+
+// Combine all differences
+var changeMagnitude = ndviDiff.abs().add(ndbiBiff.abs()).add(mndwiDiff.abs()).rename('change_magnitude');
+
+// Define change thresholds
+var vegetationLossThreshold = -0.3; // Significant vegetation loss
+var urbanGrowthThreshold = 0.2;     // Urban development
+var changeThreshold = 0.5;          // General change threshold
+
+// Identify different types of changes
+var vegetationLoss = ndviDiff.lt(vegetationLossThreshold).rename('vegetation_loss');
+var urbanGrowth = ndbiBiff.gt(urbanGrowthThreshold).rename('urban_growth');
+var significantChange = changeMagnitude.gt(changeThreshold).rename('significant_change');
+
+// Create change classification
+var changeTypes = ee.Image(0)
+  .where(vegetationLoss.eq(1), 1)  // Vegetation loss = 1
+  .where(urbanGrowth.eq(1), 2)     // Urban growth = 2
+  .where(significantChange.eq(1).and(vegetationLoss.eq(0)).and(urbanGrowth.eq(0)), 3) // Other change = 3
+  .rename('change_type');
+
+// Visualization parameters
+var trueColorVis = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 3000
+};
+
+var changeDiffVis = {
+  min: -0.5,
+  max: 0.5,
+  palette: ['red', 'white', 'green']
+};
+
+var changeTypeVis = {
+  min: 0,
+  max: 3,
+  palette: ['white', 'red', 'orange', 'yellow'] // No change, vegetation loss, urban growth, other change
+};
+
+// Add layers to map
+Map.centerObject(geometry, 10);
+
+// Before and after RGB
+Map.addLayer(beforeImage, trueColorVis, 'Before (2010)');
+Map.addLayer(afterImage, trueColorVis, 'After (2020)', false);
+
+// NDVI comparison
+Map.addLayer(beforeWithIndices.select('NDVI'), {min: -1, max: 1, palette: ['blue', 'white', 'green']}, 'NDVI Before', false);
+Map.addLayer(afterWithIndices.select('NDVI'), {min: -1, max: 1, palette: ['blue', 'white', 'green']}, 'NDVI After', false);
+
+// Change analysis
+Map.addLayer(ndviDiff, changeDiffVis, 'NDVI Difference');
+Map.addLayer(changeMagnitude, {min: 0, max: 1, palette: ['white', 'red']}, 'Change Magnitude', false);
+Map.addLayer(changeTypes.updateMask(changeTypes.gt(0)), changeTypeVis, 'Change Types');
+
+// Calculate change statistics
+var changeStats = ee.Dictionary({
+  'total_area_km2': geometry.area().divide(1e6),
+  'vegetation_loss_km2': vegetationLoss.multiply(ee.Image.pixelArea()).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 30,
+    maxPixels: 1e10
+  }).get('vegetation_loss').divide(1e6),
+  'urban_growth_km2': urbanGrowth.multiply(ee.Image.pixelArea()).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 30,
+    maxPixels: 1e10
+  }).get('urban_growth').divide(1e6)
+});
+
+print('Change Detection Statistics:', changeStats);
+
+// Create difference RGB composite for visual interpretation
+var rgbDiff = afterImage.select(['B4', 'B3', 'B2']).subtract(beforeImage.select(['B4', 'B3', 'B2']));
+Map.addLayer(rgbDiff, {min: -1000, max: 1000, bands: ['B4', 'B3', 'B2']}, 'RGB Difference', false);
+
+// Export change detection results
+Export.image.toDrive({
+  image: changeTypes,
+  description: 'Change_Detection_2010_2020',
+  folder: 'EarthEngine',
+  scale: 30,
+  region: geometry,
+  crs: 'EPSG:4326'
+});
+
+// Export statistics
+Export.table.toDrive({
+  collection: ee.FeatureCollection([ee.Feature(null, changeStats)]),
+  description: 'Change_Statistics',
+  folder: 'EarthEngine',
+  fileFormat: 'CSV'
+});`,
+      tags: ["google-earth-engine", "change-detection", "landsat", "urban-growth", "deforestation"],
+      downloads: 201,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: true,
+      geeLink: true
+    },
+    {
+      id: 21,
+      title: "Urban Expansion Detection using Landsat",
+      description: "Monitor urban expansion over time using multi-temporal Landsat imagery",
+      language: "javascript",
+      code: `// Urban Expansion Detection using Landsat Time Series
+var geometry = ee.Geometry.Rectangle([77.0, 28.4, 77.4, 28.8]); // Delhi, India
+
+// Define time periods for analysis
+var periods = [
+  {name: '2000', start: '2000-01-01', end: '2000-12-31'},
+  {name: '2010', start: '2010-01-01', end: '2010-12-31'},
+  {name: '2020', start: '2020-01-01', end: '2020-12-31'}
+];
+
+// Cloud masking for different Landsat missions
+function maskLandsatClouds(image) {
+  var qa = image.select('pixel_qa');
+  var cloudBitMask = (1 << 5);
+  var cloudShadowBitMask = (1 << 3);
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+                .and(qa.bitwiseAnd(cloudShadowBitMask).eq(0));
+  return image.updateMask(mask);
+}
+
+// Function to calculate urban indices
+function calculateUrbanIndices(image) {
+  // NDBI: (SWIR1 - NIR) / (SWIR1 + NIR)
+  var ndbi = image.normalizedDifference(['B6', 'B5']).rename('NDBI');
+  
+  // UI (Urban Index): (SWIR2 - NIR) / (SWIR2 + NIR)
+  var ui = image.normalizedDifference(['B7', 'B5']).rename('UI');
+  
+  // NDVI for vegetation
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  
+  // MNDWI for water
+  var mndwi = image.normalizedDifference(['B3', 'B6']).rename('MNDWI');
+  
+  return image.addBands([ndbi, ui, ndvi, mndwi]);
+}
+
+// Function to classify urban areas
+function classifyUrban(image, threshold) {
+  var ndbi = image.select('NDBI');
+  var ndvi = image.select('NDVI');
+  var mndwi = image.select('MNDWI');
+  
+  // Urban classification criteria:
+  // High NDBI, Low NDVI, Not water (MNDWI < 0)
+  var urban = ndbi.gt(threshold)
+                  .and(ndvi.lt(0.2))
+                  .and(mndwi.lt(0));
+  
+  return urban.rename('urban');
+}
+
+// Process each time period
+var urbanResults = periods.map(function(period) {
+  // Load appropriate Landsat collection based on year
+  var collection;
+  if (period.name === '2000') {
+    collection = ee.ImageCollection('LANDSAT/LE07/C01/T1_SR'); // Landsat 7
+  } else {
+    collection = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR'); // Landsat 8
+  }
+  
+  var composite = collection
+    .filterDate(period.start, period.end)
+    .filterBounds(geometry)
+    .map(maskLandsatClouds)
+    .median()
+    .clip(geometry);
+  
+  var withIndices = calculateUrbanIndices(composite);
+  var urbanMask = classifyUrban(withIndices, 0.1);
+  
+  return {
+    period: period.name,
+    image: composite,
+    indices: withIndices,
+    urban: urbanMask
+  };
+});
+
+// Extract urban masks for each period
+var urban2000 = urbanResults[0].urban;
+var urban2010 = urbanResults[1].urban;
+var urban2020 = urbanResults[2].urban;
+
+// Calculate urban expansion
+var expansion2000_2010 = urban2010.subtract(urban2000).gt(0).rename('expansion_2000_2010');
+var expansion2010_2020 = urban2020.subtract(urban2010).gt(0).rename('expansion_2010_2020');
+var expansion2000_2020 = urban2020.subtract(urban2000).gt(0).rename('expansion_2000_2020');
+
+// Create urban development timeline
+var urbanTimeline = ee.Image(0)
+  .where(urban2000.eq(1), 1)                    // Urban in 2000
+  .where(expansion2000_2010.eq(1), 2)           // Expansion 2000-2010
+  .where(expansion2010_2020.eq(1), 3)           // Expansion 2010-2020
+  .rename('urban_timeline');
+
+// Visualization parameters
+var trueColorVis = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 3000
+};
+
+var urbanVis = {
+  min: 0,
+  max: 1,
+  palette: ['white', 'red']
+};
+
+var timelineVis = {
+  min: 0,
+  max: 3,
+  palette: ['white', 'darkred', 'orange', 'yellow']
+};
+
+// Add layers to map
+Map.centerObject(geometry, 10);
+
+// Add RGB composites for each period
+Map.addLayer(urbanResults[0].image, trueColorVis, '2000 RGB');
+Map.addLayer(urbanResults[1].image, trueColorVis, '2010 RGB', false);
+Map.addLayer(urbanResults[2].image, trueColorVis, '2020 RGB', false);
+
+// Add urban masks
+Map.addLayer(urban2000.updateMask(urban2000), urbanVis, '2000 Urban', false);
+Map.addLayer(urban2010.updateMask(urban2010), urbanVis, '2010 Urban', false);
+Map.addLayer(urban2020.updateMask(urban2020), urbanVis, '2020 Urban');
+
+// Add expansion analysis
+Map.addLayer(expansion2000_2010.updateMask(expansion2000_2010), {palette: ['orange']}, 'Expansion 2000-2010', false);
+Map.addLayer(expansion2010_2020.updateMask(expansion2010_2020), {palette: ['yellow']}, 'Expansion 2010-2020', false);
+Map.addLayer(urbanTimeline.updateMask(urbanTimeline.gt(0)), timelineVis, 'Urban Timeline');
+
+// Calculate urban area statistics
+var pixelArea = ee.Image.pixelArea().divide(1e6); // Convert to km²
+
+var stats2000 = urban2000.multiply(pixelArea).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+});
+
+var stats2010 = urban2010.multiply(pixelArea).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+});
+
+var stats2020 = urban2020.multiply(pixelArea).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+});
+
+var expansionStats = {
+  'urban_area_2000_km2': stats2000.get('urban'),
+  'urban_area_2010_km2': stats2010.get('urban'),
+  'urban_area_2020_km2': stats2020.get('urban'),
+  'expansion_2000_2010_km2': expansion2000_2010.multiply(pixelArea).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 30,
+    maxPixels: 1e10
+  }).get('expansion_2000_2010'),
+  'expansion_2010_2020_km2': expansion2010_2020.multiply(pixelArea).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 30,
+    maxPixels: 1e10
+  }).get('expansion_2010_2020')
+};
+
+print('Urban Expansion Statistics:', expansionStats);
+
+// Calculate expansion rate
+var totalArea = geometry.area().divide(1e6);
+print('Study Area (km²):', totalArea);
+
+// Export urban timeline
+Export.image.toDrive({
+  image: urbanTimeline,
+  description: 'Urban_Expansion_Timeline_Delhi',
+  folder: 'EarthEngine',
+  scale: 30,
+  region: geometry,
+  crs: 'EPSG:4326'
+});
+
+// Create growth direction analysis
+var urbanCentroid2000 = urban2000.reduceRegion({
+  reducer: ee.Reducer.centroid(),
+  geometry: geometry,
+  scale: 90
+});
+
+var urbanCentroid2020 = urban2020.reduceRegion({
+  reducer: ee.Reducer.centroid(),
+  geometry: geometry,
+  scale: 90
+});
+
+print('Urban Growth Direction Analysis:');
+print('2000 Urban Centroid:', urbanCentroid2000);
+print('2020 Urban Centroid:', urbanCentroid2020);`,
+      tags: ["google-earth-engine", "urban-expansion", "landsat", "time-series", "change-detection"],
+      downloads: 134,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: true,
+      geeLink: true
+    },
+    // Add more comprehensive GEE snippets
+    {
+      id: 22,
+      title: "Water Body Extraction (NDWI)",
+      description: "Extract water bodies using Modified Normalized Difference Water Index",
+      language: "javascript",
+      code: `// Water Body Extraction using MNDWI in Google Earth Engine
+var geometry = ee.Geometry.Rectangle([77.1, 28.4, 77.3, 28.7]); // Yamuna River, Delhi
+
+// Date range
+var startDate = '2023-01-01';
+var endDate = '2023-12-31';
+
+// Load Sentinel-2 collection
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+          .filterDate(startDate, endDate)
+          .filterBounds(geometry)
+          .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10));
+
+// Cloud masking
+function maskClouds(image) {
+  var qa = image.select('QA60');
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+  return image.updateMask(mask).divide(10000);
+}
+
+var composite = s2.map(maskClouds).median();
+
+// Calculate water indices
+var mndwi = composite.normalizedDifference(['B3', 'B11']).rename('MNDWI');
+var ndwi = composite.normalizedDifference(['B3', 'B8']).rename('NDWI');
+
+// Extract water bodies
+var waterMask = mndwi.gt(0.3);
+var waterBodies = waterMask.updateMask(waterMask);
+
+// Visualization
+Map.centerObject(geometry, 12);
+Map.addLayer(composite, {bands: ['B4', 'B3', 'B2'], min: 0, max: 0.3}, 'RGB');
+Map.addLayer(mndwi, {min: -1, max: 1, palette: ['red', 'yellow', 'blue']}, 'MNDWI');
+Map.addLayer(waterBodies, {palette: ['blue']}, 'Water Bodies');
+
+// Calculate water area
+var waterArea = waterBodies.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 10,
+  maxPixels: 1e9
+}).get('MNDWI');
+
+print('Water Area (sq meters):', waterArea);`,
+      tags: ["google-earth-engine", "water-extraction", "ndwi", "mndwi", "sentinel-2"],
+      downloads: 156,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: false,
+      geeLink: true
+    },
+    {
+      id: 23,
+      title: "Forest Loss Analysis using Hansen Dataset",
+      description: "Analyze global forest loss using Hansen Global Forest Change dataset",
+      language: "javascript",
+      code: `// Forest Loss Analysis using Hansen Global Forest Change
+var geometry = ee.Geometry.Rectangle([-60.5, -3.5, -60.0, -3.0]); // Amazon region
+
+// Load Hansen Global Forest Change dataset
+var hansen = ee.Image('UMD/hansen/global_forest_change_2022_v1_10');
+
+// Extract relevant bands
+var treeCover = hansen.select('treecover2000'); // Tree cover in year 2000
+var forestLoss = hansen.select('loss'); // Forest loss 2001-2022
+var forestGain = hansen.select('gain'); // Forest gain 2001-2012
+var lossYear = hansen.select('lossyear'); // Year of loss
+
+// Create forest mask (areas with >30% tree cover in 2000)
+var forestMask = treeCover.gte(30);
+var forest2000 = forestMask.updateMask(forestMask);
+
+// Create loss mask
+var lossImage = forestLoss.updateMask(forestLoss.eq(1));
+
+// Calculate forest loss by year
+var lossYearMasked = lossYear.updateMask(forestLoss.eq(1));
+
+// Visualization parameters
+var forestVis = {palette: ['green']};
+var lossVis = {palette: ['red']};
+var treeCoverVis = {min: 0, max: 100, palette: ['white', 'green']};
+
+// Add layers to map
+Map.centerObject(geometry, 10);
+Map.addLayer(treeCover.clip(geometry), treeCoverVis, 'Tree Cover 2000');
+Map.addLayer(forest2000.clip(geometry), forestVis, 'Forest 2000', false);
+Map.addLayer(lossImage.clip(geometry), lossVis, 'Forest Loss 2001-2022');
+
+// Calculate statistics
+var totalForestArea = forest2000.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+}).get('treecover2000');
+
+var totalLossArea = lossImage.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: geometry,
+  scale: 30,
+  maxPixels: 1e10
+}).get('loss');
+
+print('Total Forest Area 2000 (sq m):', totalForestArea);
+print('Total Loss Area (sq m):', totalLossArea);
+
+// Calculate loss by year
+var yearlyLoss = [];
+for (var year = 1; year <= 22; year++) {
+  var yearMask = lossYearMasked.eq(year);
+  var yearLoss = yearMask.multiply(ee.Image.pixelArea()).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 30,
+    maxPixels: 1e10
+  }).get('lossyear');
+  
+  yearlyLoss.push(ee.Feature(null, {
+    'year': 2000 + year,
+    'loss_area_sqm': yearLoss
+  }));
+}
+
+// Export yearly loss data
+Export.table.toDrive({
+  collection: ee.FeatureCollection(yearlyLoss),
+  description: 'Forest_Loss_By_Year',
+  folder: 'EarthEngine'
+});`,
+      tags: ["google-earth-engine", "deforestation", "hansen", "forest-loss", "amazon"],
+      downloads: 198,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: true,
+      geeLink: true
+    },
+    {
+      id: 24,
+      title: "Exporting Maps to Google Drive",
+      description: "Export processed satellite imagery and analysis results to Google Drive",
+      language: "javascript",
+      code: `// Exporting Maps and Data to Google Drive in Google Earth Engine
+var geometry = ee.Geometry.Rectangle([78.0, 27.5, 78.5, 28.0]); // Agra, India
+
+// Load and process Sentinel-2 image
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+          .filterDate('2023-01-01', '2023-03-31')
+          .filterBounds(geometry)
+          .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+          .median()
+          .clip(geometry);
+
+// Calculate indices
+var ndvi = s2.normalizedDifference(['B8', 'B4']).rename('NDVI');
+var ndbi = s2.normalizedDifference(['B11', 'B8']).rename('NDBI');
+
+// Create RGB composite
+var rgb = s2.select(['B4', 'B3', 'B2']);
+
+// 1. Export RGB image
+Export.image.toDrive({
+  image: rgb,
+  description: 'Sentinel2_RGB_Agra',
+  folder: 'EarthEngine_Exports',
+  fileNamePrefix: 'S2_RGB_Agra_2023',
+  region: geometry,
+  scale: 10,
+  crs: 'EPSG:4326',
+  maxPixels: 1e9,
+  fileFormat: 'GeoTIFF'
+});
+
+// 2. Export NDVI with custom visualization
+var ndviVisualized = ndvi.visualize({
+  min: -1,
+  max: 1,
+  palette: ['blue', 'white', 'green']
+});
+
+Export.image.toDrive({
+  image: ndviVisualized,
+  description: 'NDVI_Visualization_Agra',
+  folder: 'EarthEngine_Exports',
+  region: geometry,
+  scale: 10,
+  crs: 'EPSG:4326',
+  fileFormat: 'PNG'
+});
+
+// 3. Export raw NDVI data for analysis
+Export.image.toDrive({
+  image: ndvi,
+  description: 'NDVI_Raw_Data_Agra',
+  folder: 'EarthEngine_Exports',
+  region: geometry,
+  scale: 10,
+  crs: 'EPSG:4326',
+  fileFormat: 'GeoTIFF'
+});
+
+// 4. Export to Google Cloud Storage (alternative)
+Export.image.toCloudStorage({
+  image: rgb,
+  description: 'S2_RGB_to_GCS',
+  bucket: 'your-gcs-bucket-name',
+  fileNamePrefix: 'S2_RGB_Agra',
+  region: geometry,
+  scale: 10,
+  maxPixels: 1e9
+});
+
+// 5. Export feature collection (vector data)
+var samples = ndvi.sample({
+  region: geometry,
+  scale: 30,
+  numPixels: 1000
+});
+
+Export.table.toDrive({
+  collection: samples,
+  description: 'NDVI_Sample_Points',
+  folder: 'EarthEngine_Exports',
+  fileFormat: 'CSV'
+});
+
+// 6. Export classification results
+var landCover = ee.Image(1)
+  .where(ndvi.gt(0.4), 2)    // Vegetation
+  .where(ndbi.gt(0.1), 3)    // Built-up
+  .where(ndvi.lt(0.1), 4)    // Barren
+  .rename('landcover');
+
+Export.image.toDrive({
+  image: landCover,
+  description: 'LandCover_Classification',
+  folder: 'EarthEngine_Exports',
+  region: geometry,
+  scale: 30,
+  crs: 'EPSG:4326',
+  fileFormat: 'GeoTIFF'
+});
+
+// 7. Create and export thumbnail for quick preview
+var thumbnail = rgb.getThumbURL({
+  'region': geometry,
+  'dimensions': 512,
+  'format': 'png'
+});
+
+print('Thumbnail URL:', thumbnail);
+
+// 8. Export time series data
+var timeSeries = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                  .filterDate('2022-01-01', '2023-12-31')
+                  .filterBounds(geometry)
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+                  .map(function(image) {
+                    var ndvi = image.normalizedDifference(['B8', 'B4']);
+                    var date = image.get('system:time_start');
+                    var meanNdvi = ndvi.reduceRegion({
+                      reducer: ee.Reducer.mean(),
+                      geometry: geometry,
+                      scale: 100
+                    });
+                    return ee.Feature(null, {
+                      'date': date,
+                      'mean_ndvi': meanNdvi.get('nd')
+                    });
+                  });
+
+Export.table.toDrive({
+  collection: timeSeries,
+  description: 'NDVI_TimeSeries_Agra',
+  folder: 'EarthEngine_Exports',
+  fileFormat: 'CSV'
+});
+
+print('All export tasks have been created. Check the Tasks tab to run them.');`,
+      tags: ["google-earth-engine", "export", "google-drive", "data-export", "workflow"],
+      downloads: 234,
+      runnable: false,
+      expectedOutput: "",
+      category: "earth-engine",
+      isPremium: false,
+      geeLink: true
     }
   ];
 
@@ -832,11 +1990,36 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
     { value: "sql", label: "SQL" }
   ];
 
-  const filteredSnippets = snippets.filter(snippet => {
+  const categories = [
+    { value: "all", label: "All Categories" },
+    { value: "general", label: "General GIS" },
+    { value: "earth-engine", label: "🌍 Google Earth Engine" },
+    { value: "remote-sensing", label: "Remote Sensing" },
+    { value: "web-mapping", label: "Web Mapping" }
+  ];
+
+  // Filter snippets based on access level
+  const accessibleSnippets = snippets.map(snippet => {
+    // Check if snippet is premium and user has access
+    if (snippet.isPremium && !hasAccess('pro')) {
+      return null; // Hide premium snippets from free users
+    }
+    return snippet;
+  }).filter(Boolean);
+
+  // For GEE category, show only 5 snippets to free users
+  const geeSnippets = accessibleSnippets.filter(s => s.category === 'earth-engine');
+  const limitedGeeSnippets = !hasAccess('pro') ? geeSnippets.slice(0, 5) : geeSnippets;
+  const otherSnippets = accessibleSnippets.filter(s => s.category !== 'earth-engine');
+  const finalSnippets = [...otherSnippets, ...limitedGeeSnippets];
+
+  const filteredSnippets = finalSnippets.filter(snippet => {
     const matchesSearch = snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         snippet.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         snippet.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         snippet.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesLanguage = selectedLanguage === "all" || snippet.language === selectedLanguage;
-    return matchesSearch && matchesLanguage;
+    const matchesCategory = selectedCategory === "all" || snippet.category === selectedCategory;
+    return matchesSearch && matchesLanguage && matchesCategory;
   });
 
   const runSnippet = async (snippetId: number) => {
@@ -878,6 +2061,18 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
     });
   };
 
+  const openInGEE = (code: string) => {
+    // Encode the code for URL
+    const encodedCode = encodeURIComponent(code);
+    const geeUrl = `https://code.earthengine.google.com/?scriptPath=users%2Fusername%2Frepo%3Afilename&code=${encodedCode}`;
+    window.open(geeUrl, '_blank');
+    
+    toast({
+      title: "Opening in GEE Code Editor",
+      description: "Code will be loaded in a new tab",
+    });
+  };
+
   return (
     <Layout>
       <div className="container py-12">
@@ -886,6 +2081,14 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Collection of runnable code snippets for GIS development and automation
           </p>
+          {!hasAccess('pro') && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-2xl mx-auto">
+              <p className="text-sm text-blue-800">
+                🌍 <strong>Google Earth Engine</strong> section shows 5 free samples. 
+                <a href="/choose-plan" className="underline ml-1">Upgrade to Pro</a> to unlock all 15+ GEE scripts!
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Controls */}
@@ -907,6 +2110,15 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
             >
               {languages.map(lang => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
+              ))}
+            </select>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 border border-input rounded-md text-sm"
+            >
+              {categories.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
               ))}
             </select>
             <Button onClick={() => setIsCreating(true)}>
@@ -986,6 +2198,17 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
                           Runnable
                         </Badge>
                       )}
+                      {snippet.category === 'earth-engine' && (
+                        <Badge variant="default" className="text-xs bg-green-600">
+                          <Globe className="h-3 w-3 mr-1" />
+                          GEE
+                        </Badge>
+                      )}
+                      {snippet.isPremium && !hasAccess('pro') && (
+                        <Badge variant="outline" className="text-xs border-yellow-400 text-yellow-700">
+                          🔐 Pro
+                        </Badge>
+                      )}
                     </CardTitle>
                     <CardDescription>{snippet.description}</CardDescription>
                   </div>
@@ -1033,7 +2256,7 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
                     <span className="text-sm text-muted-foreground">
                       {snippet.downloads} downloads
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button size="sm" variant="outline">
                         <Download className="h-4 w-4 mr-1" />
                         Download
@@ -1058,6 +2281,17 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
                           )}
                         </Button>
                       )}
+                      {snippet.geeLink && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => openInGEE(snippet.code)}
+                          className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          Open in GEE
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1070,6 +2304,19 @@ print(f"\\nSpatial autocorrelation analysis completed!")`,
           <div className="text-center py-12">
             <Code className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No code snippets found matching your criteria.</p>
+          </div>
+        )}
+
+        {/* Upgrade Prompt for Free Users */}
+        {!hasAccess('pro') && selectedCategory === 'earth-engine' && (
+          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg text-center">
+            <h3 className="text-lg font-semibold mb-2">🚀 Unlock Full Google Earth Engine Library</h3>
+            <p className="text-muted-foreground mb-4">
+              Get access to 15+ production-ready GEE scripts including Advanced Classification, Time Series Analysis, and more!
+            </p>
+            <Button asChild>
+              <a href="/choose-plan">Upgrade to Pro Plan</a>
+            </Button>
           </div>
         )}
       </div>
