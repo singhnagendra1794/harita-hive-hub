@@ -9,18 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Search, Filter, UserCog, Shield, Users } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import type { Database } from '@/integrations/supabase/types';
-
-type AppRole = Database['public']['Enums']['app_role'];
 
 interface UserData {
   id: string;
-  email?: string;
+  email: string;
   created_at: string;
-  full_name: string | null;
-  roles: AppRole[];
+  full_name: string;
+  roles: string[];
   subscription_tier: string;
   subscription_status: string;
+  last_sign_in_at: string;
 }
 
 type FilterType = 'all' | 'free' | 'pro' | 'enterprise' | 'admin' | 'user';
@@ -43,12 +41,24 @@ export const SuperAdminUserManagement = () => {
     try {
       setLoading(true);
       
-      // Fetch profiles
+      // Fetch users with their profiles and subscriptions
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, created_at');
+        .select(`
+          id,
+          full_name,
+          created_at
+        `);
 
       if (profilesError) throw profilesError;
+
+      // Fetch auth users for email and last sign in
+      const { data: authUsers, error: authError } = await supabase
+        .rpc('get_auth_users_data');
+
+      if (authError) {
+        console.error('Auth users error:', authError);
+      }
 
       // Fetch user roles
       const { data: userRoles, error: rolesError } = await supabase
@@ -64,20 +74,21 @@ export const SuperAdminUserManagement = () => {
 
       if (subscriptionsError) throw subscriptionsError;
 
-      // Transform the data to match our interface
+      // Combine all data
       const combinedUsers: UserData[] = profiles?.map(profile => {
-        const userRoleRecords = userRoles?.filter(ur => ur.user_id === profile.id) || [];
-        const roles = userRoleRecords.map(ur => ur.role);
-        const subscription = subscriptions?.find(s => s.user_id === profile.id);
-        
+        const roles = userRoles?.filter(role => role.user_id === profile.id).map(role => role.role) || [];
+        const subscription = subscriptions?.find(sub => sub.user_id === profile.id);
+        const authUser = authUsers?.find((user: any) => user.id === profile.id);
+
         return {
           id: profile.id,
-          email: `user-${profile.id.slice(0, 8)}@example.com`, // Placeholder since email isn't accessible
+          email: authUser?.email || 'No email',
+          full_name: profile.full_name || '',
           created_at: profile.created_at,
-          full_name: profile.full_name,
           roles,
           subscription_tier: subscription?.subscription_tier || 'free',
-          subscription_status: subscription?.status || 'active'
+          subscription_status: subscription?.status || 'active',
+          last_sign_in_at: authUser?.last_sign_in_at || null
         };
       }) || [];
 
@@ -115,7 +126,7 @@ export const SuperAdminUserManagement = () => {
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(user => 
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -142,14 +153,14 @@ export const SuperAdminUserManagement = () => {
     setFilteredUsers(filtered);
   }, [users, searchTerm, filter]);
 
-  const updateUserRole = async (userId: string, newRole: AppRole, action: 'grant' | 'revoke') => {
+  const updateUserRole = async (userId: string, newRole: string, action: 'grant' | 'revoke') => {
     try {
       const oldRoles = users.find(u => u.id === userId)?.roles || [];
       
       if (action === 'grant') {
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role: newRole });
+          .insert({ user_id: userId, role: newRole as 'admin' | 'user' | 'moderator' | 'beta_tester' | 'super_admin' });
         
         if (error) throw error;
         
@@ -165,7 +176,7 @@ export const SuperAdminUserManagement = () => {
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
-          .eq('role', newRole);
+          .eq('role', newRole as 'admin' | 'user' | 'moderator' | 'beta_tester' | 'super_admin');
         
         if (error) throw error;
         
@@ -338,7 +349,7 @@ export const SuperAdminUserManagement = () => {
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border border-border">
                   <SelectItem value="all">All Users</SelectItem>
                   <SelectItem value="free">Free Users</SelectItem>
                   <SelectItem value="pro">Pro Users</SelectItem>
@@ -402,7 +413,7 @@ export const SuperAdminUserManagement = () => {
                             Manage
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="bg-background border border-border z-50">
                           {!user.roles.includes('admin') && (
                             <DropdownMenuItem onClick={() => updateUserRole(user.id, 'admin', 'grant')}>
                               Grant Admin Role

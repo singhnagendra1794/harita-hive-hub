@@ -75,6 +75,7 @@ import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 import BrowseCourses from "./pages/BrowseCourses";
 import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 // Import the new feature pages
 import SkillCopilot from "./pages/SkillCopilot";
@@ -256,6 +257,11 @@ function App() {
                   <Route path="/admin" element={
                     <ProtectedRoute>
                       <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/users" element={
+                    <ProtectedRoute>
+                      <SuperAdminDashboard />
                     </ProtectedRoute>
                   } />
                    <Route path="/webgis-builder" element={

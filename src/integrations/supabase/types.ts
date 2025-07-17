@@ -3861,6 +3861,15 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_auth_users_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          last_sign_in_at: string
+          created_at: string
+        }[]
+      }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
