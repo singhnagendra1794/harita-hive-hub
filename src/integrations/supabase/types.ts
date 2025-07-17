@@ -3827,10 +3827,6 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
-      generate_secure_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       generate_stream_key: {
         Args: { user_id: string }
         Returns: string
