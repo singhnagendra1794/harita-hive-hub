@@ -114,23 +114,24 @@ const UserDashboard = () => {
   };
 
   const getPlanDisplayName = () => {
-    if (plan?.plan === 'professional' || plan?.subscription_tier === 'pro') {
-      return 'Professional Plan';
+    // Always use subscription_tier as primary source of truth
+    const tier = plan?.subscription_tier || 'free';
+    
+    switch (tier) {
+      case 'pro':
+        return 'Professional Plan';
+      case 'enterprise':
+        return 'Enterprise Plan';
+      case 'premium':
+        return 'Premium Plan';
+      default:
+        return 'Free Plan';
     }
-    if (plan?.subscription_tier === 'enterprise') {
-      return 'Enterprise Plan';
-    }
-    if (plan?.subscription_tier === 'premium') {
-      return 'Premium Plan';
-    }
-    return 'Free Plan';
   };
 
   const isProfessionalOrAbove = () => {
-    return plan?.plan === 'professional' || 
-           plan?.subscription_tier === 'pro' || 
-           plan?.subscription_tier === 'enterprise' ||
-           plan?.subscription_tier === 'premium';
+    const tier = plan?.subscription_tier || 'free';
+    return tier === 'pro' || tier === 'enterprise' || tier === 'premium';
   };
 
   // Show loading state while validating session

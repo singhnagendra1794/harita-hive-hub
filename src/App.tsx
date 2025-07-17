@@ -13,6 +13,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import NotificationWrapper from "@/components/NotificationWrapper";
 import AILearningAssistant from "@/components/ai/AILearningAssistant";
 import Layout from "@/components/Layout";
+import GlobalAuthCheck from "@/components/auth/GlobalAuthCheck";
 
 // Page imports
 import Index from "./pages/Index";
@@ -92,6 +93,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <GlobalAuthCheck />
           <NotificationWrapper>
             <ChatbotProvider>
               <TooltipProvider>

@@ -62,6 +62,9 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       let result;
       
       if (mode === 'signup') {
+        // Clear any existing auth state first
+        await supabase.auth.signOut({ scope: 'global' });
+        
         result = await supabase.auth.signUp({
           email,
           password,
@@ -75,6 +78,9 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           }
         });
       } else {
+        // Clear any existing auth state first for fresh login
+        await supabase.auth.signOut({ scope: 'global' });
+        
         result = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -197,10 +203,17 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const handleSocialAuth = async (provider: 'google' | 'github' | 'linkedin_oidc') => {
     setLoading(true);
     try {
+      // Clear any existing auth state first
+      await supabase.auth.signOut({ scope: 'global' });
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 

@@ -12,6 +12,8 @@ interface UserStats {
 interface UserPlan {
   plan: string;
   subscription_tier: string;
+  status?: string;
+  expires_at?: string | null;
 }
 
 export const useUserStats = () => {
@@ -65,14 +67,14 @@ export const useUserStats = () => {
           .from('profiles')
           .select('plan')
           .eq('id', user.id)
-          .single(),
+          .maybeSingle(),
         
-        // Get subscription info
+        // Get subscription info (primary source of truth)
         supabase
           .from('user_subscriptions')
-          .select('subscription_tier')
+          .select('subscription_tier, status, expires_at')
           .eq('user_id', user.id)
-          .single()
+          .maybeSingle()
       ]);
 
       // Set real-time stats
@@ -91,9 +93,25 @@ export const useUserStats = () => {
         console.error('Error fetching subscription:', subscriptionData.error);
       }
 
+      // Use subscription_tier as primary source, fallback to profile plan
+      const actualSubscriptionTier = subscriptionData.data?.subscription_tier || 'free';
+      const profilePlan = profileData.data?.plan || 'free';
+      
+      // Map subscription tiers to display names
+      let displayPlan = profilePlan;
+      if (actualSubscriptionTier === 'pro') {
+        displayPlan = 'professional';
+      } else if (actualSubscriptionTier === 'enterprise') {
+        displayPlan = 'enterprise';
+      } else if (actualSubscriptionTier === 'premium') {
+        displayPlan = 'premium';
+      }
+
       setPlan({
-        plan: profileData.data?.plan || 'free',
-        subscription_tier: subscriptionData.data?.subscription_tier || 'free'
+        plan: displayPlan,
+        subscription_tier: actualSubscriptionTier,
+        status: subscriptionData.data?.status || 'active',
+        expires_at: subscriptionData.data?.expires_at
       });
 
     } catch (error) {

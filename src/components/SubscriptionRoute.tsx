@@ -56,7 +56,7 @@ const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({
       description: `This feature requires a ${subscriptionName} subscription. Please upgrade your plan to continue.`,
       variant: "destructive",
     });
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to="/choose-plan" replace />;
   }
 
   return <>{children}</>;
