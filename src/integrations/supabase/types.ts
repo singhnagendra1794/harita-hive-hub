@@ -3114,6 +3114,7 @@ export type Database = {
           marketing_emails: boolean | null
           newsletter_updates: boolean | null
           onboarding_emails: boolean | null
+          unsubscribe_token: string | null
           unsubscribed_at: string | null
           updated_at: string | null
           user_id: string
@@ -3126,6 +3127,7 @@ export type Database = {
           marketing_emails?: boolean | null
           newsletter_updates?: boolean | null
           onboarding_emails?: boolean | null
+          unsubscribe_token?: string | null
           unsubscribed_at?: string | null
           updated_at?: string | null
           user_id: string
@@ -3138,6 +3140,7 @@ export type Database = {
           marketing_emails?: boolean | null
           newsletter_updates?: boolean | null
           onboarding_emails?: boolean | null
+          unsubscribe_token?: string | null
           unsubscribed_at?: string | null
           updated_at?: string | null
           user_id?: string
