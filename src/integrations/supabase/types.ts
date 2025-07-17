@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       automated_tasks: {
         Row: {
           config: Json | null
@@ -3882,12 +3912,21 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: {
-        Args: { user_id: string }
+        Args: Record<PropertyKey, never> | { user_id: string }
         Returns: boolean
       }
       is_super_admin_bypass_rls: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      log_admin_action: {
+        Args: {
+          p_target_user_id: string
+          p_action: string
+          p_old_value?: Json
+          p_new_value?: Json
+        }
+        Returns: undefined
       }
       start_stream_session: {
         Args: { user_id: string }
