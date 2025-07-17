@@ -34,45 +34,66 @@ export const useUserStats = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch profile stats and plan
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('course_count, projects_completed, community_posts, spatial_analyses, plan')
-        .eq('id', user.id)
-        .single();
+      // Fetch real-time stats from actual tables
+      const [
+        courseEnrollments,
+        communityPosts,
+        spatialAnalyses,
+        profileData,
+        subscriptionData
+      ] = await Promise.all([
+        // Count course enrollments
+        supabase
+          .from('course_enrollments')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id),
+        
+        // Count community posts (discussions)
+        supabase
+          .from('discussions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id),
+        
+        // Count spatial analyses (geoai experiments)
+        supabase
+          .from('geoai_experiments')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id),
+        
+        // Get profile plan
+        supabase
+          .from('profiles')
+          .select('plan')
+          .eq('id', user.id)
+          .single(),
+        
+        // Get subscription info
+        supabase
+          .from('user_subscriptions')
+          .select('subscription_tier')
+          .eq('user_id', user.id)
+          .single()
+      ]);
 
-      if (profileError) {
-        console.error('Error fetching profile stats:', profileError);
-        // Initialize with zeros if profile doesn't exist
-        setStats({
-          course_count: 0,
-          projects_completed: 0,
-          community_posts: 0,
-          spatial_analyses: 0
-        });
-      } else {
-        setStats({
-          course_count: profileData.course_count || 0,
-          projects_completed: profileData.projects_completed || 0,
-          community_posts: profileData.community_posts || 0,
-          spatial_analyses: profileData.spatial_analyses || 0
-        });
+      // Set real-time stats
+      setStats({
+        course_count: courseEnrollments.count || 0,
+        projects_completed: 0, // No projects table found in schema
+        community_posts: communityPosts.count || 0,
+        spatial_analyses: spatialAnalyses.count || 0
+      });
+
+      if (profileData.error && profileData.error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileData.error);
       }
 
-      // Fetch subscription info
-      const { data: subscriptionData, error: subscriptionError } = await supabase
-        .from('user_subscriptions')
-        .select('subscription_tier')
-        .eq('user_id', user.id)
-        .single();
-
-      if (subscriptionError) {
-        console.error('Error fetching subscription:', subscriptionError);
+      if (subscriptionData.error && subscriptionData.error.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', subscriptionData.error);
       }
 
       setPlan({
-        plan: profileData?.plan || 'free',
-        subscription_tier: subscriptionData?.subscription_tier || 'free'
+        plan: profileData.data?.plan || 'free',
+        subscription_tier: subscriptionData.data?.subscription_tier || 'free'
       });
 
     } catch (error) {
