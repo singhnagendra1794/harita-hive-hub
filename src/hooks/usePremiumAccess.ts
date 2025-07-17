@@ -89,10 +89,18 @@ export const usePremiumAccess = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching user subscription:', error);
-        // Create default free subscription if none exists
-        await createDefaultSubscription();
+        
+        // Only create default subscription if the user truly doesn't exist (PGRST116)
+        // Don't create for permission errors or other issues
+        if (error.code === 'PGRST116') {
+          await createDefaultSubscription();
+        } else {
+          // For other errors (like permission denied), don't create a new subscription
+          // The user might already have one, just can't access it due to temporary auth issues
+          console.warn('Unable to fetch subscription due to error, skipping default creation:', error.message);
+        }
         return;
       }
       
@@ -103,12 +111,13 @@ export const usePremiumAccess = () => {
           status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
         });
       } else {
-        // Create default free subscription
+        // Create default free subscription only if no data exists
         await createDefaultSubscription();
       }
     } catch (error) {
       console.error('Error fetching user subscription:', error);
-      await createDefaultSubscription();
+      // Don't create default subscription on network/auth errors
+      console.warn('Network or auth error, not creating default subscription');
     }
   };
 
