@@ -116,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
           
-          // Session setup completed
         } else if (event === 'SIGNED_OUT') {
           // User signed out
           cleanupAuthState();
@@ -136,6 +135,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
+          
+          // Check if this is a network/connectivity issue that might affect international users
+          if (error.message?.includes('network') || error.message?.includes('fetch')) {
+            console.warn('Network connectivity issue - may affect international users');
+          }
+          
           cleanupAuthState();
         } else {
           console.log('Initial session:', session?.user?.email || 'No session');

@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.ai-learning-assistant]
 verify_jwt = false
+
+[functions.test-connectivity]
+verify_jwt = false

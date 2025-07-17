@@ -18,8 +18,6 @@ interface MultiAuthFormProps {
   onToggleMode: () => void;
 }
 
-// Remove manual session token management - let Supabase handle it
-
 export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode }) => {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -47,9 +45,6 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       title: isSignup ? "Account Created!" : "Welcome Back!",
       description: isSignup ? "Please check your email to verify your account." : "You have successfully signed in.",
     });
-    
-    // Let the AuthContext handle the redirect via useEffect
-    // Don't manually navigate here to avoid conflicts
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -65,11 +60,14 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
         // Clear any existing auth state first
         await supabase.auth.signOut({ scope: 'global' });
         
+        // Get the current origin for redirect
+        const redirectUrl = window.location.origin + '/dashboard';
+        
         result = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: redirectUrl,
             data: {
               first_name: firstName,
               last_name: lastName,
@@ -77,6 +75,9 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
             }
           }
         });
+        
+        console.log('Signup attempt result:', result);
+        
       } else {
         // Clear any existing auth state first for fresh login
         await supabase.auth.signOut({ scope: 'global' });
@@ -85,30 +86,43 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           email,
           password,
         });
+        
+        console.log('Signin attempt result:', result);
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        console.error('Auth error details:', result.error);
+        throw result.error;
+      }
 
       if (result.data.user) {
         if (mode === 'signup') {
-          // For signup, always show email confirmation message
+          // For signup, show email confirmation message
           toast({
-            title: "Check your email!",
-            description: "We've sent you a confirmation link. Please check your email to complete registration.",
+            title: "Registration Successful!",
+            description: "Please check your email for a confirmation link to complete your registration.",
           });
+          
+          // If user needs email confirmation, don't redirect yet
+          if (!result.data.user.email_confirmed_at) {
+            toast({
+              title: "Email Verification Required",
+              description: "Please check your email and click the verification link to activate your account.",
+            });
+          }
         } else {
-          // For signin, let AuthContext handle the redirect
+          // For signin, handle success
           handleAuthSuccess(result.data.user, false);
         }
       }
     } catch (error: any) {
-      console.error('Email auth error:', error);
+      console.error('Authentication error:', error);
       
       // Provide specific error messaging based on error type
       let errorTitle = mode === 'signup' ? "Signup Failed" : "Login Failed";
       let errorDescription = error.message || "Please try again.";
       
-      // Handle specific error cases
+      // Handle specific error cases for international users
       if (error.message?.includes('User already registered')) {
         errorTitle = "Account Already Exists";
         errorDescription = "This email is already registered. Please try logging in instead.";
@@ -119,8 +133,17 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
         errorTitle = "Email Not Verified";
         errorDescription = "Please check your email and click the verification link.";
       } else if (error.message?.includes('signup_disabled')) {
-        errorTitle = "Signup Disabled";
-        errorDescription = "New registrations are temporarily disabled. Please try again later.";
+        errorTitle = "Registration Temporarily Unavailable";
+        errorDescription = "New registrations are temporarily disabled. Please try again later or contact support.";
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorTitle = "Connection Issue";
+        errorDescription = "Network connectivity issue detected. If you're outside India, please try again or contact support at contact@haritahive.com";
+      } else if (error.message?.includes('rate_limit') || error.message?.includes('too_many_requests')) {
+        errorTitle = "Too Many Attempts";
+        errorDescription = "Please wait a few minutes before trying again.";
+      } else if (error.message?.includes('captcha')) {
+        errorTitle = "Security Check Required";
+        errorDescription = "Please complete the security verification and try again.";
       }
       
       toast({
@@ -153,20 +176,19 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
     } catch (error: any) {
       console.error('Phone auth error:', error);
       
-      // Check if SMTP is not configured
+      let errorDescription = "Failed to send OTP. Please check your phone number.";
+      
       if (error.message?.includes('SMTP') || error.message?.includes('email')) {
-        toast({
-          title: "Email Service Unavailable",
-          description: "SMS/Email OTP is currently unavailable. Please try email/password login or contact support.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to send OTP. Please check your phone number.",
-          variant: "destructive",
-        });
+        errorDescription = "SMS/Email OTP is currently unavailable. Please try email/password login or contact support.";
+      } else if (error.message?.includes('phone')) {
+        errorDescription = "Please enter a valid phone number with country code (e.g., +1, +91).";
       }
+      
+      toast({
+        title: "OTP Error",
+        description: errorDescription,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -206,10 +228,13 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       // Clear any existing auth state first
       await supabase.auth.signOut({ scope: 'global' });
       
+      // Get current origin for redirect
+      const redirectUrl = window.location.origin + '/dashboard';
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -222,9 +247,16 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       // The redirect will handle the rest
     } catch (error: any) {
       console.error('Social auth error:', error);
+      
+      let errorDescription = `${provider} sign in failed. Please try again.`;
+      
+      if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorDescription = `Connection issue with ${provider}. If you're outside India, please try email/password or contact support.`;
+      }
+      
       toast({
         title: "Social Sign In Failed",
-        description: error.message || `${provider} sign in failed. Please try again.`,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
@@ -306,6 +338,11 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                   required
                   minLength={6}
                 />
+                {mode === 'signup' && (
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 6 characters long
+                  </p>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
@@ -327,7 +364,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Include country code (e.g., +1, +91)
+                    Include country code (e.g., +1 for USA, +91 for India, +44 for UK)
                   </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -423,6 +460,12 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           <Button variant="link" className="p-0" onClick={onToggleMode}>
             {mode === 'signin' ? 'Sign up' : 'Sign in'}
           </Button>
+        </div>
+
+        {/* Help text for international users */}
+        <div className="text-center text-xs text-muted-foreground border-t pt-4">
+          <p>Having trouble signing up from outside India?</p>
+          <p>Contact us at <strong>contact@haritahive.com</strong> for assistance.</p>
         </div>
       </CardContent>
     </Card>
