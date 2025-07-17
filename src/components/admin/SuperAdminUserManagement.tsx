@@ -58,6 +58,7 @@ export const SuperAdminUserManagement = () => {
 
       if (authError) {
         console.error('Auth users error:', authError);
+        throw authError;
       }
 
       // Fetch user roles
