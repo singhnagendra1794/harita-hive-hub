@@ -7,10 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { useUserStats } from "@/hooks/useUserStats";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 // Removed useSessionValidation to avoid conflicts with Supabase auth
 import LiveClassBanner from "./LiveClassBanner";
-import { ArrowRight, Crown, Zap, Lock, Loader2, Shield } from "lucide-react";
+import { ArrowRight, Crown, Zap, Lock, Loader2, Shield, RefreshCw } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
 
 interface Stat {
@@ -31,6 +33,8 @@ const UserDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
   const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder, loading: premiumLoading } = usePremiumAccess();
+  const { stats, plan, loading: statsLoading, refreshSession } = useUserStats();
+  const { toast } = useToast();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState("quick-actions");
 
@@ -53,11 +57,11 @@ const UserDashboard = () => {
     }
   }, [user]);
 
-  const stats: Stat[] = [
-    { title: "Courses Enrolled", value: "7", icon: BookOpen },
-    { title: "Projects Completed", value: "12", icon: FileCode2 },
-    { title: "Community Posts", value: "45", icon: Users },
-    { title: "Spatial Analyses", value: "28", icon: FileBarChart },
+  const userStats: Stat[] = [
+    { title: "Courses Enrolled", value: stats?.course_count?.toString() ?? "0", icon: BookOpen },
+    { title: "Projects Completed", value: stats?.projects_completed?.toString() ?? "0", icon: FileCode2 },
+    { title: "Community Posts", value: stats?.community_posts?.toString() ?? "0", icon: Users },
+    { title: "Spatial Analyses", value: stats?.spatial_analyses?.toString() ?? "0", icon: FileBarChart },
   ];
 
   const quickActions = [
@@ -93,14 +97,52 @@ const UserDashboard = () => {
     { title: "Contributing to Open Source GIS", description: "Discover how to contribute to open source GIS projects" },
   ];
 
+  const handleRefreshSession = async () => {
+    try {
+      await refreshSession();
+      toast({
+        title: "Session refreshed",
+        description: "Your session and plan information have been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh failed",
+        description: "Failed to refresh session. Please try logging in again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getPlanDisplayName = () => {
+    if (plan?.plan === 'professional' || plan?.subscription_tier === 'pro') {
+      return 'Professional Plan';
+    }
+    if (plan?.subscription_tier === 'enterprise') {
+      return 'Enterprise Plan';
+    }
+    if (plan?.subscription_tier === 'premium') {
+      return 'Premium Plan';
+    }
+    return 'Free Plan';
+  };
+
+  const isProfessionalOrAbove = () => {
+    return plan?.plan === 'professional' || 
+           plan?.subscription_tier === 'pro' || 
+           plan?.subscription_tier === 'enterprise' ||
+           plan?.subscription_tier === 'premium';
+  };
+
   // Show loading state while validating session
-  if (authLoading || premiumLoading || rolesLoading) {
+  if (authLoading || premiumLoading || rolesLoading || statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">
-            {authLoading ? "Loading user data..." : rolesLoading ? "Loading user roles..." : "Loading dashboard..."}
+            {authLoading ? "Loading user data..." : 
+             rolesLoading ? "Loading user roles..." : 
+             statsLoading ? "Loading user statistics..." : "Loading dashboard..."}
           </p>
         </div>
       </div>
@@ -140,21 +182,34 @@ const UserDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          ) : !hasAccess('premium') && (
+          ) : (
             <Card className="max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <Crown className="h-5 w-5 text-primary" />
+                  {isProfessionalOrAbove() ? (
+                    <Crown className="h-5 w-5 text-primary" />
+                  ) : (
+                    <Crown className="h-5 w-5 text-muted-foreground" />
+                  )}
                   <div className="flex-1">
-                    <p className="font-medium text-sm">Free Plan</p>
-                    <p className="text-xs text-muted-foreground">Upgrade for full access</p>
+                    <p className="font-medium text-sm">{getPlanDisplayName()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isProfessionalOrAbove() ? "Premium features unlocked" : "Upgrade for full access"}
+                    </p>
                   </div>
-                  <Link to="/pricing">
-                    <Button size="sm">
-                      <Zap className="h-3 w-3 mr-1" />
-                      Upgrade
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" onClick={handleRefreshSession}>
+                      <RefreshCw className="h-3 w-3" />
                     </Button>
-                  </Link>
+                    {!isProfessionalOrAbove() && (
+                      <Link to="/pricing">
+                        <Button size="sm">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Upgrade
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -164,7 +219,7 @@ const UserDashboard = () => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
+        {userStats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">

@@ -2145,6 +2145,7 @@ export type Database = {
           last_name: string | null
           plan: string | null
           projects_completed: number | null
+          spatial_analyses: number | null
           updated_at: string
         }
         Insert: {
@@ -2158,6 +2159,7 @@ export type Database = {
           last_name?: string | null
           plan?: string | null
           projects_completed?: number | null
+          spatial_analyses?: number | null
           updated_at?: string
         }
         Update: {
@@ -2171,6 +2173,7 @@ export type Database = {
           last_name?: string | null
           plan?: string | null
           projects_completed?: number | null
+          spatial_analyses?: number | null
           updated_at?: string
         }
         Relationships: []
