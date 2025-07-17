@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Layout from "../../components/Layout";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,8 +144,7 @@ const GeospatialFullstackDeveloper = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4 bg-primary/10 text-primary border-primary/20">
@@ -445,7 +444,6 @@ const GeospatialFullstackDeveloper = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
   );
 };
 

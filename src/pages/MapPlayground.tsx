@@ -1,11 +1,10 @@
 
-import Layout from "../components/Layout";
+
 import AdvancedMapPlayground from "../components/map/AdvancedMapPlayground";
 
 const MapPlaygroundPage = () => {
   return (
-    <Layout>
-      <div className="relative h-screen">
+    <div className="relative h-screen">
         <div className="absolute top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="container py-4">
             <div className="text-center">
@@ -21,7 +20,6 @@ const MapPlaygroundPage = () => {
           <AdvancedMapPlayground />
         </div>
       </div>
-    </Layout>
   );
 };
 

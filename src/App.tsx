@@ -12,6 +12,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
 import NotificationWrapper from "@/components/NotificationWrapper";
 import AILearningAssistant from "@/components/ai/AILearningAssistant";
+import Layout from "@/components/Layout";
 
 // Page imports
 import Index from "./pages/Index";
@@ -98,7 +99,8 @@ function App() {
                 <Sonner />
                 <BrowserRouter>
                 <ScrollToTop />
-                <Routes>
+                <Layout>
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/auth" element={<Auth />} />
@@ -338,9 +340,10 @@ function App() {
                      <Route path="*" element={<NotFound />} />
                   </Routes>
                  
-                 {/* AI Learning Assistant - Available on all pages */}
-                 <AILearningAssistant />
-               </BrowserRouter>
+                  {/* AI Learning Assistant - Available on all pages */}
+                  <AILearningAssistant />
+                </Layout>
+                </BrowserRouter>
             </TooltipProvider>
           </ChatbotProvider>
           </NotificationWrapper>

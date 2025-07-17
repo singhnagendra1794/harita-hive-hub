@@ -1,5 +1,5 @@
 
-import Layout from "../components/Layout";
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,7 @@ const Pricing = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -211,7 +210,6 @@ const Pricing = () => {
           />
         )}
       </div>
-    </Layout>
   );
 };
 

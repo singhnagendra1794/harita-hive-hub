@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, X, Crown, Users, Zap } from 'lucide-react';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { toast } from 'sonner';
-import Layout from '@/components/Layout';
+
 
 const ChoosePlan: React.FC = () => {
   const navigate = useNavigate();
@@ -43,8 +43,7 @@ const ChoosePlan: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <div className="container max-w-6xl py-12">
+    <div className="container max-w-6xl py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -246,7 +245,6 @@ const ChoosePlan: React.FC = () => {
           </p>
         </div>
       </div>
-    </Layout>
   );
 };
 

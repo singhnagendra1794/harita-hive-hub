@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '../components/Layout';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,21 +64,19 @@ const About = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container py-12 max-w-6xl">
-          <div className="animate-pulse space-y-8">
-            <div className="text-center space-y-4">
-              <div className="h-12 bg-muted rounded w-1/3 mx-auto"></div>
-              <div className="h-6 bg-muted rounded w-2/3 mx-auto"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 bg-muted rounded"></div>
-              ))}
-            </div>
+      <div className="container py-12 max-w-6xl">
+        <div className="animate-pulse space-y-8">
+          <div className="text-center space-y-4">
+            <div className="h-12 bg-muted rounded w-1/3 mx-auto"></div>
+            <div className="h-6 bg-muted rounded w-2/3 mx-auto"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-48 bg-muted rounded"></div>
+            ))}
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
@@ -92,8 +90,7 @@ const About = () => {
   );
 
   return (
-    <Layout>
-      <div className="container py-12 max-w-6xl">
+    <div className="container py-12 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-6 flex items-center justify-center gap-4">
@@ -289,7 +286,6 @@ const About = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
   );
 };
 

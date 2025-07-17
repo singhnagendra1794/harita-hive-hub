@@ -1,5 +1,5 @@
 
-import Layout from "../components/Layout";
+
 import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
 import AboutAuthor from "../components/AboutAuthor";
@@ -102,7 +102,7 @@ const Home = () => {
   ];
 
   return (
-    <Layout>
+    <>
       <HeroSection />
       
       {/* Beta Announcement Banner */}
@@ -252,7 +252,7 @@ const Home = () => {
       {/* Engagement Components */}
       <OnboardingTour />
       <FeedbackWidget />
-    </Layout>
+    </>
   );
 };
 
