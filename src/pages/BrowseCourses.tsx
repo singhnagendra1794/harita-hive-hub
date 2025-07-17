@@ -16,18 +16,22 @@ import {
   BarChart3,
   Satellite,
   TreePine,
-  Code
+  Code,
+  CheckCircle
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import geospatialThumbnail from "@/assets/courses/geospatial-fullstack-thumbnail.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BrowseCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string | number | null>(null);
+  const [isEnrolledInGeospatial, setIsEnrolledInGeospatial] = useState(false);
   const [waitlistForm, setWaitlistForm] = useState({
     fullName: "",
     email: "",
@@ -37,8 +41,71 @@ const BrowseCourses = () => {
     referralSource: ""
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Check if user is enrolled in Geospatial Technology Unlocked
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (!user) return;
+      
+      try {
+        const { data } = await supabase
+          .from('course_enrollments')
+          .select('course_id, courses!inner(title)')
+          .eq('user_id', user.id)
+          .eq('courses.title', 'Geospatial Technology Unlocked');
+        
+        setIsEnrolledInGeospatial(data && data.length > 0);
+      } catch (error) {
+        console.error('Error checking enrollment:', error);
+      }
+    };
+
+    checkEnrollment();
+  }, [user]);
 
   const upcomingCourses = [
+    {
+      id: "geospatial-technology-unlocked",
+      title: "Geospatial Technology Unlocked",
+      description: "90-Day Advanced Practical Program – GIS, Remote Sensing, Python, SQL, GeoAI",
+      instructor: "Expert Instructors",
+      timeline: "Starts from 21st July 08:00 PM TO 09:30 PM Monday to Saturday",
+      duration: "90 days",
+      level: "Advanced",
+      category: "live-training",
+      icon: GraduationCap,
+      features: [
+        "Live interactive sessions Monday to Saturday",
+        "GIS fundamentals to advanced techniques",
+        "Remote sensing and satellite imagery analysis",
+        "Python automation for geospatial workflows",
+        "SQL for spatial databases",
+        "Hands-on GeoAI and machine learning projects",
+        "Real-world industry projects",
+        "Certificate upon completion"
+      ],
+      learningOutcomes: [
+        "Master advanced GIS techniques",
+        "Build geospatial applications with Python",
+        "Analyze satellite imagery effectively",
+        "Implement GeoAI solutions",
+        "Work with spatial databases",
+        "Create professional portfolios"
+      ],
+      prerequisites: "Basic computer skills and eagerness to learn",
+      price: "₹25,999",
+      earlyBird: "₹19,999",
+      enrolled: 26,
+      maxStudents: 50,
+      rating: 5.0,
+      testimonials: [
+        "Comprehensive program covering all aspects of geospatial technology!",
+        "Perfect blend of theory and practical applications."
+      ],
+      isLive: true,
+      courseUrl: "/courses/geospatial-technology-unlocked"
+    },
     {
       id: 1,
       title: "Complete GIS Fundamentals",
@@ -297,6 +364,7 @@ const BrowseCourses = () => {
 
   const categories = [
     { value: "all", label: "All Categories", count: upcomingCourses.length },
+    { value: "live-training", label: "Live Training", count: upcomingCourses.filter(c => c.category === "live-training").length },
     { value: "fundamentals", label: "GIS Fundamentals", count: upcomingCourses.filter(c => c.category === "fundamentals").length },
     { value: "programming", label: "Programming", count: upcomingCourses.filter(c => c.category === "programming").length },
     { value: "remote-sensing", label: "Remote Sensing", count: upcomingCourses.filter(c => c.category === "remote-sensing").length },
@@ -306,6 +374,7 @@ const BrowseCourses = () => {
     { value: "fullstack", label: "Full Stack", count: upcomingCourses.filter(c => c.category === "fullstack").length }
   ];
 
+
   const filteredCourses = upcomingCourses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -313,7 +382,7 @@ const BrowseCourses = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleJoinWaitlist = (courseId: number) => {
+  const handleJoinWaitlist = (courseId: string | number) => {
     setSelectedCourse(courseId);
     setShowWaitlistForm(true);
   };
@@ -416,7 +485,19 @@ const BrowseCourses = () => {
                         </CardDescription>
                       </div>
                     </div>
-                    {course.isNew ? (
+                    {course.isLive ? (
+                      <div className="flex flex-col gap-1">
+                        <Badge className="bg-green-500 text-white">
+                          LIVE TRAINING
+                        </Badge>
+                        {course.id === "geospatial-technology-unlocked" && isEnrolledInGeospatial && (
+                          <Badge className="bg-blue-500 text-white flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            ENROLLED
+                          </Badge>
+                        )}
+                      </div>
+                    ) : course.isNew ? (
                       <Badge className="bg-primary text-primary-foreground">
                         NEW - LAUNCHING AUG 2025
                       </Badge>
@@ -543,7 +624,21 @@ const BrowseCourses = () => {
                     )}
 
                     {/* Action Button */}
-                    {course.courseUrl ? (
+                    {course.isLive ? (
+                      <Link to={course.courseUrl}>
+                        <Button 
+                          className="w-full" 
+                          disabled={course.id === "geospatial-technology-unlocked" && !isEnrolledInGeospatial}
+                        >
+                          {course.id === "geospatial-technology-unlocked" && isEnrolledInGeospatial 
+                            ? "Access Course" 
+                            : course.id === "geospatial-technology-unlocked" 
+                            ? "Enrollment Required" 
+                            : "View Course Details"
+                          }
+                        </Button>
+                      </Link>
+                    ) : course.courseUrl ? (
                       <Link to={course.courseUrl}>
                         <Button className="w-full">
                           View Course Details
