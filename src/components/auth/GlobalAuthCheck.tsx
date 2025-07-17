@@ -35,7 +35,7 @@ export const GlobalAuthCheck = () => {
           const response = await fetch(`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/test-connectivity`, {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${supabase.supabaseKey}`,
+              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwaGdkd3J3YWl6b21ueXV3ZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjQyNjAsImV4cCI6MjA2NjAwMDI2MH0.I5i-3wP4E6Q3355oY2ctXQM9MhYXKbj6wGVhiRUsqxI`,
             },
           });
           
