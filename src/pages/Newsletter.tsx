@@ -26,6 +26,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -44,6 +45,7 @@ interface NewsletterPost {
 
 const Newsletter = () => {
   const { user } = useAuth();
+  const { hasRole } = useUserRoles();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -302,15 +304,25 @@ const Newsletter = () => {
           <div>
             <h2 className="text-3xl font-bold">Harita Hive Newsletter</h2>
             <p className="text-muted-foreground">All editions from our LinkedIn newsletter</p>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="mt-2"
-              onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
-            >
-              <Globe className="h-4 w-4 mr-1" />
-              Follow on LinkedIn
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
+              >
+                <Globe className="h-4 w-4 mr-1" />
+                Follow on LinkedIn
+              </Button>
+              {(hasRole('admin') || hasRole('super_admin')) && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/admin'}
+                >
+                  📝 Admin: Manage Newsletter
+                </Button>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <Badge variant="secondary" className="text-sm">
