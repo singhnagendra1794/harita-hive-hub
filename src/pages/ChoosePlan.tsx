@@ -7,16 +7,45 @@ import { Badge } from '@/components/ui/badge';
 import { Check, X, Crown, Users, Zap } from 'lucide-react';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 const ChoosePlan: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { upgradeSubscription } = usePremiumAccess();
   const [upgrading, setUpgrading] = useState(false);
 
+  const detectUserRegion = () => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone.includes('Asia/Kolkata') || timezone.includes('Asia/Calcutta') ? 'IN' : 'INTL';
+  };
+
+  const getPricingForRegion = (region: string) => {
+    if (region === 'IN') {
+      return {
+        currency: 'INR',
+        symbol: '₹',
+        professional: 3999,
+        enterprise: 7999
+      };
+    } else {
+      return {
+        currency: 'USD',
+        symbol: '$',
+        professional: 49,
+        enterprise: 99
+      };
+    }
+  };
+
   const handlePlanSelection = async (tier: 'free' | 'professional' | 'enterprise') => {
     if (tier === 'free') {
-      navigate('/dashboard');
+      if (!user) {
+        navigate('/auth');
+      } else {
+        navigate('/dashboard');
+      }
       return;
     }
 
@@ -33,15 +62,22 @@ const ChoosePlan: React.FC = () => {
   };
 
   const handlePayment = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
+    const region = detectUserRegion();
+    const pricing = getPricingForRegion(region);
+    const amount = planName.toLowerCase().includes('enterprise') ? pricing.enterprise : pricing.professional;
+
     navigate('/checkout', {
       state: {
         planName,
-        amount: priceINR, // Default to INR, will be adjusted based on region in checkout
-        currency: 'INR',
+        amount,
+        currency: pricing.currency,
         features
       }
     });
   };
+
+  const region = detectUserRegion();
+  const pricing = getPricingForRegion(region);
 
   return (
     <Layout>
@@ -119,8 +155,12 @@ const ChoosePlan: React.FC = () => {
                 <CardTitle className="text-xl">Professional</CardTitle>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-bold">$49<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-xl font-semibold text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
+                <div className="text-3xl font-bold">{pricing.symbol}{pricing.professional.toLocaleString()}<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                {region === 'IN' ? (
+                  <div className="text-lg text-muted-foreground">$49<span className="text-sm font-normal">/month</span></div>
+                ) : (
+                  <div className="text-lg text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
+                )}
               </div>
               <CardDescription>For serious GIS professionals</CardDescription>
             </CardHeader>
@@ -183,8 +223,12 @@ const ChoosePlan: React.FC = () => {
                 <CardTitle className="text-xl">Enterprise</CardTitle>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-bold">$99<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-xl font-semibold text-muted-foreground">₹7,999<span className="text-sm font-normal">/month</span></div>
+                <div className="text-3xl font-bold">{pricing.symbol}{pricing.enterprise.toLocaleString()}<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                {region === 'IN' ? (
+                  <div className="text-lg text-muted-foreground">$99<span className="text-sm font-normal">/month</span></div>
+                ) : (
+                  <div className="text-lg text-muted-foreground">₹7,999<span className="text-sm font-normal">/month</span></div>
+                )}
               </div>
               <CardDescription>For teams and organizations</CardDescription>
             </CardHeader>

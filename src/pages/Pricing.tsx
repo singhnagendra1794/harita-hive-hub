@@ -6,20 +6,64 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from '../components/Layout';
+import { useAuth } from "@/contexts/AuthContext";
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const detectUserRegion = () => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone.includes('Asia/Kolkata') || timezone.includes('Asia/Calcutta') ? 'IN' : 'INTL';
+  };
+
+  const getPricingForRegion = (region: string) => {
+    if (region === 'IN') {
+      return {
+        currency: 'INR',
+        symbol: '₹',
+        professional: 3999,
+        enterprise: 7999
+      };
+    } else {
+      return {
+        currency: 'USD',
+        symbol: '$',
+        professional: 49,
+        enterprise: 99
+      };
+    }
+  };
+
+  const handleFreeStart = () => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   const handleSubscribe = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
+    const region = detectUserRegion();
+    const pricing = getPricingForRegion(region);
+    const amount = planName.toLowerCase().includes('enterprise') ? pricing.enterprise : pricing.professional;
+
     navigate('/checkout', {
       state: {
         planName,
-        amount: priceINR, // Default to INR, will be adjusted based on region in checkout
-        currency: 'INR',
+        amount,
+        currency: pricing.currency,
         features
       }
     });
   };
+
+  const handleGetInTouch = () => {
+    navigate('/contact');
+  };
+
+  const region = detectUserRegion();
+  const pricing = getPricingForRegion(region);
 
   return (
     <Layout>
@@ -63,7 +107,7 @@ const Pricing = () => {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={handleFreeStart}>
                 Get Started Free
               </Button>
             </CardFooter>
@@ -76,8 +120,12 @@ const Pricing = () => {
             <CardHeader className="pt-8">
               <CardTitle className="text-xl">Professional</CardTitle>
               <div className="space-y-1">
-                <div className="text-3xl font-bold">$49<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-xl font-semibold text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
+                <div className="text-3xl font-bold">{pricing.symbol}{pricing.professional.toLocaleString()}<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                {region === 'IN' ? (
+                  <div className="text-lg text-muted-foreground">$49<span className="text-sm font-normal">/month</span></div>
+                ) : (
+                  <div className="text-lg text-muted-foreground">₹3,999<span className="text-sm font-normal">/month</span></div>
+                )}
               </div>
               <CardDescription>For serious GIS professionals</CardDescription>
             </CardHeader>
@@ -130,8 +178,12 @@ const Pricing = () => {
             <CardHeader>
               <CardTitle className="text-xl">Enterprise</CardTitle>
               <div className="space-y-1">
-                <div className="text-3xl font-bold">$99<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-xl font-semibold text-muted-foreground">₹7,999<span className="text-sm font-normal">/month</span></div>
+                <div className="text-3xl font-bold">{pricing.symbol}{pricing.enterprise.toLocaleString()}<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                {region === 'IN' ? (
+                  <div className="text-lg text-muted-foreground">$99<span className="text-sm font-normal">/month</span></div>
+                ) : (
+                  <div className="text-lg text-muted-foreground">₹7,999<span className="text-sm font-normal">/month</span></div>
+                )}
               </div>
               <CardDescription>For teams and organizations</CardDescription>
             </CardHeader>
@@ -192,7 +244,7 @@ const Pricing = () => {
           <p className="text-muted-foreground mb-6">
             We offer tailored plans for large organizations and special requirements.
           </p>
-          <Button variant="secondary">Get in Touch</Button>
+          <Button variant="secondary" onClick={handleGetInTouch}>Get in Touch</Button>
         </div>
 
       </div>

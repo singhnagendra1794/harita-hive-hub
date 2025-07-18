@@ -62,14 +62,14 @@ const Checkout = () => {
     if (region === 'IN') {
       return {
         currency: 'INR',
-        professional: 2999,
-        enterprise: 9999
+        professional: 3999,
+        enterprise: 7999
       };
     } else {
       return {
         currency: 'USD',
-        professional: 39,
-        enterprise: 129
+        professional: 49,
+        enterprise: 99
       };
     }
   };
@@ -121,18 +121,45 @@ const Checkout = () => {
           color: '#3B82F6'
         },
         handler: async function (response: any) {
-          toast({
-            title: "Payment Successful!",
-            description: `Welcome to Harita Hive ${planType === 'pro' ? 'Professional' : 'Enterprise'}!`,
-          });
-          
-          // Redirect to dashboard
-          navigate('/dashboard', { 
-            state: { 
-              paymentSuccess: true, 
-              planName: planDetails.planName 
-            } 
-          });
+          try {
+            // Update user subscription in database
+            const { error: updateError } = await supabase
+              .from('user_subscriptions')
+              .update({
+                subscription_tier: planType,
+                status: 'active',
+                expires_at: null, // No expiry for lifetime access
+                payment_method: 'razorpay',
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id);
+
+            if (updateError) {
+              console.error('Error updating subscription:', updateError);
+            }
+
+            toast({
+              title: "Payment Successful!",
+              description: `Welcome to Harita Hive ${planType === 'pro' ? 'Professional' : 'Enterprise'}!`,
+            });
+            
+            // Redirect to dashboard
+            navigate('/dashboard', { 
+              state: { 
+                paymentSuccess: true, 
+                planName: planDetails.planName 
+              } 
+            });
+          } catch (error) {
+            console.error('Error processing payment success:', error);
+            // Still redirect to dashboard even if update fails
+            navigate('/dashboard', { 
+              state: { 
+                paymentSuccess: true, 
+                planName: planDetails.planName 
+              } 
+            });
+          }
         },
         modal: {
           ondismiss: function() {
