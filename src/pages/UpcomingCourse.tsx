@@ -9,6 +9,7 @@ import { Calendar, Clock, BookOpen, Brain, Target, Users, ArrowRight, CheckCircl
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import Layout from '@/components/Layout';
 
 interface ScheduleItem {
   id: string;
@@ -195,29 +196,8 @@ const UpcomingCourse: React.FC = () => {
   }, {} as Record<string, ScheduleItem[]>);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">HH</span>
-            </div>
-            <span className="font-bold text-xl">Harita Hive</span>
-          </Link>
-          <nav className="ml-auto flex items-center space-x-4">
-            <Link to="/">
-              <Button variant="ghost">Home</Button>
-            </Link>
-            <Link to="/auth">
-              <Button variant="outline">Login</Button>
-            </Link>
-            <Link to="/auth">
-              <Button>Sign Up</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
 
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -546,7 +526,8 @@ const UpcomingCourse: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

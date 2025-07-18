@@ -5,6 +5,7 @@ import { SuperAdminUserManagement } from '@/components/admin/SuperAdminUserManag
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Users, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import Layout from '@/components/Layout';
 
 const SuperAdminDashboard = () => {
   const { isSuperAdmin, loading } = useSuperAdminAccess();
@@ -19,7 +20,8 @@ const SuperAdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <Layout>
+        <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <Skeleton className="h-8 w-64 mb-2" />
@@ -46,13 +48,15 @@ const SuperAdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <Layout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -64,12 +68,14 @@ const SuperAdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <Layout>
+      <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -121,7 +127,8 @@ const SuperAdminDashboard = () => {
         {/* User Management */}
         <SuperAdminUserManagement />
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

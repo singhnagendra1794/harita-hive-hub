@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Users, Award, MapPin, Code, Brain, Layers } from "lucide-react";
+import Layout from "@/components/Layout";
 
 const Index = () => {
   const { user } = useAuth();
@@ -60,7 +61,8 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5">
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5">
       {/* Launch Banner */}
       <section className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-4">
         <div className="container text-center">
@@ -218,7 +220,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

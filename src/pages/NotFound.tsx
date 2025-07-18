@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
+import Layout from "@/components/Layout";
 
 const NotFound = () => {
   useEffect(() => {
@@ -9,7 +10,8 @@ const NotFound = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
+    <Layout>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
       <div className="text-center max-w-md mx-auto p-8">
         <div className="mb-8">
           <h1 className="text-8xl font-bold text-primary mb-4">404</h1>
@@ -37,7 +39,8 @@ const NotFound = () => {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
