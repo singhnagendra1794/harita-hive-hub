@@ -1878,6 +1878,108 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_tools: {
+        Row: {
+          author_id: string | null
+          base_price_inr: number | null
+          base_price_usd: number | null
+          category: string
+          created_at: string | null
+          created_by: string | null
+          demo_url: string | null
+          description: string | null
+          documentation_url: string | null
+          download_count: number | null
+          download_url: string | null
+          file_size_mb: number | null
+          github_url: string | null
+          id: string
+          is_featured: boolean | null
+          is_free: boolean | null
+          is_verified: boolean | null
+          license_type: string | null
+          metadata: Json | null
+          python_version: string | null
+          qgis_min_version: string | null
+          rating: number | null
+          rating_count: number | null
+          status: string | null
+          subcategory: string | null
+          tags: string[] | null
+          tech_stack: string[] | null
+          title: string
+          tool_type: string
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          base_price_inr?: number | null
+          base_price_usd?: number | null
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          demo_url?: string | null
+          description?: string | null
+          documentation_url?: string | null
+          download_count?: number | null
+          download_url?: string | null
+          file_size_mb?: number | null
+          github_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_verified?: boolean | null
+          license_type?: string | null
+          metadata?: Json | null
+          python_version?: string | null
+          qgis_min_version?: string | null
+          rating?: number | null
+          rating_count?: number | null
+          status?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          tech_stack?: string[] | null
+          title: string
+          tool_type: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          base_price_inr?: number | null
+          base_price_usd?: number | null
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          demo_url?: string | null
+          description?: string | null
+          documentation_url?: string | null
+          download_count?: number | null
+          download_url?: string | null
+          file_size_mb?: number | null
+          github_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_verified?: boolean | null
+          license_type?: string | null
+          metadata?: Json | null
+          python_version?: string | null
+          qgis_min_version?: string | null
+          rating?: number | null
+          rating_count?: number | null
+          status?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          tech_stack?: string[] | null
+          title?: string
+          tool_type?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       missing_search_queries: {
         Row: {
           created_at: string
@@ -2524,6 +2626,39 @@ export type Database = {
           },
         ]
       }
+      regional_pricing: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          currency_code: string
+          exchange_rate: number
+          id: string
+          is_active: boolean | null
+          tax_rate: number
+          updated_at: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          currency_code: string
+          exchange_rate?: number
+          id?: string
+          is_active?: boolean | null
+          tax_rate?: number
+          updated_at?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          currency_code?: string
+          exchange_rate?: number
+          id?: string
+          is_active?: boolean | null
+          tax_rate?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sandbox_sessions: {
         Row: {
           code_content: string | null
@@ -2934,6 +3069,106 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_purchases: {
+        Row: {
+          currency_code: string
+          download_attempts: number | null
+          expires_at: string | null
+          id: string
+          invoice_url: string | null
+          max_downloads: number | null
+          metadata: Json | null
+          payment_method: string | null
+          purchase_price: number
+          purchased_at: string | null
+          status: string | null
+          tool_id: string
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          currency_code: string
+          download_attempts?: number | null
+          expires_at?: string | null
+          id?: string
+          invoice_url?: string | null
+          max_downloads?: number | null
+          metadata?: Json | null
+          payment_method?: string | null
+          purchase_price: number
+          purchased_at?: string | null
+          status?: string | null
+          tool_id: string
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          currency_code?: string
+          download_attempts?: number | null
+          expires_at?: string | null
+          id?: string
+          invoice_url?: string | null
+          max_downloads?: number | null
+          metadata?: Json | null
+          payment_method?: string | null
+          purchase_price?: number
+          purchased_at?: string | null
+          status?: string | null
+          tool_id?: string
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_purchases_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_verified_purchase: boolean | null
+          rating: number
+          review_text: string | null
+          tool_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          rating: number
+          review_text?: string | null
+          tool_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          rating?: number
+          review_text?: string | null
+          tool_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_reviews_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tool_showcases: {
         Row: {
           created_at: string | null
@@ -3273,6 +3508,50 @@ export type Database = {
             columns: ["certification_id"]
             isOneToOne: false
             referencedRelation: "certifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_downloads: {
+        Row: {
+          download_type: string
+          download_url: string | null
+          downloaded_at: string | null
+          file_hash: string | null
+          id: string
+          ip_address: unknown | null
+          tool_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          download_type: string
+          download_url?: string | null
+          downloaded_at?: string | null
+          file_hash?: string | null
+          id?: string
+          ip_address?: unknown | null
+          tool_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          download_type?: string
+          download_url?: string | null
+          downloaded_at?: string | null
+          file_hash?: string | null
+          id?: string
+          ip_address?: unknown | null
+          tool_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_downloads_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
             referencedColumns: ["id"]
           },
         ]
@@ -4014,6 +4293,14 @@ export type Database = {
       get_ga_tracking_id: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_regional_price: {
+        Args: { p_base_price_usd: number; p_country_code?: string }
+        Returns: {
+          local_price: number
+          currency_code: string
+          tax_rate: number
+        }[]
       }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }

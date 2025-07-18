@@ -43,6 +43,7 @@ import PremiumUpgrade from "./pages/PremiumUpgrade";
 import Pricing from "./pages/Pricing";
 import Newsletter from "./pages/Newsletter";
 import Blog from "./pages/Blog";
+import EnhancedPluginMarketplace from "./pages/EnhancedPluginMarketplace";
 import AdminDashboard from "./pages/AdminDashboard";
 import Investors from "./pages/Investors";
 import Beta from "./pages/Beta";
@@ -151,11 +152,14 @@ function App() {
                        <GISMarketplace />
                      </SubscriptionRoute>
                    } />
-                   <Route path="/plugin-marketplace" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <PluginMarketplace />
-                     </SubscriptionRoute>
-                   } />
+                    <Route path="/plugin-marketplace" element={
+                      <SubscriptionRoute requiredTier="pro">
+                        <PluginMarketplace />
+                      </SubscriptionRoute>
+                    } />
+                    <Route path="/enhanced-marketplace" element={
+                      <EnhancedPluginMarketplace />
+                    } />
                   
                   {/* Protected Routes */}
                   <Route path="/dashboard" element={
