@@ -55,6 +55,12 @@ const Navbar = () => {
     { href: "/corporate-training", label: "Corporate Training" },
   ];
 
+  const communityLinks = [
+    { href: "/newsletter", label: "Newsletter" },
+    { href: "/community", label: "Community Forum" },
+    { href: "/challenge", label: "Challenges" },
+  ];
+
   return (
     <nav className="bg-background border-b sticky top-0 z-50">
       <div className="container">
@@ -72,18 +78,18 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-12">
+          <div className="hidden lg:flex items-center space-x-8">
             {/* Learning Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center">
+                <Button variant="ghost" className="flex items-center text-sm">
                   Learning <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-50">
                 {learningLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
-                    <Link to={link.href}>{link.label}</Link>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -92,14 +98,14 @@ const Navbar = () => {
             {/* Tools Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center">
+                <Button variant="ghost" className="flex items-center text-sm">
                   Tools <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-50">
                 {toolsLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
-                    <Link to={link.href}>{link.label}</Link>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -108,42 +114,46 @@ const Navbar = () => {
             {/* Marketplace Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center">
+                <Button variant="ghost" className="flex items-center text-sm">
                   Marketplace <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-50">
                 {marketplaceLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
-                    <Link to={link.href}>{link.label}</Link>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/community">
-              <Button variant="ghost">Community</Button>
-            </Link>
-
-            <Link to="/newsletter">
-              <Button variant="ghost">Newsletter</Button>
-            </Link>
-
-            <Link to="/challenge">
-              <Button variant="ghost">Challenge</Button>
-            </Link>
+            {/* Community Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center text-sm">
+                  Community <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-50">
+                {communityLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Link to="/upcoming-course">
-              <Button variant="ghost">Upcoming Course</Button>
+              <Button variant="ghost" className="text-sm">Upcoming Course</Button>
             </Link>
 
             <Link to="/pricing">
-              <Button variant="ghost">Pricing</Button>
+              <Button variant="ghost" className="text-sm">Pricing</Button>
             </Link>
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -194,11 +204,12 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -207,8 +218,8 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         {isOpen && (
-          <div className="md:hidden border-t">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-background">
+          <div className="lg:hidden border-t bg-background/95 backdrop-blur-sm">
+            <div className="px-2 pt-2 pb-3 space-y-1 max-h-[80vh] overflow-y-auto">
               {/* Learning Section */}
               <div className="py-2">
                 <div className="text-sm font-medium text-muted-foreground px-3 py-2">Learning</div>
@@ -216,7 +227,7 @@ const Navbar = () => {
                   <Link
                     key={link.href}
                     to={link.href}
-                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
@@ -231,7 +242,7 @@ const Navbar = () => {
                   <Link
                     key={link.href}
                     to={link.href}
-                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
@@ -246,7 +257,22 @@ const Navbar = () => {
                   <Link
                     key={link.href}
                     to={link.href}
-                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Community Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Community</div>
+                {communityLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
@@ -255,32 +281,8 @@ const Navbar = () => {
               </div>
 
               <Link
-                to="/community"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                Community
-              </Link>
-
-              <Link
-                to="/newsletter"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                Newsletter
-              </Link>
-
-              <Link
-                to="/challenge"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                Challenge
-              </Link>
-
-              <Link
                 to="/upcoming-course"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Upcoming Course
@@ -288,7 +290,7 @@ const Navbar = () => {
 
               <Link
                 to="/pricing"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Pricing
