@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { useAuth } from "@/contexts/AuthContext";
+import Layout from "@/components/Layout";
 
 const CodeSnippets = () => {
   const [searchTerm, setSearchTerm] = useState("");
