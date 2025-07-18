@@ -4011,6 +4011,10 @@ export type Database = {
           created_at: string
         }[]
       }
+      get_ga_tracking_id: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {

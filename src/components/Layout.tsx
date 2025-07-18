@@ -8,6 +8,8 @@ import ErrorBoundary from './ErrorBoundary';
 import NotificationWrapper from './NotificationWrapper';
 import MobileOptimizations from './mobile/MobileOptimizations';
 import GoogleAnalytics from './analytics/GoogleAnalytics';
+import FeedbackWidget from './FeedbackWidget';
+import OnboardingTour from './OnboardingTour';
 
 interface LayoutProps {
   children: ReactNode;
@@ -28,6 +30,8 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
         <Toaster />
         <ScrollToTop />
+        <FeedbackWidget />
+        <OnboardingTour />
       </NotificationWrapper>
     </ErrorBoundary>
   );

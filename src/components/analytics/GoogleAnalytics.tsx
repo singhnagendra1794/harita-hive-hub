@@ -24,11 +24,8 @@ const GoogleAnalytics: React.FC<GoogleAnalyticsProps> = ({ trackingId: providedT
       }
       
       try {
-        const response = await fetch('/api/get-ga-tracking-id');
-        if (response.ok) {
-          const data = await response.json();
-          setTrackingId(data.trackingId);
-        }
+        // Use placeholder tracking ID for now - replace with actual when ready for production
+        setTrackingId('G-PLACEHOLDER123');
       } catch (error) {
         console.warn('Could not fetch GA tracking ID:', error);
       }

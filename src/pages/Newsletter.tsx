@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { updatePageSEO, seoData } from '@/utils/seoUtils';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,10 @@ const Newsletter = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Update SEO for newsletter page
+    const { title, description, keywords } = seoData.newsletter;
+    updatePageSEO(title, description, keywords);
+    
     fetchNewsletterPosts();
     if (user) {
       checkSubscriptionStatus();
@@ -75,7 +80,7 @@ const Newsletter = () => {
       const { data, error } = await supabase
         .from('newsletter_subscribers')
         .select('status')
-        .eq('user_id', user.id)
+        .eq('email', user.email)
         .eq('status', 'active')
         .maybeSingle();
 

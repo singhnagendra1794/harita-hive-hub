@@ -1,4 +1,5 @@
 
+import { useEffect } from 'react';
 import Layout from '@/components/Layout';
 
 import HeroSection from "../components/HeroSection";
@@ -17,6 +18,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 
 const Home = () => {
+  useEffect(() => {
+    // Update page title and meta description for Home
+    document.title = 'Harita Hive - Master GIS Technology | Geospatial Learning Platform';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Transform your career with comprehensive GIS education, cutting-edge geospatial tools, and a thriving professional community. From beginner basics to advanced enterprise solutions.');
+    }
+  }, []);
+
   const features = [
     {
       title: "Learning Resources",
