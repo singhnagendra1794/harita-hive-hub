@@ -207,13 +207,13 @@ const JobsAIDiscovery = () => {
       );
     }
 
-    if (experienceFilter) {
+    if (experienceFilter && experienceFilter !== 'all') {
       filtered = filtered.filter(job =>
         job.experience_level === experienceFilter
       );
     }
 
-    if (remoteFilter) {
+    if (remoteFilter && remoteFilter !== 'all') {
       if (remoteFilter === 'remote') {
         filtered = filtered.filter(job => job.remote_allowed);
       } else if (remoteFilter === 'onsite') {
@@ -221,11 +221,11 @@ const JobsAIDiscovery = () => {
       }
     }
 
-    if (sourceFilter) {
+    if (sourceFilter && sourceFilter !== 'all') {
       filtered = filtered.filter(job => job.source_platform === sourceFilter);
     }
 
-    if (salaryFilter) {
+    if (salaryFilter && salaryFilter !== 'any') {
       filtered = filtered.filter(job => {
         const maxSalary = job.salary_max || 0;
         switch (salaryFilter) {
@@ -495,7 +495,7 @@ const JobsAIDiscovery = () => {
                     <SelectValue placeholder="Experience Level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Levels</SelectItem>
+                    <SelectItem value="all">All Levels</SelectItem>
                     <SelectItem value="entry">Entry Level</SelectItem>
                     <SelectItem value="mid">Mid Level</SelectItem>
                     <SelectItem value="senior">Senior Level</SelectItem>
@@ -508,7 +508,7 @@ const JobsAIDiscovery = () => {
                     <SelectValue placeholder="Minimum Salary" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any Salary</SelectItem>
+                    <SelectItem value="any">Any Salary</SelectItem>
                     <SelectItem value="50k">$50k+</SelectItem>
                     <SelectItem value="75k">$75k+</SelectItem>
                     <SelectItem value="100k">$100k+</SelectItem>
@@ -521,7 +521,7 @@ const JobsAIDiscovery = () => {
                     <SelectValue placeholder="Work Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="remote">Remote Only</SelectItem>
                     <SelectItem value="onsite">On-site Only</SelectItem>
                   </SelectContent>
@@ -532,7 +532,7 @@ const JobsAIDiscovery = () => {
                     <SelectValue placeholder="Job Source" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Sources</SelectItem>
+                    <SelectItem value="all">All Sources</SelectItem>
                     <SelectItem value="linkedin">LinkedIn</SelectItem>
                     <SelectItem value="indeed">Indeed</SelectItem>
                     <SelectItem value="glassdoor">Glassdoor</SelectItem>
