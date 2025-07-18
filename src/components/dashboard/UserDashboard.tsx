@@ -19,6 +19,7 @@ interface Stat {
   title: string;
   value: string;
   icon: React.ComponentType<any>;
+  href?: string;
 }
 
 interface UserProfile {
@@ -58,10 +59,30 @@ const UserDashboard = () => {
   }, [user]);
 
   const userStats: Stat[] = [
-    { title: "Courses Enrolled", value: stats?.course_count?.toString() ?? "0", icon: BookOpen },
-    { title: "Projects Completed", value: stats?.projects_completed?.toString() ?? "0", icon: FileCode2 },
-    { title: "Community Posts", value: stats?.community_posts?.toString() ?? "0", icon: Users },
-    { title: "Spatial Analyses", value: stats?.spatial_analyses?.toString() ?? "0", icon: FileBarChart },
+    { 
+      title: "Courses Enrolled", 
+      value: stats?.course_count?.toString() ?? "0", 
+      icon: BookOpen,
+      href: stats?.course_count && stats.course_count > 0 ? "/courses/geospatial-technology-unlocked" : "/learn"
+    },
+    { 
+      title: "Projects Completed", 
+      value: stats?.projects_completed?.toString() ?? "0", 
+      icon: FileCode2,
+      href: "/projects"
+    },
+    { 
+      title: "Community Posts", 
+      value: stats?.community_posts?.toString() ?? "0", 
+      icon: Users,
+      href: "/community"
+    },
+    { 
+      title: "Spatial Analyses", 
+      value: stats?.spatial_analyses?.toString() ?? "0", 
+      icon: FileBarChart,
+      href: "/geoai-lab"
+    },
   ];
 
   const quickActions = [
@@ -220,19 +241,37 @@ const UserDashboard = () => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {userStats.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+        {userStats.map((stat, index) => {
+          const StatCard = ({ children }: { children: React.ReactNode }) => {
+            if (stat.href && parseInt(stat.value) > 0) {
+              return (
+                <Link to={stat.href} className="block">
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                    {children}
+                  </Card>
+                </Link>
+              );
+            }
+            return <Card>{children}</Card>;
+          };
+
+          return (
+            <StatCard key={index}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    {stat.href && parseInt(stat.value) > 0 && (
+                      <p className="text-xs text-primary mt-1">Click to view →</p>
+                    )}
+                  </div>
+                  <stat.icon className="h-8 w-8 text-primary" />
                 </div>
-                <stat.icon className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </StatCard>
+          );
+        })}
       </div>
 
       {/* Main Content Tabs */}

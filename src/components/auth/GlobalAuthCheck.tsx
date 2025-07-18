@@ -10,49 +10,81 @@ export const GlobalAuthCheck = () => {
   useEffect(() => {
     // Test global connectivity and auth endpoints
     const testGlobalAuth = async () => {
+      // Test Supabase connectivity with retry logic
       try {
-        // Test if Supabase is reachable globally
-        const { data, error } = await supabase.auth.getSession();
+        await supabase.auth.getSession();
+        console.log('Global auth check - Supabase reachable: true');
+      } catch (error) {
+        console.error('Supabase connectivity error:', error);
         
-        if (error) {
-          console.error('Global auth connectivity issue:', error);
-          
-          // Show user-friendly message for common issues
-          if (error.message.includes('network') || error.message.includes('fetch')) {
+        // Try one more time after a brief delay
+        setTimeout(async () => {
+          try {
+            await supabase.auth.getSession();
+            console.log('Global auth check - Supabase reachable on retry: true');
+          } catch (retryError) {
             toast({
               title: "Connection Issue",
-              description: "Having trouble connecting to our servers. If you're outside India, please try again in a few moments or contact support.",
+              description: "Having trouble connecting to our servers. Please refresh the page or try again later.",
               variant: "destructive",
             });
           }
-        }
+        }, 2000);
+        return;
+      }
 
-        // Log successful connection for debugging
-        console.log('Global auth check - Supabase reachable:', !!data);
-        
-        // Test edge function connectivity
+      // Test edge function connectivity with multiple endpoints
+      const testEndpoints = [
+        `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/test-connectivity`,
+        // Fallback to direct Supabase REST API
+        `https://uphgdwrwaizomnyuwfwr.supabase.co/rest/v1/`
+      ];
+
+      let connectivitySuccess = false;
+      
+      for (const endpoint of testEndpoints) {
         try {
-          const response = await fetch(`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/test-connectivity`, {
+          const response = await fetch(endpoint, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwaGdkd3J3YWl6b21ueXV3ZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjQyNjAsImV4cCI6MjA2NjAwMDI2MH0.I5i-3wP4E6Q3355oY2ctXQM9MhYXKbj6wGVhiRUsqxI`,
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwaGdkd3J3YWl6b21ueXV3ZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjQyNjAsImV4cCI6MjA2NjAwMDI2MH0.I5i-3wP4E6Q3355oY2ctXQM9MhYXKbj6wGVhiRUsqxI',
             },
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           });
           
-          if (!response.ok) {
-            console.warn('Edge function connectivity test failed:', response.status);
+          if (response.ok) {
+            connectivitySuccess = true;
+            
+            // Try to get response data for location info
+            try {
+              const data = await response.json();
+              if (data.country) {
+                console.log(`User location detected: ${data.country}`);
+                
+                // Log for analytics but don't show intrusive messages
+                if (data.country !== 'IN' && data.country !== 'India') {
+                  console.log('International user - all services should work normally');
+                }
+              }
+            } catch (parseError) {
+              // Response might not be JSON, that's okay
+              console.log('Connectivity test successful');
+            }
+            break;
           }
-        } catch (edgeError) {
-          console.warn('Edge function connectivity test error:', edgeError);
+        } catch (error) {
+          console.warn(`Failed to connect to ${endpoint}:`, error);
+          continue;
         }
-        
-      } catch (error) {
-        console.error('Global auth connectivity test failed:', error);
-        
+      }
+
+      // Only show warning if all connectivity tests fail
+      if (!connectivitySuccess) {
         toast({
-          title: "Global Access Issue",
-          description: "If you're experiencing login issues from outside India, please contact support at contact@haritahive.com",
-          variant: "destructive",
+          title: "Network Connectivity",
+          description: "Some features may be limited due to network connectivity. Registration and core features should still work. Contact support if issues persist.",
+          duration: 6000,
         });
       }
     };
