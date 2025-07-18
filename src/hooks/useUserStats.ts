@@ -36,7 +36,7 @@ export const useUserStats = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch real-time stats from actual tables
+      // Fetch real-time stats from actual tables and profile/subscription data
       const [
         courseEnrollments,
         communityPosts,
@@ -69,7 +69,7 @@ export const useUserStats = () => {
           .eq('id', user.id)
           .maybeSingle(),
         
-        // Get subscription info (primary source of truth)
+        // Get subscription info separately
         supabase
           .from('user_subscriptions')
           .select('subscription_tier, status, expires_at')

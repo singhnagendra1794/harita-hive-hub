@@ -1,10 +1,12 @@
 
 
+import Layout from "../components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Privacy = () => {
   return (
-    <div className="container py-12 max-w-4xl">
+    <Layout>
+      <div className="container py-12 max-w-4xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
           <p className="text-xl text-muted-foreground">
@@ -92,6 +94,7 @@ const Privacy = () => {
           </Card>
         </div>
       </div>
+    </Layout>
   );
 };
 

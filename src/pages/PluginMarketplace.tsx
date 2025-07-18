@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import Layout from "../components/Layout";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1066,7 +1067,8 @@ const PluginMarketplace = () => {
   };
 
   return (
-    <div className="container py-8">
+    <Layout>
+      <div className="container py-8">
         {/* Access Gate for Non-Pro Users */}
         {!hasFullAccess && (
           <div className="mb-8">
@@ -1297,6 +1299,7 @@ const PluginMarketplace = () => {
           )}
         </div>
       </div>
+    </Layout>
   );
 };
 

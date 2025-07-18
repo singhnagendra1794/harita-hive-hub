@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Layout from '../components/Layout';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,8 @@ const Signup = () => {
   }, [user, navigate]);
 
   return (
-    <div className="container max-w-md py-12">
+    <Layout>
+      <div className="container max-w-md py-12">
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold mb-2">Create Your Account</h1>
         <p className="text-muted-foreground">
@@ -31,7 +33,8 @@ const Signup = () => {
         </p>
       </div>
       <MultiAuthForm mode="signup" onToggleMode={() => navigate('/login')} />
-    </div>
+      </div>
+    </Layout>
   );
 };
 

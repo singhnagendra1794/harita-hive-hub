@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Layout from '../components/Layout';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -83,7 +84,8 @@ const FAQ = () => {
   }
 
   return (
-    <div className="container py-12 max-w-4xl">
+    <Layout>
+      <div className="container py-12 max-w-4xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
             <HelpCircle className="h-10 w-10 text-primary" />
@@ -195,6 +197,7 @@ const FAQ = () => {
           </CardContent>
         </Card>
       </div>
+    </Layout>
   );
 };
 

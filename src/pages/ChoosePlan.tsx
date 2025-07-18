@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +44,8 @@ const ChoosePlan: React.FC = () => {
   };
 
   return (
-    <div className="container max-w-6xl py-12">
+    <Layout>
+      <div className="container max-w-6xl py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -245,6 +247,7 @@ const ChoosePlan: React.FC = () => {
           </p>
         </div>
       </div>
+    </Layout>
   );
 };
 
