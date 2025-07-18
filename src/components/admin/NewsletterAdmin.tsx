@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import LinkedInNewsletterImporter from './LinkedInNewsletterImporter';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface NewsletterPost {
@@ -207,7 +208,7 @@ export const NewsletterAdmin = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Newsletter Management</h2>
@@ -323,6 +324,15 @@ export const NewsletterAdmin = () => {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* LinkedIn Newsletter Importer */}
+      <LinkedInNewsletterImporter />
+
+      {/* Newsletter Posts List */}
+      <div>
+        <h3 className="text-xl font-semibold mb-4">Current Newsletter Posts</h3>
+        
       </div>
 
       {loading ? (

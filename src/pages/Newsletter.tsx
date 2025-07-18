@@ -22,7 +22,8 @@ import {
   Search,
   Filter,
   Grid,
-  List
+  List,
+  Globe
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,7 +110,7 @@ const Newsletter = () => {
   };
 
   const checkSubscriptionStatus = async () => {
-    if (!user) return;
+    if (!user?.email) return;
 
     try {
       const { data, error } = await supabase
@@ -253,7 +254,7 @@ const Newsletter = () => {
                 />
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full mb-3" 
                   disabled={isSubscribing}
                 >
                   {isSubscribing ? (
@@ -264,9 +265,18 @@ const Newsletter = () => {
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Subscribe Now
+                      Subscribe to Updates
                     </>
                   )}
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Subscribe on LinkedIn
                 </Button>
               </form>
             </CardContent>
@@ -292,6 +302,15 @@ const Newsletter = () => {
           <div>
             <h2 className="text-3xl font-bold">Harita Hive Newsletter</h2>
             <p className="text-muted-foreground">All editions from our LinkedIn newsletter</p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="mt-2"
+              onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
+            >
+              <Globe className="h-4 w-4 mr-1" />
+              Follow on LinkedIn
+            </Button>
           </div>
           <div className="flex items-center gap-4">
             <Badge variant="secondary" className="text-sm">
