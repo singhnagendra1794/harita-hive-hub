@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { PaymentModal } from "@/components/payment/PaymentModal";
+import Layout from '../components/Layout';
 
 const Pricing = () => {
 
@@ -23,7 +24,8 @@ const Pricing = () => {
   };
 
   return (
-    <div className="container py-12">
+    <Layout>
+      <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -210,6 +212,7 @@ const Pricing = () => {
           />
         )}
       </div>
+    </Layout>
   );
 };
 

@@ -10,7 +10,6 @@ import { CreatorProfileCard } from '@/components/creator/CreatorProfileCard';
 import { ReferralDashboard } from '@/components/referral/ReferralDashboard';
 import { useTrendingData } from '@/hooks/useTrendingData';
 import { formatDistanceToNow } from 'date-fns';
-import Layout from '../Layout';
 export const CommunityHub: React.FC = () => {
   const { data: trendingData, loading: trendingLoading, error: trendingError, refetch } = useTrendingData();
 
@@ -23,8 +22,7 @@ export const CommunityHub: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-6 space-y-6">
+    <div className="container py-6 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Community Hub</h1>
           <p className="text-muted-foreground">
@@ -252,6 +250,5 @@ export const CommunityHub: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
   );
 };

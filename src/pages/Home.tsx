@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Rocket, ArrowRight, CheckCircle, Users, Building, Package, Briefcase, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Layout from '../components/Layout';
 
 const Home = () => {
   const features = [
@@ -102,7 +103,7 @@ const Home = () => {
   ];
 
   return (
-    <>
+    <Layout>
       <HeroSection />
       
       {/* Beta Announcement Banner */}
@@ -252,7 +253,7 @@ const Home = () => {
       {/* Engagement Components */}
       <OnboardingTour />
       <FeedbackWidget />
-    </>
+    </Layout>
   );
 };
 

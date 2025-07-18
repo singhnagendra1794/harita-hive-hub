@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Users, Target, Award, Globe, Lightbulb } from 'lucide-react';
+import Layout from '../components/Layout';
 
 interface AboutSection {
   id: string;
@@ -90,7 +91,8 @@ const About = () => {
   );
 
   return (
-    <div className="container py-12 max-w-6xl">
+    <Layout>
+      <div className="container py-12 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-6 flex items-center justify-center gap-4">
@@ -286,6 +288,7 @@ const About = () => {
           </CardContent>
         </Card>
       </div>
+    </Layout>
   );
 };
 

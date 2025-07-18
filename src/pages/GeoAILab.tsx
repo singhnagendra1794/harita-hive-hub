@@ -1,8 +1,13 @@
 
 import GeoAIWorkspace from "../components/geoai/GeoAIWorkspace";
+import Layout from '../components/Layout';
 
 const GeoAILab = () => {
-  return <GeoAIWorkspace />;
+  return (
+    <Layout>
+      <GeoAIWorkspace />
+    </Layout>
+  );
 };
 
 export default GeoAILab;
