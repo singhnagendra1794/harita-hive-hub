@@ -27,3 +27,6 @@ verify_jwt = false
 
 [functions.send-challenge-email]
 verify_jwt = false
+
+[functions.send-creator-application-email]
+verify_jwt = false

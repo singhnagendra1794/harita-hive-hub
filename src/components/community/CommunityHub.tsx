@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, Award, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw } from 'lucide-react';
-import { DiscussionThread } from '@/components/discussions/DiscussionThread';
-import { CreatorProfileCard } from '@/components/creator/CreatorProfileCard';
+import { CommunityPosts } from '@/components/community/CommunityPosts';
+import { FeaturedCreator } from '@/components/community/FeaturedCreator';
+import { CreatorApplicationForm } from '@/components/community/CreatorApplicationForm';
 import { ReferralDashboard } from '@/components/referral/ReferralDashboard';
 import { useTrendingData } from '@/hooks/useTrendingData';
 import { formatDistanceToNow } from 'date-fns';
@@ -51,31 +52,12 @@ export const CommunityHub: React.FC = () => {
           </TabsList>
 
           <TabsContent value="discussions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Discussions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DiscussionThread 
-                  contentType="general" 
-                  contentId="community-hub"
-                />
-              </CardContent>
-            </Card>
+            <CommunityPosts />
           </TabsContent>
 
           <TabsContent value="creators" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Featured Creators</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Discover amazing GIS educators and content creators
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <FeaturedCreator />
               
               <Card>
                 <CardHeader>
@@ -83,8 +65,25 @@ export const CommunityHub: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Share your knowledge and build a following in the GIS community.
+                    Share your knowledge and build a following in the GIS community. Get recognition, connect with experts, and grow your professional brand.
                   </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-green-500"></Badge>
+                      Featured content & profile visibility
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-blue-500"></Badge>
+                      Connect with industry experts
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-purple-500"></Badge>
+                      Build your professional brand
+                    </div>
+                  </div>
+                  
+                  <CreatorApplicationForm />
                 </CardContent>
               </Card>
             </div>

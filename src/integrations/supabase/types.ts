@@ -468,6 +468,39 @@ export type Database = {
         }
         Relationships: []
       }
+      community_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          votes: number | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          votes?: number | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          votes?: number | null
+        }
+        Relationships: []
+      }
       company_profiles: {
         Row: {
           account_status: string | null
@@ -848,6 +881,42 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_applications: {
+        Row: {
+          areas_of_interest: string[] | null
+          created_at: string | null
+          email: string
+          github_url: string | null
+          id: string
+          name: string
+          phone: string | null
+          portfolio_url: string | null
+          status: string | null
+        }
+        Insert: {
+          areas_of_interest?: string[] | null
+          created_at?: string | null
+          email: string
+          github_url?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          portfolio_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          areas_of_interest?: string[] | null
+          created_at?: string | null
+          email?: string
+          github_url?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          portfolio_url?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       creator_profiles: {
         Row: {
           avatar_url: string | null
@@ -886,6 +955,36 @@ export type Database = {
           social_links?: Json | null
           specialties?: string[] | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      creator_stats: {
+        Row: {
+          created_at: string | null
+          engagement_score: number | null
+          featured_week: string | null
+          id: string
+          posts_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          engagement_score?: number | null
+          featured_week?: string | null
+          id?: string
+          posts_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          engagement_score?: number | null
+          featured_week?: string | null
+          id?: string
+          posts_count?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2626,6 +2725,33 @@ export type Database = {
           },
         ]
       }
+      referral_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          referee_id: string
+          referral_code: string
+          referrer_id: string
+          reward_granted: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referee_id: string
+          referral_code: string
+          referrer_id: string
+          reward_granted?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referee_id?: string
+          referral_code?: string
+          referrer_id?: string
+          reward_granted?: boolean | null
+        }
+        Relationships: []
+      }
       regional_pricing: {
         Row: {
           country_code: string
@@ -3336,6 +3462,36 @@ export type Database = {
           price?: number | null
           syllabus?: Json | null
           title?: string
+        }
+        Relationships: []
+      }
+      trending_topics: {
+        Row: {
+          category: string
+          count: number | null
+          created_at: string | null
+          date_recorded: string | null
+          id: string
+          topic: string
+          trend_direction: string | null
+        }
+        Insert: {
+          category: string
+          count?: number | null
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          topic: string
+          trend_direction?: string | null
+        }
+        Update: {
+          category?: string
+          count?: number | null
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          topic?: string
+          trend_direction?: string | null
         }
         Relationships: []
       }
