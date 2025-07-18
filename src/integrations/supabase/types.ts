@@ -208,6 +208,53 @@ export type Database = {
           },
         ]
       }
+      career_roadmaps: {
+        Row: {
+          created_at: string | null
+          email_sent: boolean | null
+          email_sent_at: string | null
+          generation_status: string | null
+          id: string
+          pdf_path: string | null
+          resume_id: string | null
+          roadmap_data: Json
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          generation_status?: string | null
+          id?: string
+          pdf_path?: string | null
+          resume_id?: string | null
+          roadmap_data?: Json
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          generation_status?: string | null
+          id?: string
+          pdf_path?: string | null
+          resume_id?: string | null
+          roadmap_data?: Json
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_roadmaps_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "user_resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
           certificate_hash: string
