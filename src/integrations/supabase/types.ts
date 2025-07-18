@@ -3606,6 +3606,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activities: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          points_earned: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_analytics: {
         Row: {
           created_at: string | null
@@ -3629,6 +3659,42 @@ export type Database = {
           event_type?: string
           id?: string
           session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_description: string | null
+          badge_icon: string | null
+          badge_name: string
+          badge_type: string
+          earned_at: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_icon?: string | null
+          badge_name: string
+          badge_type: string
+          earned_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          badge_description?: string | null
+          badge_icon?: string | null
+          badge_name?: string
+          badge_type?: string
+          earned_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -3859,6 +3925,66 @@ export type Database = {
           interaction_type?: string
           metadata?: Json | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_leaderboard_stats: {
+        Row: {
+          badges: Json | null
+          challenge_participations: number | null
+          code_shares: number | null
+          comments: number | null
+          courses_completed: number | null
+          created_at: string | null
+          featured_week: string | null
+          id: string
+          likes_given: number | null
+          monthly_points: number | null
+          note_shares: number | null
+          post_creations: number | null
+          tool_uploads: number | null
+          total_points: number | null
+          updated_at: string | null
+          user_id: string
+          weekly_points: number | null
+        }
+        Insert: {
+          badges?: Json | null
+          challenge_participations?: number | null
+          code_shares?: number | null
+          comments?: number | null
+          courses_completed?: number | null
+          created_at?: string | null
+          featured_week?: string | null
+          id?: string
+          likes_given?: number | null
+          monthly_points?: number | null
+          note_shares?: number | null
+          post_creations?: number | null
+          tool_uploads?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id: string
+          weekly_points?: number | null
+        }
+        Update: {
+          badges?: Json | null
+          challenge_participations?: number | null
+          code_shares?: number | null
+          comments?: number | null
+          courses_completed?: number | null
+          created_at?: string | null
+          featured_week?: string | null
+          id?: string
+          likes_given?: number | null
+          monthly_points?: number | null
+          note_shares?: number | null
+          post_creations?: number | null
+          tool_uploads?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_points?: number | null
         }
         Relationships: []
       }
@@ -4545,6 +4671,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      reset_monthly_points: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_weekly_points: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       start_stream_session: {
         Args: { user_id: string }
         Returns: string
@@ -4556,6 +4690,10 @@ export type Database = {
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }
         Returns: string
+      }
+      track_user_activity: {
+        Args: { p_user_id: string; p_activity_type: string; p_metadata?: Json }
+        Returns: undefined
       }
       track_user_interaction: {
         Args: {

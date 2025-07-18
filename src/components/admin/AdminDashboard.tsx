@@ -9,6 +9,7 @@ import { UserAnalytics } from './UserAnalytics';
 import { ContentUpload } from './ContentUpload';
 import TopRequestedTopics from './TopRequestedTopics';
 import NewsletterAdmin from './NewsletterAdmin';
+import LeaderboardSeeder from './LeaderboardSeeder';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -51,10 +52,11 @@ export const AdminDashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="search-insights">Search Insights</TabsTrigger>
           <TabsTrigger value="upload">Upload</TabsTrigger>
@@ -127,6 +129,10 @@ export const AdminDashboard = () => {
 
         <TabsContent value="newsletter">
           <NewsletterAdmin />
+        </TabsContent>
+
+        <TabsContent value="leaderboard">
+          <LeaderboardSeeder />
         </TabsContent>
 
         <TabsContent value="analytics">
