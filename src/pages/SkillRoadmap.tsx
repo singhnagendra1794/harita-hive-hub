@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Target, Clock, BookOpen, Loader2, CheckCircle, ArrowRight } from 'lucide-react';
+import { MapPin, Target, Clock, BookOpen, Loader2, CheckCircle, ArrowRight, Upload, FileText } from 'lucide-react';
 import Layout from '@/components/Layout';
 
 interface RoadmapStep {
@@ -30,7 +30,10 @@ const SkillRoadmap = () => {
   });
   const [roadmap, setRoadmap] = useState<RoadmapStep[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerated, setIsGenerated] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeId, setResumeId] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'upload' | 'form' | 'roadmap'>('upload');
   const { toast } = useToast();
 
   const fieldOptions = [
@@ -46,6 +49,106 @@ const SkillRoadmap = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'].includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a PDF or Word document.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload a file smaller than 10MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setResumeFile(file);
+    await uploadAndAnalyzeResume(file);
+  };
+
+  const uploadAndAnalyzeResume = async (file: File) => {
+    setIsAnalyzing(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to upload your resume.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Upload file to storage
+      const fileName = `${user.id}/${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('user-resumes')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Create resume record  
+      const { data: resumeData, error: resumeError } = await supabase
+        .from('user_resumes')
+        .insert({
+          user_id: user.id,
+          resume_data: { 
+            fileName: file.name,
+            filePath: uploadData.path,
+            fileSize: file.size,
+            fileType: file.type 
+          }
+        })
+        .select()
+        .single();
+
+      if (resumeError) throw resumeError;
+
+      setResumeId(resumeData.id);
+
+      // Analyze resume
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
+        body: {
+          resumeId: resumeData.id,
+          userId: user.id
+        }
+      });
+
+      if (analysisError) throw analysisError;
+
+      if (analysisData.success) {
+        setCurrentStep('form');
+        toast({
+          title: "Resume Analyzed!",
+          description: "Your resume has been processed. Now provide additional details.",
+        });
+      } else {
+        throw new Error(analysisData.error || 'Failed to analyze resume');
+      }
+    } catch (error: any) {
+      console.error('Error uploading/analyzing resume:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload and analyze resume. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const generateRoadmap = async () => {
@@ -73,9 +176,7 @@ const SkillRoadmap = () => {
 
       const { data, error } = await supabase.functions.invoke('generate-roadmap', {
         body: {
-          fieldOfInterest: formData.fieldOfInterest,
-          skillLevel: formData.skillLevel,
-          careerGoal: formData.careerGoal,
+          resumeId: resumeId,
           userId: user.id
         }
       });
@@ -83,8 +184,7 @@ const SkillRoadmap = () => {
       if (error) throw error;
 
       if (data.success) {
-        setRoadmap(data.roadmap);
-        setIsGenerated(true);
+        setCurrentStep('roadmap');
         toast({
           title: "Roadmap Generated!",
           description: "Your personalized learning roadmap is ready.",
@@ -138,15 +238,113 @@ const SkillRoadmap = () => {
           {/* Header */}
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              AI-Powered Skill Assessment
+              AI-Powered Career Roadmap
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Get a personalized learning roadmap tailored to your goals and current skill level
+              Upload your resume and get a personalized learning roadmap based on your experience and career goals
             </p>
           </div>
 
-          {!isGenerated ? (
-            /* Assessment Form */
+          {/* Progress Steps */}
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="flex items-center justify-center space-x-8">
+              <div className={`flex items-center ${currentStep === 'upload' ? 'text-primary' : 
+                ['form', 'roadmap'].includes(currentStep) ? 'text-green-600' : 'text-muted-foreground'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                  currentStep === 'upload' ? 'border-primary bg-primary text-primary-foreground' :
+                  ['form', 'roadmap'].includes(currentStep) ? 'border-green-600 bg-green-600 text-white' :
+                  'border-muted-foreground'
+                }`}>
+                  {['form', 'roadmap'].includes(currentStep) ? <CheckCircle className="h-4 w-4" /> : '1'}
+                </div>
+                <span className="ml-2 font-medium">Upload Resume</span>
+              </div>
+              
+              <div className={`flex items-center ${currentStep === 'form' ? 'text-primary' : 
+                currentStep === 'roadmap' ? 'text-green-600' : 'text-muted-foreground'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                  currentStep === 'form' ? 'border-primary bg-primary text-primary-foreground' :
+                  currentStep === 'roadmap' ? 'border-green-600 bg-green-600 text-white' :
+                  'border-muted-foreground'
+                }`}>
+                  {currentStep === 'roadmap' ? <CheckCircle className="h-4 w-4" /> : '2'}
+                </div>
+                <span className="ml-2 font-medium">Additional Details</span>
+              </div>
+              
+              <div className={`flex items-center ${currentStep === 'roadmap' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                  currentStep === 'roadmap' ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'
+                }`}>
+                  3
+                </div>
+                <span className="ml-2 font-medium">Get Roadmap</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Step Content */}
+          {currentStep === 'upload' && (
+            <div className="max-w-2xl mx-auto animate-fade-in">
+              <Card className="shadow-lg border-0 bg-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-primary" />
+                    Upload Your Resume
+                  </CardTitle>
+                  <CardDescription>
+                    Upload your resume to get a personalized career roadmap based on your experience
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 bg-primary/10 rounded-full">
+                        <FileText className="h-8 w-8 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium mb-2">Choose your resume file</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Supports PDF, DOC, and DOCX files up to 10MB
+                        </p>
+                        <Input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileUpload}
+                          disabled={isAnalyzing}
+                          className="max-w-xs mx-auto"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {resumeFile && (
+                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                      <FileText className="h-5 w-5 text-primary" />
+                      <div className="flex-1">
+                        <p className="font-medium">{resumeFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      {isAnalyzing && <Loader2 className="h-5 w-5 animate-spin" />}
+                    </div>
+                  )}
+
+                  {isAnalyzing && (
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 text-primary">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Analyzing your resume...</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {currentStep === 'form' && (
             <div className="max-w-2xl mx-auto animate-fade-in">
               <Card className="shadow-lg border-0 bg-card">
                 <CardHeader>
@@ -155,7 +353,7 @@ const SkillRoadmap = () => {
                     Tell Us About Your Goals
                   </CardTitle>
                   <CardDescription>
-                    Answer a few questions to get your personalized learning roadmap
+                    Provide additional details to customize your learning roadmap
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -218,11 +416,20 @@ const SkillRoadmap = () => {
                       </>
                     )}
                   </Button>
+
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep('upload')}
+                    className="w-full"
+                  >
+                    Back to Resume Upload
+                  </Button>
                 </CardContent>
               </Card>
             </div>
-          ) : (
-            /* Generated Roadmap */
+          )}
+
+          {currentStep === 'roadmap' && (
             <div className="space-y-8 animate-fade-in">
               {/* Roadmap Header */}
               <div className="text-center">
@@ -234,64 +441,19 @@ const SkillRoadmap = () => {
                   {formData.fieldOfInterest} Learning Path
                 </h2>
                 <p className="text-muted-foreground">
-                  Designed for {formData.skillLevel} level • {roadmap.length} learning steps
+                  Based on your resume and designed for {formData.skillLevel} level
                 </p>
               </div>
 
-              {/* Roadmap Steps */}
-              <div className="max-w-4xl mx-auto space-y-6">
-                {roadmap.map((step, index) => (
-                  <div key={index} className="animate-fade-in">
-                    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-primary">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full text-sm font-semibold">
-                                {step.order}
-                              </div>
-                              <CardTitle className="text-lg">{step.title}</CardTitle>
-                            </div>
-                            <CardDescription className="text-base">
-                              {step.description}
-                            </CardDescription>
-                          </div>
-                          <div className="flex flex-col gap-2 ml-4">
-                            <Badge variant="outline" className={getCategoryColor(step.category)}>
-                              {getCategoryIcon(step.category)}
-                              <span className="ml-1 capitalize">{step.category}</span>
-                            </Badge>
-                            <Badge variant="outline" className={getDifficultyColor(step.difficulty)}>
-                              <span className="capitalize">{step.difficulty}</span>
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            {step.duration}
-                          </div>
-                        </div>
-                        
-                        {step.resources && step.resources.length > 0 && (
-                          <div>
-                            <h4 className="font-medium mb-2">Recommended Resources:</h4>
-                            <ul className="space-y-1">
-                              {step.resources.map((resource, resourceIndex) => (
-                                <li key={resourceIndex} className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <div className="w-1 h-1 bg-primary rounded-full" />
-                                  {resource}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
+              {/* Roadmap Content - This will be populated by the AI */}
+              <div className="max-w-4xl mx-auto">
+                <Card className="p-6 text-center">
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Your roadmap will appear here once generated by AI based on your resume and preferences.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* CTA Section */}
@@ -302,7 +464,12 @@ const SkillRoadmap = () => {
                   <Button size="lg" asChild>
                     <a href="/upcoming-course">Enroll in Courses</a>
                   </Button>
-                  <Button variant="outline" size="lg" onClick={() => setIsGenerated(false)}>
+                  <Button variant="outline" size="lg" onClick={() => {
+                    setCurrentStep('upload');
+                    setResumeFile(null);
+                    setResumeId(null);
+                    setFormData({ fieldOfInterest: '', skillLevel: '', careerGoal: '' });
+                  }}>
                     Generate New Roadmap
                   </Button>
                 </div>
