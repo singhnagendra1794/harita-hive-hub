@@ -325,11 +325,11 @@ function App() {
                          <Toolkits />
                        </ProtectedRoute>
                      } />
-                     <Route path="/jobs-ai-discovery" element={
-                       <ProtectedRoute>
-                         <JobsAIDiscovery />
-                       </ProtectedRoute>
-                     } />
+                       <Route path="/jobs-ai-discovery" element={
+                         <ProtectedRoute>
+                           <JobsAIDiscovery />
+                         </ProtectedRoute>
+                       } />
                      <Route path="/project-studio" element={
                        <SubscriptionRoute requiredTier="pro">
                          <ProjectStudio />
