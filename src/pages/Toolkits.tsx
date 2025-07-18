@@ -58,7 +58,111 @@ const Toolkits = () => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      // Mock data with real download URLs for now since we don't have a backend
+      const mockCategories: ToolkitCategory[] = [
+        { id: 'processing', name: 'Data Processing', description: 'Tools for data cleaning, transformation, and analysis', icon: '⚙️' },
+        { id: 'visualization', name: 'Visualization', description: 'Mapping and visualization tools', icon: '📊' },
+        { id: 'analysis', name: 'Spatial Analysis', description: 'Advanced spatial analysis tools', icon: '🧠' },
+        { id: 'automation', name: 'Automation', description: 'Workflow automation and scripting', icon: '🔄' },
+        { id: 'web', name: 'Web GIS', description: 'Web mapping and web GIS development', icon: '🌐' }
+      ];
+
+      const mockToolkits: Toolkit[] = [
+        {
+          id: '1',
+          title: 'QGIS Buffer and Heatmap Combo Tool',
+          description: 'Combines buffer analysis with heatmap generation for comprehensive spatial analysis',
+          category_id: 'analysis',
+          download_url: '/downloads/buffer-heatmap-combo.zip',
+          demo_video_url: 'https://youtube.com/watch?v=demo1',
+          sample_project_url: '/downloads/buffer-heatmap-combo.zip',
+          tags: ['QGIS', 'Buffer', 'Heatmap', 'Analysis'],
+          license_type: 'MIT',
+          rating: 4.8,
+          download_count: 1247,
+          is_featured: true,
+          created_by: 'Harita Hive Team'
+        },
+        {
+          id: '2',
+          title: 'Coordinate Transformer Pro',
+          description: 'Advanced coordinate system transformation tool with batch processing',
+          category_id: 'processing',
+          download_url: '/downloads/coordinate-transformer.py',
+          demo_video_url: 'https://youtube.com/watch?v=demo2',
+          sample_project_url: '/downloads/coordinate-transformer.py',
+          tags: ['Python', 'Coordinates', 'CRS', 'Transformation'],
+          license_type: 'GPL-3.0',
+          rating: 4.6,
+          download_count: 892,
+          is_featured: true,
+          created_by: 'GeoSpatial Solutions'
+        },
+        {
+          id: '3',
+          title: 'GeoJSON Editor Suite',
+          description: 'Complete toolkit for editing, validating, and optimizing GeoJSON files',
+          category_id: 'processing',
+          download_url: '/downloads/geojson-editor.zip',
+          demo_video_url: 'https://youtube.com/watch?v=demo3',
+          sample_project_url: '/downloads/geojson-editor.zip',
+          tags: ['GeoJSON', 'Editor', 'Validation', 'Web'],
+          license_type: 'Apache-2.0',
+          rating: 4.9,
+          download_count: 2103,
+          is_featured: true,
+          created_by: 'OpenGIS Community'
+        },
+        {
+          id: '4',
+          title: 'Mapbox Clustering Algorithm',
+          description: 'Efficient point clustering for web maps with custom styling options',
+          category_id: 'web',
+          download_url: '/downloads/mapbox-clustering.js',
+          demo_video_url: 'https://youtube.com/watch?v=demo4',
+          sample_project_url: '/downloads/mapbox-clustering.js',
+          tags: ['Mapbox', 'Clustering', 'JavaScript', 'WebGL'],
+          license_type: 'MIT',
+          rating: 4.7,
+          download_count: 1534,
+          is_featured: true,
+          created_by: 'Web Mapping Pro'
+        },
+        {
+          id: '5',
+          title: 'NDVI Analysis Toolkit',
+          description: 'Complete NDVI calculation and analysis suite for vegetation monitoring',
+          category_id: 'analysis',
+          download_url: '/downloads/ndvi-analysis.qgz',
+          demo_video_url: 'https://youtube.com/watch?v=demo5',
+          sample_project_url: '/downloads/ndvi-analysis.qgz',
+          tags: ['NDVI', 'Vegetation', 'Remote Sensing', 'QGIS'],
+          license_type: 'CC-BY-4.0',
+          rating: 4.5,
+          download_count: 768,
+          is_featured: false,
+          created_by: 'Remote Sensing Lab'
+        },
+        {
+          id: '6',
+          title: 'Polygon Simplification Tool',
+          description: 'Optimize polygon geometries while preserving important features',
+          category_id: 'processing',
+          download_url: '/downloads/polygon-simplifier.py',
+          demo_video_url: 'https://youtube.com/watch?v=demo6',
+          sample_project_url: '/downloads/polygon-simplifier.py',
+          tags: ['Python', 'Polygons', 'Optimization', 'Geometry'],
+          license_type: 'BSD-3-Clause',
+          rating: 4.4,
+          download_count: 623,
+          is_featured: false,
+          created_by: 'Geometry Solutions'
+        }
+      ];
+
+      setCategories(mockCategories);
+      setToolkits(mockToolkits);
+      setLoading(false);
 
       // Fetch categories
       const { data: categoriesData } = await supabase

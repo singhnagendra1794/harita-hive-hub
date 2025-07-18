@@ -15,7 +15,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect authenticated users to dashboard
+    // Only redirect authenticated users to dashboard, allow visitors to see homepage
     if (user) {
       navigate("/dashboard");
     }

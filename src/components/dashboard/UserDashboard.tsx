@@ -63,7 +63,7 @@ const UserDashboard = () => {
       title: "Courses Enrolled", 
       value: stats?.course_count?.toString() ?? "0", 
       icon: BookOpen,
-      href: stats?.course_count && stats.course_count > 0 ? "/courses/geospatial-technology-unlocked" : "/learn"
+      href: stats?.course_count && stats.course_count > 0 ? "/browse-courses" : "/browse-courses"
     },
     { 
       title: "Projects Completed", 
@@ -81,19 +81,19 @@ const UserDashboard = () => {
       title: "Spatial Analyses", 
       value: stats?.spatial_analyses?.toString() ?? "0", 
       icon: FileBarChart,
-      href: "/geoai-lab"
+      href: hasAccess('pro') ? "/geoai-lab" : "/choose-plan"
     },
   ];
 
   const quickActions = [
-    { title: "Start Learning", description: "Browse courses and tutorials", href: "/learn", icon: BookOpen },
-    { title: "Interactive Map", description: "Explore our mapping tools", href: "/map-playground", icon: Map },
-    { title: "GeoAI Lab", description: "AI-powered geospatial analysis", href: "/geoai-lab", icon: Brain },
+    { title: "Browse Courses", description: "Explore learning paths and tutorials", href: "/browse-courses", icon: BookOpen },
+    { title: "Interactive Map", description: "Explore our mapping tools", href: hasAccess('pro') ? "/map-playground" : "/choose-plan", icon: Map, premium: true },
+    { title: "GeoAI Lab", description: "AI-powered geospatial analysis", href: hasAccess('pro') ? "/geoai-lab" : "/choose-plan", icon: Brain, premium: true },
     { title: "Community", description: "Connect with other GIS professionals", href: "/community", icon: Users },
     { title: "Code Snippets", description: "Ready-to-use GIS code examples", href: "/code-snippets", icon: Code },
-    { title: "Job Board", description: "Find GIS career opportunities", href: "/job-posting", icon: Briefcase },
+    { title: "Toolkits Hub", description: "Download GIS tools and plugins", href: "/toolkits", icon: Briefcase },
     { title: "Live Classes", description: "Join live GIS training sessions", href: "/live-classes", icon: Calendar },
-    { title: "Web GIS Builder", description: "Create web-based GIS applications", href: "/webgis-builder", icon: Layers },
+    { title: "Web GIS Builder", description: "Create web-based GIS applications", href: hasAccess('enterprise') ? "/webgis-builder" : "/choose-plan", icon: Layers, premium: true },
   ];
 
   const monetizationFeatures = [
@@ -286,12 +286,9 @@ const UserDashboard = () => {
         <TabsContent value="quick-actions">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
-              const isPremiumFeature = action.href === '/learn' || action.href === '/geoai-lab' || action.href === '/webgis-builder';
+              const isPremiumFeature = action.premium || false;
               // Super admins have access to all features
-              const hasFeatureAccess = isSuperAdmin() || 
-                (action.href === '/learn' ? canAccessLearnSection() :
-                 action.href === '/geoai-lab' ? canAccessGeoAILab() :
-                 action.href === '/webgis-builder' ? canAccessWebGISBuilder() : true);
+              const hasFeatureAccess = isSuperAdmin() || !isPremiumFeature || hasAccess('pro') || hasAccess('enterprise');
               
               return (
                 <Card key={index} className={`group hover:shadow-lg transition-all duration-300 ${!hasFeatureAccess ? 'opacity-75' : 'cursor-pointer'}`}>
