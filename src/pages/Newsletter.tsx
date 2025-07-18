@@ -48,7 +48,13 @@ const Newsletter = () => {
   useEffect(() => {
     // Update SEO for newsletter page
     const { title, description, keywords } = seoData.newsletter;
-    updatePageSEO(title, description, keywords);
+    updatePageSEO({
+      title,
+      description,
+      keywords,
+      url: window.location.href,
+      type: 'website'
+    });
     
     fetchNewsletterPosts();
     if (user) {

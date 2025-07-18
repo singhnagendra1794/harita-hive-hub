@@ -1,47 +1,182 @@
-// SEO utilities for dynamic meta tag updates
-export const updatePageSEO = (title: string, description: string, keywords?: string) => {
+// Advanced SEO utilities for comprehensive meta tag and schema markup management
+export interface SEOConfig {
+  title: string;
+  description: string;
+  keywords?: string;
+  image?: string;
+  url?: string;
+  author?: string;
+  publishedDate?: string;
+  modifiedDate?: string;
+  type?: 'website' | 'article' | 'course' | 'product' | 'organization';
+  price?: number;
+  currency?: string;
+  category?: string;
+  tags?: string[];
+}
+
+export const updatePageSEO = (config: SEOConfig) => {
+  const { title, description, keywords, image, url, author, publishedDate, modifiedDate, type = 'website' } = config;
+  
   // Update title
   document.title = title;
   
-  // Update meta description
-  const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription) {
-    metaDescription.setAttribute('content', description);
-  }
-  
-  // Update keywords if provided
-  if (keywords) {
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
+  // Update or create meta tags
+  const updateMetaTag = (selector: string, content: string) => {
+    let meta = document.querySelector(selector);
+    if (!meta) {
+      meta = document.createElement('meta');
+      if (selector.includes('property=')) {
+        meta.setAttribute('property', selector.split('"')[1]);
+      } else {
+        meta.setAttribute('name', selector.split('"')[1]);
+      }
+      document.head.appendChild(meta);
     }
-    metaKeywords.setAttribute('content', keywords);
+    meta.setAttribute('content', content);
+  };
+
+  // Basic meta tags
+  updateMetaTag('meta[name="description"]', description);
+  if (keywords) updateMetaTag('meta[name="keywords"]', keywords);
+  if (author) updateMetaTag('meta[name="author"]', author);
+  updateMetaTag('meta[name="robots"]', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  
+  // Open Graph tags
+  updateMetaTag('meta[property="og:title"]', title);
+  updateMetaTag('meta[property="og:description"]', description);
+  updateMetaTag('meta[property="og:type"]', type);
+  updateMetaTag('meta[property="og:site_name"]', 'Harita Hive');
+  if (url) updateMetaTag('meta[property="og:url"]', url);
+  if (image) updateMetaTag('meta[property="og:image"]', image);
+  if (image) updateMetaTag('meta[property="og:image:alt"]', title);
+  
+  // Twitter Card tags
+  updateMetaTag('meta[name="twitter:card"]', 'summary_large_image');
+  updateMetaTag('meta[name="twitter:title"]', title);
+  updateMetaTag('meta[name="twitter:description"]', description);
+  updateMetaTag('meta[name="twitter:site"]', '@HaritaHive');
+  if (image) updateMetaTag('meta[name="twitter:image"]', image);
+  
+  // Additional meta tags for articles
+  if (type === 'article' && publishedDate) {
+    updateMetaTag('meta[property="article:published_time"]', publishedDate);
+    if (modifiedDate) updateMetaTag('meta[property="article:modified_time"]', modifiedDate);
+    if (author) updateMetaTag('meta[property="article:author"]', author);
   }
   
-  // Update Open Graph title and description
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) {
-    ogTitle.setAttribute('content', title);
-  }
-  
-  const ogDescription = document.querySelector('meta[property="og:description"]');
-  if (ogDescription) {
-    ogDescription.setAttribute('content', description);
-  }
-  
-  // Update Twitter card title and description
-  const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-  if (twitterTitle) {
-    twitterTitle.setAttribute('content', title);
-  }
-  
-  const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-  if (twitterDescription) {
-    twitterDescription.setAttribute('content', description);
+  // Canonical URL
+  if (url) {
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', url);
   }
 };
+
+export const addSchemaMarkup = (schema: any) => {
+  // Remove existing schema markup
+  const existingSchema = document.getElementById('schema-markup');
+  if (existingSchema) {
+    existingSchema.remove();
+  }
+  
+  // Add new schema markup
+  const script = document.createElement('script');
+  script.id = 'schema-markup';
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(schema);
+  document.head.appendChild(script);
+};
+
+export const generateCourseSchema = (course: any) => ({
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": course.title,
+  "description": course.description,
+  "provider": {
+    "@type": "Organization",
+    "name": "Harita Hive",
+    "url": "https://haritahive.com"
+  },
+  "educationalLevel": course.difficulty_level || "Beginner",
+  "courseMode": "online",
+  "inLanguage": "en",
+  ...(course.price && {
+    "offers": {
+      "@type": "Offer",
+      "price": course.price,
+      "priceCurrency": "USD"
+    }
+  })
+});
+
+export const generateProductSchema = (product: any) => ({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": product.title,
+  "description": product.description,
+  "applicationCategory": "GIS Software",
+  "operatingSystem": "Cross-platform",
+  "offers": {
+    "@type": "Offer",
+    "price": product.price || "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Harita Hive"
+  }
+});
+
+export const generateArticleSchema = (article: any) => ({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": article.title,
+  "description": article.description,
+  "author": {
+    "@type": "Person",
+    "name": article.author || "Harita Hive Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Harita Hive",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haritahive.com/logo-512.png"
+    }
+  },
+  "datePublished": article.publishedDate,
+  "dateModified": article.modifiedDate || article.publishedDate,
+  ...(article.image && {
+    "image": {
+      "@type": "ImageObject",
+      "url": article.image
+    }
+  })
+});
+
+export const generateOrganizationSchema = () => ({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Harita Hive",
+  "url": "https://haritahive.com",
+  "logo": "https://haritahive.com/logo-512.png",
+  "description": "Leading geospatial learning platform offering GIS education, tools, and community",
+  "sameAs": [
+    "https://linkedin.com/company/haritahive",
+    "https://twitter.com/haritahive",
+    "https://github.com/haritahive"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    "email": "contact@haritahive.com"
+  }
+});
 
 // Predefined SEO data for different pages
 export const seoData = {
@@ -92,8 +227,19 @@ export const useSEO = (pageKey: keyof typeof seoData) => {
   const seo = seoData[pageKey];
   
   const updateSEO = () => {
-    updatePageSEO(seo.title, seo.description, seo.keywords);
+    updatePageSEO({
+      title: seo.title,
+      description: seo.description,
+      keywords: seo.keywords,
+      url: window.location.href,
+      type: 'website'
+    });
   };
   
   return { updateSEO, ...seo };
+};
+
+// Backward compatibility function
+export const updatePageSEOLegacy = (title: string, description: string, keywords?: string) => {
+  updatePageSEO({ title, description, keywords, url: window.location.href });
 };

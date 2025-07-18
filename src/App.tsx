@@ -42,6 +42,7 @@ import Payment from "./pages/Payment";
 import PremiumUpgrade from "./pages/PremiumUpgrade";
 import Pricing from "./pages/Pricing";
 import Newsletter from "./pages/Newsletter";
+import Blog from "./pages/Blog";
 import AdminDashboard from "./pages/AdminDashboard";
 import Investors from "./pages/Investors";
 import Beta from "./pages/Beta";
@@ -112,7 +113,8 @@ function App() {
                   <Route path="/beta" element={<Beta />} />
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/newsletter" element={<Newsletter />} />
+            <Route path="/newsletter" element={<Newsletter />} />
+            <Route path="/blog" element={<Blog />} />
                   <Route path="/challenge" element={<Challenge />} />
           <Route path="/upcoming-course" element={<UpcomingCourse />} />
           <Route path="/skill-roadmap" element={<SkillRoadmap />} />

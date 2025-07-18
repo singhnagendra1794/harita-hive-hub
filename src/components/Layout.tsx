@@ -7,7 +7,7 @@ import ScrollToTop from './ScrollToTop';
 import ErrorBoundary from './ErrorBoundary';
 import NotificationWrapper from './NotificationWrapper';
 import MobileOptimizations from './mobile/MobileOptimizations';
-import GoogleAnalytics from './analytics/GoogleAnalytics';
+import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
 
@@ -20,7 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
     <ErrorBoundary>
       <NotificationWrapper>
         <MobileOptimizations />
-        <GoogleAnalytics trackingId={undefined} />
+        <EnhancedAnalytics />
         <div className="min-h-screen flex flex-col bg-background">
           <Navbar />
           <main className="flex-1">
