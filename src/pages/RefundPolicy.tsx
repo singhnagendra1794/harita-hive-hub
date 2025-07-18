@@ -1,8 +1,10 @@
 
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const RefundPolicy = () => {
   return (
+    <Layout>
     <div className="container py-12 max-w-4xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Refund Policy</h1>
@@ -129,6 +131,7 @@ const RefundPolicy = () => {
           </Card>
         </div>
       </div>
+    </Layout>
   );
 };
 

@@ -1,4 +1,5 @@
 
+import Layout from '@/components/Layout';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -89,6 +90,7 @@ const LiveClasses = () => {
   const pastClasses = liveClasses.filter(cls => !isUpcoming(cls.starts_at));
 
   return (
+    <Layout>
     <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Live Classes</h1>
@@ -248,6 +250,7 @@ const LiveClasses = () => {
           </div>
         </div>
       </div>
+    </Layout>
   );
 };
 

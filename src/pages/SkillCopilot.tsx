@@ -1,3 +1,4 @@
+import Layout from '@/components/Layout';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,6 +128,7 @@ const SkillCopilot = () => {
   }
 
   return (
+    <Layout>
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
@@ -353,7 +355,8 @@ const SkillCopilot = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

@@ -1,4 +1,5 @@
 
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ const SpatialAnalysis = () => {
   ];
   
   return (
+    <Layout>
     <div className="container py-8">
         <h1 className="text-3xl font-bold mb-8">QGIS Processing Tools</h1>
         
@@ -254,6 +256,7 @@ const SpatialAnalysis = () => {
           </Tabs>
         )}
       </div>
+    </Layout>
   );
 };
 

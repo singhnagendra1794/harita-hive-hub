@@ -1,9 +1,14 @@
 
+import Layout from '@/components/Layout';
 import React from 'react';
 import { InvestorMicrosite } from '@/components/investors/InvestorMicrosite';
 
 const Investors = () => {
-  return <InvestorMicrosite />;
+  return (
+    <Layout>
+      <InvestorMicrosite />
+    </Layout>
+  );
 };
 
 export default Investors;

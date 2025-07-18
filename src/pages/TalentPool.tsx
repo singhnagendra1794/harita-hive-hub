@@ -1,4 +1,5 @@
 
+import Layout from '@/components/Layout';
 import { useState } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,6 +103,7 @@ const TalentPool = () => {
   };
 
   return (
+    <Layout>
     <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -283,6 +285,7 @@ const TalentPool = () => {
           </Card>
         )}
       </div>
+    </Layout>
   );
 };
 
