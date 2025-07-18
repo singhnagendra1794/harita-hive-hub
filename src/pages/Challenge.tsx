@@ -38,8 +38,9 @@ const Challenge = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [challengeStarted, setChallengeStarted] = useState(false);
 
-  // Challenge start date: October 6, 2025
-  const challengeStartDate = new Date('2025-10-06T00:00:00');
+  // Challenge dates: July 21-27, 2025
+  const challengeStartDate = new Date('2025-07-21T00:00:00');
+  const challengeEndDate = new Date('2025-07-27T23:59:59');
   const now = new Date();
 
   useEffect(() => {
@@ -125,10 +126,24 @@ const Challenge = () => {
           throw error;
         }
       } else {
+        // Send confirmation email
+        try {
+          await supabase.functions.invoke('send-challenge-email', {
+            body: {
+              name: fullName,
+              email: email.toLowerCase(),
+              challengeName: 'Build a GeoAI Dashboard using OSM + Python'
+            }
+          });
+        } catch (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+          // Continue with registration even if email fails
+        }
+
         setIsRegistered(true);
         toast({
           title: "Successfully Registered!",
-          description: "You're all set for the GeoAI Dashboard Challenge.",
+          description: "You're all set for the GeoAI Dashboard Challenge. Check your email for confirmation.",
         });
         setEmail('');
         setFullName('');
@@ -178,10 +193,10 @@ const Challenge = () => {
           </div>
           <div className="text-left">
             <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-              💡 First Community Challenge
+              📅 Weekly Challenge: 21st July – 27th July, 2025
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold">
-              ⚡ Your 1-Hour GeoAI Dashboard Challenge
+              Build a GeoAI Dashboard using OpenStreetMap + Python in 1 Hour
             </h1>
           </div>
         </div>
@@ -191,8 +206,11 @@ const Challenge = () => {
           {challengeStarted ? (
             <span className="text-green-600 font-semibold"> Challenge is now live!</span>
           ) : (
-            <span> Starts Friday, October 6, 2025</span>
+            <span> Starts Monday, July 21st, 2025</span>
           )}
+        </p>
+        <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <span className="text-primary font-semibold">New weekly challenges drop every Friday. Stay tuned and level up your skills!</span>
         </p>
 
         {/* Countdown Timer */}
@@ -378,6 +396,59 @@ const Challenge = () => {
         </Card>
       </div>
 
+      {/* What's the Reward Section */}
+      <div className="mb-16">
+        <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 border-yellow-200 dark:border-yellow-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl text-yellow-800 dark:text-yellow-200">
+              <Trophy className="h-6 w-6" />
+              🏆 What's the Reward?
+            </CardTitle>
+            <CardDescription className="text-lg text-yellow-700 dark:text-yellow-300">
+              Recognition and prizes for challenge participants
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-3">🏆 Winner Recognition:</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3 p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-full">
+                      <Trophy className="h-4 w-4 text-yellow-700 dark:text-yellow-200" />
+                    </div>
+                    <span className="text-yellow-800 dark:text-yellow-200">Featured on the Harita Hive homepage</span>
+                  </li>
+                  <li className="flex items-center gap-3 p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-full">
+                      <Award className="h-4 w-4 text-yellow-700 dark:text-yellow-200" />
+                    </div>
+                    <span className="text-yellow-800 dark:text-yellow-200">Digital Certificate of Excellence</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-3">🎁 Additional Perks:</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3 p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-full">
+                      <Users className="h-4 w-4 text-yellow-700 dark:text-yellow-200" />
+                    </div>
+                    <span className="text-yellow-800 dark:text-yellow-200">Social Shoutout on LinkedIn + Newsletter</span>
+                  </li>
+                  <li className="flex items-center gap-3 p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-full">
+                      <Zap className="h-4 w-4 text-yellow-700 dark:text-yellow-200" />
+                    </div>
+                    <span className="text-yellow-800 dark:text-yellow-200">Access to 1 Free Premium Tool or Template</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Instructions Section */}
       {challengeStarted && (
         <div className="mb-16">
@@ -452,18 +523,22 @@ const Challenge = () => {
                     Challenge Rewards
                   </h3>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      Certificate of completion for all participants
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      Featured showcase on Harita Hive community
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      Exclusive access to advanced GeoAI tutorials
-                    </li>
+                     <li className="flex items-center gap-2">
+                       <Trophy className="h-4 w-4 text-yellow-500" />
+                       Featured on the Harita Hive homepage
+                     </li>
+                     <li className="flex items-center gap-2">
+                       <Trophy className="h-4 w-4 text-yellow-500" />
+                       Digital Certificate of Excellence
+                     </li>
+                     <li className="flex items-center gap-2">
+                       <Trophy className="h-4 w-4 text-yellow-500" />
+                       Social Shoutout on LinkedIn + Newsletter
+                     </li>
+                     <li className="flex items-center gap-2">
+                       <Trophy className="h-4 w-4 text-yellow-500" />
+                       Access to 1 Free Premium Tool or Template
+                     </li>
                   </ul>
                 </div>
               </div>
@@ -479,8 +554,8 @@ const Challenge = () => {
             <CardContent className="pt-6">
               <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">Challenge Instructions Coming Soon</h3>
-              <p className="text-muted-foreground">
-                Detailed instructions, GitHub repository, and tutorial videos will be available when the challenge goes live on October 6, 2025.
+               <p className="text-muted-foreground">
+                Detailed instructions, GitHub repository, and tutorial videos will be available when the challenge goes live on July 21st, 2025.
               </p>
             </CardContent>
           </Card>
