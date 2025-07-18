@@ -5,78 +5,190 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MapPin, Building, Clock, ExternalLink, FileText, Zap, Briefcase } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Search, 
+  MapPin, 
+  Building, 
+  Clock, 
+  ExternalLink, 
+  FileText, 
+  Zap, 
+  Briefcase,
+  DollarSign,
+  Calendar,
+  Users,
+  TrendingUp,
+  Globe,
+  Filter,
+  Bookmark,
+  BookmarkCheck,
+  AlertCircle,
+  Star,
+  ChevronDown,
+  Target,
+  Brain,
+  LinkedinIcon,
+  BarChart3
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
 
 interface JobPosting {
   id: string;
   title: string;
   company: string;
-  location: string;
+  location: string | null;
   remote_allowed: boolean;
-  description: string;
-  requirements: string;
-  skills_required: string[];
-  salary_min: number;
-  salary_max: number;
-  employment_type: string;
-  experience_level: string;
-  source_url: string;
-  source_platform: string;
-  posted_date: string;
-  is_verified: boolean;
+  description: string | null;
+  requirements: string | null;
+  skills_required: string[] | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  employment_type: string | null;
+  experience_level: string | null;
+  source_url: string | null;
+  source_platform: string | null;
+  posted_date: string | null;
+  is_verified: boolean | null;
+  expires_at: string | null;
+}
+
+interface SavedJob {
+  id: string;
+  user_id: string;
+  job_id: string;
+  saved_at: string;
+}
+
+interface JobStats {
+  total_jobs: number;
+  new_this_week: number;
+  remote_opportunities: number;
+  verified_companies: number;
+  avg_salary: number;
 }
 
 const JobsAIDiscovery = () => {
   const { user } = useAuth();
   const { hasAccess } = usePremiumAccess();
+  const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<JobPosting[]>([]);
+  const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [skillFilter, setSkillFilter] = useState('');
   const [experienceFilter, setExperienceFilter] = useState('');
+  const [salaryFilter, setSalaryFilter] = useState('');
+  const [remoteFilter, setRemoteFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
+  const [sortBy, setSortBy] = useState('relevance');
   const [loading, setLoading] = useState(true);
+  const [jobStats, setJobStats] = useState<JobStats | null>(null);
+  const [activeFilters, setActiveFilters] = useState(0);
 
   const hasProfessionalAccess = hasAccess('pro');
   const hasEnterpriseAccess = hasAccess('enterprise');
 
   useEffect(() => {
     fetchJobs();
+    fetchSavedJobs();
+    fetchJobStats();
   }, []);
 
   useEffect(() => {
-    filterJobs();
-  }, [jobs, searchTerm, locationFilter, skillFilter, experienceFilter]);
+    filterAndSortJobs();
+    updateActiveFilters();
+  }, [jobs, searchTerm, locationFilter, skillFilter, experienceFilter, salaryFilter, remoteFilter, sourceFilter, sortBy]);
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('job_postings_ai')
         .select('*')
         .order('posted_date', { ascending: false })
-        .limit(50);
+        .limit(100);
 
+      if (error) throw error;
       setJobs(data || []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch jobs. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const filterJobs = () => {
-    let filtered = jobs;
+  const fetchSavedJobs = async () => {
+    // Saved jobs functionality temporarily disabled
+    // Will be implemented when saved_jobs table is created
+    setSavedJobs([]);
+  };
 
+  const fetchJobStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('job_postings_ai')
+        .select('posted_date, remote_allowed, salary_min, salary_max, is_verified');
+
+      if (error) throw error;
+
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const stats: JobStats = {
+        total_jobs: data?.length || 0,
+        new_this_week: data?.filter(job => 
+          job.posted_date && new Date(job.posted_date) > oneWeekAgo
+        ).length || 0,
+        remote_opportunities: data?.filter(job => job.remote_allowed).length || 0,
+        verified_companies: data?.filter(job => job.is_verified).length || 0,
+        avg_salary: Math.round(
+          data?.reduce((sum, job) => {
+            const avg = ((job.salary_min || 0) + (job.salary_max || 0)) / 2;
+            return sum + avg;
+          }, 0) / (data?.length || 1)
+        ),
+      };
+
+      setJobStats(stats);
+    } catch (error) {
+      console.error('Error fetching job stats:', error);
+    }
+  };
+
+  const updateActiveFilters = () => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (locationFilter) count++;
+    if (skillFilter) count++;
+    if (experienceFilter) count++;
+    if (salaryFilter) count++;
+    if (remoteFilter) count++;
+    if (sourceFilter) count++;
+    setActiveFilters(count);
+  };
+
+  const filterAndSortJobs = () => {
+    let filtered = [...jobs];
+
+    // Apply filters
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        job.title?.toLowerCase().includes(term) ||
+        job.company?.toLowerCase().includes(term) ||
+        job.description?.toLowerCase().includes(term) ||
+        job.skills_required?.some(skill => skill.toLowerCase().includes(term))
       );
     }
 
@@ -89,7 +201,7 @@ const JobsAIDiscovery = () => {
 
     if (skillFilter) {
       filtered = filtered.filter(job =>
-        job.skills_required.some(skill => 
+        job.skills_required?.some(skill => 
           skill.toLowerCase().includes(skillFilter.toLowerCase())
         )
       );
@@ -101,32 +213,137 @@ const JobsAIDiscovery = () => {
       );
     }
 
+    if (remoteFilter) {
+      if (remoteFilter === 'remote') {
+        filtered = filtered.filter(job => job.remote_allowed);
+      } else if (remoteFilter === 'onsite') {
+        filtered = filtered.filter(job => !job.remote_allowed);
+      }
+    }
+
+    if (sourceFilter) {
+      filtered = filtered.filter(job => job.source_platform === sourceFilter);
+    }
+
+    if (salaryFilter) {
+      filtered = filtered.filter(job => {
+        const maxSalary = job.salary_max || 0;
+        switch (salaryFilter) {
+          case '50k': return maxSalary >= 50000;
+          case '75k': return maxSalary >= 75000;
+          case '100k': return maxSalary >= 100000;
+          case '150k': return maxSalary >= 150000;
+          default: return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'date':
+        filtered.sort((a, b) => new Date(b.posted_date || 0).getTime() - new Date(a.posted_date || 0).getTime());
+        break;
+      case 'salary':
+        filtered.sort((a, b) => (b.salary_max || 0) - (a.salary_max || 0));
+        break;
+      case 'company':
+        filtered.sort((a, b) => (a.company || '').localeCompare(b.company || ''));
+        break;
+      case 'relevance':
+      default:
+        // AI relevance scoring would go here
+        filtered.sort((a, b) => calculateMatchScore(b) - calculateMatchScore(a));
+        break;
+    }
+
     setFilteredJobs(filtered);
   };
 
-  const formatSalary = (min: number, max: number) => {
-    if (!min && !max) return 'Salary not specified';
-    if (min && max) return `$${min}k - $${max}k`;
-    if (min) return `$${min}k+`;
-    return `Up to $${max}k`;
+  const toggleSaveJob = async (jobId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save jobs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Saved jobs functionality temporarily disabled
+    toast({
+      title: "Feature Coming Soon",
+      description: "Job saving functionality will be available soon.",
+    });
   };
 
-  const getSourceBadgeColor = (platform: string) => {
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setLocationFilter('');
+    setSkillFilter('');
+    setExperienceFilter('');
+    setSalaryFilter('');
+    setRemoteFilter('');
+    setSourceFilter('');
+  };
+
+  const applyToJobWithLinkedIn = (job: JobPosting) => {
+    if (job.source_url) {
+      window.open(job.source_url, '_blank');
+    }
+  };
+
+  const formatSalary = (min: number | null, max: number | null) => {
+    if (!min && !max) return 'Salary not disclosed';
+    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+    if (min) return `$${min.toLocaleString()}+`;
+    if (max) return `Up to $${max.toLocaleString()}`;
+    return 'Competitive salary';
+  };
+
+  const getSourceBadgeColor = (platform: string | null) => {
     switch (platform) {
-      case 'linkedin': return 'bg-blue-100 text-blue-800';
-      case 'indeed': return 'bg-green-100 text-green-800';
-      case 'government': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'linkedin': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'indeed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'glassdoor': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+      case 'government': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'company': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 
   const calculateMatchScore = (job: JobPosting) => {
-    // Placeholder AI matching logic
-    const baseScore = Math.floor(Math.random() * 30) + 60; // 60-90%
-    return baseScore;
+    // Enhanced AI matching logic would go here
+    // For now, using a more sophisticated placeholder
+    let score = 70;
+    
+    // Boost score for verified companies
+    if (job.is_verified) score += 10;
+    
+    // Boost score for remote jobs
+    if (job.remote_allowed) score += 5;
+    
+    // Boost score for recent postings
+    if (job.posted_date) {
+      const daysSincePosted = Math.floor(
+        (new Date().getTime() - new Date(job.posted_date).getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (daysSincePosted <= 3) score += 5;
+    }
+    
+    // Add some randomness for variety
+    score += Math.floor(Math.random() * 10);
+    
+    return Math.min(score, 99);
   };
 
-  // Free users can browse all jobs
+  const getJobSourceIcon = (platform: string | null) => {
+    switch (platform) {
+      case 'linkedin': return <LinkedinIcon className="h-4 w-4" />;
+      case 'indeed': return <Briefcase className="h-4 w-4" />;
+      default: return <Globe className="h-4 w-4" />;
+    }
+  };
+
   const displayedJobs = filteredJobs;
 
   if (loading) {
@@ -151,84 +368,218 @@ const JobsAIDiscovery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Briefcase className="h-8 w-8 text-primary" />
-          Geo Job Discovery Portal
-        </h1>
-        <p className="text-muted-foreground">
-          AI-aggregated geospatial job opportunities from across the web
-        </p>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Target className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">AI-Powered Geospatial Jobs</h1>
+            <p className="text-muted-foreground">
+              Discover opportunities from LinkedIn, Indeed, government portals, and company websites worldwide
+            </p>
+          </div>
+        </div>
+
+        {/* Job Statistics */}
+        {jobStats && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{jobStats.total_jobs}</p>
+                  <p className="text-xs text-muted-foreground">Total Jobs</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{jobStats.new_this_week}</p>
+                  <p className="text-xs text-muted-foreground">New This Week</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{jobStats.remote_opportunities}</p>
+                  <p className="text-xs text-muted-foreground">Remote Jobs</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-600" />
+                <div>
+                  <p className="text-2xl font-bold">{jobStats.verified_companies}</p>
+                  <p className="text-xs text-muted-foreground">Verified</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-emerald-600" />
+                <div>
+                  <p className="text-2xl font-bold">${jobStats.avg_salary}k</p>
+                  <p className="text-xs text-muted-foreground">Avg Salary</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       <Tabs defaultValue="browse" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
-          <TabsTrigger value="cv-builder" disabled={!hasProfessionalAccess}>
-            CV Builder {!hasProfessionalAccess && '🔒'}
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="browse">
+            <Search className="h-4 w-4 mr-2" />
+            Browse Jobs
           </TabsTrigger>
-          <TabsTrigger value="post-job" disabled={!hasEnterpriseAccess}>
-            Post Job {!hasEnterpriseAccess && '🔒'}
+          <TabsTrigger value="saved">
+            <Bookmark className="h-4 w-4 mr-2" />
+            Saved Jobs ({savedJobs.length})
+          </TabsTrigger>
+          <TabsTrigger value="ai-insights" disabled={!hasProfessionalAccess}>
+            <Brain className="h-4 w-4 mr-2" />
+            AI Insights {!hasProfessionalAccess && '🔒'}
+          </TabsTrigger>
+          <TabsTrigger value="analytics" disabled={!hasEnterpriseAccess}>
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics {!hasEnterpriseAccess && '🔒'}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="browse">
-          {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search jobs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        <TabsContent value="browse" className="space-y-6">
+          {/* Advanced Search and Filters */}
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Search & Filter Jobs</h3>
+                {activeFilters > 0 && (
+                  <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                    Clear Filters ({activeFilters})
+                  </Button>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Job title, company, or keyword..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                <Input
+                  placeholder="Location (city, country, or 'remote')"
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                />
+                
+                <Input
+                  placeholder="Required skill (GIS, Python, etc.)"
+                  value={skillFilter}
+                  onChange={(e) => setSkillFilter(e.target.value)}
+                />
+                
+                <Select value={experienceFilter} onValueChange={setExperienceFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Experience Level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Levels</SelectItem>
+                    <SelectItem value="entry">Entry Level</SelectItem>
+                    <SelectItem value="mid">Mid Level</SelectItem>
+                    <SelectItem value="senior">Senior Level</SelectItem>
+                    <SelectItem value="lead">Lead/Principal</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={salaryFilter} onValueChange={setSalaryFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Minimum Salary" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Any Salary</SelectItem>
+                    <SelectItem value="50k">$50k+</SelectItem>
+                    <SelectItem value="75k">$75k+</SelectItem>
+                    <SelectItem value="100k">$100k+</SelectItem>
+                    <SelectItem value="150k">$150k+</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={remoteFilter} onValueChange={setRemoteFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Work Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="remote">Remote Only</SelectItem>
+                    <SelectItem value="onsite">On-site Only</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Job Source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Sources</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="indeed">Indeed</SelectItem>
+                    <SelectItem value="glassdoor">Glassdoor</SelectItem>
+                    <SelectItem value="government">Government</SelectItem>
+                    <SelectItem value="company">Company Direct</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort By" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">AI Relevance</SelectItem>
+                    <SelectItem value="date">Date Posted</SelectItem>
+                    <SelectItem value="salary">Salary</SelectItem>
+                    <SelectItem value="company">Company Name</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Input
-              placeholder="Location or 'remote'"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-            />
-            <Input
-              placeholder="Required skill..."
-              value={skillFilter}
-              onChange={(e) => setSkillFilter(e.target.value)}
-            />
-            <Select value={experienceFilter} onValueChange={setExperienceFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Experience Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Levels</SelectItem>
-                <SelectItem value="entry">Entry Level</SelectItem>
-                <SelectItem value="mid">Mid Level</SelectItem>
-                <SelectItem value="senior">Senior Level</SelectItem>
-                <SelectItem value="lead">Lead/Principal</SelectItem>
-              </SelectContent>
-            </Select>
+          </Card>
+
+          {/* Results Summary */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Found {displayedJobs.length} jobs matching your criteria
+            </p>
+            <div className="flex items-center gap-2">
+              {hasProfessionalAccess && (
+                <Badge variant="outline" className="text-xs">
+                  <Zap className="h-3 w-3 mr-1" />
+                  AI-Enhanced
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Jobs List */}
           <div className="space-y-4">
             {displayedJobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-lg transition-shadow">
+              <Card key={job.id} className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-transparent hover:border-l-primary">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        <Building className="h-4 w-4" />
-                        {job.company}
-                        {job.is_verified && (
-                          <Badge variant="secondary" className="text-xs">Verified</Badge>
-                        )}
-                      </CardDescription>
-                    </div>
-                    <div className="text-right">
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getSourceBadgeColor(job.source_platform)}>
-                          {job.source_platform}
-                        </Badge>
+                        <CardTitle className="text-xl">{job.title}</CardTitle>
                         {hasProfessionalAccess && (
                           <Badge variant="outline" className="text-xs">
                             <Zap className="h-3 w-3 mr-1" />
@@ -236,62 +587,118 @@ const JobsAIDiscovery = () => {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm font-medium">
-                        {formatSalary(job.salary_min, job.salary_max)}
-                      </p>
+                      <CardDescription className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Building className="h-4 w-4" />
+                          {job.company}
+                          {job.is_verified && (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              <Star className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {job.location || 'Location not specified'}
+                          {job.remote_allowed && (
+                            <Badge variant="outline" className="ml-2 text-xs">Remote OK</Badge>
+                          )}
+                        </div>
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleSaveJob(job.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {savedJobs.includes(job.id) ? (
+                          <BookmarkCheck className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Bookmark className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Badge className={getSourceBadgeColor(job.source_platform)}>
+                        <div className="flex items-center gap-1">
+                          {getJobSourceIcon(job.source_platform)}
+                          {job.source_platform || 'External'}
+                        </div>
+                      </Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {job.location || 'Location not specified'}
-                      {job.remote_allowed && (
-                        <Badge variant="outline" className="ml-2 text-xs">Remote OK</Badge>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {job.employment_type || 'Full-time'}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        Posted {job.posted_date ? new Date(job.posted_date).toLocaleDateString() : 'Recently'}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        {formatSalary(job.salary_min, job.salary_max)}
+                      </div>
+                      {job.experience_level && (
+                        <Badge variant="outline" className="text-xs">
+                          {job.experience_level}
+                        </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      {job.employment_type || 'Full-time'}
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {job.experience_level || 'All levels'}
-                    </Badge>
-                  </div>
 
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {job.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {job.skills_required.slice(0, 6).map((skill) => (
-                      <Badge key={skill} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                    {job.skills_required.length > 6 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{job.skills_required.length - 6} more
-                      </Badge>
+                    {job.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {job.description}
+                      </p>
                     )}
-                  </div>
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      Posted {new Date(job.posted_date).toLocaleDateString()}
-                    </p>
-                    <div className="flex gap-2">
-                      {hasProfessionalAccess && (
-                        <Button size="sm" variant="outline">
-                          <FileText className="h-4 w-4 mr-2" />
-                          Apply with AI CV
+                    {job.skills_required && job.skills_required.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {job.skills_required.slice(0, 8).map((skill) => (
+                          <Badge key={skill} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {job.skills_required.length > 8 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{job.skills_required.length - 8} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {job.expires_at && (
+                          <div className="flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            Expires {new Date(job.expires_at).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {hasProfessionalAccess && (
+                          <Button size="sm" variant="outline">
+                            <Brain className="h-4 w-4 mr-2" />
+                            AI Apply
+                          </Button>
+                        )}
+                        <Button size="sm" variant="outline" onClick={() => applyToJobWithLinkedIn(job)}>
+                          <LinkedinIcon className="h-4 w-4 mr-2" />
+                          Apply on LinkedIn
                         </Button>
-                      )}
-                      <Button size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Job
-                      </Button>
+                        <Button size="sm" onClick={() => job.source_url && window.open(job.source_url, '_blank')}>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Job
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -300,66 +707,117 @@ const JobsAIDiscovery = () => {
           </div>
 
           {displayedJobs.length === 0 && !loading && (
-            <div className="text-center py-12">
-              <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <Card className="p-12 text-center">
+              <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No jobs found</h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Try adjusting your search criteria or check back later for new opportunities.
               </p>
-            </div>
+              <Button variant="outline" onClick={clearAllFilters}>
+                Clear All Filters
+              </Button>
+            </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="cv-builder">
+        <TabsContent value="saved">
+          <Card>
+            <CardHeader>
+              <CardTitle>Saved Jobs</CardTitle>
+              <CardDescription>
+                Jobs you've bookmarked for future reference
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {savedJobs.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bookmark className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No saved jobs yet</h3>
+                  <p className="text-muted-foreground">
+                    Start browsing and save interesting opportunities for later.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {displayedJobs.filter(job => savedJobs.includes(job.id)).map((job) => (
+                    <Card key={job.id} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium">{job.title}</h4>
+                          <p className="text-sm text-muted-foreground">{job.company}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSaveJob(job.id)}
+                        >
+                          <BookmarkCheck className="h-4 w-4 text-primary" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-insights">
           {!hasProfessionalAccess ? (
             <UpgradePrompt 
-              feature="AI CV Builder"
-              description="Create tailored resumes that match job descriptions with AI-powered keyword optimization and formatting."
+              feature="AI-Powered Job Insights"
+              description="Get personalized job recommendations, skill gap analysis, and career progression insights powered by AI."
             />
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>AI-Powered CV Builder</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  AI Career Insights
+                </CardTitle>
                 <CardDescription>
-                  Create resumes tailored to specific job postings with intelligent keyword matching
+                  Personalized recommendations and career guidance
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">CV Builder Coming Soon</h3>
+                  <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">AI Insights Coming Soon</h3>
                   <p className="text-muted-foreground mb-4">
-                    Upload your resume and let AI optimize it for each job application.
+                    Get personalized job recommendations, skill gap analysis, and career progression insights.
                   </p>
-                  <Button>Upload Resume to Get Started</Button>
+                  <Button>Set Up AI Profile</Button>
                 </div>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="post-job">
+        <TabsContent value="analytics">
           {!hasEnterpriseAccess ? (
             <UpgradePrompt 
-              feature="Job Posting"
-              description="Post verified job openings and access our talent pool of geospatial professionals."
+              feature="Job Market Analytics"
+              description="Access comprehensive job market trends, salary benchmarks, and hiring patterns in the geospatial industry."
             />
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Post a Job</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Market Analytics
+                </CardTitle>
                 <CardDescription>
-                  Reach qualified geospatial professionals in our community
+                  Industry insights and hiring trends
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Job Posting Portal</h3>
+                  <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Analytics Dashboard</h3>
                   <p className="text-muted-foreground mb-4">
-                    Create verified job postings and connect with top talent.
+                    Access comprehensive job market trends and salary benchmarks.
                   </p>
-                  <Button>Create Job Posting</Button>
+                  <Button>View Analytics</Button>
                 </div>
               </CardContent>
             </Card>
