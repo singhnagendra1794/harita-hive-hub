@@ -28,10 +28,11 @@ const Navbar = () => {
 
   const learningLinks = [
     { href: "/browse-courses", label: "Browse Courses" },
+    { href: "/mentorship", label: "Expert Mentors" },
     { href: "/skill-copilot", label: "Skill Copilot" },
+    { href: "/live-classes", label: "Live Classes" },
     ...(user && hasAccess('pro') ? [{ href: "/project-templates", label: "Project Templates" }] : []),
     { href: "/code-snippets", label: "Code Library" },
-    { href: "/live-classes", label: "Live Classes" },
   ];
 
   const toolsLinks = [
@@ -44,15 +45,26 @@ const Navbar = () => {
     ...(user && hasAccess('enterprise') ? [{ href: "/webgis-builder", label: "Web GIS Builder" }] : []),
   ];
 
-  const marketplaceLinks = [
-    ...(user && hasAccess('pro') ? [{ href: "/gis-marketplace", label: "GIS Tools" }] : []),
-    ...(user && hasAccess('pro') ? [{ href: "/plugin-marketplace", label: "Plugins & Scripts" }] : []),
-    { href: "/jobs-ai-discovery", label: "Jobs AI Discovery" },
-    ...(user && hasAccess('pro') ? [{ href: "/project-studio", label: "Project Studio" }] : []),
+  const workLinks = [
+    { href: "/jobs", label: "Global Job Board" },
+    { href: "/freelance-projects", label: "Freelance Hub" },
+    { href: "/jobs-ai-discovery", label: "AI Job Discovery" },
     { href: "/talent-pool", label: "Hire Talent" },
-    { href: "/task-board", label: "Freelance Projects" },
     { href: "/certifications", label: "Certifications" },
     { href: "/corporate-training", label: "Corporate Training" },
+  ];
+
+  const createLinks = [
+    { href: "/studio", label: "Content Studio" },
+    ...(user && hasAccess('pro') ? [{ href: "/project-studio", label: "Project Studio" }] : []),
+    ...(user && hasAccess('pro') ? [{ href: "/gis-marketplace", label: "GIS Tools" }] : []),
+    ...(user && hasAccess('pro') ? [{ href: "/plugin-marketplace", label: "Plugins & Scripts" }] : []),
+  ];
+
+  const careerLinks = [
+    { href: "/portfolio", label: "Portfolio Builder" },
+    { href: "/skill-roadmap", label: "Skill Roadmap" },
+    { href: "/leaderboard", label: "Leaderboard" },
   ];
 
   const communityLinks = [
@@ -111,15 +123,47 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Marketplace Dropdown */}
+            {/* Work Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center text-sm">
-                  Marketplace <ChevronDown className="ml-1 h-4 w-4" />
+                  Work <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
-                {marketplaceLinks.map((link) => (
+                {workLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Create Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center text-sm">
+                  Create <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+                {createLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href} className="w-full">{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Career Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center text-sm">
+                  Career <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+                {careerLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
                   </DropdownMenuItem>

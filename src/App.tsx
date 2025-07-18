@@ -90,6 +90,11 @@ import JobsAIDiscovery from "./pages/JobsAIDiscovery";
 import ProjectStudio from "./pages/ProjectStudio";
 import Labs from "./pages/Labs";
 import Challenge from "./pages/Challenge";
+import Jobs from "./pages/Jobs";
+import FreelanceProjects from "./pages/FreelanceProjects";
+import Studio from "./pages/Studio";
+import Portfolio from "./pages/Portfolio";
+import Mentorship from "./pages/Mentorship";
 
 const queryClient = new QueryClient();
 
@@ -122,7 +127,12 @@ function App() {
           <Route path="/skill-roadmap" element={<SkillRoadmap />} />
           <Route path="/projects-gallery" element={<ProjectsGallery />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/jobs" element={<JobBoard />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/job-board" element={<JobBoard />} />
+          <Route path="/freelance-projects" element={<FreelanceProjects />} />
+          <Route path="/studio" element={<Studio />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/mentorship" element={<Mentorship />} />
           <Route path="/for-companies" element={<CompanyDashboard />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/about" element={<About />} />
