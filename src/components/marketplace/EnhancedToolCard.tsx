@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { supabase } from '@/integrations/supabase/client';
+import ToolPurchaseDialog from './ToolPurchaseDialog';
 import { 
   Download, 
   Star, 
@@ -24,7 +25,10 @@ import {
   FileText,
   Crown,
   Lock,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  IndianRupee,
+  DollarSign
 } from 'lucide-react';
 
 interface MarketplaceTool {
@@ -72,6 +76,7 @@ const EnhancedToolCard: React.FC<EnhancedToolCardProps> = ({ tool, userCountry }
   const [installationSteps, setInstallationSteps] = useState<Array<{step_number: number, instruction_text: string}>>([]);
   const [compatibilityData, setCompatibilityData] = useState<Array<{qgis_version: string, platform: string, compatibility_status: string, notes: string}>>([]);
   const [showDetails, setShowDetails] = useState(false);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -301,26 +306,32 @@ const EnhancedToolCard: React.FC<EnhancedToolCardProps> = ({ tool, userCountry }
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button
-            onClick={handleDownload}
-            disabled={downloading || (!canDownload && !tool.is_free)}
-            className="flex-1"
-            size="sm"
-          >
-            {downloading ? (
-              "Downloading..."
-            ) : !canDownload && !tool.is_free ? (
-              <>
-                <Lock className="h-3 w-3 mr-1" />
-                Premium Only
-              </>
-            ) : (
-              <>
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </>
-            )}
-          </Button>
+          {tool.is_free || canDownload ? (
+            <Button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex-1"
+              size="sm"
+            >
+              {downloading ? (
+                "Downloading..."
+              ) : (
+                <>
+                  <Download className="h-3 w-3 mr-1" />
+                  Download
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setShowPurchaseDialog(true)}
+              className="flex-1"
+              size="sm"
+            >
+              <CreditCard className="h-3 w-3 mr-1" />
+              Purchase {currency}{price}
+            </Button>
+          )}
 
           <Dialog open={showDetails} onOpenChange={(open) => {
             setShowDetails(open);
@@ -495,6 +506,14 @@ const EnhancedToolCard: React.FC<EnhancedToolCardProps> = ({ tool, userCountry }
           </Dialog>
         </div>
       </CardContent>
+
+      {/* Purchase Dialog */}
+      <ToolPurchaseDialog
+        tool={tool}
+        isOpen={showPurchaseDialog}
+        onClose={() => setShowPurchaseDialog(false)}
+        userCountry={userCountry}
+      />
     </Card>
   );
 };

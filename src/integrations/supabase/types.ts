@@ -3351,6 +3351,113 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_downloads: {
+        Row: {
+          downloaded_at: string | null
+          id: string
+          ip_address: unknown | null
+          order_id: string | null
+          tool_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          order_id?: string | null
+          tool_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          order_id?: string | null
+          tool_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_downloads_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "tool_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_downloads_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_orders: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string
+          download_count: number | null
+          expires_at: string | null
+          id: string
+          max_downloads: number | null
+          metadata: Json | null
+          payment_method: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          status: string
+          tool_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string
+          download_count?: number | null
+          expires_at?: string | null
+          id?: string
+          max_downloads?: number | null
+          metadata?: Json | null
+          payment_method?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          tool_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          download_count?: number | null
+          expires_at?: string | null
+          id?: string
+          max_downloads?: number | null
+          metadata?: Json | null
+          payment_method?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          tool_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_orders_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tool_purchases: {
         Row: {
           currency_code: string

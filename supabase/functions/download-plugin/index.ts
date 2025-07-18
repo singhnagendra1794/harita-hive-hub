@@ -51,28 +51,26 @@ serve(async (req) => {
       });
     }
 
-    // Check access permissions using the database function
-    const { data: hasAccess, error: accessError } = await supabase
-      .rpc('can_download_premium_plugin', {
-        p_user_id: userId,
-        p_tool_id: toolId
-      });
+    // Check if user can download this tool (purchase verification)
+    const { data: purchaseData, error: purchaseError } = await supabase
+      .from('tool_orders')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('tool_id', toolId)
+      .eq('status', 'completed')
+      .maybeSingle();
 
-    if (accessError) {
-      console.error('Error checking access:', accessError);
-      return new Response(JSON.stringify({
-        error: 'Access check failed',
-        success: false
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Check if user is super admin
+    const { data: userData } = await supabase.auth.admin.getUserById(userId);
+    const isAdmin = userData?.user?.email === 'contact@haritahive.com';
 
-    if (!hasAccess) {
+    // Check access: free tool, purchased tool, or admin access
+    const canDownload = tool.is_free || purchaseData || isAdmin;
+
+    if (!canDownload) {
       return new Response(JSON.stringify({
-        error: 'Premium subscription required for this plugin',
-        upgrade_required: true,
+        error: 'Purchase required for this premium tool',
+        needsPurchase: true,
         success: false
       }), {
         status: 403,
@@ -80,22 +78,50 @@ serve(async (req) => {
       });
     }
 
-    // Log the download
-    const { error: logError } = await supabase
-      .from('user_downloads')
-      .insert({
-        user_id: userId,
-        tool_id: toolId,
-        download_type: tool.is_free ? 'free' : 'premium',
-        download_url: tool.download_url,
-        ip_address: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+    // Check download limits for purchased tools
+    if (purchaseData && purchaseData.download_count >= purchaseData.max_downloads) {
+      return new Response(JSON.stringify({
+        error: 'Download limit exceeded',
+        downloadCount: purchaseData.download_count,
+        maxDownloads: purchaseData.max_downloads,
+        success: false
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
-
-    if (logError) {
-      console.error('Error logging download:', logError);
     }
 
-    // Update download count
+    // Update purchase download count if this was a purchased tool
+    if (purchaseData) {
+      const { error: purchaseUpdateError } = await supabase
+        .from('tool_orders')
+        .update({ 
+          download_count: purchaseData.download_count + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', purchaseData.id);
+
+      if (purchaseUpdateError) {
+        console.error('Error updating purchase download count:', purchaseUpdateError);
+      }
+
+      // Log individual download
+      const { error: downloadLogError } = await supabase
+        .from('tool_downloads')
+        .insert({
+          order_id: purchaseData.id,
+          user_id: userId,
+          tool_id: toolId,
+          ip_address: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for'),
+          user_agent: req.headers.get('user-agent')
+        });
+
+      if (downloadLogError) {
+        console.error('Error logging download:', downloadLogError);
+      }
+    }
+
+    // Update tool's total download count
     const { error: updateError } = await supabase
       .from('marketplace_tools')
       .update({ download_count: tool.download_count + 1 })
