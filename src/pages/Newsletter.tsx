@@ -18,7 +18,11 @@ import {
   Clock,
   Users,
   TrendingUp,
-  Star
+  Star,
+  Search,
+  Filter,
+  Grid,
+  List
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,12 +31,14 @@ import { useToast } from '@/hooks/use-toast';
 interface NewsletterPost {
   id: string;
   title: string;
-  summary: string;
-  linkedin_url: string;
+  summary: string | null;
+  content: string | null;
+  linkedin_url: string | null;
+  featured_image_url: string | null;
   published_date: string;
   tags: string[];
   view_count: number;
-  is_featured: boolean;
+  is_featured: boolean | null;
 }
 
 const Newsletter = () => {
@@ -43,7 +49,11 @@ const Newsletter = () => {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [posts, setPosts] = useState<NewsletterPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<NewsletterPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     // Update SEO for newsletter page
@@ -62,16 +72,35 @@ const Newsletter = () => {
     }
   }, [user]);
 
+  // Filter posts based on search term and selected tag
+  useEffect(() => {
+    let filtered = posts;
+
+    if (searchTerm) {
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (selectedTag) {
+      filtered = filtered.filter(post => post.tags.includes(selectedTag));
+    }
+
+    setFilteredPosts(filtered);
+  }, [posts, searchTerm, selectedTag]);
+
   const fetchNewsletterPosts = async () => {
     try {
       const { data, error } = await supabase
         .from('newsletter_posts')
         .select('*')
-        .order('published_date', { ascending: false })
-        .limit(6);
+        .order('published_date', { ascending: false });
 
       if (error) throw error;
       setPosts(data || []);
+      setFilteredPosts(data || []);
     } catch (error) {
       console.error('Error fetching newsletter posts:', error);
     } finally {
@@ -172,6 +201,13 @@ const Newsletter = () => {
     return colors[tag] || colors.default;
   };
 
+  // Get all unique tags from posts
+  const allTags = Array.from(new Set(posts.flatMap(post => post.tags)));
+
+  const handleTagFilter = (tag: string) => {
+    setSelectedTag(selectedTag === tag ? '' : tag);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -252,16 +288,71 @@ const Newsletter = () => {
 
       {/* Latest Newsletters Grid */}
       <div className="mb-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold">Latest Newsletter Posts</h2>
-          <Badge variant="secondary" className="text-sm">
-            <TrendingUp className="h-4 w-4 mr-1" />
-            Weekly Updates
-          </Badge>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-3xl font-bold">Harita Hive Newsletter</h2>
+            <p className="text-muted-foreground">All editions from our LinkedIn newsletter</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="text-sm">
+              <TrendingUp className="h-4 w-4 mr-1" />
+              {filteredPosts.length} Editions
+            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search newsletters..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedTag === '' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedTag('')}
+            >
+              All Topics
+            </Button>
+            {allTags.slice(0, 6).map((tag) => (
+              <Button
+                key={tag}
+                variant={selectedTag === tag ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleTagFilter(tag)}
+                className="text-xs"
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -274,51 +365,94 @@ const Newsletter = () => {
               </Card>
             ))}
           </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No newsletters found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your search terms or filters
+            </p>
+            <Button onClick={() => { setSearchTerm(''); setSelectedTag(''); }}>
+              Clear filters
+            </Button>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <Card key={post.id} className={`hover:shadow-lg transition-shadow ${post.is_featured ? 'ring-2 ring-primary/20' : ''}`}>
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <CardTitle className="text-lg leading-tight">
-                      {post.title}
-                      {post.is_featured && <Star className="h-4 w-4 text-yellow-500 inline ml-2" />}
-                    </CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarDays className="h-4 w-4" />
-                    {formatDate(post.published_date)}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {post.summary}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags?.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="secondary" className={getTagColor(tag)}>
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      {post.view_count} views
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {filteredPosts.map((post) => (
+                <Card key={post.id} className={`group hover:shadow-lg transition-all duration-300 ${post.is_featured ? 'ring-2 ring-primary/20 bg-primary/5' : ''} ${viewMode === 'list' ? 'flex flex-row' : ''}`}>
+                  {/* Featured Image */}
+                  {post.featured_image_url && (
+                    <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-32 rounded-l-lg flex-shrink-0' : 'aspect-video w-full rounded-t-lg'}`}>
+                      <img 
+                        src={post.featured_image_url} 
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                      {post.is_featured && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-yellow-500 text-yellow-900">
+                            <Star className="h-3 w-3 mr-1" />
+                            Featured
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(post.linkedin_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Read Full Post
-                    </Button>
+                  )}
+                  
+                  <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
+                    <CardHeader className={post.featured_image_url ? 'pb-2' : ''}>
+                      <div className="flex items-start justify-between mb-2">
+                        <CardTitle className={`leading-tight group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-lg'}`}>
+                          {post.title}
+                          {post.is_featured && !post.featured_image_url && <Star className="h-4 w-4 text-yellow-500 inline ml-2" />}
+                        </CardTitle>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <CalendarDays className="h-4 w-4" />
+                        {formatDate(post.published_date)}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {post.summary && (
+                        <p className={`text-muted-foreground mb-4 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-3'}`}>
+                          {post.summary}
+                        </p>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {post.tags?.slice(0, viewMode === 'list' ? 2 : 3).map((tag) => (
+                          <Badge key={tag} variant="secondary" className={getTagColor(tag)}>
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className={`flex items-center ${viewMode === 'list' ? 'justify-between' : 'justify-between'}`}>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          {post.view_count} views
+                        </div>
+                        {post.linkedin_url && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                            onClick={() => window.open(post.linkedin_url, '_blank')}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Read Now
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
                   </div>
-                </CardContent>
-              </Card>
+                </Card>
             ))}
           </div>
         )}
