@@ -161,7 +161,6 @@ const Learn = () => {
           <Button size="sm">Start Free Trial</Button>
         </div>
       </div>
-    </div>
   );
 };
 
