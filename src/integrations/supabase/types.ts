@@ -4364,6 +4364,10 @@ export type Database = {
         Args: { p_user_id: string; p_new_session_token: string }
         Returns: undefined
       }
+      is_professional_email: {
+        Args: { email_to_check: string }
+        Returns: boolean
+      }
       is_session_valid: {
         Args: { p_user_id: string; p_session_token: string }
         Returns: boolean
