@@ -294,10 +294,40 @@ const Navbar = () => {
                 ))}
               </div>
 
-              {/* Marketplace Section */}
+              {/* Work Section */}
               <div className="py-2">
-                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Marketplace</div>
-                {marketplaceLinks.map((link) => (
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Work</div>
+                {workLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Create Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Create</div>
+                {createLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Career Section */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-muted-foreground px-3 py-2">Career</div>
+                {careerLinks.map((link) => (
                   <Link
                     key={link.href}
                     to={link.href}
