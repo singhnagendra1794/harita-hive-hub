@@ -1,5 +1,5 @@
 
-import Layout from "../components/Layout";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,8 +64,7 @@ const Notes = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">My Notes</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -192,8 +191,7 @@ const Notes = () => {
             <p className="text-muted-foreground">No notes found matching your criteria.</p>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 

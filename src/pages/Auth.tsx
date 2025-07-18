@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { MultiAuthForm } from '../components/auth/MultiAuthForm';
 import { useAuth } from '@/contexts/AuthContext';
-import Layout from '../components/Layout';
+
 
 const Auth = () => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -22,11 +22,9 @@ const Auth = () => {
   };
 
   return (
-    <Layout>
-      <div className="container max-w-md py-12 mx-auto">
-        <MultiAuthForm mode={mode} onToggleMode={toggleMode} />
-      </div>
-    </Layout>
+    <div className="container max-w-md py-12 mx-auto">
+      <MultiAuthForm mode={mode} onToggleMode={toggleMode} />
+    </div>
   );
 };
 

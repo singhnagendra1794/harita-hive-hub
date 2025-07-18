@@ -1,5 +1,5 @@
 
-import Layout from "../components/Layout";
+
 import YouTubePlayer from "../components/YouTubePlayer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,8 +40,7 @@ const Learn = () => {
   ];
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Learn Geospatial Technologies</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -162,7 +161,7 @@ const Learn = () => {
           <Button size="sm">Start Free Trial</Button>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
