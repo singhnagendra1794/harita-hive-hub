@@ -103,7 +103,6 @@ function App() {
                 <Sonner />
                 <BrowserRouter>
                 <ScrollToTop />
-                <Layout>
                   <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/home" element={<Home />} />
@@ -348,7 +347,6 @@ function App() {
                  
                   {/* AI Learning Assistant - Available on all pages */}
                   <AILearningAssistant />
-                </Layout>
                 </BrowserRouter>
             </TooltipProvider>
           </ChatbotProvider>
