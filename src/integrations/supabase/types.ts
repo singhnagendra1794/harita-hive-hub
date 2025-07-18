@@ -4042,6 +4042,22 @@ export type Database = {
           granted_by: string
         }[]
       }
+      get_user_subscription_safe: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          subscription_tier: string
+          status: string
+          started_at: string
+          expires_at: string
+          payment_method: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       has_role_bypass_rls: {
         Args: {
           p_user_id: string
@@ -4098,6 +4114,10 @@ export type Database = {
           p_interaction_type: string
           p_metadata?: Json
         }
+        Returns: undefined
+      }
+      update_user_stats: {
+        Args: { p_user_id: string; p_stat_type: string; p_increment?: number }
         Returns: undefined
       }
       user_has_premium_access: {

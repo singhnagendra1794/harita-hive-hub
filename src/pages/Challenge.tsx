@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -167,7 +168,8 @@ const Challenge = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="text-center mb-16">
         <div className="flex items-center justify-center gap-3 mb-6">
@@ -484,7 +486,8 @@ const Challenge = () => {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 };
 

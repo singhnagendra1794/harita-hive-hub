@@ -83,32 +83,29 @@ export const usePremiumAccess = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      // Use the secure function to fetch subscription
+      const { data, error } = await supabase.rpc('get_user_subscription_safe', {
+        p_user_id: user.id
+      });
 
       if (error) {
         console.error('Error fetching user subscription:', error);
         
-        // Only create default subscription if the user truly doesn't exist (PGRST116)
-        // Don't create for permission errors or other issues
-        if (error.code === 'PGRST116') {
+        // Only create default subscription if the user truly doesn't exist
+        if (error.code === 'PGRST116' || !data || data.length === 0) {
           await createDefaultSubscription();
         } else {
-          // For other errors (like permission denied), don't create a new subscription
-          // The user might already have one, just can't access it due to temporary auth issues
           console.warn('Unable to fetch subscription due to error, skipping default creation:', error.message);
         }
         return;
       }
       
-      if (data) {
+      if (data && data.length > 0) {
+        const subscriptionData = data[0];
         setSubscription({
-          ...data,
-          subscription_tier: data.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
-          status: data.status as 'active' | 'cancelled' | 'expired' | 'trial'
+          ...subscriptionData,
+          subscription_tier: subscriptionData.subscription_tier as 'free' | 'premium' | 'pro' | 'enterprise',
+          status: subscriptionData.status as 'active' | 'cancelled' | 'expired' | 'trial'
         });
       } else {
         // Create default free subscription only if no data exists
