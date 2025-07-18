@@ -4,23 +4,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
-import { useState } from "react";
-import { PaymentModal } from "@/components/payment/PaymentModal";
+import { useNavigate } from "react-router-dom";
 import Layout from '../components/Layout';
 
 const Pricing = () => {
-
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<{
-    planName: string;
-    priceUSD: number;
-    priceINR: number;
-    features: string[];
-  } | null>(null);
+  const navigate = useNavigate();
 
   const handleSubscribe = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
-    setSelectedPlan({ planName, priceUSD, priceINR, features });
-    setPaymentModalOpen(true);
+    navigate('/checkout', {
+      state: {
+        planName,
+        amount: priceINR, // Default to INR, will be adjusted based on region in checkout
+        currency: 'INR',
+        features
+      }
+    });
   };
 
   return (
@@ -197,20 +195,6 @@ const Pricing = () => {
           <Button variant="secondary">Get in Touch</Button>
         </div>
 
-        {/* Payment Modal */}
-        {selectedPlan && (
-          <PaymentModal
-            isOpen={paymentModalOpen}
-            onClose={() => {
-              setPaymentModalOpen(false);
-              setSelectedPlan(null);
-            }}
-            planName={selectedPlan.planName}
-            priceUSD={selectedPlan.priceUSD}
-            priceINR={selectedPlan.priceINR}
-            features={selectedPlan.features}
-          />
-        )}
       </div>
     </Layout>
   );

@@ -33,11 +33,11 @@ const ChoosePlan: React.FC = () => {
   };
 
   const handlePayment = (planName: string, priceUSD: number, priceINR: number, features: string[]) => {
-    navigate('/payment', {
+    navigate('/checkout', {
       state: {
         planName,
-        priceUSD,
-        priceINR,
+        amount: priceINR, // Default to INR, will be adjusted based on region in checkout
+        currency: 'INR',
         features
       }
     });

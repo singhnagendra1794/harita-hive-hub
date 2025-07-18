@@ -39,6 +39,7 @@ import GeoAILab from "./pages/GeoAILab";
 import GeoProcessingLab from "./pages/GeoProcessingLab";
 import Search from "./pages/Search";
 import Payment from "./pages/Payment";
+import Checkout from "./pages/Checkout";
 import PremiumUpgrade from "./pages/PremiumUpgrade";
 import Pricing from "./pages/Pricing";
 import Newsletter from "./pages/Newsletter";
@@ -260,6 +261,11 @@ function App() {
                   <Route path="/payment" element={
                     <ProtectedRoute>
                       <Payment />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/checkout" element={
+                    <ProtectedRoute>
+                      <Checkout />
                     </ProtectedRoute>
                   } />
                   <Route path="/premium-upgrade" element={
