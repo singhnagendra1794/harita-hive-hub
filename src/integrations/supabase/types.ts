@@ -1597,6 +1597,44 @@ export type Database = {
         }
         Relationships: []
       }
+      installation_instructions: {
+        Row: {
+          created_at: string | null
+          id: string
+          instruction_text: string
+          screenshot_url: string | null
+          step_number: number
+          tool_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instruction_text: string
+          screenshot_url?: string | null
+          step_number: number
+          tool_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instruction_text?: string
+          screenshot_url?: string | null
+          step_number?: number
+          tool_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installation_instructions_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_invitations: {
         Row: {
           company_id: string
@@ -2030,9 +2068,11 @@ export type Database = {
           base_price_inr: number | null
           base_price_usd: number | null
           category: string
+          compatibility_notes: string | null
           created_at: string | null
           created_by: string | null
           demo_url: string | null
+          dependencies: string[] | null
           description: string | null
           documentation_url: string | null
           download_count: number | null
@@ -2040,15 +2080,22 @@ export type Database = {
           file_size_mb: number | null
           github_url: string | null
           id: string
+          installation_guide: string | null
+          installation_verified: boolean | null
           is_featured: boolean | null
           is_free: boolean | null
           is_verified: boolean | null
           license_type: string | null
           metadata: Json | null
+          minimum_requirements: Json | null
+          plugin_icon_url: string | null
+          plugin_id: string | null
           python_version: string | null
           qgis_min_version: string | null
           rating: number | null
           rating_count: number | null
+          scan_results: Json | null
+          security_scanned: boolean | null
           status: string | null
           subcategory: string | null
           tags: string[] | null
@@ -2063,9 +2110,11 @@ export type Database = {
           base_price_inr?: number | null
           base_price_usd?: number | null
           category: string
+          compatibility_notes?: string | null
           created_at?: string | null
           created_by?: string | null
           demo_url?: string | null
+          dependencies?: string[] | null
           description?: string | null
           documentation_url?: string | null
           download_count?: number | null
@@ -2073,15 +2122,22 @@ export type Database = {
           file_size_mb?: number | null
           github_url?: string | null
           id?: string
+          installation_guide?: string | null
+          installation_verified?: boolean | null
           is_featured?: boolean | null
           is_free?: boolean | null
           is_verified?: boolean | null
           license_type?: string | null
           metadata?: Json | null
+          minimum_requirements?: Json | null
+          plugin_icon_url?: string | null
+          plugin_id?: string | null
           python_version?: string | null
           qgis_min_version?: string | null
           rating?: number | null
           rating_count?: number | null
+          scan_results?: Json | null
+          security_scanned?: boolean | null
           status?: string | null
           subcategory?: string | null
           tags?: string[] | null
@@ -2096,9 +2152,11 @@ export type Database = {
           base_price_inr?: number | null
           base_price_usd?: number | null
           category?: string
+          compatibility_notes?: string | null
           created_at?: string | null
           created_by?: string | null
           demo_url?: string | null
+          dependencies?: string[] | null
           description?: string | null
           documentation_url?: string | null
           download_count?: number | null
@@ -2106,15 +2164,22 @@ export type Database = {
           file_size_mb?: number | null
           github_url?: string | null
           id?: string
+          installation_guide?: string | null
+          installation_verified?: boolean | null
           is_featured?: boolean | null
           is_free?: boolean | null
           is_verified?: boolean | null
           license_type?: string | null
           metadata?: Json | null
+          minimum_requirements?: Json | null
+          plugin_icon_url?: string | null
+          plugin_id?: string | null
           python_version?: string | null
           qgis_min_version?: string | null
           rating?: number | null
           rating_count?: number | null
+          scan_results?: Json | null
+          security_scanned?: boolean | null
           status?: string | null
           subcategory?: string | null
           tags?: string[] | null
@@ -2473,6 +2538,50 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      plugin_compatibility: {
+        Row: {
+          compatibility_status: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          platform: string
+          qgis_version: string
+          test_date: string | null
+          tester_id: string | null
+          tool_id: string
+        }
+        Insert: {
+          compatibility_status: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          platform: string
+          qgis_version: string
+          test_date?: string | null
+          tester_id?: string | null
+          tool_id: string
+        }
+        Update: {
+          compatibility_status?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          platform?: string
+          qgis_version?: string
+          test_date?: string | null
+          tester_id?: string | null
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_compatibility_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_tools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       premium_content: {
         Row: {
@@ -4594,6 +4703,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_download_premium_plugin: {
+        Args: { p_user_id: string; p_tool_id: string }
+        Returns: boolean
+      }
       check_geo_processing_limits: {
         Args: { p_user_id: string; p_job_type: string }
         Returns: Json
