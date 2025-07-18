@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Layout from "../components/Layout";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,8 +102,7 @@ const TalentPool = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-8">
+    <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Talent Pool</h1>
@@ -284,7 +283,6 @@ const TalentPool = () => {
           </Card>
         )}
       </div>
-    </Layout>
   );
 };
 

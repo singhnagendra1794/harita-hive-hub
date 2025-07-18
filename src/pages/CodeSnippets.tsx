@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { useAuth } from "@/contexts/AuthContext";
-import Layout from "@/components/Layout";
+
 
 const CodeSnippets = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -2074,8 +2074,7 @@ print('All export tasks have been created. Check the Tasks tab to run them.');`,
   };
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Code Snippets</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -2320,7 +2319,6 @@ print('All export tasks have been created. Check the Tasks tab to run them.');`,
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 

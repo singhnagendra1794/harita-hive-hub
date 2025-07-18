@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Layout from "../components/Layout";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,8 +125,7 @@ const TaskBoard = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-8">
+    <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Task Board</h1>
@@ -307,7 +306,6 @@ const TaskBoard = () => {
           </Card>
         )}
       </div>
-    </Layout>
   );
 };
 

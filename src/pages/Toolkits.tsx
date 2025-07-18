@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { supabase } from '@/integrations/supabase/client';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
-import Layout from '@/components/Layout';
+
 
 interface ToolkitCategory {
   id: string;
@@ -157,8 +157,7 @@ const Toolkits = () => {
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
           <Package className="h-8 w-8 text-primary" />
@@ -326,8 +325,7 @@ const Toolkits = () => {
           </CardContent>
         </Card>
       )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 
