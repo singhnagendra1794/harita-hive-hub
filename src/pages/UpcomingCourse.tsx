@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import { CourseWaitlistForm } from '@/components/CourseWaitlistForm';
 
 interface ScheduleItem {
   id: string;
@@ -36,12 +37,6 @@ const UpcomingCourse: React.FC = () => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [experienceLevel, setExperienceLevel] = useState('');
-  const [motivation, setMotivation] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -102,63 +97,6 @@ const UpcomingCourse: React.FC = () => {
     }
   };
 
-  const submitWaitlist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase
-        .from('upcoming_course_waitlist')
-        .insert({
-          email: email.trim(),
-          full_name: fullName.trim() || null,
-          phone: phone.trim() || null,
-          experience_level: experienceLevel || 'beginner',
-          motivation: motivation.trim() || null,
-          referral_source: 'website'
-        });
-
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: "Already registered",
-            description: "You're already on our waitlist! We'll notify you when enrollment opens.",
-          });
-          return;
-        }
-        throw error;
-      }
-
-      toast({
-        title: "Successfully joined waitlist!",
-        description: "We'll notify you when enrollment opens for the next cohort.",
-      });
-
-      // Reset form
-      setEmail('');
-      setFullName('');
-      setPhone('');
-      setExperienceLevel('');
-      setMotivation('');
-    } catch (error) {
-      console.error('Error joining waitlist:', error);
-      toast({
-        title: "Error",
-        description: "Failed to join waitlist. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const getPhaseColor = (phase: string) => {
     switch (phase) {
@@ -250,6 +188,24 @@ const UpcomingCourse: React.FC = () => {
               </p>
             </div>
           )}
+
+          {/* Main Waitlist Section */}
+          <div className="bg-primary/5 rounded-lg p-8 mb-12 max-w-2xl mx-auto border">
+            <h3 className="text-2xl font-semibold mb-4 text-center">🚀 Get Early Access</h3>
+            <p className="text-muted-foreground text-center mb-6">
+              Join our exclusive waitlist to be the first to know when the GeoAI Mastery Program opens for enrollment.
+            </p>
+            <div className="max-w-md mx-auto">
+              <CourseWaitlistForm 
+                courseTitle="GeoAI Mastery Program"
+                buttonText="Join Waitlist"
+                buttonClassName="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              />
+            </div>
+            <p className="text-sm text-center text-muted-foreground mt-4">
+              ✅ Early bird pricing • ✅ Exclusive content • ✅ Priority support
+            </p>
+          </div>
         </div>
 
         {/* Course Cards Grid - All 4 courses from the image */}
@@ -303,12 +259,10 @@ const UpcomingCourse: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Input type="email" placeholder="Enter your email" className="w-full" />
-                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
-                  Join Waitlist
-                </Button>
-              </div>
+              <CourseWaitlistForm 
+                courseTitle="ArcGIS Enterprise Mastery"
+                buttonText="Join Waitlist"
+              />
             </CardContent>
           </Card>
 
@@ -361,12 +315,10 @@ const UpcomingCourse: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Input type="email" placeholder="Enter your email" className="w-full" />
-                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
-                  Notify Me
-                </Button>
-              </div>
+              <CourseWaitlistForm 
+                courseTitle="Advanced Python for GIS Automation"
+                buttonText="Notify Me"
+              />
             </CardContent>
           </Card>
 
@@ -419,12 +371,10 @@ const UpcomingCourse: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Input type="email" placeholder="Enter your email" className="w-full" />
-                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
-                  Notify Me
-                </Button>
-              </div>
+              <CourseWaitlistForm 
+                courseTitle="Drone Mapping & Photogrammetry"
+                buttonText="Notify Me"
+              />
             </CardContent>
           </Card>
 
@@ -477,12 +427,10 @@ const UpcomingCourse: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Input type="email" placeholder="Enter your email" className="w-full" />
-                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" size="lg">
-                  Notify Me
-                </Button>
-              </div>
+              <CourseWaitlistForm 
+                courseTitle="GIS Data Science & Machine Learning"
+                buttonText="Notify Me"
+              />
             </CardContent>
           </Card>
         </div>
@@ -511,7 +459,7 @@ const UpcomingCourse: React.FC = () => {
             <Card className="text-center">
               <CardContent className="p-6">
                 <Target className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-                <h3 className="font-semibent mb-2">Advanced GeoAI</h3>
+                <h3 className="font-semibold mb-2">Advanced GeoAI</h3>
                 <p className="text-sm text-muted-foreground">Deep Learning & Computer Vision</p>
               </CardContent>
             </Card>
