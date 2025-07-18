@@ -63,7 +63,7 @@ const UserDashboard = () => {
       title: "Courses Enrolled", 
       value: stats?.course_count?.toString() ?? "0", 
       icon: BookOpen,
-      href: stats?.course_count && stats.course_count > 0 ? "/courses/geospatial-fullstack-developer" : "/learn"
+      href: stats?.course_count && stats.course_count > 0 ? "/courses/geospatial-technology-unlocked" : "/learn"
     },
     { 
       title: "Projects Completed", 

@@ -76,8 +76,8 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 import BrowseCourses from "./pages/BrowseCourses";
-import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
 import GeospatialTechnologyUnlocked from "./pages/courses/GeospatialTechnologyUnlocked";
+import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 // Import the new feature pages
@@ -122,12 +122,8 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/about" element={<About />} />
           <Route path="/browse-courses" element={<BrowseCourses />} />
-          <Route path="/courses/geospatial-fullstack-developer" element={<GeospatialFullstackDeveloper />} />
-          <Route path="/courses/geospatial-technology-unlocked" element={
-            <SubscriptionRoute requiredTier="pro">
-              <GeospatialTechnologyUnlocked />
-            </SubscriptionRoute>
-          } />
+                <Route path="/courses/geospatial-technology-unlocked" element={<GeospatialTechnologyUnlocked />} />
+                <Route path="/courses/geospatial-fullstack-developer" element={<GeospatialFullstackDeveloper />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
