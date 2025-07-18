@@ -22,6 +22,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Starting Razorpay order creation...');
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -30,6 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get user from JWT token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error('Missing Authorization header');
       return new Response('Unauthorized', { status: 401, headers: corsHeaders });
     }
 
@@ -38,10 +41,14 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (authError || !user) {
+      console.error('Auth error:', authError);
       return new Response('Unauthorized', { status: 401, headers: corsHeaders });
     }
 
+    console.log('User authenticated:', user.email);
+
     const { amount, currency, plan_type }: CreateOrderRequest = await req.json();
+    console.log('Order details:', { amount, currency, plan_type });
 
     // Validate input
     if (!amount || !currency || !plan_type) {
@@ -50,7 +57,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create Razorpay order
     const razorpayKeyId = 'rzp_live_brnHWpkHS6YtlJ';
-    const razorpaySecret = Deno.env.get('RAZORPAY_SECRET_KEY') || '9LPBfcHHuFbXRmME0cYAmVrP';
+    const razorpaySecret = Deno.env.get('RAZORPAY_SECRET_KEY');
+    
+    if (!razorpaySecret) {
+      console.error('RAZORPAY_SECRET_KEY not found in environment');
+      return new Response(JSON.stringify({ error: 'Payment configuration error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
     
     const orderData = {
       amount: Math.round(amount * 100), // Convert to paise
@@ -86,12 +101,13 @@ const handler = async (req: Request): Promise<Response> => {
       .from('payment_transactions')
       .insert({
         user_id: user.id,
-        razorpay_order_id: razorpayOrder.id,
+        payment_gateway_id: razorpayOrder.id,
         amount: amount,
         currency: currency,
-        plan_type: plan_type,
+        payment_method: 'razorpay',
+        subscription_type: plan_type,
         status: 'pending',
-        metadata: { razorpay_order: razorpayOrder }
+        payment_data: { razorpay_order: razorpayOrder }
       })
       .select()
       .single();
@@ -116,6 +132,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
+    console.error('Error stack:', error.stack);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

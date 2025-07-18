@@ -81,12 +81,11 @@ const handler = async (req: Request): Promise<Response> => {
       const { error: updateError } = await supabase
         .from('payment_transactions')
         .update({
-          razorpay_payment_id: payment.id,
-          status: 'paid',
-          updated_at: new Date().toISOString(),
-          metadata: { payment_method: payment.method }
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          webhook_data: { payment_id: payment.id, method: payment.method }
         })
-        .eq('razorpay_order_id', payment.order_id);
+        .eq('payment_gateway_id', payment.order_id);
 
       if (updateError) {
         console.error('Error updating payment transaction:', updateError);
@@ -96,8 +95,8 @@ const handler = async (req: Request): Promise<Response> => {
       // Get the payment transaction to find plan type and user
       const { data: transaction, error: fetchError } = await supabase
         .from('payment_transactions')
-        .select('user_id, plan_type')
-        .eq('razorpay_order_id', payment.order_id)
+        .select('user_id, subscription_type')
+        .eq('payment_gateway_id', payment.order_id)
         .single();
 
       if (fetchError || !transaction) {
@@ -109,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { error: subscriptionError } = await supabase
         .from('user_subscriptions')
         .update({
-          subscription_tier: transaction.plan_type,
+          subscription_tier: transaction.subscription_type,
           status: 'active',
           updated_at: new Date().toISOString()
         })
@@ -124,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          plan: transaction.plan_type === 'pro' ? 'professional' : transaction.plan_type,
+          plan: transaction.subscription_type === 'pro' ? 'professional' : transaction.subscription_type,
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.user_id);
@@ -133,7 +132,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.error('Error updating profile:', profileError);
       }
 
-      console.log(`Payment successful for order ${payment.order_id}, user upgraded to ${transaction.plan_type}`);
+      console.log(`Payment successful for order ${payment.order_id}, user upgraded to ${transaction.subscription_type}`);
     }
 
     return new Response(JSON.stringify({ received: true }), {
