@@ -1,4 +1,5 @@
 
+import Layout from '@/components/Layout';
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,6 +62,7 @@ const Index = () => {
   ];
 
   return (
+    <Layout>
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5">
       {/* Launch Banner */}
       <section className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-4">
@@ -220,6 +222,7 @@ const Index = () => {
         </div>
       </section>
       </div>
+    </Layout>
   );
 };
 

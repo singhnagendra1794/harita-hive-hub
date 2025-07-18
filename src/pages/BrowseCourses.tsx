@@ -1,4 +1,5 @@
 
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -421,6 +422,7 @@ const BrowseCourses = () => {
   };
 
   return (
+    <Layout>
     <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Browse Upcoming Courses</h1>
@@ -793,6 +795,7 @@ const BrowseCourses = () => {
           </CardContent>
         </Card>
       </div>
+    </Layout>
   );
 };
 

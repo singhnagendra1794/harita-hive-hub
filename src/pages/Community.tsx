@@ -1,11 +1,14 @@
 
+import Layout from '@/components/Layout';
 import React from 'react';
 import { CommunityHub } from '@/components/community/CommunityHub';
 
 
 const Community = () => {
   return (
-    <CommunityHub />
+    <Layout>
+      <CommunityHub />
+    </Layout>
   );
 };
 
