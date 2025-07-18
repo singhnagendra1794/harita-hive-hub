@@ -283,6 +283,48 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_participants: {
+        Row: {
+          challenge_name: string
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          registered_at: string
+          status: string
+          submission_url: string | null
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge_name?: string
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          registered_at?: string
+          status?: string
+          submission_url?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge_name?: string
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          registered_at?: string
+          status?: string
+          submission_url?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       challenge_submissions: {
         Row: {
           challenge_id: string
@@ -1870,6 +1912,90 @@ export type Database = {
           search_filters?: Json | null
           status?: string | null
           times_requested?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_posts: {
+        Row: {
+          content: string | null
+          created_at: string
+          featured_image_url: string | null
+          id: string
+          is_featured: boolean | null
+          linkedin_url: string | null
+          published_date: string
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          linkedin_url?: string | null
+          published_date: string
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          linkedin_url?: string | null
+          published_date?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          preferences: Json | null
+          status: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          preferences?: Json | null
+          status?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          preferences?: Json | null
+          status?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
           updated_at?: string
           user_id?: string | null
         }

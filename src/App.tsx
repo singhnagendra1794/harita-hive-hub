@@ -86,6 +86,7 @@ import Toolkits from "./pages/Toolkits";
 import JobsAIDiscovery from "./pages/JobsAIDiscovery";
 import ProjectStudio from "./pages/ProjectStudio";
 import Labs from "./pages/Labs";
+import Challenge from "./pages/Challenge";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,7 @@ function App() {
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/newsletter" element={<Newsletter />} />
+                  <Route path="/challenge" element={<Challenge />} />
           <Route path="/upcoming-course" element={<UpcomingCourse />} />
           <Route path="/skill-roadmap" element={<SkillRoadmap />} />
           <Route path="/projects-gallery" element={<ProjectsGallery />} />
