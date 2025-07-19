@@ -1263,6 +1263,36 @@ export type Database = {
           },
         ]
       }
+      course_waitlist: {
+        Row: {
+          course_id: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           category: string | null
@@ -1904,6 +1934,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          created_at: string
+          email: string
+          emi_plan: string | null
+          full_name: string
+          how_did_you_hear: string | null
+          id: string
+          is_emi: boolean | null
+          location: string
+          mobile_number: string
+          payment_amount: number
+          payment_currency: string
+          payment_status: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          email: string
+          emi_plan?: string | null
+          full_name: string
+          how_did_you_hear?: string | null
+          id?: string
+          is_emi?: boolean | null
+          location: string
+          mobile_number: string
+          payment_amount: number
+          payment_currency: string
+          payment_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          email?: string
+          emi_plan?: string | null
+          full_name?: string
+          how_did_you_hear?: string | null
+          id?: string
+          is_emi?: boolean | null
+          location?: string
+          mobile_number?: string
+          payment_amount?: number
+          payment_currency?: string
+          payment_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       event_registrations: {
         Row: {

@@ -21,22 +21,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { EnrollmentForm } from "@/components/course-enrollment/EnrollmentForm";
+import { WaitlistForm } from "@/components/course-enrollment/WaitlistForm";
 
 const BrowseCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('USD');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [waitlistForm, setWaitlistForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    experienceLevel: "beginner",
-    motivation: "",
-    referralSource: ""
-  });
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -85,6 +79,35 @@ const BrowseCourses = () => {
     }
   ];
 
+  // Check if enrollment is still open for Geospatial Technology Unlocked
+  const isEnrollmentOpen = () => {
+    const enrollmentDeadline = new Date('2025-07-21T13:30:00.000Z'); // 7 PM IST in UTC
+    return new Date() <= enrollmentDeadline;
+  };
+
+  const handleEnrollNow = (course: any) => {
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to enroll in this course.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!isEnrollmentOpen()) {
+      toast({
+        title: "Enrollment Closed",
+        description: "Enrollment deadline has passed for this course.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedCourse(course);
+    setShowEnrollmentForm(true);
+  };
+
   const handleJoinWaitlist = (course: any) => {
     if (!user) {
       toast({
@@ -99,37 +122,14 @@ const BrowseCourses = () => {
     setShowWaitlistForm(true);
   };
 
-  const submitWaitlistForm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      const response = await fetch('/functions/v1/send-waitlist-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...waitlistForm,
-          courseTitle: selectedCourse?.title,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to join waitlist');
-
-      toast({
-        title: "Successfully joined waitlist!",
-        description: "We'll notify you when enrollment opens.",
-      });
-      
-      setShowWaitlistForm(false);
-    } catch (error) {
-      toast({
-        title: "Error joining waitlist",
-        description: "Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleEnrollmentSuccess = (enrollmentId: string) => {
+    setShowEnrollmentForm(false);
+    // Here you would typically redirect to payment processing
+    toast({
+      title: "Enrollment Successful!",
+      description: "Redirecting to payment..."
+    });
+    // Implement Razorpay payment integration here
   };
 
   const formatPrice = (course: any) => {
@@ -248,7 +248,24 @@ const BrowseCourses = () => {
                       <div className="text-sm text-green-600">Course Price</div>
                     </div>
 
-                    {course.isLive ? (
+                    {course.isLive && course.id === "geospatial-technology-unlocked" ? (
+                      isEnrollmentOpen() ? (
+                        <Button 
+                          className="w-full"
+                          onClick={() => handleEnrollNow(course)}
+                        >
+                          Enroll Now
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="w-full" 
+                          disabled
+                          variant="outline"
+                        >
+                          Enrollment Closed
+                        </Button>
+                      )
+                    ) : course.isLive ? (
                       <Link to={course.courseUrl}>
                         <Button className="w-full">
                           View Course Details
@@ -269,40 +286,26 @@ const BrowseCourses = () => {
           })}
         </div>
 
+        {/* Enrollment Form Modal */}
+        {showEnrollmentForm && selectedCourse && (
+          <EnrollmentForm
+            courseId={selectedCourse.id}
+            courseTitle={selectedCourse.title}
+            price={formatPrice(selectedCourse).replace(/[₹$]/g, '')}
+            currency={currencyMode === 'INR' ? '₹' : '$'}
+            isInternational={currencyMode === 'USD'}
+            onClose={() => setShowEnrollmentForm(false)}
+            onSuccess={handleEnrollmentSuccess}
+          />
+        )}
+
         {/* Waitlist Form Modal */}
-        {showWaitlistForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Join Course Waitlist</h3>
-              <form onSubmit={submitWaitlistForm} className="space-y-4">
-                <Input
-                  required
-                  placeholder="Full Name"
-                  value={waitlistForm.fullName}
-                  onChange={(e) => setWaitlistForm({...waitlistForm, fullName: e.target.value})}
-                />
-                <Input
-                  required
-                  type="email"
-                  placeholder="Email"
-                  value={waitlistForm.email}
-                  onChange={(e) => setWaitlistForm({...waitlistForm, email: e.target.value})}
-                />
-                <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? 'Joining...' : 'Join Waitlist'}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowWaitlistForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
+        {showWaitlistForm && selectedCourse && (
+          <WaitlistForm
+            courseId={selectedCourse.id}
+            courseTitle={selectedCourse.title}
+            onClose={() => setShowWaitlistForm(false)}
+          />
         )}
       </div>
     </Layout>

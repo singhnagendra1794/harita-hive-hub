@@ -9,7 +9,9 @@ const corsHeaders = {
 interface CreateOrderRequest {
   amount: number;
   currency: string;
-  plan_type: string;
+  plan_type?: string;
+  enrollmentId?: string;
+  isEmi?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -47,11 +49,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('User authenticated:', user.email);
 
-    const { amount, currency, plan_type }: CreateOrderRequest = await req.json();
-    console.log('Order details:', { amount, currency, plan_type });
+    const { amount, currency, plan_type, enrollmentId, isEmi = false }: CreateOrderRequest = await req.json();
+    console.log('Order details:', { amount, currency, plan_type, enrollmentId, isEmi });
 
     // Validate input
-    if (!amount || !currency || !plan_type) {
+    if (!amount || !currency) {
       return new Response('Missing required fields', { status: 400, headers: corsHeaders });
     }
 
@@ -72,8 +74,10 @@ const handler = async (req: Request): Promise<Response> => {
       currency: currency,
       payment_capture: 1,
       notes: {
-        plan_type: plan_type,
-        user_id: user.id
+        plan_type: plan_type || 'course_enrollment',
+        user_id: user.id,
+        enrollment_id: enrollmentId || '',
+        is_emi: isEmi.toString()
       }
     };
 
@@ -96,35 +100,61 @@ const handler = async (req: Request): Promise<Response> => {
 
     const razorpayOrder = await razorpayResponse.json();
 
-    // Store transaction in database
-    const { data: transaction, error: dbError } = await supabase
-      .from('payment_transactions')
-      .insert({
-        user_id: user.id,
-        payment_gateway_id: razorpayOrder.id,
-        amount: amount,
-        currency: currency,
-        payment_method: 'razorpay',
-        subscription_type: plan_type,
-        status: 'pending',
-        payment_data: { razorpay_order: razorpayOrder }
-      })
-      .select()
-      .single();
+    // Store transaction in database or update enrollment
+    let transaction = null;
+    let dbError = null;
 
-    if (dbError) {
-      console.error('Database error:', dbError);
-      throw dbError;
+    if (enrollmentId) {
+      // Update enrollment with Razorpay order details
+      const { error: enrollmentError } = await supabase
+        .from('enrollments')
+        .update({
+          razorpay_order_id: razorpayOrder.id,
+          is_emi: isEmi,
+          emi_plan: isEmi ? '3_months' : null
+        })
+        .eq('id', enrollmentId)
+        .eq('user_id', user.id);
+
+      if (enrollmentError) {
+        console.error('Enrollment update error:', enrollmentError);
+        throw enrollmentError;
+      }
+    } else {
+      // Store transaction in database for subscription payments
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('payment_transactions')
+        .insert({
+          user_id: user.id,
+          payment_gateway_id: razorpayOrder.id,
+          amount: amount,
+          currency: currency,
+          payment_method: 'razorpay',
+          subscription_type: plan_type,
+          status: 'pending',
+          payment_data: { razorpay_order: razorpayOrder }
+        })
+        .select()
+        .single();
+
+      transaction = transactionData;
+      dbError = transactionError;
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw dbError;
+      }
     }
 
-    console.log(`Created order ${razorpayOrder.id} for user ${user.id}, plan: ${plan_type}`);
+    console.log(`Created order ${razorpayOrder.id} for user ${user.id}, type: ${plan_type || 'course_enrollment'}`);
 
     return new Response(JSON.stringify({
       order_id: razorpayOrder.id,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       key_id: razorpayKeyId,
-      transaction_id: transaction.id
+      transaction_id: transaction?.id || null,
+      enrollment_id: enrollmentId || null
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
