@@ -96,9 +96,8 @@ import Studio from "./pages/Studio";
 import Portfolio from "./pages/Portfolio";
 import Mentorship from "./pages/Mentorship";
 
-const queryClient = new QueryClient();
-
 function App() {
+  const queryClient = new QueryClient();
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
