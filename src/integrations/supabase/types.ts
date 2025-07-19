@@ -583,6 +583,158 @@ export type Database = {
         }
         Relationships: []
       }
+      code_snippet_favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          snippet_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          snippet_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          snippet_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_snippet_favorites_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_code_snippets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      code_snippet_feedback: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          feedback_type: string
+          id: string
+          is_resolved: boolean | null
+          rating: number | null
+          resolved_at: string | null
+          resolved_by: string | null
+          snippet_id: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          feedback_type: string
+          id?: string
+          is_resolved?: boolean | null
+          rating?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          snippet_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          feedback_type?: string
+          id?: string
+          is_resolved?: boolean | null
+          rating?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          snippet_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_snippet_feedback_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_code_snippets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      code_snippet_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          snippet_id: string | null
+          tag: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          snippet_id?: string | null
+          tag: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          snippet_id?: string | null
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_snippet_tags_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_code_snippets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      code_snippet_tests: {
+        Row: {
+          error_message: string | null
+          id: string
+          snippet_id: string | null
+          test_duration_ms: number | null
+          test_environment: string
+          test_output: string | null
+          test_status: string
+          tested_at: string | null
+          tested_by: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          snippet_id?: string | null
+          test_duration_ms?: number | null
+          test_environment: string
+          test_output?: string | null
+          test_status: string
+          tested_at?: string | null
+          tested_by?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          snippet_id?: string | null
+          test_duration_ms?: number | null
+          test_environment?: string
+          test_output?: string | null
+          test_status?: string
+          tested_at?: string | null
+          tested_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_snippet_tests_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_code_snippets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_notifications: {
         Row: {
           created_at: string
@@ -1408,6 +1560,99 @@ export type Database = {
           template_type?: string
           text_content?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      enhanced_code_snippets: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          category: string
+          code: string
+          colab_url: string | null
+          configuration: Json | null
+          created_at: string | null
+          description: string
+          download_count: number | null
+          github_url: string | null
+          id: string
+          inputs_required: Json | null
+          is_active: boolean | null
+          is_production_ready: boolean | null
+          is_tested: boolean | null
+          language: string
+          last_tested_at: string | null
+          notebook_url: string | null
+          output_format: string | null
+          preview_image_url: string | null
+          rating_average: number | null
+          rating_count: number | null
+          summary: string
+          title: string
+          updated_at: string | null
+          use_case: string
+          version: string | null
+          view_count: number | null
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          category: string
+          code: string
+          colab_url?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          description: string
+          download_count?: number | null
+          github_url?: string | null
+          id?: string
+          inputs_required?: Json | null
+          is_active?: boolean | null
+          is_production_ready?: boolean | null
+          is_tested?: boolean | null
+          language: string
+          last_tested_at?: string | null
+          notebook_url?: string | null
+          output_format?: string | null
+          preview_image_url?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          summary: string
+          title: string
+          updated_at?: string | null
+          use_case: string
+          version?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          category?: string
+          code?: string
+          colab_url?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string
+          download_count?: number | null
+          github_url?: string | null
+          id?: string
+          inputs_required?: Json | null
+          is_active?: boolean | null
+          is_production_ready?: boolean | null
+          is_tested?: boolean | null
+          language?: string
+          last_tested_at?: string | null
+          notebook_url?: string | null
+          output_format?: string | null
+          preview_image_url?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          summary?: string
+          title?: string
+          updated_at?: string | null
+          use_case?: string
+          version?: string | null
+          view_count?: number | null
         }
         Relationships: []
       }
