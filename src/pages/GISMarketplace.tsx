@@ -9,11 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GISToolCard from "../components/marketplace/GISToolCard";
 import { Plus, Search, Filter, TrendingUp, Package, Users } from "lucide-react";
+import { useUserStats } from "@/hooks/useUserStats";
 
 const GISMarketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  const { plan } = useUserStats();
+  
+  // Check if user has professional access
+  const isProfessionalUser = plan?.plan === 'professional' || plan?.subscription_tier === 'pro' || plan?.subscription_tier === 'enterprise';
 
   // Mock data - replace with real data from Supabase
   const tools = [
@@ -200,7 +205,12 @@ const GISMarketplace = () => {
           <TabsContent value="browse">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTools.map(tool => (
-                <GISToolCard key={tool.id} {...tool} />
+                <GISToolCard 
+                  key={tool.id} 
+                  {...tool} 
+                  userPlan={plan?.plan || 'free'}
+                  isProfessionalUser={isProfessionalUser}
+                />
               ))}
             </div>
           </TabsContent>
@@ -208,7 +218,12 @@ const GISMarketplace = () => {
           <TabsContent value="featured">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredTools.map(tool => (
-                <GISToolCard key={tool.id} {...tool} />
+                <GISToolCard 
+                  key={tool.id} 
+                  {...tool} 
+                  userPlan={plan?.plan || 'free'}
+                  isProfessionalUser={isProfessionalUser}
+                />
               ))}
             </div>
           </TabsContent>
@@ -216,7 +231,12 @@ const GISMarketplace = () => {
           <TabsContent value="popular">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...tools].sort((a, b) => b.downloads - a.downloads).map(tool => (
-                <GISToolCard key={tool.id} {...tool} />
+                <GISToolCard 
+                  key={tool.id} 
+                  {...tool} 
+                  userPlan={plan?.plan || 'free'}
+                  isProfessionalUser={isProfessionalUser}
+                />
               ))}
             </div>
           </TabsContent>
@@ -224,7 +244,12 @@ const GISMarketplace = () => {
           <TabsContent value="recent">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...tools].reverse().map(tool => (
-                <GISToolCard key={tool.id} {...tool} />
+                <GISToolCard 
+                  key={tool.id} 
+                  {...tool} 
+                  userPlan={plan?.plan || 'free'}
+                  isProfessionalUser={isProfessionalUser}
+                />
               ))}
             </div>
           </TabsContent>

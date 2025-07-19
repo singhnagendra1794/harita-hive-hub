@@ -56,13 +56,13 @@ export const useUserStats = () => {
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id),
         
-        // Count spatial analyses (geoai experiments)
+        // Count spatial analyses (geoai experiments) 
         supabase
           .from('geoai_experiments')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id),
         
-        // Get profile plan
+        // Get profile plan - profiles table uses id column for user reference
         supabase
           .from('profiles')
           .select('plan')

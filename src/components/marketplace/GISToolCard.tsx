@@ -18,6 +18,8 @@ interface GISToolCardProps {
   isFeatured?: boolean;
   programmingLanguage?: string;
   compatibleSoftware?: string[];
+  userPlan?: string;
+  isProfessionalUser?: boolean;
 }
 
 const GISToolCard = ({ 
@@ -32,12 +34,17 @@ const GISToolCard = ({
   downloadUrl,
   isFeatured,
   programmingLanguage,
-  compatibleSoftware 
+  compatibleSoftware,
+  userPlan = 'free',
+  isProfessionalUser = false
 }: GISToolCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
 
+  // Professional users get special pricing of $14.99 for paid tools
+  const displayPrice = isProfessionalUser && price > 0 ? 14.99 : price;
+
   const handleDownload = () => {
-    if (price === 0) {
+    if (displayPrice === 0) {
       window.open(downloadUrl, '_blank');
     } else {
       // Handle payment flow
@@ -117,9 +124,19 @@ const GISToolCard = ({
               <span>{downloads.toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-2">
+              {isProfessionalUser && price > 0 && price !== displayPrice && (
+                <span className="text-sm line-through text-muted-foreground">
+                  ${price}
+                </span>
+              )}
               <span className="text-lg font-bold text-foreground">
-                {price === 0 ? 'Free' : `$${price}`}
+                {displayPrice === 0 ? 'Free' : `$${displayPrice}`}
               </span>
+              {isProfessionalUser && price > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  Pro Price
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -128,7 +145,7 @@ const GISToolCard = ({
       <CardFooter className="flex gap-2">
         <Button onClick={handleDownload} className="flex-1">
           <Download className="h-4 w-4 mr-2" />
-          {price === 0 ? 'Download' : 'Purchase'}
+          {displayPrice === 0 ? 'Download' : 'Purchase'}
         </Button>
         <Button variant="outline" size="sm">
           <ExternalLink className="h-4 w-4" />
