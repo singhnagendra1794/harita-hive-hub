@@ -195,9 +195,10 @@ const UserDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {userProfile?.first_name && userProfile?.last_name 
-                ? `${userProfile.first_name} ${userProfile.last_name}` 
-                : user?.user_metadata?.full_name || 'GIS Professional'}! 👋
+              Welcome back, {userProfile?.full_name || 
+                (userProfile?.first_name && userProfile?.last_name 
+                  ? `${userProfile.first_name} ${userProfile.last_name}` 
+                  : user?.user_metadata?.full_name) || 'GIS Professional'}! 👋
             </h1>
             <p className="text-muted-foreground">
             Continue your geospatial journey and explore new opportunities
