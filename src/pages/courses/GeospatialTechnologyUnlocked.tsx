@@ -15,80 +15,91 @@ const GeospatialTechnologyUnlocked = () => {
   const courseModules = [
     {
       id: 1,
-      title: "Introduction to Geospatial Technology",
-      description: "Understanding the fundamentals of GIS, remote sensing, and spatial analysis",
-      duration: "2 hours",
+      title: "Track 1: Foundations of Geospatial Science",
+      description: "Days 1–25: GIS, Remote Sensing, GNSS, Cartography, Data Preparation",
+      duration: "25 sessions",
       completed: true,
       lessons: [
-        { title: "What is Geospatial Technology?", duration: "15 min", completed: true },
-        { title: "History and Evolution of GIS", duration: "20 min", completed: true },
-        { title: "Key Components of GIS", duration: "25 min", completed: true },
-        { title: "Introduction to Coordinate Systems", duration: "30 min", completed: true },
+        { title: "Day 1: Intro to Geospatial Tech - Understanding 'Where' and 'Why there' questions", duration: "1.5 hours", completed: true },
+        { title: "Days 2-3: GIS Concepts & Data Types - Vector vs Raster, spatial vs attribute", duration: "3 hours", completed: true },
+        { title: "Day 4: Coordinate Systems - GCS vs PCS, projections", duration: "1.5 hours", completed: true },
+        { title: "Days 5-6: Cartography - Map elements, symbology", duration: "3 hours", completed: true },
+        { title: "Days 7-8: Remote Sensing Basics - EM spectrum, resolutions", duration: "3 hours", completed: true },
+        { title: "Days 9-10: Satellite Sensors & Data Acquisition", duration: "3 hours", completed: true },
+        { title: "Day 11: GNSS, GPS - Field data collection", duration: "1.5 hours", completed: true },
+        { title: "Day 12: Surveying + Open Data - Integrate GPS and open datasets", duration: "1.5 hours", completed: true },
+        { title: "Days 13-14: Spatial Analysis Basics - Buffer, clip, intersect", duration: "3 hours", completed: true },
+        { title: "Day 15: Intro to QGIS Plugins", duration: "1.5 hours", completed: true },
+        { title: "Days 16-17: Project I (Foundations) - Apply skills to local planning", duration: "3 hours", completed: true },
+        { title: "Days 18-19: Data Quality & Metadata", duration: "3 hours", completed: true },
+        { title: "Day 20: Map Layouts - Design print-ready maps", duration: "1.5 hours", completed: true },
+        { title: "Days 21-22: Dashboards & Storytelling", duration: "3 hours", completed: true },
+        { title: "Days 23-25: Capstone #1 - Present & review foundational project", duration: "4.5 hours", completed: true }
       ]
     },
     {
       id: 2,
-      title: "Working with Spatial Data",
-      description: "Learn about vector and raster data formats, data sources, and data quality",
-      duration: "3 hours",
+      title: "Track 2: Spatial Programming & Automation",
+      description: "Days 26–50: Python, R, SQL, PostGIS, Automation Pipelines",
+      duration: "25 sessions",
       completed: false,
       lessons: [
-        { title: "Vector vs Raster Data", duration: "20 min", completed: false },
-        { title: "Common Data Formats", duration: "25 min", completed: false },
-        { title: "Data Sources and Acquisition", duration: "30 min", completed: false },
-        { title: "Data Quality and Accuracy", duration: "35 min", completed: false },
+        { title: "Day 26: Intro to Python for GIS - Set up environment", duration: "1.5 hours", completed: false },
+        { title: "Days 27-28: Vector Ops in Python - Spatial joins, buffers", duration: "3 hours", completed: false },
+        { title: "Days 29-30: Raster Processing in Python - Load, calc, export rasters", duration: "3 hours", completed: false },
+        { title: "Day 31: Folium & Interactive Maps - HTML map creation", duration: "1.5 hours", completed: false },
+        { title: "Days 32-33: Automating QGIS - PyQGIS scripting", duration: "3 hours", completed: false },
+        { title: "Days 34-35: R for Spatial Analysis - Spatial stats, plotting", duration: "3 hours", completed: false },
+        { title: "Day 36: Raster Analysis in R - Raster math, reclassification", duration: "1.5 hours", completed: false },
+        { title: "Days 37-38: Spatial Joins & Overlays in R", duration: "3 hours", completed: false },
+        { title: "Days 39-40: SQL Basics - Joins, queries", duration: "3 hours", completed: false },
+        { title: "Days 41-42: Spatial SQL in PostGIS - ST_Buffer, ST_Intersects", duration: "3 hours", completed: false },
+        { title: "Day 43: DB Design & Indexing", duration: "1.5 hours", completed: false },
+        { title: "Days 44-45: Python + SQL Integration", duration: "3 hours", completed: false },
+        { title: "Days 46-47: R + SQL Integration", duration: "3 hours", completed: false },
+        { title: "Days 48-50: Capstone #2 - Full spatial data pipeline", duration: "4.5 hours", completed: false }
       ]
     },
     {
       id: 3,
-      title: "QGIS Fundamentals",
-      description: "Hands-on training with QGIS - the most popular open-source GIS software",
-      duration: "4 hours",
+      title: "Track 3: Web GIS & Cloud Platforms",
+      description: "Days 51–70: Leaflet, Mapbox, GeoServer, GEE, Cloud Storage",
+      duration: "20 sessions",
       completed: false,
       lessons: [
-        { title: "QGIS Interface Overview", duration: "20 min", completed: false },
-        { title: "Loading and Managing Data", duration: "30 min", completed: false },
-        { title: "Basic Symbology and Styling", duration: "25 min", completed: false },
-        { title: "Creating Your First Map", duration: "45 min", completed: false },
+        { title: "Day 51: Web GIS Intro - Web map architecture", duration: "1.5 hours", completed: false },
+        { title: "Days 52-53: Leaflet JS Basics - Load layers, interactivity", duration: "3 hours", completed: false },
+        { title: "Days 54-55: Mapbox Styling - Custom maps and tokens", duration: "3 hours", completed: false },
+        { title: "Days 56-58: GeoServer Setup - Serve WMS/WFS", duration: "4.5 hours", completed: false },
+        { title: "Days 59-60: GeoServer Styling - SLD, layer rules", duration: "3 hours", completed: false },
+        { title: "Days 61-62: Web GIS Fullstack - Backend + frontend", duration: "3 hours", completed: false },
+        { title: "Days 63-64: Cloud GIS: Google Earth Engine", duration: "3 hours", completed: false },
+        { title: "Day 65: Earth Engine Python API", duration: "1.5 hours", completed: false },
+        { title: "Day 66: Open Data Cube / AWS Open Data", duration: "1.5 hours", completed: false },
+        { title: "Days 67-68: Web Dashboards - Integrate maps with UI", duration: "3 hours", completed: false },
+        { title: "Day 69: Publish Portfolio Website", duration: "1.5 hours", completed: false },
+        { title: "Day 70: Capstone #3 - Web GIS / GEE project", duration: "1.5 hours", completed: false }
       ]
     },
     {
       id: 4,
-      title: "Spatial Analysis Techniques",
-      description: "Master essential spatial analysis operations and workflows",
-      duration: "5 hours",
+      title: "Track 4: GeoAI & Deep Learning",
+      description: "Days 71–100+: ML models, deep learning (YOLO, UNet), image detection, time series",
+      duration: "30+ sessions",
       completed: false,
       lessons: [
-        { title: "Buffer Analysis", duration: "30 min", completed: false },
-        { title: "Overlay Operations", duration: "45 min", completed: false },
-        { title: "Network Analysis", duration: "40 min", completed: false },
-        { title: "Statistical Analysis", duration: "35 min", completed: false },
-      ]
-    },
-    {
-      id: 5,
-      title: "Remote Sensing Basics",
-      description: "Introduction to satellite imagery and remote sensing applications",
-      duration: "3 hours",
-      completed: false,
-      lessons: [
-        { title: "Understanding Satellite Imagery", duration: "25 min", completed: false },
-        { title: "Image Classification", duration: "40 min", completed: false },
-        { title: "NDVI and Vegetation Analysis", duration: "30 min", completed: false },
-        { title: "Change Detection", duration: "35 min", completed: false },
-      ]
-    },
-    {
-      id: 6,
-      title: "Web Mapping and Visualization",
-      description: "Create interactive web maps and share your GIS results",
-      duration: "3 hours",
-      completed: false,
-      lessons: [
-        { title: "Introduction to Web GIS", duration: "20 min", completed: false },
-        { title: "Creating Interactive Maps", duration: "45 min", completed: false },
-        { title: "Data Visualization Best Practices", duration: "25 min", completed: false },
-        { title: "Publishing and Sharing Maps", duration: "30 min", completed: false },
+        { title: "Day 71: Intro to GeoAI - Why ML in geospatial", duration: "1.5 hours", completed: false },
+        { title: "Days 72-73: Data Prep for ML - Band math, labeling", duration: "3 hours", completed: false },
+        { title: "Days 74-75: Supervised Classification - Random Forest, SVM", duration: "3 hours", completed: false },
+        { title: "Days 76-77: Unsupervised Clustering - KMeans, DBSCAN", duration: "3 hours", completed: false },
+        { title: "Day 78: Accuracy Assessment - Confusion matrix", duration: "1.5 hours", completed: false },
+        { title: "Days 79-80: Deep Learning Intro - CNNs, UNet, YOLO", duration: "3 hours", completed: false },
+        { title: "Days 81-83: Building Detection - YOLOv8, LabelImg", duration: "4.5 hours", completed: false },
+        { title: "Days 84-85: Land Cover Segmentation - UNet, semantic segmentation", duration: "3 hours", completed: false },
+        { title: "Day 86: Time Series + Change Detection", duration: "1.5 hours", completed: false },
+        { title: "Day 87: ML in GEE - Train RF in GEE", duration: "1.5 hours", completed: false },
+        { title: "Days 88-89: AI Model Deployment - Streamlit app", duration: "3 hours", completed: false },
+        { title: "Day 90+: Final Capstone - End-to-end GeoAI + automation project", duration: "Open-ended", completed: false }
       ]
     }
   ];
@@ -97,13 +108,13 @@ const GeospatialTechnologyUnlocked = () => {
   const progressPercentage = (completedModules / courseModules.length) * 100;
 
   const courseInfo = {
-    title: "Geospatial Technology Unlocked",
-    description: "Master the fundamentals of GIS, remote sensing, and spatial analysis with hands-on projects and real-world applications.",
-    duration: "20+ hours",
-    level: "Beginner to Intermediate",
+    title: "Geospatial Technology Unlocked – Full 90+ Day Curriculum",
+    description: "From beginner to advanced, students will be job-ready geospatial professionals with AI and automation skills. 90 sessions (1.5 hours/day) with a blend of lecture (20–30%), demos, and practical exercises.",
+    duration: "90+ sessions (135+ hours)",
+    level: "Beginner to Advanced",
     students: "2,847 enrolled",
     rating: 4.8,
-    instructor: "Dr. Sarah Johnson",
+    instructor: "HaritaHive Expert Team",
     lastUpdated: "December 2024"
   };
 
@@ -142,7 +153,7 @@ const GeospatialTechnologyUnlocked = () => {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Your Progress</span>
                 <span className="text-sm text-muted-foreground">
-                  {completedModules} of {courseModules.length} modules completed
+                  {completedModules} of {courseModules.length} tracks completed
                 </span>
               </div>
               <Progress value={progressPercentage} className="h-2" />
@@ -196,7 +207,7 @@ const GeospatialTechnologyUnlocked = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Course Curriculum</h2>
               <div className="text-sm text-muted-foreground">
-                {courseModules.length} modules • 20+ hours of content
+                {courseModules.length} tracks • 90+ sessions • 135+ hours of content
               </div>
             </div>
 
@@ -251,6 +262,91 @@ const GeospatialTechnologyUnlocked = () => {
                 </CardContent>
               </Card>
             ))}
+
+            {/* Deliverables Section */}
+            <div className="mt-8 space-y-6">
+              <h2 className="text-2xl font-bold">Student Deliverables</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      Major Projects
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      At least 4 major capstone projects (1 per track) showcasing practical skills
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      Portfolio Website
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Personal geospatial portfolio site (GitHub Pages or custom)
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      GitHub Repository
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Resume-ready GitHub repo of code and maps
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      Career Readiness
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Ability to apply for internships, jobs, or freelance roles
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Bonus Add-ons */}
+            <div className="mt-8 space-y-6">
+              <h2 className="text-2xl font-bold">Bonus Add-ons (Optional)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  "Slide decks for each module",
+                  "Assignment templates (Google Docs / Notion)",
+                  "PDF workbook for students",
+                  "Student showcase gallery template",
+                  "Mentorship / internship mapping"
+                ].map((addon, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-primary" />
+                        <span className="text-sm">{addon}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
@@ -267,13 +363,13 @@ const GeospatialTechnologyUnlocked = () => {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">{courseInfo.instructor}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Ph.D. in Geography, 15+ years of experience in GIS and remote sensing. 
-                    Former NASA researcher and current professor at Stanford University.
+                    Expert team of GIS professionals, data scientists, and AI specialists with combined 100+ years 
+                    of experience in geospatial technology, remote sensing, and machine learning applications.
                   </p>
                   <div className="flex gap-4 text-sm">
-                    <span>50,000+ students taught</span>
-                    <span>4.9 instructor rating</span>
-                    <span>25 courses published</span>
+                    <span>10,000+ students trained</span>
+                    <span>4.8 instructor rating</span>
+                    <span>Industry-proven curriculum</span>
                   </div>
                 </div>
               </div>
