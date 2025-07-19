@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { DataImportDialog } from "./DataImportDialog";
 import { SpatialAnalysisPanel } from "./SpatialAnalysisPanel";
 import { PublishDashboardDialog } from "./PublishDashboardDialog";
+import { MapboxRenderer } from "./MapboxRenderer";
+import { CollaborationPanel } from "./CollaborationPanel";
+import { DashboardTemplates } from "./DashboardTemplates";
 import { MapContainer, TileLayer, LayersControl, useMap } from 'react-leaflet';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -330,9 +333,169 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
     await addLayer(analysisLayer);
   };
 
-  const handleProjectUpdate = (updates: any) => {
-    setCurrentProject(prev => ({ ...prev, ...updates }));
+  const handleTemplateSelect = async (template: any) => {
+    // Apply template layers and widgets
+    for (const layerTemplate of template.layers) {
+      await addLayer({
+        name: layerTemplate.name,
+        type: layerTemplate.type,
+        source_data: layerTemplate.sampleData || {},
+        style_config: layerTemplate.style,
+        is_visible: true,
+        layer_order: layers.length,
+        project_id: projectId
+      });
+    }
+
+    for (const widgetTemplate of template.widgets) {
+      await addWidget({
+        type: widgetTemplate.type,
+        title: widgetTemplate.config?.title || widgetTemplate.type,
+        position: widgetTemplate.position,
+        config: widgetTemplate.config || {},
+        is_visible: true,
+        project_id: projectId
+      });
+    }
   };
+
+  return (
+    <div className="h-screen flex flex-col bg-background">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Projects
+            </Button>
+            <h1 className="text-2xl font-bold">WebGIS Builder</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setTemplatesDialogOpen(true)}>
+              <Template className="h-4 w-4 mr-2" />
+              Templates
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setUseMapbox(!useMapbox)}>
+              <Globe className="h-4 w-4 mr-2" />
+              {useMapbox ? 'Mapbox' : 'Leaflet'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className={`bg-muted/20 border-r transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-80'} flex flex-col`}>
+          <div className="p-4 border-b">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="w-full justify-start"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              {!sidebarCollapsed && "Tools & Layers"}
+            </Button>
+          </div>
+
+          {!sidebarCollapsed && (
+            <div className="flex-1 overflow-auto p-4">
+              <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as any)}>
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="layers" className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Layers
+                  </TabsTrigger>
+                  <TabsTrigger value="widgets" className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Widgets
+                  </TabsTrigger>
+                  <TabsTrigger value="analysis" className="flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    Analysis
+                  </TabsTrigger>
+                  <TabsTrigger value="collaborate" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Collaborate
+                  </TabsTrigger>
+                  <TabsTrigger value="settings" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* ... keep existing TabsContent sections ... */}
+
+              </Tabs>
+            </div>
+          )}
+        </div>
+
+        {/* Map Container */}
+        <div className="flex-1 relative">
+          <div className="absolute top-4 right-4 z-10 flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleSaveProject}>
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setPublishDialogOpen(true)}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Publish
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleExportProject}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+
+          {useMapbox ? (
+            <MapboxRenderer
+              layers={layers}
+              widgets={widgets}
+              onMapReady={(map) => { mapRef.current = map; }}
+            />
+          ) : (
+            <MapContainer
+              center={[51.505, -0.09]}
+              zoom={13}
+              ref={mapRef}
+              className="h-full w-full"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            </MapContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Data Import Dialog */}
+      <DataImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        projectId={projectId}
+        onLayerAdded={handleImportedLayerAdded}
+      />
+
+      {/* Publish Dashboard Dialog */}
+      <PublishDashboardDialog
+        open={publishDialogOpen}
+        onOpenChange={setPublishDialogOpen}
+        project={currentProject}
+        onProjectUpdate={handleProjectUpdate}
+      />
+
+      {/* Dashboard Templates Dialog */}
+      <DashboardTemplates
+        open={templatesDialogOpen}
+        onClose={() => setTemplatesDialogOpen(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
+    </div>
+  );
+};
 
   const getBasemapUrl = (basemap: string) => {
     const basemaps = {
@@ -705,12 +868,11 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
         onLayerAdded={handleImportedLayerAdded}
       />
 
-      {/* Publish Dashboard Dialog */}
-      <PublishDashboardDialog
-        open={publishDialogOpen}
-        onOpenChange={setPublishDialogOpen}
-        project={currentProject}
-        onProjectUpdate={handleProjectUpdate}
+      {/* Dashboard Templates Dialog */}
+      <DashboardTemplates
+        open={templatesDialogOpen}
+        onClose={() => setTemplatesDialogOpen(false)}
+        onSelectTemplate={handleTemplateSelect}
       />
     </div>
   );
