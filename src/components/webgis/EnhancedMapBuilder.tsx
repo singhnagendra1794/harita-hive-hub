@@ -95,7 +95,7 @@ const SortableLayerItem: React.FC<{
             <div>
               <span className="text-sm font-medium">{layer.name}</span>
               <Badge variant="outline" className="text-xs ml-2">
-                {layer.layer_type.toUpperCase()}
+                {layer.type.toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -245,8 +245,8 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
 
           await addLayer({
             name: file.name.replace(/\.[^/.]+$/, ""),
-            layer_type: layerType as any,
-            data_source: JSON.stringify(data),
+            type: layerType as any,
+            source_data: data,
             style_config: {
               color: '#3b82f6',
               weight: 2,
@@ -254,8 +254,7 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
             },
             is_visible: true,
             layer_order: layers.length,
-            project_id: projectId,
-            opacity: 1
+            project_id: projectId
           });
 
           setUploadDialogOpen(false);
@@ -305,10 +304,9 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
 
   const addNewWidget = async (type: 'legend' | 'scale' | 'coordinates' | 'filter' | 'chart') => {
     await addWidget({
-      widget_type: type as any,
-      name: `${type.charAt(0).toUpperCase() + type.slice(1)} Widget`,
-      position: { x: 20, y: 20 },
-      size: { width: 200, height: 100 },
+      type: type as any,
+      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Widget`,
+      position: 'top-left',
       config: {},
       is_visible: true,
       project_id: projectId
@@ -322,13 +320,12 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
   const handleAnalysisComplete = async (result: any) => {
     const analysisLayer = {
       name: result.name,
-      layer_type: 'geojson' as const,
-      data_source: JSON.stringify(result),
+      type: 'geojson' as const,
+      source_data: result,
       style_config: result.style,
       is_visible: true,
       layer_order: layers.length,
-      project_id: projectId,
-      opacity: 1
+      project_id: projectId
     };
     await addLayer(analysisLayer);
   };
@@ -558,11 +555,11 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
                       checked={widget.is_visible}
                       onChange={(e) => updateWidget(widget.id, { is_visible: e.target.checked })}
                     />
-                    <span className="text-sm capitalize">{widget.widget_type}</span>
+                    <span className="text-sm capitalize">{widget.type}</span>
                   </div>
                   <div className="flex gap-1">
                     <Badge variant="secondary" className="text-xs">
-                      {widget.position.x},{widget.position.y}
+                      {widget.position}
                     </Badge>
                     <Button variant="ghost" size="sm" onClick={() => deleteWidget(widget.id)}>
                       <Trash2 className="h-3 w-3" />
@@ -677,23 +674,22 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
             {widgets.filter(w => w.is_visible).map(widget => (
               <div
                 key={widget.id}
-                className="absolute z-[1000] p-2 bg-background/90 backdrop-blur-sm rounded border shadow-sm top-4 left-4"
-                style={{
-                  left: `${widget.position.x}px`,
-                  top: `${widget.position.y}px`,
-                  width: `${widget.size.width}px`,
-                  minHeight: `${widget.size.height}px`
-                }}
+                className={`absolute z-[1000] p-2 bg-background/90 backdrop-blur-sm rounded border shadow-sm ${
+                  widget.position === 'top-left' ? 'top-4 left-4' :
+                  widget.position === 'top-right' ? 'top-4 right-4' :
+                  widget.position === 'bottom-left' ? 'bottom-4 left-4' :
+                  'bottom-4 right-4'
+                }`}
               >
                 <div className="text-xs font-medium mb-1 capitalize">
-                  {widget.widget_type}
+                  {widget.type}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {widget.widget_type === 'coordinates' && 'Lat: 0.000, Lng: 0.000'}
-                  {widget.widget_type === 'scale' && '1:100,000'}
-                  {widget.widget_type === 'legend' && 'Map Legend'}
-                  {widget.widget_type === 'chart' && 'Data Chart'}
-                  {widget.widget_type === 'filter' && 'Layer Filter'}
+                  {widget.type === 'coordinates' && 'Lat: 0.000, Lng: 0.000'}
+                  {widget.type === 'scale' && '1:100,000'}
+                  {widget.type === 'legend' && 'Map Legend'}
+                  {widget.type === 'chart' && 'Data Chart'}
+                  {widget.type === 'filter' && 'Layer Filter'}
                 </div>
               </div>
             ))}
