@@ -281,7 +281,11 @@ const EnhancedGeoProcessingWorkspace = () => {
 
             <div className="px-4">
               <TabsContent value="merge" className="mt-0">
-                <MergeTools />
+                <MergeTools 
+                  onJobCreated={fetchJobStats}
+                  onResultGenerated={(result) => addResultLayer(result, result.tool_name || 'Result', 'vector')}
+                  subscription={subscription}
+                />
               </TabsContent>
 
               <TabsContent value="data" className="mt-0">
@@ -327,9 +331,8 @@ const EnhancedGeoProcessingWorkspace = () => {
 
             <TabsContent value="export" className="mt-0">
               <ExportTools
-                data={null}
-                dataType="vector"
-                fileName="processing_results"
+                subscription={subscription}
+                mapLayers={mapLayers}
               />
             </TabsContent>
           </div>

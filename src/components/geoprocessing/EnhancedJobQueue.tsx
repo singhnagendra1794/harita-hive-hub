@@ -84,7 +84,19 @@ const EnhancedJobQueue = ({ jobStats, onJobUpdate, onResultGenerated }: Enhanced
 
       if (error) throw error;
 
-      setJobs(data || []);
+      setJobs((data || []).map(job => ({
+        id: job.id,
+        job_type: job.job_type,
+        status: job.status as 'pending' | 'processing' | 'completed' | 'failed',
+        progress: job.progress || 0,
+        created_at: job.created_at,
+        completed_at: job.completed_at || undefined,
+        error_message: job.error_message || undefined,
+        result_url: job.output_files ? String(job.output_files) : undefined,
+        parameters: job.parameters || {},
+        input_files: Array.isArray(job.input_files) ? job.input_files.map(f => String(f)) : [String(job.input_files || '')],
+        ai_summary: undefined // This field doesn't exist in the database yet
+      })));
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {
