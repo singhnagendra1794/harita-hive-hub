@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
+import { DataImportDialog } from "./DataImportDialog";
+import { SpatialAnalysisPanel } from "./SpatialAnalysisPanel";
+import { PublishDashboardDialog } from "./PublishDashboardDialog";
 import { MapContainer, TileLayer, LayersControl, useMap } from 'react-leaflet';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,7 +95,7 @@ const SortableLayerItem: React.FC<{
             <div>
               <span className="text-sm font-medium">{layer.name}</span>
               <Badge variant="outline" className="text-xs ml-2">
-                {layer.type.toUpperCase()}
+                {layer.layer_type.toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -130,6 +133,9 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
   });
 
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [currentProject, setCurrentProject] = useState<any>(null);
   const [fileUploadType, setFileUploadType] = useState<'geojson' | 'csv' | 'api'>('geojson');
   const [analysisMode, setAnalysisMode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -239,8 +245,8 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
 
           await addLayer({
             name: file.name.replace(/\.[^/.]+$/, ""),
-            type: layerType,
-            source_data: data,
+            layer_type: layerType as any,
+            data_source: JSON.stringify(data),
             style_config: {
               color: '#3b82f6',
               weight: 2,
@@ -248,7 +254,8 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
             },
             is_visible: true,
             layer_order: layers.length,
-            project_id: projectId
+            project_id: projectId,
+            opacity: 1
           });
 
           setUploadDialogOpen(false);
@@ -298,13 +305,36 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
 
   const addNewWidget = async (type: 'legend' | 'scale' | 'coordinates' | 'filter' | 'chart') => {
     await addWidget({
-      type,
-      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Widget`,
-      position: 'top-left',
+      widget_type: type as any,
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)} Widget`,
+      position: { x: 20, y: 20 },
+      size: { width: 200, height: 100 },
       config: {},
       is_visible: true,
       project_id: projectId
     });
+  };
+
+  const handleImportedLayerAdded = async (layerData: any) => {
+    await addLayer(layerData);
+  };
+
+  const handleAnalysisComplete = async (result: any) => {
+    const analysisLayer = {
+      name: result.name,
+      layer_type: 'geojson' as const,
+      data_source: JSON.stringify(result),
+      style_config: result.style,
+      is_visible: true,
+      layer_order: layers.length,
+      project_id: projectId,
+      opacity: 1
+    };
+    await addLayer(analysisLayer);
+  };
+
+  const handleProjectUpdate = (updates: any) => {
+    setCurrentProject(prev => ({ ...prev, ...updates }));
   };
 
   const getBasemapUrl = (basemap: string) => {
@@ -528,11 +558,11 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
                       checked={widget.is_visible}
                       onChange={(e) => updateWidget(widget.id, { is_visible: e.target.checked })}
                     />
-                    <span className="text-sm capitalize">{widget.type}</span>
+                    <span className="text-sm capitalize">{widget.widget_type}</span>
                   </div>
                   <div className="flex gap-1">
                     <Badge variant="secondary" className="text-xs">
-                      {widget.position}
+                      {widget.position.x},{widget.position.y}
                     </Badge>
                     <Button variant="ghost" size="sm" onClick={() => deleteWidget(widget.id)}>
                       <Trash2 className="h-3 w-3" />
@@ -647,28 +677,45 @@ const EnhancedMapBuilder: React.FC<EnhancedMapBuilderProps> = ({ projectId, onBa
             {widgets.filter(w => w.is_visible).map(widget => (
               <div
                 key={widget.id}
-                className={`absolute z-[1000] p-2 bg-background/90 backdrop-blur-sm rounded border shadow-sm ${
-                  widget.position === 'top-left' ? 'top-4 left-4' :
-                  widget.position === 'top-right' ? 'top-4 right-4' :
-                  widget.position === 'bottom-left' ? 'bottom-4 left-4' :
-                  'bottom-4 right-4'
-                }`}
+                className="absolute z-[1000] p-2 bg-background/90 backdrop-blur-sm rounded border shadow-sm top-4 left-4"
+                style={{
+                  left: `${widget.position.x}px`,
+                  top: `${widget.position.y}px`,
+                  width: `${widget.size.width}px`,
+                  minHeight: `${widget.size.height}px`
+                }}
               >
                 <div className="text-xs font-medium mb-1 capitalize">
-                  {widget.type}
+                  {widget.widget_type}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {widget.type === 'coordinates' && 'Lat: 0.000, Lng: 0.000'}
-                  {widget.type === 'scale' && '1:100,000'}
-                  {widget.type === 'legend' && 'Map Legend'}
-                  {widget.type === 'chart' && 'Data Chart'}
-                  {widget.type === 'filter' && 'Layer Filter'}
+                  {widget.widget_type === 'coordinates' && 'Lat: 0.000, Lng: 0.000'}
+                  {widget.widget_type === 'scale' && '1:100,000'}
+                  {widget.widget_type === 'legend' && 'Map Legend'}
+                  {widget.widget_type === 'chart' && 'Data Chart'}
+                  {widget.widget_type === 'filter' && 'Layer Filter'}
                 </div>
               </div>
             ))}
           </MapContainer>
         </div>
       </div>
+
+      {/* Data Import Dialog */}
+      <DataImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        projectId={projectId}
+        onLayerAdded={handleImportedLayerAdded}
+      />
+
+      {/* Publish Dashboard Dialog */}
+      <PublishDashboardDialog
+        open={publishDialogOpen}
+        onOpenChange={setPublishDialogOpen}
+        project={currentProject}
+        onProjectUpdate={handleProjectUpdate}
+      />
     </div>
   );
 };
