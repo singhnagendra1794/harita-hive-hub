@@ -583,6 +583,94 @@ export type Database = {
         }
         Relationships: []
       }
+      class_qa: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          answered_by: string | null
+          class_id: string
+          created_at: string
+          id: string
+          is_highlighted: boolean | null
+          question: string
+          updated_at: string
+          user_id: string
+          votes: number | null
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          class_id: string
+          created_at?: string
+          id?: string
+          is_highlighted?: boolean | null
+          question: string
+          updated_at?: string
+          user_id: string
+          votes?: number | null
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          class_id?: string
+          created_at?: string
+          id?: string
+          is_highlighted?: boolean | null
+          question?: string
+          updated_at?: string
+          user_id?: string
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_qa_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_registrations: {
+        Row: {
+          attendance_status: string | null
+          class_id: string
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          registered_at: string
+          user_id: string
+        }
+        Insert: {
+          attendance_status?: string | null
+          class_id: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          registered_at?: string
+          user_id: string
+        }
+        Update: {
+          attendance_status?: string | null
+          class_id?: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          registered_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_registrations_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       code_snippet_favorites: {
         Row: {
           created_at: string | null
@@ -2328,6 +2416,48 @@ export type Database = {
           },
         ]
       }
+      instructor_stream_settings: {
+        Row: {
+          backup_recording: boolean | null
+          created_at: string
+          default_stream_type: string | null
+          enable_chat: boolean | null
+          enable_recording: boolean | null
+          id: string
+          instructor_id: string
+          obs_stream_key: string | null
+          stream_quality: string | null
+          updated_at: string
+          youtube_channel_id: string | null
+        }
+        Insert: {
+          backup_recording?: boolean | null
+          created_at?: string
+          default_stream_type?: string | null
+          enable_chat?: boolean | null
+          enable_recording?: boolean | null
+          id?: string
+          instructor_id: string
+          obs_stream_key?: string | null
+          stream_quality?: string | null
+          updated_at?: string
+          youtube_channel_id?: string | null
+        }
+        Update: {
+          backup_recording?: boolean | null
+          created_at?: string
+          default_stream_type?: string | null
+          enable_chat?: boolean | null
+          enable_recording?: boolean | null
+          id?: string
+          instructor_id?: string
+          obs_stream_key?: string | null
+          stream_quality?: string | null
+          updated_at?: string
+          youtube_channel_id?: string | null
+        }
+        Relationships: []
+      }
       interview_invitations: {
         Row: {
           company_id: string
@@ -2695,6 +2825,9 @@ export type Database = {
       live_classes: {
         Row: {
           access_tier: string
+          auto_record: boolean | null
+          chat_enabled: boolean | null
+          class_status: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -2702,19 +2835,25 @@ export type Database = {
           id: string
           instructor: string | null
           is_live: boolean
+          recording_url: string | null
           rtmp_endpoint: string | null
           starts_at: string
           stream_key: string | null
+          stream_server_url: string | null
           stream_type: string | null
           stream_url: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
           video_url: string
+          viewer_count: number | null
           youtube_video_id: string
         }
         Insert: {
           access_tier?: string
+          auto_record?: boolean | null
+          chat_enabled?: boolean | null
+          class_status?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2722,19 +2861,25 @@ export type Database = {
           id?: string
           instructor?: string | null
           is_live?: boolean
+          recording_url?: string | null
           rtmp_endpoint?: string | null
           starts_at: string
           stream_key?: string | null
+          stream_server_url?: string | null
           stream_type?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
           video_url: string
+          viewer_count?: number | null
           youtube_video_id: string
         }
         Update: {
           access_tier?: string
+          auto_record?: boolean | null
+          chat_enabled?: boolean | null
+          class_status?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2742,15 +2887,18 @@ export type Database = {
           id?: string
           instructor?: string | null
           is_live?: boolean
+          recording_url?: string | null
           rtmp_endpoint?: string | null
           starts_at?: string
           stream_key?: string | null
+          stream_server_url?: string | null
           stream_type?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string
+          viewer_count?: number | null
           youtube_video_id?: string
         }
         Relationships: []
@@ -6503,6 +6651,10 @@ export type Database = {
         Args: { session_id: string }
         Returns: undefined
       }
+      track_class_attendance: {
+        Args: { p_class_id: string; p_user_id: string; p_action: string }
+        Returns: undefined
+      }
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }
         Returns: string
@@ -6519,6 +6671,10 @@ export type Database = {
           p_interaction_type: string
           p_metadata?: Json
         }
+        Returns: undefined
+      }
+      update_class_status: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       update_user_stats: {

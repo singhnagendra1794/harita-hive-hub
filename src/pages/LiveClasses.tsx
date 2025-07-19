@@ -24,7 +24,10 @@ interface LiveClass {
   thumbnail_url: string | null;
   instructor: string;
   created_at: string;
-  stream_type?: string;
+  class_status: 'upcoming' | 'live' | 'ended' | 'recorded';
+  viewer_count: number;
+  stream_type: 'youtube' | 'obs' | 'hybrid';
+  recording_url: string | null;
 }
 
 const LiveClasses = () => {
@@ -45,7 +48,7 @@ const LiveClasses = () => {
         .order('starts_at', { ascending: false });
 
       if (error) throw error;
-      setLiveClasses(data || []);
+      setLiveClasses((data || []) as LiveClass[]);
     } catch (error) {
       console.error('Error fetching live classes:', error);
       toast({
@@ -58,16 +61,16 @@ const LiveClasses = () => {
     }
   };
 
-  const isLive = (startsAt: string, endsAt: string | null, isLiveFlag: boolean) => {
-    const now = new Date();
-    const start = new Date(startsAt);
-    const end = endsAt ? new Date(endsAt) : null;
-    
-    return isLiveFlag && now >= start && (!end || now <= end);
+  const isLive = (liveClass: LiveClass) => {
+    return liveClass.class_status === 'live';
   };
 
-  const isUpcoming = (startsAt: string) => {
-    return new Date(startsAt) > new Date();
+  const isUpcoming = (liveClass: LiveClass) => {
+    return liveClass.class_status === 'upcoming';
+  };
+
+  const isRecorded = (liveClass: LiveClass) => {
+    return liveClass.class_status === 'recorded';
   };
 
   const handleJoinClass = (liveClass: LiveClass) => {
@@ -86,8 +89,8 @@ const LiveClasses = () => {
     navigate(`/live-classes/${liveClass.id}`);
   };
 
-  const upcomingClasses = liveClasses.filter(cls => isUpcoming(cls.starts_at));
-  const pastClasses = liveClasses.filter(cls => !isUpcoming(cls.starts_at));
+  const upcomingClasses = liveClasses.filter(cls => isUpcoming(cls) || isLive(cls));
+  const pastClasses = liveClasses.filter(cls => isRecorded(cls) || cls.class_status === 'ended');
 
   return (
     <Layout>
@@ -117,13 +120,13 @@ const LiveClasses = () => {
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{liveClass.title}</CardTitle>
                       <div className="flex gap-2">
-                        {isLive(liveClass.starts_at, liveClass.ends_at, liveClass.is_live) && (
+                        {isLive(liveClass) && (
                           <Badge variant="destructive" className="animate-pulse">
                             🔴 LIVE
                           </Badge>
                         )}
                         <Badge variant="outline">{liveClass.access_tier}</Badge>
-                        <Badge variant="secondary">{liveClass.stream_type || 'YouTube'}</Badge>
+                        <Badge variant="secondary">{liveClass.stream_type}</Badge>
                       </div>
                     </div>
                     <CardDescription>{liveClass.description}</CardDescription>
@@ -150,7 +153,7 @@ const LiveClasses = () => {
                         className="w-full" 
                         onClick={() => handleJoinClass(liveClass)}
                       >
-                        {isLive(liveClass.starts_at, liveClass.ends_at, liveClass.is_live) ? 'Join Live Class' : 'View Class'}
+                        {isLive(liveClass) ? 'Join Live Class' : isUpcoming(liveClass) ? 'Register & Join' : 'View Class'}
                       </Button>
                     </div>
                   </CardContent>
@@ -184,9 +187,11 @@ const LiveClasses = () => {
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{liveClass.title}</CardTitle>
                       <div className="flex gap-2">
-                        <Badge variant="outline">Recorded</Badge>
-                        <Badge variant="secondary">{liveClass.access_tier}</Badge>
-                        <Badge variant="outline">{liveClass.stream_type || 'YouTube'}</Badge>
+                        <Badge variant="secondary">
+                          {isRecorded(liveClass) ? 'Recorded' : 'Ended'}
+                        </Badge>
+                        <Badge variant="outline">{liveClass.access_tier}</Badge>
+                        <Badge variant="outline">{liveClass.stream_type}</Badge>
                       </div>
                     </div>
                     <CardDescription>{liveClass.description}</CardDescription>
@@ -208,7 +213,7 @@ const LiveClasses = () => {
                         className="w-full"
                         onClick={() => handleJoinClass(liveClass)}
                       >
-                        Watch Recording
+                        {isRecorded(liveClass) ? 'Watch Recording' : 'View Class'}
                       </Button>
                     </div>
                   </CardContent>
