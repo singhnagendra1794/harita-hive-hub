@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GISToolCard from "../components/marketplace/GISToolCard";
-import { Plus, Search, Filter, TrendingUp, Package, Users } from "lucide-react";
+import { Plus, Search, Filter, TrendingUp, Package, Users, CheckCircle, WifiOff, FileText, Database } from "lucide-react";
 import { useUserStats } from "@/hooks/useUserStats";
 
 const GISMarketplace = () => {
@@ -255,12 +255,48 @@ const GISMarketplace = () => {
           </CardContent>
         </Card>
 
+        {/* Quality Assurance Section */}
+        <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div>
+                <h3 className="text-lg font-semibold text-green-800">Quality Assured GIS Tools</h3>
+                <p className="text-green-700">All tools are tested and verified for global compatibility</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <CheckCircle className="h-4 w-4" />
+                <span>✅ QGIS Compatible</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <WifiOff className="h-4 w-4" />
+                <span>Offline Capable</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <FileText className="h-4 w-4" />
+                <span>Full Documentation</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <Database className="h-4 w-4" />
+                <span>Sample Data Included</span>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Global Pricing:</strong> All tools available at $14.99 USD (₹1,249 INR) with instant download access
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="browse" className="space-y-6">
           <div className="flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="browse">Browse All</TabsTrigger>
               <TabsTrigger value="featured">Featured</TabsTrigger>
-              <TabsTrigger value="popular">Most Popular</TabsTrigger>
+              <TabsTrigger value="qgis">QGIS Tools</TabsTrigger>
               <TabsTrigger value="recent">Recently Added</TabsTrigger>
             </TabsList>
             
@@ -296,9 +332,9 @@ const GISMarketplace = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="popular">
+          <TabsContent value="qgis">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...tools].sort((a, b) => b.downloads - a.downloads).map(tool => (
+              {tools.filter(tool => tool.isQGISCompatible).map(tool => (
                 <GISToolCard 
                   key={tool.id} 
                   {...tool} 

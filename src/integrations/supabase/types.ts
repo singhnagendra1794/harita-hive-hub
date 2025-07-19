@@ -1598,6 +1598,42 @@ export type Database = {
           },
         ]
       }
+      download_logs: {
+        Row: {
+          created_at: string
+          download_completed: boolean | null
+          download_timestamp: string
+          id: string
+          ip_address: unknown | null
+          tool_id: string
+          tool_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          download_completed?: boolean | null
+          download_timestamp?: string
+          id?: string
+          ip_address?: unknown | null
+          tool_id: string
+          tool_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          download_completed?: boolean | null
+          download_timestamp?: string
+          id?: string
+          ip_address?: unknown | null
+          tool_id?: string
+          tool_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_queue: {
         Row: {
           created_at: string | null
