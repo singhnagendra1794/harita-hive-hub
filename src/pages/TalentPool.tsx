@@ -8,120 +8,122 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import GISProfileCard from "../components/talent/GISProfileCard";
-import { Search, Users, TrendingUp, MapPin, Plus } from "lucide-react";
+import { Search, Briefcase, TrendingUp, MapPin, RefreshCw, Clock, Users, Filter } from "lucide-react";
+import { useJobListings } from "@/hooks/useJobListings";
+import JobCard from "@/components/jobs/JobCard";
+import { useToast } from "@/hooks/use-toast";
 
 const TalentPool = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [experienceFilter, setExperienceFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [skillFilter, setSkillFilter] = useState("all");
-
-  // Mock data - replace with real data from Supabase
-  const profiles = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      title: "Senior GIS Analyst & Remote Sensing Specialist",
-      bio: "Experienced GIS professional with 8+ years in environmental consulting. Specialized in satellite imagery analysis, land use planning, and web mapping applications.",
-      avatar: "/api/placeholder/64/64",
-      location: "San Francisco, CA",
-      hourlyRate: 85,
-      experienceLevel: "senior",
-      skills: ["ArcGIS", "Python", "Remote Sensing", "Spatial Analysis", "QGIS"],
-      tools: ["ArcGIS Pro", "Python", "R", "Google Earth Engine", "PostGIS"],
-      rating: 4.9,
-      completedProjects: 47,
-      availableForHire: true,
-      portfolioUrl: "https://sarahjohnson.dev",
-      linkedinUrl: "https://linkedin.com/in/sarahjohnson"
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      title: "GIS Developer & Full-Stack Engineer",
-      bio: "Full-stack developer specializing in geospatial web applications. Expert in modern web technologies and spatial databases.",
-      location: "Remote",
-      hourlyRate: 75,
-      experienceLevel: "mid",
-      skills: ["JavaScript", "React", "Leaflet", "PostGIS", "Node.js"],
-      tools: ["Mapbox", "Leaflet", "React", "PostgreSQL", "Docker"],
-      rating: 4.8,
-      completedProjects: 32,
-      availableForHire: true,
-      portfolioUrl: "https://michaelchen.io"
-    },
-    {
-      id: "3",
-      name: "Dr. Elena Rodriguez",
-      title: "Geospatial Data Scientist",
-      bio: "PhD in Geography with expertise in machine learning applications for geospatial data. Published researcher with industry experience.",
-      location: "Austin, TX",
-      hourlyRate: 120,
-      experienceLevel: "expert",
-      skills: ["Machine Learning", "Python", "R", "Statistical Analysis", "Research"],
-      tools: ["Python", "R", "TensorFlow", "GDAL", "Jupyter"],
-      rating: 5.0,
-      completedProjects: 23,
-      availableForHire: false
-    },
-    {
-      id: "4",
-      name: "James Wilson",
-      title: "Junior GIS Technician",
-      bio: "Recent geography graduate with strong foundation in GIS principles. Eager to work on mapping and data collection projects.",
-      location: "Denver, CO",
-      hourlyRate: 35,
-      experienceLevel: "entry",
-      skills: ["ArcGIS", "Data Entry", "Cartography", "GPS", "Field Work"],
-      tools: ["ArcGIS", "QGIS", "GPS Units", "Excel"],
-      rating: 4.5,
-      completedProjects: 8,
-      availableForHire: true
-    }
-  ];
-
-  const skills = ["ArcGIS", "Python", "QGIS", "Remote Sensing", "JavaScript", "R", "Machine Learning"];
-  const locations = ["Remote", "San Francisco, CA", "Austin, TX", "Denver, CO", "New York, NY"];
+  const [jobTypeFilter, setJobTypeFilter] = useState("all");
+  const [experienceFilter, setExperienceFilter] = useState("all");
+  const [refreshing, setRefreshing] = useState(false);
   
-  const filteredProfiles = profiles.filter(profile => {
-    const matchesSearch = profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         profile.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         profile.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesExperience = experienceFilter === "all" || profile.experienceLevel === experienceFilter;
-    const matchesLocation = locationFilter === "all" || profile.location === locationFilter;
-    const matchesSkill = skillFilter === "all" || profile.skills.includes(skillFilter);
+  const { jobs, loading, error, lastUpdated, fetchJobs, refreshJobs } = useJobListings();
+  const { toast } = useToast();
+
+  // Build filters object - simplified for now
+  const applyFilters = () => {
+    // Client-side filtering since we have mock data
+    fetchJobs();
+  };
+
+  // Filter jobs based on current filters
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = !searchTerm || 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesSearch && matchesExperience && matchesLocation && matchesSkill;
+    const matchesLocation = locationFilter === "all" || 
+      job.location.toLowerCase().includes(locationFilter.toLowerCase());
+    
+    const matchesJobType = jobTypeFilter === "all" || job.job_type === jobTypeFilter;
+    const matchesExperience = experienceFilter === "all" || job.experience_level === experienceFilter;
+    
+    return matchesSearch && matchesLocation && matchesJobType && matchesExperience;
   });
 
-  const availableProfiles = profiles.filter(p => p.availableForHire);
-  const stats = {
-    totalProfiles: profiles.length,
-    availableNow: availableProfiles.length,
-    avgHourlyRate: Math.round(profiles.reduce((sum, p) => sum + p.hourlyRate, 0) / profiles.length)
+  // Separate jobs by categories
+  const indiaJobs = filteredJobs.filter(job => job.is_india_focused);
+  const remoteJobs = filteredJobs.filter(job => job.is_remote);
+  const freshJobs = filteredJobs.filter(job => {
+    const postedDate = new Date(job.posted_date);
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    return postedDate > threeDaysAgo;
+  });
+
+  const handleRefreshJobs = async () => {
+    try {
+      setRefreshing(true);
+      await refreshJobs();
+      
+      toast({
+        title: "Jobs Updated! 🚀",
+        description: "Fresh job listings have been fetched using AI discovery.",
+      });
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "Failed to refresh job listings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  const stats = {
+    totalJobs: jobs.length,
+    indiaJobs: indiaJobs.length,
+    remoteJobs: remoteJobs.length,
+    freshJobs: freshJobs.length
+  };
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <div className="text-center py-12">
+            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Error loading job listings</h3>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-    <div className="container py-8">
+      <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">GIS Talent Pool</h1>
+          <h1 className="text-4xl font-bold mb-4">🇮🇳 Geospatial Jobs Discovery</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Connect with verified GIS professionals and browse our talent pool. Find the perfect expert for your geospatial projects.
+            AI-powered job discovery for GIS, Remote Sensing, GeoAI, and Spatial Data professionals. 
+            Focused on India with global opportunities.
           </p>
+          {lastUpdated && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Last updated {lastUpdated.toLocaleTimeString()} • {stats.totalJobs} active positions
+            </p>
+          )}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <Users className="h-10 w-10 text-primary" />
+                <Briefcase className="h-10 w-10 text-primary" />
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalProfiles}</div>
-                  <div className="text-muted-foreground">GIS Professionals</div>
+                  <div className="text-2xl font-bold">{stats.totalJobs}</div>
+                  <div className="text-muted-foreground">Total Jobs</div>
                 </div>
               </div>
             </CardContent>
@@ -129,10 +131,10 @@ const TalentPool = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <TrendingUp className="h-10 w-10 text-green-500" />
+                <MapPin className="h-10 w-10 text-orange-500" />
                 <div>
-                  <div className="text-2xl font-bold">{stats.availableNow}</div>
-                  <div className="text-muted-foreground">Available Now</div>
+                  <div className="text-2xl font-bold">{stats.indiaJobs}</div>
+                  <div className="text-muted-foreground">India-Focused</div>
                 </div>
               </div>
             </CardContent>
@@ -140,27 +142,56 @@ const TalentPool = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <MapPin className="h-10 w-10 text-blue-500" />
+                <Users className="h-10 w-10 text-blue-500" />
                 <div>
-                  <div className="text-2xl font-bold">${stats.avgHourlyRate}</div>
-                  <div className="text-muted-foreground">Avg. Hourly Rate</div>
+                  <div className="text-2xl font-bold">{stats.remoteJobs}</div>
+                  <div className="text-muted-foreground">Remote Jobs</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <Clock className="h-10 w-10 text-green-500" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.freshJobs}</div>
+                  <div className="text-muted-foreground">Posted This Week</div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* CTA for Companies */}
+        {/* AI Job Discovery CTA */}
         <Card className="mb-8 bg-gradient-to-r from-primary/10 to-accent/10">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold mb-2">Looking to Hire GIS Talent?</h3>
-                <p className="text-muted-foreground">Post your project or browse our verified professionals to find the perfect match.</p>
+                <h3 className="text-xl font-bold mb-2">🤖 AI-Powered Job Discovery</h3>
+                <p className="text-muted-foreground">
+                  Get the latest geospatial jobs from across India using our AI job discovery engine.
+                  Fresh listings updated daily from LinkedIn, Naukri, Government portals & more.
+                </p>
               </div>
               <div className="flex gap-2">
-                <Button>Post a Project</Button>
-                <Button variant="outline">Browse All Talent</Button>
+                <Button 
+                  onClick={handleRefreshJobs}
+                  disabled={refreshing}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {refreshing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Discovering...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Discover New Jobs
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -173,12 +204,42 @@ const TalentPool = () => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name, title, or skills..."
+                  placeholder="Search jobs, companies, or skills..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
+              
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="india">India</SelectItem>
+                  <SelectItem value="remote">Remote</SelectItem>
+                  <SelectItem value="bangalore">Bangalore</SelectItem>
+                  <SelectItem value="delhi">Delhi/NCR</SelectItem>
+                  <SelectItem value="mumbai">Mumbai</SelectItem>
+                  <SelectItem value="pune">Pune</SelectItem>
+                  <SelectItem value="hyderabad">Hyderabad</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Job Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="full-time">Full-time</SelectItem>
+                  <SelectItem value="part-time">Part-time</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={experienceFilter} onValueChange={setExperienceFilter}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="Experience" />
@@ -191,96 +252,121 @@ const TalentPool = () => {
                   <SelectItem value="expert">Expert</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {locations.map(location => (
-                    <SelectItem key={location} value={location}>{location}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={skillFilter} onValueChange={setSkillFilter}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Skills" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Skills</SelectItem>
-                  {skills.map(skill => (
-                    <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </Card>
 
         <Tabs defaultValue="all" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="all">All Professionals</TabsTrigger>
-              <TabsTrigger value="available">Available Now</TabsTrigger>
-              <TabsTrigger value="top-rated">Top Rated</TabsTrigger>
-              <TabsTrigger value="verified">Verified</TabsTrigger>
-            </TabsList>
-            
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Join Talent Pool
-            </Button>
-          </div>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all">All Jobs ({filteredJobs.length})</TabsTrigger>
+            <TabsTrigger value="india">India Focus ({indiaJobs.length})</TabsTrigger>
+            <TabsTrigger value="remote">Remote ({remoteJobs.length})</TabsTrigger>
+            <TabsTrigger value="fresh">Fresh ({freshJobs.length})</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="all">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredProfiles.map(profile => (
-                <GISProfileCard key={profile.id} {...profile} />
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading job opportunities...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredJobs.map(job => (
+                  <JobCard 
+                    key={job.id} 
+                    {...job}
+                    onMarkApplied={() => {
+                      toast({
+                        title: "Application Noted! 📝",
+                        description: "We've marked this job as applied. Good luck!",
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="india">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {indiaJobs.map(job => (
+                <JobCard 
+                  key={job.id} 
+                  {...job}
+                  onMarkApplied={() => {
+                    toast({
+                      title: "Application Noted! 📝",
+                      description: "We've marked this job as applied. Good luck!",
+                    });
+                  }}
+                />
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="available">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {availableProfiles.map(profile => (
-                <GISProfileCard key={profile.id} {...profile} />
+          <TabsContent value="remote">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {remoteJobs.map(job => (
+                <JobCard 
+                  key={job.id} 
+                  {...job}
+                  onMarkApplied={() => {
+                    toast({
+                      title: "Application Noted! 📝",
+                      description: "We've marked this job as applied. Good luck!",
+                    });
+                  }}
+                />
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="top-rated">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[...profiles].sort((a, b) => b.rating - a.rating).map(profile => (
-                <GISProfileCard key={profile.id} {...profile} />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="verified">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {profiles.filter(p => p.completedProjects > 20).map(profile => (
-                <GISProfileCard key={profile.id} {...profile} />
+          <TabsContent value="fresh">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {freshJobs.map(job => (
+                <JobCard 
+                  key={job.id} 
+                  {...job}
+                  onMarkApplied={() => {
+                    toast({
+                      title: "Application Noted! 📝",
+                      description: "We've marked this job as applied. Good luck!",
+                    });
+                  }}
+                />
               ))}
             </div>
           </TabsContent>
         </Tabs>
 
-        {filteredProfiles.length === 0 && (
+        {filteredJobs.length === 0 && !loading && (
           <Card className="text-center py-12">
             <CardContent>
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No profiles found</h3>
+              <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your search criteria or browse all professionals.
+                Try adjusting your search criteria or discover new jobs using our AI engine.
               </p>
-              <Button onClick={() => {
-                setSearchTerm("");
-                setExperienceFilter("all");
-                setLocationFilter("all");
-                setSkillFilter("all");
-              }}>
-                Clear Filters
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  onClick={() => {
+                    setSearchTerm("");
+                    setLocationFilter("all");
+                    setJobTypeFilter("all");
+                    setExperienceFilter("all");
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
+                <Button onClick={handleRefreshJobs}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Discover Jobs
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
