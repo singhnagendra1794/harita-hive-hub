@@ -80,6 +80,45 @@ export type Database = {
         }
         Relationships: []
       }
+      application_tracking: {
+        Row: {
+          application_method: string | null
+          applied_at: string | null
+          id: string
+          notes: string | null
+          platform: string | null
+          project_id: string
+          project_type: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          application_method?: string | null
+          applied_at?: string | null
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          project_id: string
+          project_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          application_method?: string | null
+          applied_at?: string | null
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          project_id?: string
+          project_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       automated_tasks: {
         Row: {
           config: Json | null
@@ -1403,6 +1442,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      external_projects: {
+        Row: {
+          applicants_count: number | null
+          apply_url: string | null
+          budget_max: number | null
+          budget_min: number | null
+          budget_type: string | null
+          client_name: string | null
+          client_rating: number | null
+          created_at: string | null
+          currency: string | null
+          deadline: string | null
+          description: string
+          difficulty: string | null
+          duration: string | null
+          external_id: string
+          id: string
+          is_active: boolean | null
+          is_remote: boolean | null
+          is_verified: boolean | null
+          last_updated: string | null
+          location: string | null
+          platform: string
+          posted_date: string | null
+          skills: string[] | null
+          title: string
+        }
+        Insert: {
+          applicants_count?: number | null
+          apply_url?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          budget_type?: string | null
+          client_name?: string | null
+          client_rating?: number | null
+          created_at?: string | null
+          currency?: string | null
+          deadline?: string | null
+          description: string
+          difficulty?: string | null
+          duration?: string | null
+          external_id: string
+          id?: string
+          is_active?: boolean | null
+          is_remote?: boolean | null
+          is_verified?: boolean | null
+          last_updated?: string | null
+          location?: string | null
+          platform: string
+          posted_date?: string | null
+          skills?: string[] | null
+          title: string
+        }
+        Update: {
+          applicants_count?: number | null
+          apply_url?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          budget_type?: string | null
+          client_name?: string | null
+          client_rating?: number | null
+          created_at?: string | null
+          currency?: string | null
+          deadline?: string | null
+          description?: string
+          difficulty?: string | null
+          duration?: string | null
+          external_id?: string
+          id?: string
+          is_active?: boolean | null
+          is_remote?: boolean | null
+          is_verified?: boolean | null
+          last_updated?: string | null
+          location?: string | null
+          platform?: string
+          posted_date?: string | null
+          skills?: string[] | null
+          title?: string
+        }
+        Relationships: []
       }
       faqs: {
         Row: {
@@ -3363,6 +3483,30 @@ export type Database = {
           content_type?: string
           created_at?: string | null
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          id: string
+          project_data: Json
+          project_id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          project_data: Json
+          project_id: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          project_data?: Json
+          project_id?: string
+          saved_at?: string
           user_id?: string
         }
         Relationships: []
