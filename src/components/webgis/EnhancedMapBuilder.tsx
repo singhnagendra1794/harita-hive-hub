@@ -178,7 +178,7 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Projects
             </Button>
-            <h1 className="text-2xl font-bold">WebGIS Builder</h1>
+            <h1 className="text-2xl font-bold">WebGIS Dashboard Builder</h1>
           </div>
           
           <div className="flex items-center gap-2">
