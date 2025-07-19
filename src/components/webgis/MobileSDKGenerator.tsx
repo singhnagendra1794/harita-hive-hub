@@ -18,7 +18,7 @@ import {
   Play, 
   Settings, 
   Apple,
-  Android,
+  Bot,
   Wifi,
   MapPin,
   Camera,
@@ -115,7 +115,7 @@ const MobileSDKGenerator: React.FC<MobileSDKGeneratorProps> = ({ projectId }) =>
     },
     android: {
       name: 'Android',
-      icon: Android,
+      icon: Bot,
       color: 'text-green-600',
       requirements: ['Android Studio', 'Android SDK 24+', 'Java 11+'],
       buildTime: '5-8 minutes'
