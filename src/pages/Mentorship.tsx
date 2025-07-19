@@ -1,414 +1,405 @@
 import { useState } from "react";
-import { Calendar, Clock, Users, Video, Star, BookOpen, User, MessageCircle } from "lucide-react";
+import { Bot, User, MessageCircle, Linkedin, Mail, MapPin, Award, ExternalLink, Sparkles, Clock, Users, Star } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-
-interface Mentor {
-  id: string;
-  name: string;
-  title: string;
-  company: string;
-  avatar: string;
-  rating: number;
-  reviews: number;
-  hourlyRate: number;
-  specialties: string[];
-  experience: number;
-  isAvailable: boolean;
-  bio: string;
-}
-
-interface Session {
-  id: string;
-  mentorId: string;
-  mentorName: string;
-  type: "1-on-1" | "group" | "ama";
-  title: string;
-  date: string;
-  duration: number;
-  participants: number;
-  maxParticipants?: number;
-  level: "beginner" | "intermediate" | "advanced";
-  topics: string[];
-  price?: number;
-  isBooked?: boolean;
-}
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const Mentorship = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("sessions");
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Mock mentors data
-  const mentors: Mentor[] = [
-    {
-      id: "1",
-      name: "Dr. Sarah Chen",
-      title: "Senior Remote Sensing Scientist",
-      company: "NASA",
-      avatar: "/api/placeholder/150/150",
-      rating: 4.9,
-      reviews: 127,
-      hourlyRate: 150,
-      specialties: ["Remote Sensing", "Machine Learning", "Climate Analysis"],
-      experience: 12,
-      isAvailable: true,
-      bio: "Leading expert in satellite data analysis and climate modeling with 12+ years at NASA."
-    },
-    {
-      id: "2",
-      name: "Marcus Rodriguez",
-      title: "Lead GIS Developer",
-      company: "Esri",
-      avatar: "/api/placeholder/150/150",
-      rating: 4.8,
-      reviews: 94,
-      hourlyRate: 120,
-      specialties: ["Web GIS", "ArcGIS", "JavaScript", "Python"],
-      experience: 8,
-      isAvailable: true,
-      bio: "Full-stack GIS developer specializing in enterprise web mapping solutions."
-    },
-    {
-      id: "3",
-      name: "Dr. Priya Sharma",
-      title: "Geospatial Data Scientist",
-      company: "Google",
-      avatar: "/api/placeholder/150/150",
-      rating: 4.9,
-      reviews: 156,
-      hourlyRate: 180,
-      specialties: ["Google Earth Engine", "Big Data", "Spatial Analytics"],
-      experience: 10,
-      isAvailable: false,
-      bio: "Expert in large-scale geospatial analytics and cloud computing platforms."
-    }
-  ];
-
-  // Mock sessions data
-  const sessions: Session[] = [
-    {
-      id: "1",
-      mentorId: "1",
-      mentorName: "Dr. Sarah Chen",
-      type: "ama",
-      title: "Career Paths in Remote Sensing - AMA",
-      date: "2024-01-25T18:00:00Z",
-      duration: 60,
-      participants: 45,
-      maxParticipants: 100,
-      level: "beginner",
-      topics: ["Career Guidance", "Remote Sensing", "Industry Insights"],
-      price: 0
-    },
-    {
-      id: "2",
-      mentorId: "2",
-      mentorName: "Marcus Rodriguez",
-      type: "group",
-      title: "Building Interactive Web Maps",
-      date: "2024-01-26T20:00:00Z",
-      duration: 90,
-      participants: 12,
-      maxParticipants: 20,
-      level: "intermediate",
-      topics: ["Web Development", "Leaflet", "Mapbox"],
-      price: 49
-    },
-    {
-      id: "3",
-      mentorId: "3",
-      mentorName: "Dr. Priya Sharma",
-      type: "1-on-1",
-      title: "Google Earth Engine Deep Dive",
-      date: "2024-01-27T16:00:00Z",
-      duration: 60,
-      participants: 1,
-      maxParticipants: 1,
-      level: "advanced",
-      topics: ["Google Earth Engine", "JavaScript", "Cloud Computing"],
-      price: 180,
-      isBooked: true
-    },
-    {
-      id: "4",
-      mentorId: "1",
-      mentorName: "Dr. Sarah Chen",
-      type: "group",
-      title: "Machine Learning for Earth Observation",
-      date: "2024-01-28T19:00:00Z",
-      duration: 120,
-      participants: 8,
-      maxParticipants: 15,
-      level: "advanced",
-      topics: ["Machine Learning", "Python", "Satellite Data"],
-      price: 79
-    }
-  ];
-
-  const filteredSessions = selectedLevel === "all" 
-    ? sessions 
-    : sessions.filter(session => session.level === selectedLevel);
-
-  const handleBookSession = (sessionId: string) => {
-    if (!user) {
+  const handleAskAI = async () => {
+    if (!aiPrompt.trim()) return;
+    
+    setIsLoading(true);
+    // Simulate AI processing
+    setTimeout(() => {
+      setIsLoading(false);
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to book a mentorship session.",
-        variant: "destructive"
+        title: "AI Mentor Response",
+        description: "Your question has been processed. Check your chat for the response!",
       });
-      return;
-    }
-
-    const session = sessions.find(s => s.id === sessionId);
-    if (session?.price === 0) {
-      toast({
-        title: "Session Booked",
-        description: "You've successfully registered for the free AMA session!",
-      });
-    } else {
-      toast({
-        title: "Redirecting to Payment",
-        description: "You'll be redirected to complete your booking...",
-      });
-    }
-  };
-
-  const handleContactMentor = (mentorId: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to contact mentors.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Message Sent",
-      description: "Your message has been sent to the mentor. They'll respond within 24 hours.",
-    });
-  };
-
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case "beginner": return "bg-green-100 text-green-800";
-      case "intermediate": return "bg-blue-100 text-blue-800";
-      case "advanced": return "bg-purple-100 text-purple-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getSessionTypeIcon = (type: string) => {
-    switch (type) {
-      case "1-on-1": return <User className="h-4 w-4" />;
-      case "group": return <Users className="h-4 w-4" />;
-      case "ama": return <MessageCircle className="h-4 w-4" />;
-      default: return <BookOpen className="h-4 w-4" />;
-    }
+      setAiPrompt("");
+    }, 2000);
   };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Learn with Expert Mentors</h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Get personalized guidance from industry professionals and accelerate your geospatial career
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Your Mentorship Journey</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Get personalized guidance through our dual mentorship model - expert human insight 
+            combined with AI-powered 24/7 support for your geospatial career growth.
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="sessions">Upcoming Sessions</TabsTrigger>
-            <TabsTrigger value="mentors">Find Mentors</TabsTrigger>
-            <TabsTrigger value="my-sessions">My Sessions</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="sessions" className="space-y-6">
-            {/* Level Filter */}
-            <div className="flex gap-2 mb-6">
-              <Button 
-                variant={selectedLevel === "all" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setSelectedLevel("all")}
-              >
-                All Levels
-              </Button>
-              <Button 
-                variant={selectedLevel === "beginner" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setSelectedLevel("beginner")}
-              >
-                Beginner
-              </Button>
-              <Button 
-                variant={selectedLevel === "intermediate" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setSelectedLevel("intermediate")}
-              >
-                Intermediate
-              </Button>
-              <Button 
-                variant={selectedLevel === "advanced" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setSelectedLevel("advanced")}
-              >
-                Advanced
-              </Button>
+        {/* Two Mentorship Models */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          
+          {/* Human Mentor - Nagendra Singh */}
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-4 right-4">
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <User className="h-3 w-3 mr-1" />
+                Human Expert
+              </Badge>
             </div>
+            
+            <CardHeader className="pb-4">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src="/api/placeholder/200/200" alt="Nagendra Singh" />
+                  <AvatarFallback className="text-lg font-bold">NS</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <CardTitle className="text-2xl mb-2">Nagendra Singh</CardTitle>
+                  <p className="text-primary font-semibold mb-1">Senior Geospatial Solutions Architect</p>
+                  <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                    <MapPin className="h-4 w-4" />
+                    <span>India • 8+ years experience</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
 
-            {/* Sessions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredSessions.map((session) => (
-                <Card key={session.id} className="overflow-hidden">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {getSessionTypeIcon(session.type)}
-                          <Badge variant="outline" className="capitalize">
-                            {session.type.replace("-", " ")}
-                          </Badge>
-                          <Badge className={getLevelColor(session.level)}>
-                            {session.level}
-                          </Badge>
+            <CardContent className="space-y-6">
+              {/* Quick Summary */}
+              <div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Expert in geospatial automation, QGIS plugin development, and GeoAI applications. 
+                  Specializes in helping professionals transition from traditional GIS to modern 
+                  automated workflows and AI-enhanced spatial analysis.
+                </p>
+              </div>
+
+              {/* Core Strengths */}
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-primary" />
+                  Core Expertise
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Badge variant="outline" className="justify-center py-2">GeoAI & ML</Badge>
+                  <Badge variant="outline" className="justify-center py-2">QGIS Plugins</Badge>
+                  <Badge variant="outline" className="justify-center py-2">Automation</Badge>
+                  <Badge variant="outline" className="justify-center py-2">Remote Sensing</Badge>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 py-4 border-t border-b">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">50+</div>
+                  <div className="text-xs text-muted-foreground">Students Mentored</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">4.9</div>
+                  <div className="text-xs text-muted-foreground">Rating</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">15+</div>
+                  <div className="text-xs text-muted-foreground">Tools Mastered</div>
+                </div>
+              </div>
+
+              {/* Contact Options */}
+              <div className="space-y-3">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" size="lg">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      View Full Profile & Book Session
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src="/api/placeholder/200/200" alt="Nagendra Singh" />
+                          <AvatarFallback>NS</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div>Nagendra Singh</div>
+                          <div className="text-sm font-normal text-muted-foreground">
+                            Senior Geospatial Solutions Architect
+                          </div>
                         </div>
-                        <CardTitle className="text-lg mb-2">{session.title}</CardTitle>
-                        <p className="text-primary font-semibold">{session.mentorName}</p>
-                      </div>
-                      <div className="text-right">
-                        {session.price === 0 ? (
-                          <span className="text-green-600 font-bold">FREE</span>
-                        ) : (
-                          <span className="text-lg font-bold">${session.price}</span>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(session.date).toLocaleDateString()}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription asChild>
+                      <div className="space-y-6">
+                        {/* Detailed Bio */}
+                        <div>
+                          <h4 className="font-semibold mb-2">About</h4>
+                          <p className="text-muted-foreground leading-relaxed">
+                            Nagendra is a seasoned geospatial professional with over 8 years of experience 
+                            in developing innovative GIS solutions. He has led multiple automation projects, 
+                            developed 20+ QGIS plugins, and pioneered several GeoAI applications for 
+                            environmental monitoring and urban planning.
+                          </p>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {session.duration} min
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {session.participants}/{session.maxParticipants || "∞"}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-1">
-                        {session.topics.map((topic) => (
-                          <Badge key={topic} variant="secondary" className="text-xs">
-                            {topic}
-                          </Badge>
-                        ))}
-                      </div>
 
-                      <Button 
-                        className="w-full"
-                        onClick={() => handleBookSession(session.id)}
-                        disabled={session.isBooked}
-                      >
-                        {session.isBooked ? "Booked" : session.price === 0 ? "Join Free Session" : "Book Session"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="mentors" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mentors.map((mentor) => (
-                <Card key={mentor.id} className="overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="text-center mb-4">
-                      <Avatar className="h-20 w-20 mx-auto mb-3">
-                        <AvatarImage src={mentor.avatar} alt={mentor.name} />
-                        <AvatarFallback>{mentor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <h3 className="font-bold text-lg">{mentor.name}</h3>
-                      <p className="text-primary font-semibold">{mentor.title}</p>
-                      <p className="text-muted-foreground text-sm">{mentor.company}</p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold">{mentor.rating}</span>
-                          <span className="text-muted-foreground text-sm">({mentor.reviews})</span>
+                        {/* Mentorship Focus */}
+                        <div>
+                          <h4 className="font-semibold mb-2">Mentorship Focus</h4>
+                          <ul className="space-y-1 text-muted-foreground">
+                            <li>• Career transition strategies for GIS professionals</li>
+                            <li>• QGIS plugin development and Python automation</li>
+                            <li>• Implementing AI/ML in geospatial workflows</li>
+                            <li>• Building geospatial products and solutions</li>
+                            <li>• Technical interview preparation</li>
+                          </ul>
                         </div>
-                        <div className="text-right">
-                          <span className="text-lg font-bold">${mentor.hourlyRate}/hr</span>
+
+                        {/* Session Types */}
+                        <div>
+                          <h4 className="font-semibold mb-3">Available Sessions</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">1-on-1 Career Guidance</div>
+                                <div className="text-sm text-muted-foreground">60 minutes • Personalized advice</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold">$89</div>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">Technical Deep Dive</div>
+                                <div className="text-sm text-muted-foreground">90 minutes • Hands-on coding</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold">$129</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Contact Actions */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button className="w-full">Book Session</Button>
+                          <Button variant="outline" className="w-full">Send Message</Button>
                         </div>
                       </div>
+                    </DialogDescription>
+                  </DialogContent>
+                </Dialog>
 
-                      <div className="flex flex-wrap gap-1">
-                        {mentor.specialties.map((specialty) => (
-                          <Badge key={specialty} variant="secondary" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <p className="text-muted-foreground text-sm">{mentor.bio}</p>
-
-                      <div className="flex gap-2">
-                        <Button 
-                          className="flex-1"
-                          onClick={() => handleContactMentor(mentor.id)}
-                          disabled={!mentor.isAvailable}
-                        >
-                          {mentor.isAvailable ? "Contact" : "Unavailable"}
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Video className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="my-sessions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Booked Sessions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No sessions booked yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Book your first mentorship session to get personalized guidance
-                  </p>
-                  <Button onClick={() => setActiveTab("sessions")}>
-                    Browse Sessions
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" asChild>
+                    <a href="https://linkedin.com/in/nagendrasingh" target="_blank" rel="noopener noreferrer">
+                      <Linkedin className="h-4 w-4 mr-2" />
+                      LinkedIn
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="flex-1" asChild>
+                    <a href="mailto:nagendra@haritahive.com">
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email
+                    </a>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Mentor - Harita AI Copilot */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-purple-50">
+            <div className="absolute top-4 right-4">
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                <Bot className="h-3 w-3 mr-1" />
+                AI Powered
+              </Badge>
+            </div>
+            
+            <CardHeader className="pb-4">
+              <div className="flex items-start gap-4">
+                <div className="relative">
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+                    <Bot className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <div className="h-2 w-2 bg-white rounded-full animate-pulse" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-2xl mb-2 flex items-center gap-2">
+                    Harita AI Copilot
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </CardTitle>
+                  <p className="text-primary font-semibold mb-1">24/7 Intelligent Assistant</p>
+                  <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                    <div className="h-2 w-2 bg-green-500 rounded-full" />
+                    <span>Always Available</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* AI Description */}
+              <div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Your intelligent companion for instant career guidance, technical support, and 
+                  personalized learning recommendations. Powered by advanced AI trained on geospatial 
+                  industry knowledge and best practices.
+                </p>
+              </div>
+
+              {/* AI Capabilities */}
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  AI Capabilities
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-1.5 w-1.5 bg-primary rounded-full" />
+                    <span>Career pathway recommendations</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-1.5 w-1.5 bg-primary rounded-full" />
+                    <span>Technical troubleshooting & code help</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-1.5 w-1.5 bg-primary rounded-full" />
+                    <span>Learning resource suggestions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-1.5 w-1.5 bg-primary rounded-full" />
+                    <span>Industry insights & trend analysis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-1.5 w-1.5 bg-primary rounded-full" />
+                    <span>Skill gap analysis & improvement plans</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Stats */}
+              <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-primary/20">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">∞</div>
+                  <div className="text-xs text-muted-foreground">Availability</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">&lt;30s</div>
+                  <div className="text-xs text-muted-foreground">Response Time</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">1000+</div>
+                  <div className="text-xs text-muted-foreground">Topics Covered</div>
+                </div>
+              </div>
+
+              {/* AI Interaction */}
+              <div className="space-y-3">
+                <Textarea
+                  placeholder="Ask me anything about your geospatial career, skills, tools, or learning path..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={handleAskAI}
+                  disabled={!aiPrompt.trim() || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Ask AI Mentor
+                    </>
+                  )}
+                </Button>
+                
+                <div className="text-center">
+                  <Button variant="ghost" size="sm" className="text-primary">
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Open Full Chat Interface
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* How It Works Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-center">How Our Dual Mentorship Works</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center space-y-3">
+                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <MessageCircle className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Start with AI</h3>
+                <p className="text-sm text-muted-foreground">
+                  Get instant answers to technical questions, career guidance, and learning recommendations from our AI mentor.
+                </p>
+              </div>
+              
+              <div className="text-center space-y-3">
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <User className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold">Human Expert Guidance</h3>
+                <p className="text-sm text-muted-foreground">
+                  Book 1-on-1 sessions with Nagendra for deep career counseling, technical mentorship, and personalized advice.
+                </p>
+              </div>
+              
+              <div className="text-center space-y-3">
+                <div className="mx-auto w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Star className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="font-semibold">Accelerated Growth</h3>
+                <p className="text-sm text-muted-foreground">
+                  Combine AI efficiency with human expertise for the fastest path to achieving your geospatial career goals.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CTA Section */}
+        <Card className="text-center bg-gradient-to-r from-primary/5 to-purple-50">
+          <CardContent className="py-8">
+            <h2 className="text-2xl font-bold mb-4">Ready to Accelerate Your Career?</h2>
+            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Whether you need quick answers or deep guidance, our mentorship system is here to support 
+              your journey in the geospatial industry.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button size="lg" className="min-w-[200px]">
+                <Bot className="h-4 w-4 mr-2" />
+                Try AI Mentor Free
+              </Button>
+              <Button size="lg" variant="outline" className="min-w-[200px]">
+                <User className="h-4 w-4 mr-2" />
+                Book Human Session
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
