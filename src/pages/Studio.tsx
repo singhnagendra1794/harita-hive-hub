@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Upload, Video, Mic, Settings, Play, Download, Share, Globe, FileText, Camera } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Upload, Video, Mic, Settings, Play, Download, Share, Globe, FileText, Camera, Users, TrendingUp, Star, Award } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,60 +8,140 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { VideoUploadComponent } from "@/components/studio/VideoUploadComponent";
+import { ContentCard } from "@/components/studio/ContentCard";
 
-interface CreatedContent {
+interface StudioContent {
   id: string;
   title: string;
-  type: "tutorial" | "walkthrough" | "analysis" | "demo";
-  thumbnail: string;
-  duration: string;
-  views: number;
-  createdAt: string;
-  status: "processing" | "ready" | "error";
+  description: string;
+  content_type: string;
+  file_url?: string;
+  thumbnail_url?: string;
+  embed_url?: string;
+  duration?: number;
+  tools_used: string[];
+  skill_domain?: string;
+  region?: string;
+  views_count: number;
+  likes_count: number;
+  comments_count: number;
+  is_featured: boolean;
+  created_at: string;
+  user_id: string;
+  tags: any;
+  user_liked?: boolean;
+  creator_name?: string;
+  creator_avatar?: string;
+}
+
+interface FeaturedCreator {
+  id: string;
+  user_id: string;
+  creator_name: string;
+  bio: string;
+  total_views: number;
+  total_likes: number;
+  content_count: number;
+  avatar_url?: string;
+  specialties: any;
+  featured_this_week: boolean;
 }
 
 const Studio = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("create");
+  const [myContent, setMyContent] = useState<StudioContent[]>([]);
+  const [featuredContent, setFeaturedContent] = useState<StudioContent[]>([]);
+  const [featuredCreators, setFeaturedCreators] = useState<FeaturedCreator[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
 
-  // Mock content data
-  const [myContent, setMyContent] = useState<CreatedContent[]>([
-    {
-      id: "1",
-      title: "QGIS Buffer Analysis Tutorial",
-      type: "tutorial",
-      thumbnail: "/api/placeholder/300/200",
-      duration: "12:34",
-      views: 1245,
-      createdAt: "2024-01-15",
-      status: "ready"
-    },
-    {
-      id: "2",
-      title: "Google Earth Engine Landsat Analysis",
-      type: "analysis",
-      thumbnail: "/api/placeholder/300/200",
-      duration: "18:22",
-      views: 832,
-      createdAt: "2024-01-12",
-      status: "ready"
-    },
-    {
-      id: "3",
-      title: "Web Map Walkthrough",
-      type: "walkthrough",
-      thumbnail: "/api/placeholder/300/200",
-      duration: "8:45",
-      views: 0,
-      createdAt: "2024-01-18",
-      status: "processing"
+  useEffect(() => {
+    if (activeTab === 'my-content') {
+      fetchMyContent();
+    } else if (activeTab === 'featured-creators') {
+      fetchFeaturedContent();
+      fetchFeaturedCreators();
     }
-  ]);
+  }, [activeTab, user]);
+
+  const fetchMyContent = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('studio_content')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMyContent(data || []);
+    } catch (error) {
+      console.error('Error fetching content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFeaturedContent = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('studio_content')
+        .select('*')
+        .eq('is_published', true)
+        .order('likes_count', { ascending: false })
+        .order('views_count', { ascending: false })
+        .limit(12);
+
+      if (error) throw error;
+      setFeaturedContent(data || []);
+    } catch (error) {
+      console.error('Error fetching featured content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFeaturedCreators = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('creator_profiles_enhanced')
+        .select('*')
+        .eq('featured_this_week', true)
+        .order('total_views', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      
+      const mapped = data?.map(item => ({
+        ...item,
+        creator_name: 'Creator',
+        content_count: 0
+      })) || [];
+      
+      setFeaturedCreators(mapped);
+    } catch (error) {
+      console.error('Error fetching featured creators:', error);
+    }
+  };
+
+  const handleContentUpdate = () => {
+    if (activeTab === 'my-content') {
+      fetchMyContent();
+    } else if (activeTab === 'featured-creators') {
+      fetchFeaturedContent();
+    }
+  };
 
   const handleStartRecording = () => {
     if (!user) {
@@ -79,7 +159,6 @@ const Studio = () => {
       description: "Your screen recording has begun. Click stop when finished.",
     });
 
-    // Simulate recording
     setTimeout(() => {
       setIsRecording(false);
       toast({
@@ -89,36 +168,6 @@ const Studio = () => {
     }, 5000);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to upload content.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Simulate upload progress
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          toast({
-            title: "Upload Complete",
-            description: "Your video has been uploaded successfully!",
-          });
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-  };
-
   const handleAIVoiceover = () => {
     toast({
       title: "AI Voiceover",
@@ -126,32 +175,14 @@ const Studio = () => {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ready": return "text-green-600";
-      case "processing": return "text-yellow-600";
-      case "error": return "text-red-600";
-      default: return "text-gray-600";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "ready": return "Ready";
-      case "processing": return "Processing...";
-      case "error": return "Error";
-      default: return "Unknown";
-    }
-  };
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Content Creation Studio</h1>
+          <h1 className="text-4xl font-bold mb-4">Geospatial Talent Showcase</h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Create, upload, and share your geospatial knowledge with the world
+            Create, upload, and showcase your geospatial expertise to the global community
           </p>
         </div>
 
@@ -159,8 +190,8 @@ const Studio = () => {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="create">Create</TabsTrigger>
             <TabsTrigger value="upload">Upload</TabsTrigger>
-            <TabsTrigger value="ai-tools">AI Tools</TabsTrigger>
             <TabsTrigger value="my-content">My Content</TabsTrigger>
+            <TabsTrigger value="featured-creators">Featured Creators</TabsTrigger>
           </TabsList>
 
           <TabsContent value="create" className="space-y-6">
@@ -282,246 +313,173 @@ const Studio = () => {
           </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Video Content</CardTitle>
-                <p className="text-muted-foreground">
-                  Upload your existing videos, screen recordings, or presentations
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-lg font-semibold mb-2">Drop your video files here</p>
-                    <p className="text-muted-foreground mb-4">
-                      Supports MP4, MOV, AVI, and more. Max file size: 2GB
-                    </p>
-                    <div className="flex justify-center">
-                      <Label htmlFor="file-upload" className="cursor-pointer">
-                        <Button asChild>
-                          <span>Choose Files</span>
-                        </Button>
-                        <Input
-                          id="file-upload"
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          onChange={handleFileUpload}
-                        />
-                      </Label>
-                    </div>
-                  </div>
-
-                  {uploadProgress > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Uploading...</span>
-                        <span>{uploadProgress}%</span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="title">Video Title</Label>
-                      <Input id="title" placeholder="Enter video title..." />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutorial">Tutorial</SelectItem>
-                          <SelectItem value="walkthrough">Map Walkthrough</SelectItem>
-                          <SelectItem value="analysis">Analysis</SelectItem>
-                          <SelectItem value="demo">Project Demo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea 
-                      id="description" 
-                      placeholder="Describe your video content..."
-                      className="min-h-[100px]"
-                    />
-                  </div>
-
-                  <Button className="w-full">
-                    Upload and Publish
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ai-tools" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* AI Voiceover */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mic className="h-5 w-5" />
-                    AI Voiceover Generation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Generate professional voiceovers for your videos using AI
-                  </p>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="voice-text">Script</Label>
-                      <Textarea 
-                        id="voice-text"
-                        placeholder="Enter your script here..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="voice-type">Voice Type</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select voice" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="professional-male">Professional Male</SelectItem>
-                          <SelectItem value="professional-female">Professional Female</SelectItem>
-                          <SelectItem value="casual-male">Casual Male</SelectItem>
-                          <SelectItem value="casual-female">Casual Female</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button onClick={handleAIVoiceover} className="w-full">
-                      Generate Voiceover
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Auto Subtitles */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Auto Subtitles & Translation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Automatically generate subtitles and translate to multiple languages
-                  </p>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="source-lang">Source Language</Label>
-                      <Select defaultValue="en">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="es">Spanish</SelectItem>
-                          <SelectItem value="fr">French</SelectItem>
-                          <SelectItem value="de">German</SelectItem>
-                          <SelectItem value="zh">Chinese</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="target-langs">Target Languages</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select languages" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Major Languages</SelectItem>
-                          <SelectItem value="european">European Languages</SelectItem>
-                          <SelectItem value="asian">Asian Languages</SelectItem>
-                          <SelectItem value="custom">Custom Selection</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button className="w-full" onClick={() => toast({ title: "Feature Coming Soon", description: "Auto subtitles feature is in development." })}>
-                      Generate Subtitles
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <VideoUploadComponent onUploadComplete={handleContentUpdate} />
           </TabsContent>
 
           <TabsContent value="my-content" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">My Content</h2>
-              <Button onClick={() => setActiveTab("create")}>
-                Create New Content
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {myContent.map((content) => (
-                <Card key={content.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted relative">
-                    <img 
-                      src={content.thumbnail} 
-                      alt={content.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 right-2 bg-black/75 text-white px-2 py-1 rounded text-sm">
-                      {content.duration}
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(content.status)}`}>
-                        {getStatusText(content.status)}
-                      </span>
-                    </div>
+            {!user ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Video className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sign in to view your content</h3>
+                  <p className="text-muted-foreground text-center">
+                    Please sign in to access your uploaded videos and content.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <div className="aspect-video bg-muted rounded-t-lg" />
+                    <CardHeader>
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : myContent.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Upload className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No content yet</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Start by uploading your first video or creating new content.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button onClick={() => setActiveTab('upload')}>
+                      Upload Content
+                    </Button>
+                    <Button variant="outline" onClick={() => setActiveTab('create')}>
+                      Create New
+                    </Button>
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">{content.title}</h3>
-                    <div className="flex justify-between items-center text-sm text-muted-foreground mb-3">
-                      <span>{content.views} views</span>
-                      <span>{new Date(content.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Play className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Share className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {myContent.length === 0 && (
-              <div className="text-center py-12">
-                <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No content yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start creating your first video to share your geospatial knowledge
-                </p>
-                <Button onClick={() => setActiveTab("create")}>
-                  Create Your First Video
-                </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myContent.map((content) => (
+                  <ContentCard
+                    key={content.id}
+                    content={content}
+                    onUpdate={handleContentUpdate}
+                    showCreator={false}
+                  />
+                ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="featured-creators" className="space-y-6">
+            {/* Featured Content */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Trending Content</h2>
+                <Badge variant="secondary">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  This Week
+                </Badge>
+              </div>
+              
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <div className="aspect-video bg-muted rounded-t-lg" />
+                      <CardHeader>
+                        <div className="h-4 bg-muted rounded w-3/4" />
+                        <div className="h-3 bg-muted rounded w-1/2" />
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              ) : featuredContent.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Star className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No featured content yet</h3>
+                    <p className="text-muted-foreground text-center">
+                      Be the first to create amazing geospatial content!
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {featuredContent.map((content) => (
+                    <ContentCard
+                      key={content.id}
+                      content={content}
+                      onUpdate={handleContentUpdate}
+                      showCreator={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Featured Creators */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Featured Creators</h2>
+                <Badge variant="secondary">
+                  <Award className="h-4 w-4 mr-1" />
+                  This Week
+                </Badge>
+              </div>
+              
+              {featuredCreators.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No featured creators yet</h3>
+                    <p className="text-muted-foreground text-center">
+                      Start creating content to become a featured creator!
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {featuredCreators.map((creator) => (
+                    <Card key={creator.id} className="group hover:shadow-lg transition-shadow">
+                      <CardHeader className="text-center">
+                        <Avatar className="h-16 w-16 mx-auto mb-4">
+                          <AvatarImage src={creator.avatar_url} />
+                          <AvatarFallback className="text-lg">
+                            {creator.creator_name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <CardTitle className="group-hover:text-primary transition-colors">
+                          {creator.creator_name}
+                        </CardTitle>
+                        {creator.bio && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {creator.bio}
+                          </p>
+                        )}
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-primary">{creator.total_views}</div>
+                            <div className="text-xs text-muted-foreground">Total Views</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-primary">{creator.total_likes}</div>
+                            <div className="text-xs text-muted-foreground">Total Likes</div>
+                          </div>
+                        </div>
+
+                        <Button className="w-full" size="sm">
+                          View Profile
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

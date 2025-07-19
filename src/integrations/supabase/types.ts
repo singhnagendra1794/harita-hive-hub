@@ -1006,6 +1006,66 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_profiles_enhanced: {
+        Row: {
+          behance_url: string | null
+          bio: string | null
+          created_at: string | null
+          experience_level: string | null
+          featured_this_week: boolean | null
+          github_url: string | null
+          id: string
+          is_verified: boolean | null
+          linkedin_url: string | null
+          location: string | null
+          portfolio_url: string | null
+          specialties: string[] | null
+          tools_expertise: string[] | null
+          total_likes: number | null
+          total_views: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          behance_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          featured_this_week?: boolean | null
+          github_url?: string | null
+          id?: string
+          is_verified?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          specialties?: string[] | null
+          tools_expertise?: string[] | null
+          total_likes?: number | null
+          total_views?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          behance_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          featured_this_week?: boolean | null
+          github_url?: string | null
+          id?: string
+          is_verified?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          specialties?: string[] | null
+          tools_expertise?: string[] | null
+          total_likes?: number | null
+          total_views?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       creator_stats: {
         Row: {
           created_at: string | null
@@ -3427,6 +3487,167 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_content: {
+        Row: {
+          comments_count: number | null
+          content_type: string
+          created_at: string | null
+          description: string | null
+          duration: number | null
+          embed_url: string | null
+          file_size: number | null
+          file_url: string | null
+          goal: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          likes_count: number | null
+          outcome: string | null
+          region: string | null
+          skill_domain: string | null
+          status: string | null
+          tags: Json | null
+          thumbnail_url: string | null
+          title: string
+          tools_used: string[] | null
+          updated_at: string | null
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          embed_url?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          goal?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          likes_count?: number | null
+          outcome?: string | null
+          region?: string | null
+          skill_domain?: string | null
+          status?: string | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title: string
+          tools_used?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          comments_count?: number | null
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          embed_url?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          goal?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          likes_count?: number | null
+          outcome?: string | null
+          region?: string | null
+          skill_domain?: string | null
+          status?: string | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title?: string
+          tools_used?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
+      studio_content_comments: {
+        Row: {
+          comment: string
+          content_id: string
+          created_at: string | null
+          id: string
+          is_deleted: boolean | null
+          parent_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          content_id: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          parent_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          content_id?: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          parent_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_content_comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "studio_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_content_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "studio_content_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_content_interactions: {
+        Row: {
+          content_id: string
+          created_at: string | null
+          id: string
+          interaction_type: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string | null
+          id?: string
+          interaction_type: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string | null
+          id?: string
+          interaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_content_interactions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "studio_content"
             referencedColumns: ["id"]
           },
         ]
