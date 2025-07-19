@@ -90,7 +90,7 @@ import JobsAIDiscovery from "./pages/JobsAIDiscovery";
 import ProjectStudio from "./pages/ProjectStudio";
 import Labs from "./pages/Labs";
 import Challenge from "./pages/Challenge";
-import Jobs from "./pages/Jobs";
+
 import FreelanceProjects from "./pages/FreelanceProjects";
 import Studio from "./pages/Studio";
 import Portfolio from "./pages/Portfolio";
@@ -127,7 +127,7 @@ function App() {
           <Route path="/skill-roadmap" element={<SkillRoadmap />} />
           <Route path="/projects-gallery" element={<ProjectsGallery />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/jobs" element={<Jobs />} />
+          
           <Route path="/job-board" element={<JobBoard />} />
           <Route path="/freelance-projects" element={<FreelanceProjects />} />
           <Route path="/studio" element={<Studio />} />

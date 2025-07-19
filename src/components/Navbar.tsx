@@ -46,7 +46,7 @@ const Navbar = () => {
   ];
 
   const workLinks = [
-    { href: "/jobs", label: "Global Job Board" },
+    
     { href: "/freelance-projects", label: "Freelance Hub" },
     { href: "/jobs-ai-discovery", label: "AI Job Discovery" },
     { href: "/talent-pool", label: "Hire Talent" },
