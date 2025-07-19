@@ -5443,6 +5443,227 @@ export type Database = {
         }
         Relationships: []
       }
+      webgis_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          position: Json | null
+          project_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          position?: Json | null
+          project_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          position?: Json | null
+          project_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webgis_comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "webgis_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webgis_layers: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          layer_order: number | null
+          name: string
+          project_id: string
+          source_data: Json | null
+          source_url: string | null
+          style_config: Json | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          layer_order?: number | null
+          name: string
+          project_id: string
+          source_data?: Json | null
+          source_url?: string | null
+          style_config?: Json | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          layer_order?: number | null
+          name?: string
+          project_id?: string
+          source_data?: Json | null
+          source_url?: string | null
+          style_config?: Json | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webgis_layers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "webgis_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webgis_projects: {
+        Row: {
+          config: Json
+          created_at: string | null
+          description: string | null
+          embed_code: string | null
+          id: string
+          is_public: boolean | null
+          is_template: boolean | null
+          published_at: string | null
+          published_url: string | null
+          template_category: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          description?: string | null
+          embed_code?: string | null
+          id?: string
+          is_public?: boolean | null
+          is_template?: boolean | null
+          published_at?: string | null
+          published_url?: string | null
+          template_category?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          description?: string | null
+          embed_code?: string | null
+          id?: string
+          is_public?: boolean | null
+          is_template?: boolean | null
+          published_at?: string | null
+          published_url?: string | null
+          template_category?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      webgis_shared_projects: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_level: string
+          project_id: string
+          shared_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_level?: string
+          project_id: string
+          shared_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_level?: string
+          project_id?: string
+          shared_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webgis_shared_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "webgis_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webgis_widgets: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          position: string
+          project_id: string
+          title: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position: string
+          project_id: string
+          title?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position?: string
+          project_id?: string
+          title?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webgis_widgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "webgis_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_challenges: {
         Row: {
           created_at: string
