@@ -297,6 +297,71 @@ export type Database = {
         }
         Relationships: []
       }
+      certification_courses: {
+        Row: {
+          course_schedule_id: string | null
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          duration: string | null
+          estimated_launch: string | null
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          is_blockchain_verified: boolean | null
+          price: number | null
+          rating: number | null
+          requirements: string[] | null
+          students_enrolled: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_schedule_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          estimated_launch?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_blockchain_verified?: boolean | null
+          price?: number | null
+          rating?: number | null
+          requirements?: string[] | null
+          students_enrolled?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_schedule_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          estimated_launch?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_blockchain_verified?: boolean | null
+          price?: number | null
+          rating?: number | null
+          requirements?: string[] | null
+          students_enrolled?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certification_courses_course_schedule_id_fkey"
+            columns: ["course_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "upcoming_course_schedule"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certifications: {
         Row: {
           badge_url: string | null
@@ -811,6 +876,7 @@ export type Database = {
           end_date: string | null
           enrollment_deadline: string | null
           id: string
+          is_certification: boolean | null
           max_students: number | null
           name: string
           price: number | null
@@ -823,6 +889,7 @@ export type Database = {
           end_date?: string | null
           enrollment_deadline?: string | null
           id?: string
+          is_certification?: boolean | null
           max_students?: number | null
           name: string
           price?: number | null
@@ -835,6 +902,7 @@ export type Database = {
           end_date?: string | null
           enrollment_deadline?: string | null
           id?: string
+          is_certification?: boolean | null
           max_students?: number | null
           name?: string
           price?: number | null
@@ -4228,6 +4296,7 @@ export type Database = {
           estimated_duration: string | null
           id: string
           is_active: boolean | null
+          is_certification: boolean | null
           learning_goal: string | null
           phase: string
           topic: string
@@ -4241,6 +4310,7 @@ export type Database = {
           estimated_duration?: string | null
           id?: string
           is_active?: boolean | null
+          is_certification?: boolean | null
           learning_goal?: string | null
           phase: string
           topic: string
@@ -4254,6 +4324,7 @@ export type Database = {
           estimated_duration?: string | null
           id?: string
           is_active?: boolean | null
+          is_certification?: boolean | null
           learning_goal?: string | null
           phase?: string
           topic?: string
