@@ -8,8 +8,8 @@ const GeoProcessingLab = () => {
     <Layout>
       <PremiumAccessGate 
         requiredTier="pro"
-        featureName="Geo-Processing Lab"
-        featureDescription="Access advanced geospatial processing tools, batch operations, and automated workflows for data transformation and analysis."
+        featureName="Enterprise Geo-Processing Lab"
+        featureDescription="Access enterprise-grade spatial analysis tools with AI-powered insights, real-time processing, cloud export, and API automation capabilities."
       >
         <EnhancedGeoProcessingWorkspace />
       </PremiumAccessGate>
