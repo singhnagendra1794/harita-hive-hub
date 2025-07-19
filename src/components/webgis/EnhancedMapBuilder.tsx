@@ -35,7 +35,12 @@ import {
   Database,
   Paintbrush,
   Building,
-  Code
+  Code,
+  Smartphone,
+  Radio,
+  MessageSquare,
+  Package,
+  Terminal
 } from "lucide-react";
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useWebGISBuilder } from "@/hooks/useWebGISBuilder";
@@ -54,6 +59,12 @@ import WorkflowDesigner from "./WorkflowDesigner";
 import APIBuilder from "./APIBuilder";
 import AutomationEngine from "./AutomationEngine";
 import EnterpriseIntegration from "./EnterpriseIntegration";
+import MobileSDKGenerator from "./MobileSDKGenerator";
+import MLPipeline from "./MLPipeline";
+import RealTimeStreaming from "./RealTimeStreaming";
+import CollaborationHub from "./CollaborationHub";
+import PluginMarketplace from "./PluginMarketplace";
+import CodeExecutionEnvironment from "./CodeExecutionEnvironment";
 import 'leaflet/dist/leaflet.css';
 
 interface EnhancedMapBuilderProps {
@@ -101,6 +112,12 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
     { id: 'api', name: 'API Builder', icon: Code },
     { id: 'automation', name: 'Automation', icon: Settings },
     { id: 'enterprise', name: 'Enterprise', icon: Building },
+    { id: 'mobile', name: 'Mobile SDK', icon: Smartphone },
+    { id: 'ml', name: 'ML Pipeline', icon: Brain },
+    { id: 'streaming', name: 'Live Data', icon: Radio },
+    { id: 'collab-hub', name: 'Collab Hub', icon: MessageSquare },
+    { id: 'plugins', name: 'Plugins', icon: Package },
+    { id: 'code', name: 'Code Env', icon: Terminal },
     { id: 'publish', name: 'Publish', icon: Globe }
   ];
 
@@ -423,6 +440,31 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
                   
                   {activeTab === 'enterprise' && (
                     <EnterpriseIntegration projectId={projectId} />
+                  )}
+
+                  {/* Phase 6 Tabs */}
+                  {activeTab === 'mobile' && (
+                    <MobileSDKGenerator projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'ml' && (
+                    <MLPipeline projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'streaming' && (
+                    <RealTimeStreaming projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'collab-hub' && (
+                    <CollaborationHub projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'plugins' && (
+                    <PluginMarketplace projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'code' && (
+                    <CodeExecutionEnvironment projectId={projectId} />
                   )}
 
                   {/* Publish Tab */}
