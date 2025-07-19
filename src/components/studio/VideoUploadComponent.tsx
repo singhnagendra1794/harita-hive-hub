@@ -84,11 +84,7 @@ export const VideoUploadComponent: React.FC<VideoUploadProps> = ({ onUploadCompl
       // Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('studio-content')
-        .upload(fileName, file, {
-          onUploadProgress: (progress) => {
-            setUploadProgress((progress.loaded / progress.total) * 100);
-          }
-        });
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 

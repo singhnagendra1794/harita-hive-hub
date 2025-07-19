@@ -15,7 +15,7 @@ interface StudioContent {
   id: string;
   title: string;
   description: string;
-  content_type: 'video' | 'image' | 'embed';
+  content_type: string;
   file_url?: string;
   thumbnail_url?: string;
   embed_url?: string;
