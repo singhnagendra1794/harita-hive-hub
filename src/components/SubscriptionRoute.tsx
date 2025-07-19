@@ -56,7 +56,26 @@ const SubscriptionRoute: React.FC<SubscriptionRouteProps> = ({
       description: `This feature requires a ${subscriptionName} subscription. Please upgrade your plan to continue.`,
       variant: "destructive",
     });
-    return <Navigate to="/choose-plan" replace />;
+    return <Navigate to="/checkout" state={{ 
+      planName: `${subscriptionName} Plan`,
+      amount: requiredTier === 'enterprise' ? 7999 : 3999,
+      currency: 'INR',
+      features: requiredTier === 'enterprise' ? [
+        "Everything in Professional",
+        "Team collaboration features", 
+        "Advanced Geo-Dashboard",
+        "Unlimited job postings",
+        "API access",
+        "Dedicated support"
+      ] : [
+        "Full access to Learn section",
+        "QGIS Project integration",
+        "Basic Geo-Dashboard features", 
+        "GeoAI Lab & Tools",
+        "Web GIS Builder",
+        "Priority support"
+      ]
+    }} replace />;
   }
 
   return <>{children}</>;
