@@ -40,6 +40,44 @@ const cleanupAuthState = () => {
   }
 };
 
+const sendAdminNotification = async (user: User) => {
+  try {
+    // Get user profile to get full name
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single();
+
+    const userName = profile?.full_name || user.user_metadata?.full_name || 'Unknown User';
+    
+    await supabase.functions.invoke('send-email', {
+      body: {
+        templateName: 'admin_new_user_notification',
+        to: 'contact@haritahive.com',
+        templateData: {
+          user_name: userName,
+          user_email: user.email,
+          user_id: user.id,
+          registration_date: new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }
+      }
+    });
+    
+    console.log('Admin notification sent for new user:', user.email);
+  } catch (error) {
+    console.error('Failed to send admin notification:', error);
+    // Don't throw error as this shouldn't block user signup
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -87,6 +125,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Handle different auth events
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in successfully');
+
+          // Check if this is a new user signup by checking if user was just created
+          const isNewUser = session.user.created_at && 
+            new Date(session.user.created_at).getTime() > (Date.now() - 60000); // Within last minute
+
+          // Send admin notification for new users
+          if (isNewUser) {
+            setTimeout(() => {
+              sendAdminNotification(session.user);
+            }, 1000); // Delay to ensure user profile is created
+          }
           
           // Set up auto-refresh timer
           if (session.expires_at) {
