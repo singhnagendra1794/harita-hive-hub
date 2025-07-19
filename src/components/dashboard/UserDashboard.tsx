@@ -166,6 +166,12 @@ const UserDashboard = () => {
     return tier === 'pro' || tier === 'enterprise' || tier === 'premium';
   };
 
+  const shouldShowFreePlanTag = () => {
+    // Only show Free Plan tag for actual free users
+    const tier = plan?.subscription_tier || 'free';
+    return tier === 'free';
+  };
+
   // Show loading state while validating session
   if (authLoading || premiumLoading || rolesLoading || statsLoading || activityLoading) {
     return (
