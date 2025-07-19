@@ -124,12 +124,15 @@ const BrowseCourses = () => {
 
   const handleEnrollmentSuccess = (enrollmentId: string) => {
     setShowEnrollmentForm(false);
-    // Here you would typically redirect to payment processing
     toast({
-      title: "Enrollment Successful!",
-      description: "Redirecting to payment..."
+      title: "Enrollment Complete!",
+      description: "Payment successful. Check your email for course details.",
     });
-    // Implement Razorpay payment integration here
+    
+    // Redirect to dashboard with enrollment success
+    setTimeout(() => {
+      window.location.href = '/dashboard?enrolled=true';
+    }, 2000);
   };
 
   const formatPrice = (course: any) => {

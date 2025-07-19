@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response('Missing required fields', { status: 400, headers: corsHeaders });
     }
 
-    // Create Razorpay order
+    // Create Razorpay order - Production keys
     const razorpayKeyId = 'rzp_live_brnHWpkHS6YtlJ';
     const razorpaySecret = Deno.env.get('RAZORPAY_SECRET_KEY');
     

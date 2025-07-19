@@ -13,9 +13,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { Building, Users, Award, CheckCircle, ArrowRight, MessageSquare, Calendar, Star, Clock, Globe, Phone, Mail, CreditCard, Zap, BookOpen, Target, Play, ChevronRight, Monitor, Database, Cpu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const CorporateTraining = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,6 +33,19 @@ const CorporateTraining = () => {
     teamSize: "",
     areasOfInterest: [] as string[],
     additionalInfo: ""
+  });
+
+  // Contact form state for payment
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    company: "",
+    participants: "",
+    requirements: "",
+    timeline: "",
+    budget: "",
+    isSubmitting: false,
+    showSignIn: false
   });
 
   // Floating CTA visibility
@@ -191,9 +212,82 @@ const CorporateTraining = () => {
     }
   };
 
-  const handlePayment = () => {
-    // This would integrate with Razorpay/Stripe
-    window.open('https://pages.razorpay.com/haritahive-corporate', '_blank');
+  const handlePayment = async () => {
+    if (!user) {
+      setContactForm({ ...contactForm, showSignIn: true });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // Create Razorpay order for corporate training
+      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+        body: {
+          amount: 50000, // ₹50,000 for corporate training
+          currency: 'INR',
+          plan_type: 'corporate_training'
+        }
+      });
+
+      if (error) throw error;
+
+      // Load Razorpay script if not loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise((resolve) => { script.onload = resolve; });
+      }
+
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'Harita Hive',
+        description: 'Corporate Training Program',
+        order_id: data.order_id,
+        prefill: {
+          email: user.email,
+          name: user.user_metadata?.full_name || '',
+        },
+        theme: { color: '#3B82F6' },
+        handler: function (response: any) {
+          toast({
+            title: "Payment Successful!",
+            description: "Our team will contact you soon to schedule the training.",
+          });
+          setContactForm({
+            name: "",
+            email: "",
+            company: "",
+            participants: "",
+            requirements: "",
+            timeline: "",
+            budget: "",
+            isSubmitting: false,
+            showSignIn: false
+          });
+        },
+        modal: {
+          ondismiss: function() {
+            setIsSubmitting(false);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
     
     // Track payment button click for analytics
     if (typeof window !== 'undefined' && (window as any).gtag) {

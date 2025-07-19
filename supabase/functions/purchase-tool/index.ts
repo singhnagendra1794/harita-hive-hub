@@ -70,9 +70,9 @@ serve(async (req) => {
       });
     }
 
-    // Create Razorpay order
-    const razorpayKeyId = Deno.env.get("RAZORPAY_KEY_ID");
-    const razorpayKeySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
+    // Create Razorpay order - using consistent key names
+    const razorpayKeyId = 'rzp_live_brnHWpkHS6YtlJ';
+    const razorpayKeySecret = Deno.env.get("RAZORPAY_SECRET_KEY");
 
     if (!razorpayKeyId || !razorpayKeySecret) {
       throw new Error("Razorpay keys not configured");
