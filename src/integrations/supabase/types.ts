@@ -2661,6 +2661,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string | null
+          description: string
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string | null
+          description: string
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_activities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_applications: {
         Row: {
           created_at: string | null
@@ -2698,6 +2736,56 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "freelance_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_collaborators: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          invited_at: string | null
+          invited_by: string
+          joined_at: string | null
+          permissions: Json | null
+          project_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          invited_at?: string | null
+          invited_by: string
+          joined_at?: string | null
+          permissions?: Json | null
+          project_id: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          invited_at?: string | null
+          invited_by?: string
+          joined_at?: string | null
+          permissions?: Json | null
+          project_id?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -2747,17 +2835,107 @@ export type Database = {
           },
         ]
       }
+      project_files: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          is_public: boolean | null
+          project_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_public?: boolean | null
+          project_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_public?: boolean | null
+          project_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          project_id: string
+          rating: number
+          review: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          project_id: string
+          rating: number
+          review?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          project_id?: string
+          rating?: number
+          review?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_ratings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_submissions: {
         Row: {
+          activity_log: Json | null
+          average_rating: number | null
           colab_url: string | null
+          collaborators: Json | null
           created_at: string | null
           demo_url: string | null
           description: string | null
+          domain: string | null
+          file_attachments: Json | null
           github_url: string | null
           id: string
+          is_public: boolean | null
           is_team_project: boolean | null
+          rating_count: number | null
           status: string | null
           team_members: Json | null
+          template_id: string | null
           thumbnail_url: string | null
           title: string
           tools_used: string[] | null
@@ -2766,15 +2944,23 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_log?: Json | null
+          average_rating?: number | null
           colab_url?: string | null
+          collaborators?: Json | null
           created_at?: string | null
           demo_url?: string | null
           description?: string | null
+          domain?: string | null
+          file_attachments?: Json | null
           github_url?: string | null
           id?: string
+          is_public?: boolean | null
           is_team_project?: boolean | null
+          rating_count?: number | null
           status?: string | null
           team_members?: Json | null
+          template_id?: string | null
           thumbnail_url?: string | null
           title: string
           tools_used?: string[] | null
@@ -2783,15 +2969,23 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_log?: Json | null
+          average_rating?: number | null
           colab_url?: string | null
+          collaborators?: Json | null
           created_at?: string | null
           demo_url?: string | null
           description?: string | null
+          domain?: string | null
+          file_attachments?: Json | null
           github_url?: string | null
           id?: string
+          is_public?: boolean | null
           is_team_project?: boolean | null
+          rating_count?: number | null
           status?: string | null
           team_members?: Json | null
+          template_id?: string | null
           thumbnail_url?: string | null
           title?: string
           tools_used?: string[] | null
@@ -2799,7 +2993,15 @@ export type Database = {
           upvotes?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "project_submissions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_templates: {
         Row: {
@@ -4935,6 +5137,16 @@ export type Database = {
           p_action: string
           p_old_value?: Json
           p_new_value?: Json
+        }
+        Returns: undefined
+      }
+      log_project_activity: {
+        Args: {
+          p_project_id: string
+          p_user_id: string
+          p_activity_type: string
+          p_description: string
+          p_activity_data?: Json
         }
         Returns: undefined
       }

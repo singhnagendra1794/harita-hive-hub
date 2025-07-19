@@ -1,31 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, MessageCircle, Share2, Github, ExternalLink, Plus, Search, Filter, Star, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Plus, Search, Filter, Star, File, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { supabase } from '@/integrations/supabase/client';
-import { Json } from '@/integrations/supabase/types';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
+import { ProjectCreationDialog } from '@/components/project/ProjectCreationDialog';
+import { ProjectCard } from '@/components/project/ProjectCard';
+import { ProjectTemplatesGrid } from '@/components/project/ProjectTemplatesGrid';
 
 interface ProjectSubmission {
   id: string;
   title: string;
   description: string;
+  domain: string;
   tools_used: string[];
-  github_url: string;
-  colab_url: string;
-  demo_url: string;
+  github_url?: string;
+  colab_url?: string;
+  demo_url?: string;
   is_team_project: boolean;
-  team_members: any[];
+  is_public: boolean;
   upvotes: number;
+  average_rating: number;
+  rating_count: number;
   status: string;
-  thumbnail_url: string;
+  thumbnail_url?: string;
   created_at: string;
   user_id: string;
 }
@@ -35,55 +38,54 @@ const ProjectStudio = () => {
   const { hasAccess } = usePremiumAccess();
   const [projects, setProjects] = useState<ProjectSubmission[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectSubmission[]>([]);
+  const [userProjects, setUserProjects] = useState<ProjectSubmission[]>([]);
+  const [userVotes, setUserVotes] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
-  const [toolFilter, setToolFilter] = useState('');
+  const [domainFilter, setDomainFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('published');
   const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
 
   const hasProfessionalAccess = hasAccess('pro');
   const hasEnterpriseAccess = hasAccess('enterprise');
 
-  // New project form state
-  const [newProject, setNewProject] = useState({
-    title: '',
-    description: '',
-    tools_used: '',
-    github_url: '',
-    colab_url: '',
-    demo_url: '',
-    is_team_project: false,
-    team_members: ''
-  });
-
   useEffect(() => {
     fetchProjects();
-  }, []);
+    if (user) {
+      fetchUserVotes();
+    }
+  }, [user]);
 
   useEffect(() => {
     filterProjects();
-  }, [projects, searchTerm, toolFilter, statusFilter]);
+  }, [projects, searchTerm, domainFilter, statusFilter]);
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const { data } = await supabase
+      
+      // Fetch public projects
+      const { data: publicProjects } = await supabase
         .from('project_submissions')
         .select('*')
+        .eq('is_public', true)
         .order('upvotes', { ascending: false })
         .order('created_at', { ascending: false });
 
-      // Transform the data to handle Json type for team_members
-      const transformedData = data?.map(project => ({
-        ...project,
-        team_members: Array.isArray(project.team_members) 
-          ? project.team_members 
-          : project.team_members 
-            ? [project.team_members] 
-            : []
-      })) || [];
+      setProjects(publicProjects || []);
 
-      setProjects(transformedData);
+      // Fetch user's projects if authenticated
+      if (user) {
+        const { data: userProjectsData } = await supabase
+          .from('project_submissions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        setUserProjects(userProjectsData || []);
+      }
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -91,94 +93,52 @@ const ProjectStudio = () => {
     }
   };
 
+  const fetchUserVotes = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('project_votes')
+        .select('project_id')
+        .eq('user_id', user.id);
+
+      setUserVotes(new Set(data?.map(vote => vote.project_id) || []));
+    } catch (error) {
+      console.error('Error fetching user votes:', error);
+    }
+  };
+
   const filterProjects = () => {
-    let filtered = projects.filter(project => project.status === statusFilter);
+    let filtered = projects.filter(project => 
+      statusFilter === 'all' || project.status === statusFilter
+    );
 
     if (searchTerm) {
       filtered = filtered.filter(project =>
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.domain?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (toolFilter) {
+    if (domainFilter) {
       filtered = filtered.filter(project =>
-        project.tools_used.some(tool => 
-          tool.toLowerCase().includes(toolFilter.toLowerCase())
-        )
+        project.domain?.toLowerCase().includes(domainFilter.toLowerCase())
       );
     }
 
     setFilteredProjects(filtered);
   };
 
-  const handleVote = async (projectId: string) => {
-    if (!user) return;
-
-    try {
-      // Check if user already voted
-      const { data: existingVote } = await supabase
-        .from('project_votes')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('project_id', projectId)
-        .single();
-
-      if (existingVote) {
-        // Remove vote
-        await supabase
-          .from('project_votes')
-          .delete()
-          .eq('id', existingVote.id);
-      } else {
-        // Add vote
-        await supabase
-          .from('project_votes')
-          .insert({
-            user_id: user.id,
-            project_id: projectId,
-            vote_type: 'upvote'
-          });
-      }
-
-      fetchProjects();
-    } catch (error) {
-      console.error('Error voting:', error);
-    }
+  const handleProjectUpdate = () => {
+    fetchProjects();
+    fetchUserVotes();
   };
 
-  const handleCreateProject = async () => {
-    if (!user || !hasProfessionalAccess) return;
-
-    try {
-      const { error } = await supabase
-        .from('project_submissions')
-        .insert({
-          ...newProject,
-          user_id: user.id,
-          tools_used: newProject.tools_used.split(',').map(t => t.trim()),
-          team_members: newProject.is_team_project ? 
-            newProject.team_members.split(',').map(m => m.trim()) : [],
-          status: 'published'
-        });
-
-      if (!error) {
-        setShowCreateForm(false);
-        setNewProject({
-          title: '',
-          description: '',
-          tools_used: '',
-          github_url: '',
-          colab_url: '',
-          demo_url: '',
-          is_team_project: false,
-          team_members: ''
-        });
-        fetchProjects();
-      }
-    } catch (error) {
-      console.error('Error creating project:', error);
-    }
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setShowTemplates(false);
+    setShowCreateDialog(true);
   };
 
   if (loading) {
@@ -212,111 +172,61 @@ const ProjectStudio = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
               <Star className="h-8 w-8 text-primary" />
-              Project Launcher Studio
+              Project Studio
             </h1>
             <p className="text-muted-foreground">
-              Showcase your geospatial projects and discover inspiring work from the community
+              Create, collaborate, and showcase your geospatial projects with the community
             </p>
           </div>
           
           {hasProfessionalAccess && (
-            <Button onClick={() => setShowCreateForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Launch Project
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowTemplates(true)}>
+                <File className="h-4 w-4 mr-2" />
+                Use Template
+              </Button>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Button>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Create Project Modal/Form */}
-      {showCreateForm && hasProfessionalAccess && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Launch New Project</CardTitle>
-            <CardDescription>
-              Share your geospatial work with the community
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                placeholder="Project Title"
-                value={newProject.title}
-                onChange={(e) => setNewProject({...newProject, title: e.target.value})}
-              />
-              <Input
-                placeholder="Tools Used (comma-separated)"
-                value={newProject.tools_used}
-                onChange={(e) => setNewProject({...newProject, tools_used: e.target.value})}
-              />
-            </div>
-            
-            <Textarea
-              placeholder="Project Description"
-              value={newProject.description}
-              onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-              rows={3}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                placeholder="GitHub URL (optional)"
-                value={newProject.github_url}
-                onChange={(e) => setNewProject({...newProject, github_url: e.target.value})}
-              />
-              <Input
-                placeholder="Colab/Notebook URL (optional)"
-                value={newProject.colab_url}
-                onChange={(e) => setNewProject({...newProject, colab_url: e.target.value})}
-              />
-              <Input
-                placeholder="Demo URL (optional)"
-                value={newProject.demo_url}
-                onChange={(e) => setNewProject({...newProject, demo_url: e.target.value})}
-              />
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={newProject.is_team_project}
-                  onChange={(e) => setNewProject({...newProject, is_team_project: e.target.checked})}
-                />
-                Team Project
-              </label>
-              
-              {newProject.is_team_project && (
-                <Input
-                  placeholder="Team Members (comma-separated)"
-                  value={newProject.team_members}
-                  onChange={(e) => setNewProject({...newProject, team_members: e.target.value})}
-                  className="flex-1"
-                />
-              )}
-            </div>
-            
-            <div className="flex gap-2">
-              <Button onClick={handleCreateProject}>Launch Project</Button>
-              <Button variant="outline" onClick={() => setShowCreateForm(false)}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Dialogs */}
+      <ProjectCreationDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onProjectCreated={handleProjectUpdate}
+        templateId={selectedTemplateId}
+      />
+
+      {showTemplates && (
+        <div className="mb-6 p-6 border rounded-lg bg-background">
+          <ProjectTemplatesGrid onSelectTemplate={handleSelectTemplate} />
+          <div className="flex justify-center mt-4">
+            <Button variant="outline" onClick={() => setShowTemplates(false)}>
+              Close Templates
+            </Button>
+          </div>
+        </div>
       )}
 
       <Tabs defaultValue="browse" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="browse">Browse Projects</TabsTrigger>
           <TabsTrigger value="my-projects" disabled={!hasProfessionalAccess}>
             My Projects {!hasProfessionalAccess && '🔒'}
+          </TabsTrigger>
+          <TabsTrigger value="analytics" disabled={!hasProfessionalAccess}>
+            Analytics {!hasProfessionalAccess && '🔒'}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse">
           {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -327,9 +237,9 @@ const ProjectStudio = () => {
               />
             </div>
             <Input
-              placeholder="Filter by tool..."
-              value={toolFilter}
-              onChange={(e) => setToolFilter(e.target.value)}
+              placeholder="Filter by domain..."
+              value={domainFilter}
+              onChange={(e) => setDomainFilter(e.target.value)}
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
@@ -337,6 +247,7 @@ const ProjectStudio = () => {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Projects</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="featured">Featured</SelectItem>
               </SelectContent>
@@ -346,92 +257,13 @@ const ProjectStudio = () => {
           {/* Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="group hover:shadow-lg transition-shadow">
-                {project.thumbnail_url && (
-                  <div className="aspect-video w-full bg-muted overflow-hidden rounded-t-lg">
-                    <img 
-                      src={project.thumbnail_url} 
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                )}
-                
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg line-clamp-1">{project.title}</CardTitle>
-                      <CardDescription className="line-clamp-2 mt-1">
-                        {project.description}
-                      </CardDescription>
-                    </div>
-                    {project.status === 'featured' && (
-                      <Badge className="ml-2">
-                        <Star className="h-3 w-3 mr-1" />
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {project.tools_used.slice(0, 3).map((tool) => (
-                      <Badge key={tool} variant="secondary" className="text-xs">
-                        {tool}
-                      </Badge>
-                    ))}
-                    {project.tools_used.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{project.tools_used.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleVote(project.id)}
-                        className="text-xs"
-                      >
-                        <Heart className="h-4 w-4 mr-1" />
-                        {project.upvotes}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-xs">
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        Comments
-                      </Button>
-                    </div>
-                    
-                    {project.is_team_project && (
-                      <Badge variant="outline" className="text-xs">
-                        <Users className="h-3 w-3 mr-1" />
-                        Team
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {project.github_url && (
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <Github className="h-3 w-3 mr-1" />
-                        Code
-                      </Button>
-                    )}
-                    {project.demo_url && (
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Demo
-                      </Button>
-                    )}
-                    <Button size="sm" variant="ghost" className="text-xs ml-auto">
-                      <Share2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <ProjectCard
+                key={project.id}
+                project={project}
+                currentUserVoted={userVotes.has(project.id)}
+                onVote={handleProjectUpdate}
+                onUpdate={handleProjectUpdate}
+              />
             ))}
           </div>
 
@@ -456,16 +288,49 @@ const ProjectStudio = () => {
               description="Launch and manage your geospatial projects, collaborate with teams, and showcase your work to the community."
             />
           ) : (
+            <div className="space-y-6">
+              {userProjects.length === 0 ? (
+                <div className="text-center py-12">
+                  <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Your Projects</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create your first project to start building your portfolio.
+                  </p>
+                  <Button onClick={() => setShowCreateDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Project
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      currentUserVoted={userVotes.has(project.id)}
+                      onVote={handleProjectUpdate}
+                      onUpdate={handleProjectUpdate}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          {!hasProfessionalAccess ? (
+            <UpgradePrompt 
+              feature="Project Analytics"
+              description="Track project performance, collaboration insights, and community engagement metrics."
+            />
+          ) : (
             <div className="text-center py-12">
-              <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Your Projects</h3>
-              <p className="text-muted-foreground mb-4">
-                Manage your published projects and track their performance.
+              <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">Project Analytics</h3>
+              <p className="text-muted-foreground">
+                Analytics dashboard coming soon. Track your project views, votes, and collaboration metrics.
               </p>
-              <Button onClick={() => setShowCreateForm(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Launch Your First Project
-              </Button>
             </div>
           )}
         </TabsContent>
