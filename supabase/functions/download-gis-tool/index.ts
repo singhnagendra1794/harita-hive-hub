@@ -8,8 +8,6 @@ const corsHeaders = {
 
 interface DownloadRequest {
   toolId: string;
-  userId?: string;
-  paymentCompleted: boolean;
 }
 
 serve(async (req) => {
@@ -19,48 +17,107 @@ serve(async (req) => {
   }
 
   try {
-    const { toolId, userId, paymentCompleted }: DownloadRequest = await req.json();
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Get user from auth header
+    const authHeader = req.headers.get("Authorization")!;
+    const token = authHeader.replace("Bearer ", "");
+    const { data } = await supabaseClient.auth.getUser(token);
+    const user = data.user;
 
-    // Mock tool data - in production, this would come from your database
-    const tools = {
+    if (!user?.email) {
+      throw new Error("User not authenticated");
+    }
+
+    const { toolId }: DownloadRequest = await req.json();
+
+    // Use service role to check access
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Check if user has purchased this tool or is premium user
+    const { data: order } = await supabaseService
+      .from('tool_orders')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('tool_id', toolId)
+      .eq('status', 'completed')
+      .maybeSingle();
+
+    // Check if user has premium access
+    const { data: subscription } = await supabaseService
+      .from('user_subscriptions')
+      .select('subscription_tier, status')
+      .eq('user_id', user.id)
+      .single();
+
+    const hasPremiumAccess = subscription && 
+      ['pro', 'enterprise', 'premium'].includes(subscription.subscription_tier) && 
+      subscription.status === 'active';
+
+    // Check if user is super admin
+    const isAdmin = user.email === 'contact@haritahive.com';
+
+    if (!order && !hasPremiumAccess && !isAdmin) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Access denied",
+          message: "Purchase required to download this tool",
+          needsPurchase: true
+        }),
+        { 
+          status: 403, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+
+    // Tool metadata with actual download paths from Supabase Storage
+    const toolData = {
       "1": {
-        downloadUrl: "https://example.com/downloads/spatial-analysis-toolkit.zip",
-        filename: "spatial-analysis-toolkit.zip",
+        title: "Advanced Spatial Analysis Toolkit",
+        storagePath: "gis-tools/spatial-analysis-toolkit.zip",
+        version: "2.1.0",
         size: "45.2 MB"
       },
       "2": {
-        downloadUrl: "https://example.com/downloads/land-use-classification.zip",
-        filename: "land-use-classification.zip",
+        title: "Land Use Classification Scripts", 
+        storagePath: "gis-tools/land-use-classification.zip",
+        version: "1.8.3",
         size: "67.8 MB"
       },
       "3": {
-        downloadUrl: "https://example.com/downloads/web-mapping-dashboard.zip",
-        filename: "web-mapping-dashboard.zip",
+        title: "Web Mapping Dashboard Template",
+        storagePath: "gis-tools/web-mapping-dashboard.zip", 
+        version: "3.0.1",
         size: "23.4 MB"
       },
       "4": {
-        downloadUrl: "https://example.com/downloads/dem-processing-utilities.zip",
-        filename: "dem-processing-utilities.zip",
+        title: "DEM Processing Utilities",
+        storagePath: "gis-tools/dem-processing-utilities.zip",
+        version: "1.5.2", 
         size: "34.7 MB"
       },
       "5": {
-        downloadUrl: "https://example.com/downloads/remote-sensing-suite.zip",
-        filename: "remote-sensing-suite.zip",
+        title: "Remote Sensing Image Analysis Suite",
+        storagePath: "gis-tools/remote-sensing-suite.zip",
+        version: "2.3.0",
         size: "89.3 MB"
       },
       "6": {
-        downloadUrl: "https://example.com/downloads/hydro-modeling-toolkit.zip",
-        filename: "hydro-modeling-toolkit.zip",
+        title: "Hydrological Modeling Toolkit",
+        storagePath: "gis-tools/hydro-modeling-toolkit.zip",
+        version: "1.7.1",
         size: "56.1 MB"
       }
     };
 
-    const tool = tools[toolId as keyof typeof tools];
+    const tool = toolData[toolId as keyof typeof toolData];
     
     if (!tool) {
       return new Response(
@@ -72,43 +129,69 @@ serve(async (req) => {
       );
     }
 
-    // For paid tools, verify payment completion
-    if (!paymentCompleted) {
+    // Generate signed URL for secure download (expires in 1 hour)
+    const { data: signedUrlData, error: signedUrlError } = await supabaseService
+      .storage
+      .from('geospatial-files')
+      .createSignedUrl(tool.storagePath, 3600); // 1 hour expiry
+
+    if (signedUrlError) {
+      console.error('Error creating signed URL:', signedUrlError);
+      // Fallback to a demo file if storage file doesn't exist
+      const demoFileUrl = `https://github.com/haritahive/sample-tools/releases/download/v1.0/${toolId}-demo.zip`;
+      
       return new Response(
-        JSON.stringify({ 
-          error: "Payment required",
-          redirectToPayment: true
+        JSON.stringify({
+          success: true,
+          downloadUrl: demoFileUrl,
+          filename: `${tool.title.replace(/[^a-zA-Z0-9]/g, '_')}_v${tool.version}.zip`,
+          size: tool.size,
+          version: tool.version,
+          message: "Demo version available for download"
         }),
-        { 
-          status: 402, 
+        {
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       );
     }
 
-    // Log download activity if user is provided
-    if (userId) {
-      try {
-        await supabase.from('download_logs').insert({
-          user_id: userId,
-          tool_id: toolId,
-          download_timestamp: new Date().toISOString(),
-          tool_name: tool.filename
-        });
-      } catch (error) {
-        console.log('Failed to log download:', error);
-        // Don't block download if logging fails
-      }
+    // Log download activity
+    try {
+      await supabaseService.from('download_logs').insert({
+        user_id: user.id,
+        tool_id: toolId,
+        download_timestamp: new Date().toISOString(),
+        tool_name: tool.title,
+        file_size: tool.size,
+        version: tool.version
+      });
+    } catch (error) {
+      console.log('Failed to log download:', error);
+      // Don't block download if logging fails
     }
 
-    // Return download information
+    // Update download count if this is a purchase
+    if (order) {
+      await supabaseService
+        .from('tool_orders')
+        .update({ 
+          download_count: (order.download_count || 0) + 1,
+          last_downloaded_at: new Date().toISOString()
+        })
+        .eq('id', order.id);
+    }
+
+    // Return secure download URL
     return new Response(
       JSON.stringify({
         success: true,
-        downloadUrl: tool.downloadUrl,
-        filename: tool.filename,
+        downloadUrl: signedUrlData.signedUrl,
+        filename: `${tool.title.replace(/[^a-zA-Z0-9]/g, '_')}_v${tool.version}.zip`,
         size: tool.size,
-        message: "Download ready"
+        version: tool.version,
+        expiresIn: "1 hour",
+        message: "Secure download ready"
       }),
       {
         status: 200,

@@ -32,4 +32,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.download-gis-tool]
+verify_jwt = true
+
+[functions.tool-purchase-webhook]
 verify_jwt = false

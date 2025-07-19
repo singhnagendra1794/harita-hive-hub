@@ -20,7 +20,7 @@ const GISMarketplace = () => {
   // Check if user has professional access
   const isProfessionalUser = plan?.plan === 'professional' || plan?.subscription_tier === 'pro' || plan?.subscription_tier === 'enterprise';
 
-  // Updated tools with standardized pricing at $14.99 USD
+  // Updated tools with standardized pricing at $14.99 USD - removed placeholder URLs
   const tools = [
     {
       id: "1",
@@ -32,7 +32,7 @@ const GISMarketplace = () => {
       downloads: 1245,
       rating: 4.8,
       author: "GeoSpatial Pro",
-      downloadUrl: "https://example.com/downloads/spatial-analysis-toolkit.zip",
+      downloadUrl: "", // Secure download handled by edge function
       isFeatured: true,
       programmingLanguage: "Python",
       compatibleSoftware: ["QGIS", "ArcGIS", "PostGIS"],
@@ -41,7 +41,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "45.2 MB",
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2024-01-15",
+      toolContents: ["Python scripts for spatial clustering", "QGIS processing algorithms", "Sample urban datasets", "Comprehensive documentation"],
+      requirements: "QGIS 3.0+, Python 3.7+",
+      license: "Commercial"
     },
     {
       id: "2", 
@@ -53,7 +56,7 @@ const GISMarketplace = () => {
       downloads: 3421,
       rating: 4.6,
       author: "Dr. Sarah Chen",
-      downloadUrl: "https://example.com/downloads/land-use-classification.zip",
+      downloadUrl: "", // Secure download handled by edge function
       programmingLanguage: "Python",
       compatibleSoftware: ["QGIS", "R Studio", "Google Earth Engine"],
       isQGISCompatible: true,
@@ -61,7 +64,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "67.8 MB",
-      lastUpdated: "2024-01-10"
+      lastUpdated: "2024-01-10",
+      toolContents: ["Pre-trained ML models", "Classification scripts", "Satellite imagery samples", "Training notebooks"],
+      requirements: "Python 3.8+, scikit-learn, GDAL",
+      license: "Commercial"
     },
     {
       id: "3",
@@ -73,7 +79,7 @@ const GISMarketplace = () => {
       downloads: 892,
       rating: 4.9,
       author: "WebGIS Solutions",
-      downloadUrl: "https://example.com/downloads/web-mapping-dashboard.zip",
+      downloadUrl: "", // Secure download handled by edge function
       programmingLanguage: "JavaScript",
       compatibleSoftware: ["QGIS", "Leaflet", "Mapbox", "OpenLayers"],
       isQGISCompatible: true,
@@ -81,7 +87,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "23.4 MB",
-      lastUpdated: "2024-01-20"
+      lastUpdated: "2024-01-20",
+      toolContents: ["React dashboard template", "Node.js backend", "QGIS processing scripts", "Setup documentation"],
+      requirements: "Node.js 16+, QGIS 3.0+",
+      license: "Commercial"
     },
     {
       id: "4",
@@ -93,7 +102,7 @@ const GISMarketplace = () => {
       downloads: 687,
       rating: 4.4,
       author: "TerrainTech",
-      downloadUrl: "https://example.com/downloads/dem-processing-utilities.zip",
+      downloadUrl: "", // Secure download handled by edge function
       programmingLanguage: "Python",
       compatibleSoftware: ["QGIS", "GDAL", "ArcGIS"],
       isQGISCompatible: true,
@@ -101,7 +110,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "34.7 MB",
-      lastUpdated: "2024-01-12"
+      lastUpdated: "2024-01-12",
+      toolContents: ["Terrain analysis scripts", "QGIS plugins", "Sample DEM data", "Processing workflows"],
+      requirements: "QGIS 3.0+, GDAL, NumPy",
+      license: "Commercial"
     },
     {
       id: "5",
@@ -113,7 +125,7 @@ const GISMarketplace = () => {
       downloads: 1876,
       rating: 4.7,
       author: "RemoteSense Pro",
-      downloadUrl: "https://example.com/downloads/remote-sensing-suite.zip",
+      downloadUrl: "", // Secure download handled by edge function
       programmingLanguage: "Python",
       compatibleSoftware: ["QGIS", "SNAP", "ENVI"],
       isQGISCompatible: true,
@@ -121,7 +133,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "89.3 MB",
-      lastUpdated: "2024-01-18"
+      lastUpdated: "2024-01-18",
+      toolContents: ["NDVI/NDWI calculators", "Image enhancement tools", "Landsat/Sentinel samples", "Analysis workflows"],
+      requirements: "QGIS 3.0+, Python 3.8+, rasterio",
+      license: "Commercial"
     },
     {
       id: "6",
@@ -133,7 +148,7 @@ const GISMarketplace = () => {
       downloads: 543,
       rating: 4.5,
       author: "HydroGIS Labs",
-      downloadUrl: "https://example.com/downloads/hydro-modeling-toolkit.zip",
+      downloadUrl: "", // Secure download handled by edge function
       programmingLanguage: "Python",
       compatibleSoftware: ["QGIS", "GRASS GIS", "HEC-RAS"],
       isQGISCompatible: true,
@@ -141,7 +156,10 @@ const GISMarketplace = () => {
       includesSampleData: true,
       includesDocumentation: true,
       fileSize: "56.1 MB",
-      lastUpdated: "2024-01-08"
+      lastUpdated: "2024-01-08",
+      toolContents: ["Watershed delineation tools", "Flow modeling scripts", "Sample watershed data", "Flood analysis tutorials"],
+      requirements: "QGIS 3.0+, GRASS GIS, SciPy",
+      license: "Commercial"
     }
   ];
 

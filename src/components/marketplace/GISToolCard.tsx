@@ -2,9 +2,18 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Star, ExternalLink, Heart, CheckCircle, Wifi, WifiOff, FileText, Database, Clock } from "lucide-react";
+import { Download, Star, ExternalLink, Heart, CheckCircle, Wifi, WifiOff, FileText, Database, Clock, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { supabase } from "@/integrations/supabase/client";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface GISToolCardProps {
   id: string;
@@ -55,32 +64,53 @@ const GISToolCard = ({
 }: GISToolCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { hasAccess: isPremiumUser } = usePremiumAccess();
 
   // All tools are now $14.99 USD for global consistency
   const displayPrice = 14.99;
   const displayPriceINR = priceINR || 1249;
 
   const handleDownload = async () => {
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to download tools.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsDownloading(true);
     
     try {
-      // Simulate payment flow for paid tools
-      if (price > 0) {
-        toast({
-          title: "Redirecting to Payment",
-          description: "You'll be redirected to complete your purchase...",
-        });
-        
-        // Simulate payment processing
-        setTimeout(() => {
-          setIsDownloading(false);
-          initiateDownload();
-        }, 2000);
-      } else {
-        initiateDownload();
+      // Check if user already owns this tool or has premium access
+      if (isPremiumUser || price === 0) {
+        await initiateSecureDownload();
+        return;
       }
+
+      // Check if user already purchased this tool
+      const { data: existingPurchase } = await supabase
+        .from('tool_orders')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('tool_id', id)
+        .eq('status', 'completed')
+        .maybeSingle();
+
+      if (existingPurchase) {
+        await initiateSecureDownload();
+        return;
+      }
+
+      // Need to purchase - initiate Razorpay payment
+      await initiatePayment();
+      
     } catch (error) {
+      console.error('Download error:', error);
       toast({
         title: "Download Failed",
         description: "Please try again later or contact support.",
@@ -90,29 +120,126 @@ const GISToolCard = ({
     }
   };
 
-  const initiateDownload = () => {
+  const detectUserRegion = () => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone.includes('Asia/Kolkata') || timezone.includes('Asia/Calcutta') ? 'IN' : 'INTL';
+  };
+
+  const initiatePayment = async () => {
+    const region = detectUserRegion();
+    const amount = region === 'IN' ? displayPriceINR : displayPrice;
+    const currency = region === 'IN' ? 'INR' : 'USD';
+
+    // Load Razorpay script if not loaded
+    if (!window.Razorpay) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+      await new Promise((resolve) => { script.onload = resolve; });
+    }
+
+    // Create Razorpay order
+    const { data, error } = await supabase.functions.invoke('purchase-tool', {
+      body: {
+        toolId: id,
+        amount: amount,
+        currency: currency
+      }
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const options = {
+      key: data.keyId,
+      amount: data.amount,
+      currency: data.currency,
+      name: 'Harita Hive',
+      description: `Purchase: ${title}`,
+      order_id: data.orderId,
+      prefill: {
+        email: user.email,
+        name: user.user_metadata?.full_name || '',
+      },
+      theme: { color: '#3B82F6' },
+      handler: async function (response: any) {
+        try {
+          // Payment successful, now download
+          toast({
+            title: "Payment Successful!",
+            description: "Your tool purchase is complete. Downloading now...",
+          });
+          
+          // Wait a moment then download
+          setTimeout(async () => {
+            await initiateSecureDownload();
+          }, 1000);
+          
+        } catch (error) {
+          console.error('Post-payment error:', error);
+          toast({
+            title: "Payment Successful",
+            description: "Payment completed! Please try downloading again.",
+          });
+          setIsDownloading(false);
+        }
+      },
+      modal: {
+        ondismiss: function() {
+          setIsDownloading(false);
+          toast({
+            title: "Payment Cancelled",
+            description: "You can try again anytime to purchase this tool.",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  };
+
+  const initiateSecureDownload = async () => {
     try {
-      if (downloadUrl && downloadUrl !== "#") {
-        window.open(downloadUrl, '_blank');
+      // Call secure download function
+      const { data, error } = await supabase.functions.invoke('download-gis-tool', {
+        body: { toolId: id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.downloadUrl) {
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = data.downloadUrl;
+        link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_v${data.version || '1.0'}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         toast({
           title: "Download Started",
           description: `${title} is now downloading...`,
         });
       } else {
-        toast({
-          title: "Download Unavailable",
-          description: "This file is temporarily unavailable. Please try again later.",
-          variant: "destructive",
-        });
+        throw new Error('Download URL not available');
       }
+      
     } catch (error) {
+      console.error('Secure download error:', error);
       toast({
         title: "Download Error",
-        description: "Failed to start download. Please check your connection.",
+        description: "Failed to start download. Please contact support if this persists.",
         variant: "destructive",
       });
+    } finally {
+      setIsDownloading(false);
     }
-    setIsDownloading(false);
   };
 
   return (
@@ -251,9 +378,19 @@ const GISToolCard = ({
           onClick={handleDownload} 
           className="flex-1" 
           disabled={isDownloading}
+          variant={isPremiumUser || price === 0 ? "default" : "default"}
         >
-          <Download className="h-4 w-4 mr-2" />
-          {isDownloading ? 'Processing...' : 'Purchase & Download'}
+          {isPremiumUser || price === 0 ? (
+            <>
+              <Download className="h-4 w-4 mr-2" />
+              {isDownloading ? 'Downloading...' : 'Download Now'}
+            </>
+          ) : (
+            <>
+              <CreditCard className="h-4 w-4 mr-2" />
+              {isDownloading ? 'Processing...' : 'Buy & Download'}
+            </>
+          )}
         </Button>
         <Button variant="outline" size="sm">
           <ExternalLink className="h-4 w-4" />
