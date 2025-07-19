@@ -2,8 +2,9 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Star, ExternalLink, Heart } from "lucide-react";
+import { Download, Star, ExternalLink, Heart, CheckCircle, Wifi, WifiOff, FileText, Database, Clock } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface GISToolCardProps {
   id: string;
@@ -11,6 +12,7 @@ interface GISToolCardProps {
   description: string;
   category: string;
   price: number;
+  priceINR?: number;
   downloads: number;
   rating: number;
   author: string;
@@ -20,6 +22,12 @@ interface GISToolCardProps {
   compatibleSoftware?: string[];
   userPlan?: string;
   isProfessionalUser?: boolean;
+  isQGISCompatible?: boolean;
+  isOfflineCapable?: boolean;
+  includesSampleData?: boolean;
+  includesDocumentation?: boolean;
+  fileSize?: string;
+  lastUpdated?: string;
 }
 
 const GISToolCard = ({ 
@@ -28,6 +36,7 @@ const GISToolCard = ({
   description, 
   category, 
   price, 
+  priceINR,
   downloads, 
   rating, 
   author, 
@@ -36,20 +45,74 @@ const GISToolCard = ({
   programmingLanguage,
   compatibleSoftware,
   userPlan = 'free',
-  isProfessionalUser = false
+  isProfessionalUser = false,
+  isQGISCompatible = false,
+  isOfflineCapable = false,
+  includesSampleData = false,
+  includesDocumentation = false,
+  fileSize,
+  lastUpdated
 }: GISToolCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const { toast } = useToast();
 
-  // Professional users get special pricing of $14.99 for paid tools
-  const displayPrice = isProfessionalUser && price > 0 ? 14.99 : price;
+  // All tools are now $14.99 USD for global consistency
+  const displayPrice = 14.99;
+  const displayPriceINR = priceINR || 1249;
 
-  const handleDownload = () => {
-    if (displayPrice === 0) {
-      window.open(downloadUrl, '_blank');
-    } else {
-      // Handle payment flow
-      console.log('Redirect to payment for tool:', id);
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    
+    try {
+      // Simulate payment flow for paid tools
+      if (price > 0) {
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to complete your purchase...",
+        });
+        
+        // Simulate payment processing
+        setTimeout(() => {
+          setIsDownloading(false);
+          initiateDownload();
+        }, 2000);
+      } else {
+        initiateDownload();
+      }
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Please try again later or contact support.",
+        variant: "destructive",
+      });
+      setIsDownloading(false);
     }
+  };
+
+  const initiateDownload = () => {
+    try {
+      if (downloadUrl && downloadUrl !== "#") {
+        window.open(downloadUrl, '_blank');
+        toast({
+          title: "Download Started",
+          description: `${title} is now downloading...`,
+        });
+      } else {
+        toast({
+          title: "Download Unavailable",
+          description: "This file is temporarily unavailable. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Download Error",
+        description: "Failed to start download. Please check your connection.",
+        variant: "destructive",
+      });
+    }
+    setIsDownloading(false);
   };
 
   return (
@@ -78,6 +141,34 @@ const GISToolCard = ({
           >
             <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
           </Button>
+        </div>
+
+        {/* Compatibility Indicators */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {isQGISCompatible && (
+            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              ✅ QGIS-Compatible
+            </Badge>
+          )}
+          {isOfflineCapable && (
+            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+              <WifiOff className="h-3 w-3 mr-1" />
+              Offline Ready
+            </Badge>
+          )}
+          {includesSampleData && (
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+              <Database className="h-3 w-3 mr-1" />
+              Sample Data
+            </Badge>
+          )}
+          {includesDocumentation && (
+            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+              <FileText className="h-3 w-3 mr-1" />
+              Documentation
+            </Badge>
+          )}
         </div>
       </CardHeader>
 
@@ -118,34 +209,51 @@ const GISToolCard = ({
             </div>
           )}
 
+          {/* File Info */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-3">
+              {fileSize && (
+                <span>Size: {fileSize}</span>
+              )}
+              {lastUpdated && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>{new Date(lastUpdated).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Download className="h-3 w-3" />
               <span>{downloads.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-2">
-              {isProfessionalUser && price > 0 && price !== displayPrice && (
-                <span className="text-sm line-through text-muted-foreground">
-                  ${price}
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-foreground">
+                  ${displayPrice}
                 </span>
-              )}
-              <span className="text-lg font-bold text-foreground">
-                {displayPrice === 0 ? 'Free' : `$${displayPrice}`}
-              </span>
-              {isProfessionalUser && price > 0 && (
                 <Badge variant="secondary" className="text-xs">
-                  Pro Price
+                  USD
                 </Badge>
-              )}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                ₹{displayPriceINR} INR
+              </div>
             </div>
           </div>
         </div>
       </CardContent>
 
       <CardFooter className="flex gap-2">
-        <Button onClick={handleDownload} className="flex-1">
+        <Button 
+          onClick={handleDownload} 
+          className="flex-1" 
+          disabled={isDownloading}
+        >
           <Download className="h-4 w-4 mr-2" />
-          {displayPrice === 0 ? 'Download' : 'Purchase'}
+          {isDownloading ? 'Processing...' : 'Purchase & Download'}
         </Button>
         <Button variant="outline" size="sm">
           <ExternalLink className="h-4 w-4" />

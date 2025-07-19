@@ -20,64 +20,132 @@ const GISMarketplace = () => {
   // Check if user has professional access
   const isProfessionalUser = plan?.plan === 'professional' || plan?.subscription_tier === 'pro' || plan?.subscription_tier === 'enterprise';
 
-  // Mock data - replace with real data from Supabase
+  // Updated tools with standardized pricing at $14.99 USD
   const tools = [
     {
       id: "1",
       title: "Advanced Spatial Analysis Toolkit",
-      description: "Complete toolkit for advanced spatial analysis including clustering, hotspot analysis, and network analysis tools.",
+      description: "Complete toolkit for advanced spatial analysis including clustering, hotspot analysis, and network analysis tools. Includes Python scripts, QGIS plugins, and sample datasets.",
       category: "Analysis",
-      price: 49.99,
+      price: 14.99,
+      priceINR: 1249,
       downloads: 1245,
       rating: 4.8,
       author: "GeoSpatial Pro",
-      downloadUrl: "#",
+      downloadUrl: "https://example.com/downloads/spatial-analysis-toolkit.zip",
       isFeatured: true,
       programmingLanguage: "Python",
-      compatibleSoftware: ["ArcGIS", "QGIS", "PostGIS"]
+      compatibleSoftware: ["QGIS", "ArcGIS", "PostGIS"],
+      isQGISCompatible: true,
+      isOfflineCapable: true,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "45.2 MB",
+      lastUpdated: "2024-01-15"
     },
     {
       id: "2", 
       title: "Land Use Classification Scripts",
-      description: "Machine learning scripts for automated land use classification from satellite imagery.",
+      description: "Machine learning scripts for automated land use classification from satellite imagery. Works offline with any GIS software and includes pre-trained models.",
       category: "Machine Learning",
-      price: 0,
+      price: 14.99,
+      priceINR: 1249,
       downloads: 3421,
       rating: 4.6,
       author: "Dr. Sarah Chen",
-      downloadUrl: "#",
-      programmingLanguage: "R",
-      compatibleSoftware: ["R Studio", "Google Earth Engine"]
+      downloadUrl: "https://example.com/downloads/land-use-classification.zip",
+      programmingLanguage: "Python",
+      compatibleSoftware: ["QGIS", "R Studio", "Google Earth Engine"],
+      isQGISCompatible: true,
+      isOfflineCapable: true,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "67.8 MB",
+      lastUpdated: "2024-01-10"
     },
     {
       id: "3",
       title: "Web Mapping Dashboard Template",
-      description: "Complete responsive web mapping dashboard template with admin panel and user management.",
+      description: "Complete responsive web mapping dashboard template with admin panel and user management. QGIS-compatible data processing scripts included.",
       category: "Web Development",
-      price: 79.99,
+      price: 14.99,
+      priceINR: 1249,
       downloads: 892,
       rating: 4.9,
       author: "WebGIS Solutions",
-      downloadUrl: "#",
+      downloadUrl: "https://example.com/downloads/web-mapping-dashboard.zip",
       programmingLanguage: "JavaScript",
-      compatibleSoftware: ["Leaflet", "Mapbox", "OpenLayers"]
+      compatibleSoftware: ["QGIS", "Leaflet", "Mapbox", "OpenLayers"],
+      isQGISCompatible: true,
+      isOfflineCapable: false,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "23.4 MB",
+      lastUpdated: "2024-01-20"
     },
     {
       id: "4",
       title: "DEM Processing Utilities",
-      description: "Comprehensive set of tools for Digital Elevation Model processing and terrain analysis.",
+      description: "Comprehensive set of tools for Digital Elevation Model processing and terrain analysis. Fully compatible with QGIS and works offline.",
       category: "Data Processing",
-      price: 29.99,
+      price: 14.99,
+      priceINR: 1249,
       downloads: 687,
       rating: 4.4,
       author: "TerrainTech",
-      downloadUrl: "#",
+      downloadUrl: "https://example.com/downloads/dem-processing-utilities.zip",
       programmingLanguage: "Python",
-      compatibleSoftware: ["GDAL", "ArcGIS", "QGIS"]
+      compatibleSoftware: ["QGIS", "GDAL", "ArcGIS"],
+      isQGISCompatible: true,
+      isOfflineCapable: true,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "34.7 MB",
+      lastUpdated: "2024-01-12"
+    },
+    {
+      id: "5",
+      title: "Remote Sensing Image Analysis Suite",
+      description: "Complete suite for satellite image analysis, band math, and vegetation indices calculation. Optimized for QGIS workflow.",
+      category: "Remote Sensing",
+      price: 14.99,
+      priceINR: 1249,
+      downloads: 1876,
+      rating: 4.7,
+      author: "RemoteSense Pro",
+      downloadUrl: "https://example.com/downloads/remote-sensing-suite.zip",
+      programmingLanguage: "Python",
+      compatibleSoftware: ["QGIS", "SNAP", "ENVI"],
+      isQGISCompatible: true,
+      isOfflineCapable: true,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "89.3 MB",
+      lastUpdated: "2024-01-18"
+    },
+    {
+      id: "6",
+      title: "Hydrological Modeling Toolkit",
+      description: "Advanced tools for watershed analysis, flow accumulation, and flood modeling. Includes QGIS processing scripts and sample watersheds.",
+      category: "Hydrology",
+      price: 14.99,
+      priceINR: 1249,
+      downloads: 543,
+      rating: 4.5,
+      author: "HydroGIS Labs",
+      downloadUrl: "https://example.com/downloads/hydro-modeling-toolkit.zip",
+      programmingLanguage: "Python",
+      compatibleSoftware: ["QGIS", "GRASS GIS", "HEC-RAS"],
+      isQGISCompatible: true,
+      isOfflineCapable: true,
+      includesSampleData: true,
+      includesDocumentation: true,
+      fileSize: "56.1 MB",
+      lastUpdated: "2024-01-08"
     }
   ];
 
-  const categories = ["Analysis", "Machine Learning", "Web Development", "Data Processing", "Visualization"];
+  const categories = ["Analysis", "Machine Learning", "Web Development", "Data Processing", "Remote Sensing", "Hydrology", "Visualization"];
   
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

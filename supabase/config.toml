@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.send-creator-application-email]
 verify_jwt = false
+
+[functions.download-gis-tool]
+verify_jwt = false
