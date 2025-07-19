@@ -1656,6 +1656,167 @@ export type Database = {
         }
         Relationships: []
       }
+      enhanced_project_templates: {
+        Row: {
+          author_id: string | null
+          blog_post_url: string | null
+          changelog: Json | null
+          contributor_email: string | null
+          contributor_name: string | null
+          created_at: string | null
+          description: string
+          documentation_external_url: string | null
+          documentation_url: string | null
+          download_count: number | null
+          estimated_duration: string | null
+          folder_structure: Json | null
+          github_url: string | null
+          id: string
+          is_featured: boolean | null
+          is_verified: boolean | null
+          keywords: string[] | null
+          last_verified_at: string | null
+          learning_outcomes: string[] | null
+          license_type: string | null
+          main_script_file: string | null
+          objectives: Json | null
+          organization: string | null
+          overview: string
+          parent_template_id: string | null
+          prerequisites: string[] | null
+          preview_images: Json | null
+          published_at: string | null
+          quality_score: number | null
+          rating_average: number | null
+          rating_count: number | null
+          requirements_file: string | null
+          result_images: Json | null
+          sample_data_description: string | null
+          sample_data_url: string | null
+          sector: Database["public"]["Enums"]["project_sector"]
+          skill_level: Database["public"]["Enums"]["skill_level"]
+          slug: string
+          status: string | null
+          tags: string[] | null
+          template_files: Json | null
+          title: string
+          tools_required: Database["public"]["Enums"]["gis_tool"][]
+          updated_at: string | null
+          use_case: string
+          version: string | null
+          video_tutorial_url: string | null
+          view_count: number | null
+        }
+        Insert: {
+          author_id?: string | null
+          blog_post_url?: string | null
+          changelog?: Json | null
+          contributor_email?: string | null
+          contributor_name?: string | null
+          created_at?: string | null
+          description: string
+          documentation_external_url?: string | null
+          documentation_url?: string | null
+          download_count?: number | null
+          estimated_duration?: string | null
+          folder_structure?: Json | null
+          github_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          keywords?: string[] | null
+          last_verified_at?: string | null
+          learning_outcomes?: string[] | null
+          license_type?: string | null
+          main_script_file?: string | null
+          objectives?: Json | null
+          organization?: string | null
+          overview: string
+          parent_template_id?: string | null
+          prerequisites?: string[] | null
+          preview_images?: Json | null
+          published_at?: string | null
+          quality_score?: number | null
+          rating_average?: number | null
+          rating_count?: number | null
+          requirements_file?: string | null
+          result_images?: Json | null
+          sample_data_description?: string | null
+          sample_data_url?: string | null
+          sector: Database["public"]["Enums"]["project_sector"]
+          skill_level?: Database["public"]["Enums"]["skill_level"]
+          slug: string
+          status?: string | null
+          tags?: string[] | null
+          template_files?: Json | null
+          title: string
+          tools_required?: Database["public"]["Enums"]["gis_tool"][]
+          updated_at?: string | null
+          use_case: string
+          version?: string | null
+          video_tutorial_url?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string | null
+          blog_post_url?: string | null
+          changelog?: Json | null
+          contributor_email?: string | null
+          contributor_name?: string | null
+          created_at?: string | null
+          description?: string
+          documentation_external_url?: string | null
+          documentation_url?: string | null
+          download_count?: number | null
+          estimated_duration?: string | null
+          folder_structure?: Json | null
+          github_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          keywords?: string[] | null
+          last_verified_at?: string | null
+          learning_outcomes?: string[] | null
+          license_type?: string | null
+          main_script_file?: string | null
+          objectives?: Json | null
+          organization?: string | null
+          overview?: string
+          parent_template_id?: string | null
+          prerequisites?: string[] | null
+          preview_images?: Json | null
+          published_at?: string | null
+          quality_score?: number | null
+          rating_average?: number | null
+          rating_count?: number | null
+          requirements_file?: string | null
+          result_images?: Json | null
+          sample_data_description?: string | null
+          sample_data_url?: string | null
+          sector?: Database["public"]["Enums"]["project_sector"]
+          skill_level?: Database["public"]["Enums"]["skill_level"]
+          slug?: string
+          status?: string | null
+          tags?: string[] | null
+          template_files?: Json | null
+          title?: string
+          tools_required?: Database["public"]["Enums"]["gis_tool"][]
+          updated_at?: string | null
+          use_case?: string
+          version?: string | null
+          video_tutorial_url?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enhanced_project_templates_parent_template_id_fkey"
+            columns: ["parent_template_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_registrations: {
         Row: {
           attended: boolean | null
@@ -4264,6 +4425,201 @@ export type Database = {
           },
         ]
       }
+      template_collection_items: {
+        Row: {
+          added_at: string | null
+          collection_id: string | null
+          id: string
+          order_index: number | null
+          template_id: string | null
+        }
+        Insert: {
+          added_at?: string | null
+          collection_id?: string | null
+          id?: string
+          order_index?: number | null
+          template_id?: string | null
+        }
+        Update: {
+          added_at?: string | null
+          collection_id?: string | null
+          id?: string
+          order_index?: number | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "template_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_collection_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_collections: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string | null
+          curator_id: string | null
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          curator_id?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          curator_id?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          name?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      template_downloads: {
+        Row: {
+          download_type: string | null
+          downloaded_at: string | null
+          id: string
+          ip_address: unknown | null
+          template_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          template_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          template_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_downloads_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_ratings: {
+        Row: {
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          rating: number | null
+          review: string | null
+          template_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number | null
+          review?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number | null
+          review?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_ratings_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_usage_analytics: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          template_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          template_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          template_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_usage_analytics_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           avatar_url: string | null
@@ -6088,6 +6444,10 @@ export type Database = {
         Args: { template_id: string }
         Returns: undefined
       }
+      increment_template_download_count: {
+        Args: { template_id: string }
+        Returns: undefined
+      }
       invalidate_previous_sessions: {
         Args: { p_user_id: string; p_new_session_token: string }
         Returns: undefined
@@ -6172,6 +6532,46 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "beta_tester" | "user" | "super_admin"
+      gis_tool:
+        | "qgis"
+        | "arcgis"
+        | "python"
+        | "r"
+        | "google_earth_engine"
+        | "postgis"
+        | "sql"
+        | "javascript"
+        | "leaflet"
+        | "openlayers"
+        | "mapbox"
+        | "grass_gis"
+        | "gdal"
+        | "fme"
+        | "autocad_map"
+        | "microstation"
+        | "erdas_imagine"
+        | "envi"
+        | "snap"
+        | "matlab"
+      project_sector:
+        | "agriculture"
+        | "urban_planning"
+        | "infrastructure"
+        | "risk_mapping"
+        | "forestry"
+        | "water_resources"
+        | "climate"
+        | "remote_sensing"
+        | "health"
+        | "real_estate"
+        | "mining"
+        | "transportation"
+        | "environmental"
+        | "disaster_management"
+        | "archaeology"
+        | "marine"
+        | "energy"
+      skill_level: "beginner" | "intermediate" | "advanced" | "expert"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6300,6 +6700,48 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "beta_tester", "user", "super_admin"],
+      gis_tool: [
+        "qgis",
+        "arcgis",
+        "python",
+        "r",
+        "google_earth_engine",
+        "postgis",
+        "sql",
+        "javascript",
+        "leaflet",
+        "openlayers",
+        "mapbox",
+        "grass_gis",
+        "gdal",
+        "fme",
+        "autocad_map",
+        "microstation",
+        "erdas_imagine",
+        "envi",
+        "snap",
+        "matlab",
+      ],
+      project_sector: [
+        "agriculture",
+        "urban_planning",
+        "infrastructure",
+        "risk_mapping",
+        "forestry",
+        "water_resources",
+        "climate",
+        "remote_sensing",
+        "health",
+        "real_estate",
+        "mining",
+        "transportation",
+        "environmental",
+        "disaster_management",
+        "archaeology",
+        "marine",
+        "energy",
+      ],
+      skill_level: ["beginner", "intermediate", "advanced", "expert"],
     },
   },
 } as const
