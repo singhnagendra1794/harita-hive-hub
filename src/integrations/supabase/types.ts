@@ -730,6 +730,45 @@ export type Database = {
           },
         ]
       }
+      corporate_inquiries: {
+        Row: {
+          additional_info: string | null
+          areas_of_interest: string[] | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          organization: string
+          status: string | null
+          team_size: string
+          updated_at: string
+        }
+        Insert: {
+          additional_info?: string | null
+          areas_of_interest?: string[] | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          organization: string
+          status?: string | null
+          team_size: string
+          updated_at?: string
+        }
+        Update: {
+          additional_info?: string | null
+          areas_of_interest?: string[] | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          organization?: string
+          status?: string | null
+          team_size?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_analytics: {
         Row: {
           course_id: string | null
