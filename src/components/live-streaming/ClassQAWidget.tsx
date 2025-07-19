@@ -33,11 +33,11 @@ interface QAItem {
   created_at: string;
   updated_at: string;
   user_profiles?: {
-    full_name: string;
-  };
+    full_name?: string;
+  } | null;
   instructor_profiles?: {
-    full_name: string;
-  };
+    full_name?: string;
+  } | null;
 }
 
 interface ClassQAWidgetProps {
@@ -69,16 +69,20 @@ export const ClassQAWidget: React.FC<ClassQAWidgetProps> = ({
     try {
       const { data, error } = await supabase
         .from('class_qa')
-        .select(`
-          *,
-          user_profiles:profiles!class_qa_user_id_fkey(full_name),
-          instructor_profiles:profiles!class_qa_answered_by_fkey(full_name)
-        `)
+        .select('*')
         .eq('class_id', classId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setQuestions((data || []) as QAItem[]);
+      
+      // Map the data to include placeholder profile data
+      const questionsWithProfiles = (data || []).map(qa => ({
+        ...qa,
+        user_profiles: null,
+        instructor_profiles: null
+      }));
+      
+      setQuestions(questionsWithProfiles);
     } catch (error) {
       console.error('Error fetching questions:', error);
       toast({
