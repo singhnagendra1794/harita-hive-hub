@@ -21,11 +21,17 @@ export const useUserRoles = () => {
   useEffect(() => {
     if (user) {
       fetchUserRoles();
+    } else {
+      setLoading(false);
+      setRoles([]);
     }
   }, [user]);
 
   const fetchUserRoles = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -33,11 +39,13 @@ export const useUserRoles = () => {
 
       if (error) {
         console.error('Error fetching user roles:', error);
-        throw error;
+        setRoles([]);
+      } else {
+        setRoles(data || []);
       }
-      setRoles(data || []);
     } catch (error) {
       console.error('Error fetching user roles:', error);
+      setRoles([]);
     } finally {
       setLoading(false);
     }

@@ -30,106 +30,70 @@ export const useUserActivity = () => {
     if (!user) return;
 
     try {
-      // Fetch from multiple sources to build comprehensive activity feed
-      const [
-        enrollmentData,
-        waitlistData,
-        feedbackData,
-        challengeData,
-        communityData
-      ] = await Promise.all([
-        // Course enrollments
-        supabase
-          .from('enrollments')
-          .select('course_id, created_at')
+      // Fetch from sources where we have permissions
+      const activityFeed: ActivityDisplay[] = [];
+
+      // Try to fetch course enrollments (may fail due to RLS)
+      try {
+        const enrollmentData = await supabase
+          .from('course_enrollments')
+          .select('course_id, enrolled_at')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5),
+          .order('enrolled_at', { ascending: false })
+          .limit(5);
         
-        // Waitlist entries
-        supabase
-          .from('course_waitlist')
-          .select('course_id, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5),
-        
-        // Feedback submissions
-        supabase
+        if (enrollmentData.data) {
+          enrollmentData.data.forEach(enrollment => {
+            activityFeed.push({
+              title: `Enrolled in ${enrollment.course_id ? enrollment.course_id.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'a'} course`,
+              date: formatRelativeTime(enrollment.enrolled_at)
+            });
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch course enrollments:', error);
+      }
+
+      // Try to fetch feedback submissions (should work)
+      try {
+        const feedbackData = await supabase
           .from('content_feedback')
           .select('content_type, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(3),
+          .limit(3);
         
-        // Challenge participations
-        supabase
-          .from('challenge_participants')
-          .select('challenge_name, created_at, status')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(3),
-        
-        // Community posts
-        supabase
+        if (feedbackData.data) {
+          feedbackData.data.forEach(feedback => {
+            activityFeed.push({
+              title: `Submitted feedback for ${feedback.content_type}`,
+              date: formatRelativeTime(feedback.created_at)
+            });
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch feedback data:', error);
+      }
+
+      // Try to fetch community posts (should work)
+      try {
+        const communityData = await supabase
           .from('community_posts')
           .select('title, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(3)
-      ]);
-
-      const activityFeed: ActivityDisplay[] = [];
-
-      // Process enrollments
-      if (enrollmentData.data) {
-        enrollmentData.data.forEach(enrollment => {
-          activityFeed.push({
-            title: `Enrolled in ${enrollment.course_id.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} course`,
-            date: formatRelativeTime(enrollment.created_at)
+          .limit(3);
+        
+        if (communityData.data) {
+          communityData.data.forEach(post => {
+            activityFeed.push({
+              title: `Posted "${post.title}" in community`,
+              date: formatRelativeTime(post.created_at)
+            });
           });
-        });
-      }
-
-      // Process waitlist entries
-      if (waitlistData.data) {
-        waitlistData.data.forEach(waitlist => {
-          activityFeed.push({
-            title: `Joined waitlist for ${waitlist.course_id.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
-            date: formatRelativeTime(waitlist.created_at)
-          });
-        });
-      }
-
-      // Process feedback
-      if (feedbackData.data) {
-        feedbackData.data.forEach(feedback => {
-          activityFeed.push({
-            title: `Submitted feedback for ${feedback.content_type}`,
-            date: formatRelativeTime(feedback.created_at)
-          });
-        });
-      }
-
-      // Process challenges
-      if (challengeData.data) {
-        challengeData.data.forEach(challenge => {
-          const action = challenge.status === 'submitted' ? 'Submitted' : 'Registered for';
-          activityFeed.push({
-            title: `${action} ${challenge.challenge_name.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} challenge`,
-            date: formatRelativeTime(challenge.created_at)
-          });
-        });
-      }
-
-      // Process community posts
-      if (communityData.data) {
-        communityData.data.forEach(post => {
-          activityFeed.push({
-            title: `Posted "${post.title}" in community`,
-            date: formatRelativeTime(post.created_at)
-          });
-        });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch community posts:', error);
       }
 
       // Sort by date and limit to 10 most recent
