@@ -33,7 +33,9 @@ import {
   Brain,
   Shield,
   Database,
-  Paintbrush
+  Paintbrush,
+  Building,
+  Code
 } from "lucide-react";
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useWebGISBuilder } from "@/hooks/useWebGISBuilder";
@@ -48,6 +50,10 @@ import AnalyticsDashboard from "./AnalyticsDashboard";
 import AIInsights from "./AIInsights";
 import ExportManager from "./ExportManager";
 import UserManagement from "./UserManagement";
+import WorkflowDesigner from "./WorkflowDesigner";
+import APIBuilder from "./APIBuilder";
+import AutomationEngine from "./AutomationEngine";
+import EnterpriseIntegration from "./EnterpriseIntegration";
 import 'leaflet/dist/leaflet.css';
 
 interface EnhancedMapBuilderProps {
@@ -91,6 +97,10 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
     { id: 'ai-insights', name: 'AI Insights', icon: Brain },
     { id: 'export', name: 'Export', icon: Download },
     { id: 'users', name: 'Users', icon: Shield },
+    { id: 'workflows', name: 'Workflows', icon: Zap },
+    { id: 'api', name: 'API Builder', icon: Code },
+    { id: 'automation', name: 'Automation', icon: Settings },
+    { id: 'enterprise', name: 'Enterprise', icon: Building },
     { id: 'publish', name: 'Publish', icon: Globe }
   ];
 
@@ -396,6 +406,23 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
                   {/* Users Tab */}
                   {activeTab === 'users' && (
                     <UserManagement projectId={projectId} />
+                  )}
+
+                  {/* Phase 5 Tabs */}
+                  {activeTab === 'workflows' && (
+                    <WorkflowDesigner projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'api' && (
+                    <APIBuilder projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'automation' && (
+                    <AutomationEngine projectId={projectId} />
+                  )}
+                  
+                  {activeTab === 'enterprise' && (
+                    <EnterpriseIntegration projectId={projectId} />
                   )}
 
                   {/* Publish Tab */}
