@@ -23,8 +23,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [otpSent, setOtpSent] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [activeTab, setActiveTab] = useState('email');
@@ -50,7 +49,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    if (mode === 'signup' && (!firstName || !lastName)) return;
+    if (mode === 'signup' && !fullName.trim()) return;
 
     setLoading(true);
     try {
@@ -69,9 +68,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              first_name: firstName,
-              last_name: lastName,
-              full_name: `${firstName} ${lastName}`
+              full_name: fullName.trim()
             }
           }
         });
@@ -159,11 +156,17 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone) return;
+    if (mode === 'signup' && !fullName.trim()) return;
 
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
         phone: phone,
+        options: mode === 'signup' ? {
+          data: {
+            full_name: fullName.trim()
+          }
+        } : undefined
       });
 
       if (error) throw error;
@@ -291,29 +294,16 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           <TabsContent value="email" className="space-y-4">
             <form onSubmit={handleEmailAuth} className="space-y-4">
               {mode === 'signup' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      type="text"
-                      placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      type="text"
-                      placeholder="Doe"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      required
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
                 </div>
               )}
               <div className="space-y-2">
@@ -353,6 +343,19 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           <TabsContent value="phone" className="space-y-4">
             {!otpSent ? (
               <form onSubmit={handlePhoneAuth} className="space-y-4">
+                {mode === 'signup' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneFullName">Full Name</Label>
+                    <Input
+                      id="phoneFullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
