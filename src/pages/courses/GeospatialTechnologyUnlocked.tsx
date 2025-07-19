@@ -104,15 +104,16 @@ const GeospatialTechnologyUnlocked = () => {
     }
   ];
 
-  const completedModules = courseModules.filter(m => m.completed).length;
-  const progressPercentage = (completedModules / courseModules.length) * 100;
+  // Calculate progress based on live class attendance (reset to 0 for now)
+  const completedModules = 0; // Will be calculated based on live class attendance
+  const progressPercentage = 0; // Will be calculated based on completed days
 
   const courseInfo = {
     title: "Geospatial Technology Unlocked – Full 90+ Day Curriculum",
     description: "From beginner to advanced, students will be job-ready geospatial professionals with AI and automation skills. 90 sessions (1.5 hours/day) with a blend of lecture (20–30%), demos, and practical exercises.",
     duration: "90+ sessions (135+ hours)",
     level: "Beginner to Advanced",
-    students: "2,847 enrolled",
+    students: "30 enrolled",
     rating: 4.8,
     instructor: "HaritaHive Expert Team",
     lastUpdated: "December 2024"
@@ -153,10 +154,10 @@ const GeospatialTechnologyUnlocked = () => {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Your Progress</span>
                 <span className="text-sm text-muted-foreground">
-                  {completedModules} of {courseModules.length} tracks completed
+                  0% complete (0 of 90+ days)
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
+              <Progress value={0} className="h-2" />
             </div>
           </div>
 
@@ -179,7 +180,7 @@ const GeospatialTechnologyUnlocked = () => {
                 </div>
                 
                 {hasAccess('pro') ? (
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => window.location.href = '/live-classes'}>
                     <Play className="h-4 w-4 mr-2" />
                     Continue Learning
                   </Button>
