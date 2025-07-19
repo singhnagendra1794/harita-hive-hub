@@ -274,9 +274,9 @@ const APIManager = ({ subscription }: APIManagerProps) => {
                         <div className="flex flex-wrap gap-1 mt-2">
                           {apiKey.permissions.map((permission) => (
                             <Badge key={permission} variant="secondary" className="text-xs">
-                              {permission.replace('_', ' ')}
+                              {permission.replace("_", " ")}
                             </Badge>
-                          )))}
+                          ))}
                         </div>
                       </div>
                       
@@ -290,7 +290,7 @@ const APIManager = ({ subscription }: APIManagerProps) => {
                       </Button>
                     </div>
                   </div>
-                )))}
+                ))}
               </div>
             )}
           </CardContent>
@@ -315,7 +315,7 @@ const APIManager = ({ subscription }: APIManagerProps) => {
 curl -X POST "https://api.haritahive.com/v1/jobs" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
-                  -d '{
+  -d '{
     "job_type": "vector_buffer",
     "input_files": ["file_url_1"],
     "parameters": {
