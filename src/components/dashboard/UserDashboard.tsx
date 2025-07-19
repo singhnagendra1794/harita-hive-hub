@@ -8,12 +8,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { useUserStats } from "@/hooks/useUserStats";
+import { useUserActivity } from "@/hooks/useUserActivity";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 // Removed useSessionValidation to avoid conflicts with Supabase auth
 import LiveClassBanner from "./LiveClassBanner";
 import { ArrowRight, Crown, Zap, Lock, Loader2, Shield, RefreshCw } from "lucide-react";
-import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart } from "lucide-react";
+import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart, Globe, Wrench, Presentation, UserPlus, Trophy, DollarSign, Upload, Target, Gamepad2, Play, BookText, ClipboardList, Compass, School, BrainCircuit, FileText, Database, Microscope } from "lucide-react";
 
 interface Stat {
   title: string;
@@ -35,6 +36,7 @@ const UserDashboard = () => {
   const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
   const { hasAccess, subscription, canAccessLearnSection, canAccessGeoAILab, canAccessWebGISBuilder, loading: premiumLoading } = usePremiumAccess();
   const { stats, plan, loading: statsLoading, refreshSession } = useUserStats();
+  const { activities, loading: activityLoading } = useUserActivity();
   const { toast } = useToast();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState("quick-actions");
@@ -87,29 +89,38 @@ const UserDashboard = () => {
 
   const quickActions = [
     { title: "Browse Courses", description: "Explore learning paths and tutorials", href: "/browse-courses", icon: BookOpen },
-    { title: "Interactive Map", description: "Explore our mapping tools", href: hasAccess('pro') ? "/map-playground" : "/choose-plan", icon: Map, premium: true },
-    { title: "GeoAI Lab", description: "AI-powered geospatial analysis", href: hasAccess('pro') ? "/geoai-lab" : "/choose-plan", icon: Brain, premium: true },
-    { title: "Community", description: "Connect with other GIS professionals", href: "/community", icon: Users },
+    { title: "Plugin Marketplace", description: "Discover and download GIS plugins", href: "/plugin-marketplace", icon: Puzzle },
+    { title: "GIS Marketplace", description: "Tools, scripts & templates", href: "/gis-marketplace", icon: Package },
+    { title: "Freelance Projects", description: "Find GIS project opportunities", href: "/task-board", icon: Briefcase },
+    { title: "Portfolio Builder", description: "Showcase your GIS work", href: "/portfolio", icon: Presentation },
+    { title: "Project Studio", description: "Create and manage projects", href: "/projects", icon: Layers },
+    { title: "Spatial Tools", description: "GIS analysis and processing tools", href: hasAccess('pro') ? "/geoai-lab" : "/choose-plan", icon: Wrench, premium: true },
+    { title: "Certification", description: "Get industry-recognized credentials", href: "/certifications", icon: Award },
+    { title: "AI Mentor", description: "Get AI-powered GIS guidance", href: hasAccess('pro') ? "/ai-mentor" : "/choose-plan", icon: BrainCircuit, premium: true },
+    { title: "Resume Roadmap", description: "Build your career path", href: "/resume-roadmap", icon: FileText },
+    { title: "Labs", description: "Hands-on GIS experiments", href: hasAccess('pro') ? "/labs" : "/choose-plan", icon: Microscope, premium: true },
     { title: "Code Snippets", description: "Ready-to-use GIS code examples", href: "/code-snippets", icon: Code },
-    { title: "Toolkits Hub", description: "Download GIS tools and plugins", href: "/toolkits", icon: Briefcase },
+    { title: "Templates", description: "Project templates and starter kits", href: "/templates", icon: FileSearch2 },
     { title: "Live Classes", description: "Join live GIS training sessions", href: "/live-classes", icon: Calendar },
-    { title: "Web GIS Builder", description: "Create web-based GIS applications", href: hasAccess('enterprise') ? "/webgis-builder" : "/choose-plan", icon: Layers, premium: true },
+    { title: "Community", description: "Connect with other GIS professionals", href: "/community", icon: Users },
+    { title: "Interactive Map", description: "Explore our mapping tools", href: hasAccess('pro') ? "/map-playground" : "/choose-plan", icon: Map, premium: true },
   ];
 
   const monetizationFeatures = [
-    { title: "Hire GIS Talent", description: "Find verified professionals", href: "/talent-pool", icon: Users, badge: "Hiring" },
-    { title: "Corporate Training", description: "Custom team training programs", href: "/corporate-training", icon: Building, badge: "B2B" },
-    { title: "GIS Marketplace", description: "Tools, scripts & templates", href: "/gis-marketplace", icon: Package, badge: "Tools" },
-    { title: "Plugin Store", description: "Extend your GIS capabilities", href: "/plugin-marketplace", icon: Puzzle, badge: "Plugins" },
-    { title: "Task Board", description: "Freelance projects & micro-tasks", href: "/task-board", icon: Briefcase, badge: "Earn" },
-    { title: "Certifications", description: "Industry-recognized credentials", href: "/certifications", icon: Award, badge: "Certified" },
+    { title: "Upload Plugin", description: "Sell your GIS plugins to the community", href: "/plugin-marketplace/upload", icon: Upload, badge: "Earn" },
+    { title: "Freelance Projects", description: "Apply to GIS project opportunities", href: "/task-board", icon: Target, badge: "Apply" },
+    { title: "Sell GIS Tools", description: "Monetize your tools and scripts", href: "/gis-marketplace/sell", icon: Package, badge: "Sell" },
+    { title: "Offer Services", description: "Provide data and consulting services", href: "/services/offer", icon: Building, badge: "Services" },
+    { title: "Become Creator", description: "Join our creator program", href: "/community/creator-application", icon: UserPlus, badge: "Creator" },
+    { title: "Referral Program", description: "Earn rewards for referrals", href: "/referrals", icon: DollarSign, badge: "Rewards" },
+    { title: "Corporate Training", description: "Offer training to companies", href: "/corporate-training", icon: School, badge: "Training" },
+    { title: "Marketplace Revenue", description: "Track your earnings", href: "/dashboard/earnings", icon: Trophy, badge: "Revenue" },
   ];
 
-  const recentActivities = [
-    { title: "Completed 'Spatial Analysis with Python' course", date: "2 days ago" },
-    { title: "Joined the 'Web Mapping' community forum", date: "5 days ago" },
-    { title: "Submitted a code snippet for raster processing", date: "1 week ago" },
-    { title: "Applied for a GIS Analyst position", date: "2 weeks ago" },
+  // Use real activity data from the hook
+  const recentActivities = activities.length > 0 ? activities : [
+    { title: "Welcome to Harita Hive! Start exploring", date: "Just now" },
+    { title: "Complete your profile to get personalized recommendations", date: "Today" },
   ];
 
   const recommendations = [
@@ -156,7 +167,7 @@ const UserDashboard = () => {
   };
 
   // Show loading state while validating session
-  if (authLoading || premiumLoading || rolesLoading || statsLoading) {
+  if (authLoading || premiumLoading || rolesLoading || statsLoading || activityLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -284,7 +295,7 @@ const UserDashboard = () => {
         </TabsList>
 
         <TabsContent value="quick-actions">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {quickActions.map((action, index) => {
               const isPremiumFeature = action.premium || false;
               // Super admins have access to all features
@@ -292,33 +303,33 @@ const UserDashboard = () => {
               
               return (
                 <Card key={index} className={`group hover:shadow-lg transition-all duration-300 ${!hasFeatureAccess ? 'opacity-75' : 'cursor-pointer'}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <action.icon className={`h-8 w-8 group-hover:scale-110 transition-transform ${!hasFeatureAccess ? 'text-muted-foreground' : 'text-primary'}`} />
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <action.icon className={`h-6 w-6 group-hover:scale-110 transition-transform ${!hasFeatureAccess ? 'text-muted-foreground' : 'text-primary'}`} />
                       {isPremiumFeature && !hasFeatureAccess && (
-                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        <Lock className="h-3 w-3 text-muted-foreground" />
                       )}
                     </div>
-                    <h3 className={`font-semibold mb-2 group-hover:text-primary transition-colors ${!hasFeatureAccess ? 'text-muted-foreground' : ''}`}>
+                    <h3 className={`font-semibold mb-1 text-sm group-hover:text-primary transition-colors ${!hasFeatureAccess ? 'text-muted-foreground' : ''}`}>
                       {action.title}
                       {isPremiumFeature && !hasFeatureAccess && (
-                        <Badge variant="secondary" className="ml-2 text-xs">Premium</Badge>
+                        <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>
                       )}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-xs text-muted-foreground mb-3">
                       {action.description}
                     </p>
                     {hasFeatureAccess ? (
                       <Link to={action.href}>
-                        <Button variant="outline" size="sm" className="w-full">
-                          Access <ArrowRight className="h-4 w-4 ml-2" />
+                        <Button variant="outline" size="sm" className="w-full text-xs">
+                          Access <ArrowRight className="h-3 w-3 ml-1" />
                         </Button>
                       </Link>
                     ) : (
                       <Link to="/pricing">
-                        <Button variant="outline" size="sm" className="w-full">
-                          <Crown className="h-3 w-3 mr-2" />
-                          Upgrade to Access
+                        <Button variant="outline" size="sm" className="w-full text-xs">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Upgrade
                         </Button>
                       </Link>
                     )}
