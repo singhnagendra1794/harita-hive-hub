@@ -70,7 +70,7 @@ const UserDashboard = () => {
       title: "Courses Enrolled", 
       value: (isProfessionalOrAbove() ? "1" : stats?.course_count?.toString()) ?? "0", 
       icon: BookOpen,
-      href: isProfessionalOrAbove() ? "/courses/GeospatialTechnologyUnlocked" : "/browse-courses"
+      href: isProfessionalOrAbove() ? "/courses/geospatial-technology-unlocked" : "/browse-courses"
     },
     { 
       title: "Projects Completed", 
