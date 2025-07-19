@@ -6691,6 +6691,18 @@ export type Database = {
           granted_by: string
         }[]
       }
+      get_user_stats_safe: {
+        Args: { p_user_id: string }
+        Returns: {
+          user_id: string
+          subscription_tier: string
+          course_count: number
+          projects_completed: number
+          community_posts: number
+          spatial_analyses: number
+          plan: string
+        }[]
+      }
       get_user_subscription_safe: {
         Args: { p_user_id: string }
         Returns: {

@@ -83,20 +83,22 @@ export const usePremiumAccess = () => {
     if (!user) return;
 
     try {
-      // Use the secure function to fetch subscription
+      // Force premium access function to run - this will create/update subscription if needed
+      const { data: premiumCheck, error: premiumError } = await supabase.rpc('user_has_premium_access', {
+        p_user_id: user.id
+      });
+
+      if (premiumError) {
+        console.error('Error checking premium access:', premiumError);
+      }
+
+      // Now fetch the subscription data
       const { data, error } = await supabase.rpc('get_user_subscription_safe', {
         p_user_id: user.id
       });
 
       if (error) {
         console.error('Error fetching user subscription:', error);
-        
-        // Only create default subscription if the user truly doesn't exist
-        if (error.code === 'PGRST116' || !data || data.length === 0) {
-          await createDefaultSubscription();
-        } else {
-          console.warn('Unable to fetch subscription due to error, skipping default creation:', error.message);
-        }
         return;
       }
       
@@ -108,13 +110,11 @@ export const usePremiumAccess = () => {
           status: subscriptionData.status as 'active' | 'cancelled' | 'expired' | 'trial'
         });
       } else {
-        // Create default free subscription only if no data exists
-        await createDefaultSubscription();
+        // This shouldn't happen anymore with the updated backend function
+        console.warn('No subscription data found even after premium access check');
       }
     } catch (error) {
       console.error('Error fetching user subscription:', error);
-      // Don't create default subscription on network/auth errors
-      console.warn('Network or auth error, not creating default subscription');
     }
   };
 
