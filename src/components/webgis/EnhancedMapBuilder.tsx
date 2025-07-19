@@ -29,7 +29,11 @@ import {
   Zap,
   Users,
   FileText,
-  Globe
+  Globe,
+  Brain,
+  Shield,
+  Database,
+  Paintbrush
 } from "lucide-react";
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useWebGISBuilder } from "@/hooks/useWebGISBuilder";
@@ -40,6 +44,10 @@ import { PublishDashboardDialog } from "./PublishDashboardDialog";
 import { MapboxRenderer } from "./MapboxRenderer";
 import { CollaborationPanel } from "./CollaborationPanel";
 import { DashboardTemplates } from "./DashboardTemplates";
+import AnalyticsDashboard from "./AnalyticsDashboard";
+import AIInsights from "./AIInsights";
+import ExportManager from "./ExportManager";
+import UserManagement from "./UserManagement";
 import 'leaflet/dist/leaflet.css';
 
 interface EnhancedMapBuilderProps {
@@ -50,7 +58,7 @@ interface EnhancedMapBuilderProps {
 export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProps) => {
   const [currentProject, setCurrentProject] = useState<any>(null);
   const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'layers' | 'widgets' | 'analysis' | 'collaborate' | 'settings'>('layers');
+  const [activeTab, setActiveTab] = useState('design');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
@@ -72,6 +80,19 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
   } = useWebGISBuilder(projectId);
   
   const { toast } = useToast();
+
+  const tabs = [
+    { id: 'design', name: 'Design', icon: Paintbrush },
+    { id: 'data', name: 'Data', icon: Database },
+    { id: 'analysis', name: 'Analysis', icon: BarChart3 },
+    { id: 'collaboration', name: 'Collaborate', icon: Users },
+    { id: 'templates', name: 'Templates', icon: FileText },
+    { id: 'analytics', name: 'Analytics', icon: TrendingUp },
+    { id: 'ai-insights', name: 'AI Insights', icon: Brain },
+    { id: 'export', name: 'Export', icon: Download },
+    { id: 'users', name: 'Users', icon: Shield },
+    { id: 'publish', name: 'Publish', icon: Globe }
+  ];
 
   const handleAddLayer = async () => {
     const newLayer = {
@@ -182,20 +203,20 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setTemplatesDialogOpen(true)}>
-              <FileText className="h-4 w-4 mr-2" />
-              Templates
-            </Button>
             <Button variant="outline" size="sm" onClick={() => setUseMapbox(!useMapbox)}>
               <Globe className="h-4 w-4 mr-2" />
               {useMapbox ? 'Mapbox' : 'Leaflet'}
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleSaveProject}>
+              <Save className="h-4 w-4 mr-2" />
+              Save
             </Button>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+        {/* Left Sidebar - Tabs */}
         <div className={`bg-muted/20 border-r transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-80'} flex flex-col`}>
           <div className="p-4 border-b">
             <Button
@@ -205,206 +226,214 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
               className="w-full justify-start"
             >
               <Settings className="h-4 w-4 mr-2" />
-              {!sidebarCollapsed && "Tools & Layers"}
+              {!sidebarCollapsed && "Tools & Features"}
             </Button>
           </div>
 
           {!sidebarCollapsed && (
-            <div className="flex-1 overflow-auto p-4">
-              <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as any)}>
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="layers" className="flex items-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    Layers
-                  </TabsTrigger>
-                  <TabsTrigger value="widgets" className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Widgets
-                  </TabsTrigger>
-                  <TabsTrigger value="analysis" className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    Analysis
-                  </TabsTrigger>
-                  <TabsTrigger value="collaborate" className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Collaborate
-                  </TabsTrigger>
-                  <TabsTrigger value="settings" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="layers" className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Map Layers</h3>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setImportDialogOpen(true)}>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Import Data
-                      </Button>
-                      <Button size="sm" onClick={handleAddLayer}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Layer
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {layers.map((layer) => (
-                      <Card key={layer.id} className={`p-3 cursor-pointer transition-colors ${
-                        selectedLayer === layer.id ? 'ring-2 ring-primary' : ''
-                      }`} onClick={() => setSelectedLayer(layer.id)}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateLayer(layer.id, { is_visible: !layer.is_visible });
-                              }}
-                            >
-                              {layer.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                            </Button>
-                            <span className="font-medium">{layer.name}</span>
-                            <Badge variant="outline" className="text-xs ml-2">
-                              {layer.type.toUpperCase()}
-                            </Badge>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteLayer(layer.id);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="widgets" className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Map Widgets</h3>
-                    <Button size="sm" onClick={handleAddWidget}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Widget
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {['legend', 'scale', 'coordinates', 'filter', 'chart'].map((type) => (
+            <div className="flex-1 overflow-auto">
+              {/* Tab Navigation */}
+              <div className="p-4 border-b">
+                <div className="grid grid-cols-2 gap-2">
+                  {tabs.map((tab) => {
+                    const IconComponent = tab.icon;
+                    return (
                       <Button
-                        key={type}
-                        variant="outline"
+                        key={tab.id}
+                        variant={activeTab === tab.id ? "default" : "outline"}
                         size="sm"
-                        className="h-16 flex flex-col gap-1"
-                        onClick={() => handleAddWidget()}
+                        onClick={() => setActiveTab(tab.id)}
+                        className="flex items-center gap-2 justify-start h-10"
                       >
-                        {type === 'legend' && <Map className="h-5 w-5" />}
-                        {type === 'scale' && <BarChart3 className="h-5 w-5" />}
-                        {type === 'coordinates' && <MapPin className="h-5 w-5" />}
-                        {type === 'filter' && <Settings className="h-5 w-5" />}
-                        {type === 'chart' && <TrendingUp className="h-5 w-5" />}
-                        <span className="text-xs capitalize">{type}</span>
+                        <IconComponent className="h-4 w-4" />
+                        <span className="text-xs">{tab.name}</span>
                       </Button>
-                    ))}
-                  </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-                  <div className="space-y-2">
-                    {widgets.map((widget) => (
-                      <Card key={widget.id} className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={widget.is_visible}
-                              onCheckedChange={(checked) =>
-                                updateWidget(widget.id, { is_visible: checked })
-                              }
-                            />
-                            <span className="font-medium">{widget.title}</span>
-                            <span className="text-sm capitalize">{widget.type}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {widget.position}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteWidget(widget.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="analysis" className="space-y-4">
-                  <SpatialAnalysisPanel 
-                    layers={layers}
-                    onAnalysisComplete={handleAnalysisComplete}
-                  />
-                </TabsContent>
-
-                <TabsContent value="collaborate" className="space-y-4">
-                  <CollaborationPanel 
-                    projectId={projectId}
-                    currentUser={null} // Would get from auth context
-                  />
-                </TabsContent>
-
-                <TabsContent value="settings" className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Project Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Project Name</Label>
-                        <Input placeholder="Enter project name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Input placeholder="Project description" />
-                      </div>
+              {/* Tab Content */}
+              <div className="p-4">
+                <div className="space-y-4">
+                  {/* Design Tab */}
+                  {activeTab === 'design' && (
+                    <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label>Public Access</Label>
-                        <Switch />
+                        <h3 className="text-lg font-semibold">Map Layers</h3>
+                        <Button size="sm" onClick={handleAddLayer}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Layer
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+
+                      <div className="space-y-2">
+                        {layers.map((layer) => (
+                          <Card key={layer.id} className={`p-3 cursor-pointer transition-colors ${
+                            selectedLayer === layer.id ? 'ring-2 ring-primary' : ''
+                          }`} onClick={() => setSelectedLayer(layer.id)}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateLayer(layer.id, { is_visible: !layer.is_visible });
+                                  }}
+                                >
+                                  {layer.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                </Button>
+                                <span className="font-medium text-sm">{layer.name}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteLayer(layer.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">Widgets</h3>
+                        <Button size="sm" onClick={handleAddWidget}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Widget
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {['legend', 'scale', 'coordinates', 'filter', 'chart'].map((type) => (
+                          <Button
+                            key={type}
+                            variant="outline"
+                            size="sm"
+                            className="h-12 flex flex-col gap-1"
+                            onClick={() => handleAddWidget()}
+                          >
+                            {type === 'legend' && <Map className="h-4 w-4" />}
+                            {type === 'scale' && <BarChart3 className="h-4 w-4" />}
+                            {type === 'coordinates' && <MapPin className="h-4 w-4" />}
+                            {type === 'filter' && <Settings className="h-4 w-4" />}
+                            {type === 'chart' && <TrendingUp className="h-4 w-4" />}
+                            <span className="text-xs capitalize">{type}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Data Tab */}
+                  {activeTab === 'data' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">Data Sources</h3>
+                        <Button size="sm" onClick={() => setImportDialogOpen(true)}>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Import Data
+                        </Button>
+                      </div>
+                      
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="text-sm text-muted-foreground">
+                            Import GeoJSON, Shapefile, KML, or CSV data to create map layers.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Analysis Tab */}
+                  {activeTab === 'analysis' && (
+                    <SpatialAnalysisPanel 
+                      layers={layers}
+                      onAnalysisComplete={handleAnalysisComplete}
+                    />
+                  )}
+
+                  {/* Collaboration Tab */}
+                  {activeTab === 'collaboration' && (
+                    <CollaborationPanel 
+                      projectId={projectId}
+                      currentUser={null}
+                    />
+                  )}
+
+                  {/* Templates Tab */}
+                  {activeTab === 'templates' && (
+                    <DashboardTemplates 
+                      open={true}
+                      onClose={() => {}}
+                      onSelectTemplate={handleTemplateSelect} 
+                    />
+                  )}
+                  
+                  {/* Analytics Tab */}
+                  {activeTab === 'analytics' && (
+                    <AnalyticsDashboard projectId={projectId} />
+                  )}
+                  
+                  {/* AI Insights Tab */}
+                  {activeTab === 'ai-insights' && (
+                    <AIInsights projectId={projectId} />
+                  )}
+                  
+                  {/* Export Tab */}
+                  {activeTab === 'export' && (
+                    <ExportManager projectId={projectId} />
+                  )}
+                  
+                  {/* Users Tab */}
+                  {activeTab === 'users' && (
+                    <UserManagement projectId={projectId} />
+                  )}
+
+                  {/* Publish Tab */}
+                  {activeTab === 'publish' && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Publish Dashboard</h3>
+                      <Card>
+                        <CardContent className="p-4 space-y-4">
+                          <div className="space-y-2">
+                            <Label>Dashboard URL</Label>
+                            <Input 
+                              value={`https://app.webgis.com/dashboard/${projectId}`}
+                              readOnly 
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Public Access</Label>
+                            <Switch />
+                          </div>
+                          <Button 
+                            onClick={() => setPublishDialogOpen(true)}
+                            className="w-full"
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            Publish Dashboard
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
 
         {/* Map Container */}
         <div className="flex-1 relative">
-          <div className="absolute top-4 right-4 z-10 flex gap-2">
-            <Button size="sm" variant="outline" onClick={handleSaveProject}>
-              <Save className="h-4 w-4 mr-2" />
-              Save
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setPublishDialogOpen(true)}>
-              <Share2 className="h-4 w-4 mr-2" />
-              Publish
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleExportProject}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          </div>
-
           {useMapbox ? (
             <MapboxRenderer
               layers={layers}
@@ -427,7 +456,7 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
         </div>
       </div>
 
-      {/* Data Import Dialog */}
+      {/* Dialogs */}
       <DataImportDialog
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
@@ -435,19 +464,11 @@ export const EnhancedMapBuilder = ({ projectId, onBack }: EnhancedMapBuilderProp
         onLayerAdded={handleImportedLayerAdded}
       />
 
-      {/* Publish Dashboard Dialog */}
       <PublishDashboardDialog
         open={publishDialogOpen}
         onOpenChange={setPublishDialogOpen}
         project={currentProject}
         onProjectUpdate={handleProjectUpdate}
-      />
-
-      {/* Dashboard Templates Dialog */}
-      <DashboardTemplates
-        open={templatesDialogOpen}
-        onClose={() => setTemplatesDialogOpen(false)}
-        onSelectTemplate={handleTemplateSelect}
       />
     </div>
   );
