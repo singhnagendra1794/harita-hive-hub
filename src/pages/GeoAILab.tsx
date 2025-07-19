@@ -1,5 +1,5 @@
 
-import GeoAIWorkspace from "../components/geoai/GeoAIWorkspace";
+import EnhancedGeoAIWorkspace from "../components/geoai/EnhancedGeoAIWorkspace";
 import Layout from '../components/Layout';
 import PremiumAccessGate from '../components/premium/PremiumAccessGate';
 
@@ -11,7 +11,7 @@ const GeoAILab = () => {
         featureName="GeoAI Lab"
         featureDescription="Access advanced AI-powered geospatial analysis tools, machine learning models, and automated data processing capabilities."
       >
-        <GeoAIWorkspace />
+        <EnhancedGeoAIWorkspace />
       </PremiumAccessGate>
     </Layout>
   );
