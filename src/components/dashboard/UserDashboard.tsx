@@ -60,12 +60,17 @@ const UserDashboard = () => {
     }
   }, [user]);
 
+  const isProfessionalOrAbove = () => {
+    const tier = plan?.subscription_tier || 'free';
+    return tier === 'pro' || tier === 'enterprise' || tier === 'premium';
+  };
+
   const userStats: Stat[] = [
     { 
       title: "Courses Enrolled", 
-      value: stats?.course_count?.toString() ?? "0", 
+      value: (isProfessionalOrAbove() ? "1" : stats?.course_count?.toString()) ?? "0", 
       icon: BookOpen,
-      href: stats?.course_count && stats.course_count > 0 ? "/browse-courses" : "/browse-courses"
+      href: isProfessionalOrAbove() ? "/courses/GeospatialTechnologyUnlocked" : "/browse-courses"
     },
     { 
       title: "Projects Completed", 
@@ -159,11 +164,6 @@ const UserDashboard = () => {
       default:
         return 'Free Plan';
     }
-  };
-
-  const isProfessionalOrAbove = () => {
-    const tier = plan?.subscription_tier || 'free';
-    return tier === 'pro' || tier === 'enterprise' || tier === 'premium';
   };
 
   const shouldShowFreePlanTag = () => {
@@ -260,7 +260,7 @@ const UserDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {userStats.map((stat, index) => {
           const StatCard = ({ children }: { children: React.ReactNode }) => {
-            if (stat.href && parseInt(stat.value) > 0) {
+            if (stat.href && (parseInt(stat.value) > 0 || stat.title === "Courses Enrolled")) {
               return (
                 <Link to={stat.href} className="block">
                   <Card className="cursor-pointer hover:shadow-lg transition-shadow">
@@ -279,7 +279,7 @@ const UserDashboard = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
                     <p className="text-2xl font-bold">{stat.value}</p>
-                    {stat.href && parseInt(stat.value) > 0 && (
+                    {stat.href && (parseInt(stat.value) > 0 || stat.title === "Courses Enrolled") && (
                       <p className="text-xs text-primary mt-1">Click to view →</p>
                     )}
                   </div>
