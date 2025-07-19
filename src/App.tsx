@@ -82,6 +82,7 @@ import BrowseCourses from "./pages/BrowseCourses";
 import GeospatialTechnologyUnlocked from "./pages/courses/GeospatialTechnologyUnlocked";
 import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import AdminUserManagement from "./pages/AdminUserManagement";
 
 // Import the new feature pages
 import SkillCopilot from "./pages/SkillCopilot";
@@ -290,6 +291,11 @@ function App() {
                   <Route path="/admin/users" element={
                     <ProtectedRoute>
                       <SuperAdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/bulk-users" element={
+                    <ProtectedRoute>
+                      <AdminUserManagement />
                     </ProtectedRoute>
                   } />
                    <Route path="/webgis-builder" element={
