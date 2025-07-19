@@ -1,6 +1,6 @@
 
 
-import AdvancedMapPlayground from "../components/map/AdvancedMapPlayground";
+import EnhancedWebGISViewer from "../components/map/EnhancedWebGISViewer";
 import Layout from '../components/Layout';
 
 const MapPlaygroundPage = () => {
@@ -19,7 +19,7 @@ const MapPlaygroundPage = () => {
         </div>
         
         <div className="pt-24 h-full">
-          <AdvancedMapPlayground />
+          <EnhancedWebGISViewer />
         </div>
       </div>
     </Layout>
