@@ -42,17 +42,8 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Working RTMP Server URLs (choose one based on your preference)
-  const RTMP_SERVERS = {
-    youtube: 'rtmp://a.rtmp.youtube.com/live2/',
-    twitch: 'rtmp://live.twitch.tv/app/',
-    facebook: 'rtmps://live-api-s.facebook.com:443/rtmp/',
-    local: 'rtmp://localhost:1935/live/',
-    custom: 'rtmp://streaming.mux.com/live/' // Example cloud RTMP service
-  };
-  
-  // Use YouTube Live as default (most reliable)
-  const RTMP_SERVER_URL = RTMP_SERVERS.youtube;
+  // Direct platform streaming server
+  const RTMP_SERVER_URL = 'rtmp://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server/publish';
 
   // Check if user is super admin
   useEffect(() => {
