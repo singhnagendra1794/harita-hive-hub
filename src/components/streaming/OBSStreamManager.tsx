@@ -42,8 +42,8 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // RTMP streaming server URL - Fixed working server
-  const RTMP_SERVER_URL = 'rtmp://stream.haritahive.com/live';
+  // RTMP streaming server URL - Use Supabase edge function URL
+  const RTMP_SERVER_URL = 'https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server';
 
   // Check if user is super admin
   useEffect(() => {
