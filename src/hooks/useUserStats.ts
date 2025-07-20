@@ -113,7 +113,8 @@ export const useUserStats = () => {
         'shaliniazh@gmail.com', 'sg17122004@gmail.com', 'veenapoovukal@gmail.com',
         'asadullahm031@gmail.com', 'moumitadas19996@gmail.com', 'javvad.rizvi@gmail.com',
         'mandadi.jyothi123@gmail.com', 'udaypbrn@gmail.com', 'anshumanavasthi1411@gmail.com',
-        'sruthythulasi2017@gmail.com', 'nagendrasingh1794@gmail.com'
+        'sruthythulasi2017@gmail.com', 'nagendrasingh1794@gmail.com', 'maneetsethi954@gmail.com',
+        'tharun.ravichandran@gmail.com'
       ].includes(user.email.toLowerCase());
 
       const tier = isProEmail ? 'pro' : 'free';
