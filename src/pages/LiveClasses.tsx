@@ -6,7 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Calendar, Clock, Users, Play, AlertCircle } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, AlertCircle, Settings, Monitor } from "lucide-react";
+import LiveStreamPlayer from '@/components/streaming/LiveStreamPlayer';
+import StreamStatusIndicator from '@/components/streaming/StreamStatusIndicator';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 import { toast } from '@/hooks/use-toast';
@@ -233,24 +235,64 @@ const LiveClasses = () => {
           )}
         </div>
 
+        {/* Live Stream Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Video className="h-6 w-6" />
+            Live Stream
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <LiveStreamPlayer
+                title="Live Class Stream"
+                instructor="Nagendra Singh"
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-4">
+              <StreamStatusIndicator />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button variant="outline" className="w-full" onClick={() => window.location.href = '/streaming'}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Streaming Dashboard
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => window.location.href = '/admin'}>
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Manage Classes
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
         {/* Integration Info */}
         <div className="mt-12 p-6 bg-accent/10 rounded-lg border border-accent/20">
-          <h3 className="text-lg font-semibold mb-2">🎥 Live Streaming Integration</h3>
+          <h3 className="text-lg font-semibold mb-2">🎥 Professional Streaming Platform</h3>
           <p className="text-muted-foreground mb-4">
-            Classes are streamed using YouTube Live or OBS Studio for the best experience. Automatic recording available for all sessions.
+            Stream directly from OBS Studio to our platform with HD quality, automatic recording, and real-time viewer analytics.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Video className="h-4 w-4 text-primary" />
-              <span>HD Video Quality</span>
+              <span>OBS Integration</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              <span>Interactive Q&A</span>
+              <span>Real-time Chat</span>
             </div>
             <div className="flex items-center gap-2">
               <Play className="h-4 w-4 text-primary" />
               <span>Auto Recording</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Monitor className="h-4 w-4 text-primary" />
+              <span>Analytics Dashboard</span>
             </div>
           </div>
         </div>

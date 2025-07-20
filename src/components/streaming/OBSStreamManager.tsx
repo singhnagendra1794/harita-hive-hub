@@ -42,9 +42,9 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // RTMP streaming server options
+  // RTMP streaming server options - Updated with working Harita Hive server
   const RTMP_SERVERS = {
-    haritahive: `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server`, // Harita Hive RTMP Server
+    haritahive: `rtmp://stream.haritahive.com/live`, // Harita Hive RTMP Server
     youtube: 'rtmp://a.rtmp.youtube.com/live2',
     twitch: 'rtmp://live.twitch.tv/app',
     facebook: 'rtmps://live-api-s.facebook.com:443/rtmp',
@@ -404,18 +404,21 @@ export const OBSStreamManager: React.FC = () => {
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Open OBS Studio</li>
               <li>Go to Settings → Stream</li>
-              <li>Select "Custom..." as Service (or choose your platform directly)</li>
-              <li>Copy the RTMP Server URL from above</li>
-              <li>Copy your Stream Key from above</li>
+              <li>Select "Custom..." as Service</li>
+              <li>Server: Copy the RTMP Server URL from above</li>
+              <li>Stream Key: Copy your Stream Key from above</li>
+              <li>Set Output → Video Bitrate to 2500-3500 kbps</li>
+              <li>Set Output → Video Resolution to 1280x720</li>
               <li>Click "OK" to save settings</li>
-              <li>Click "Start Streaming" when ready</li>
+              <li>Click "Start Streaming" to go live!</li>
             </ol>
             
             <Alert className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Note:</strong> For YouTube Live, you need to enable live streaming in your YouTube account first. 
-                For Twitch, use your Twitch stream key. For custom servers, make sure the server is running and accessible.
+                <strong>Recommended Settings:</strong> For best quality, use 1280x720 resolution, 2500-3500 kbps bitrate, 
+                and AAC audio codec. The Harita Hive server supports direct RTMP streaming with automatic HLS conversion 
+                for browser playback. Your stream will be automatically recorded and available for replay.
               </AlertDescription>
             </Alert>
           </div>
