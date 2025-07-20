@@ -4355,49 +4355,91 @@ export type Database = {
         }
         Relationships: []
       }
+      stream_keys: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          stream_key: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          stream_key: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          stream_key?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       stream_sessions: {
         Row: {
           created_at: string | null
+          description: string | null
           ended_at: string | null
+          hls_endpoint: string | null
           id: string
-          is_active: boolean | null
-          live_class_id: string | null
-          rtmp_endpoint: string
+          recording_url: string | null
+          rtmp_endpoint: string | null
           started_at: string | null
-          stream_key: string
+          status: string | null
+          stream_key_id: string | null
+          title: string | null
           updated_at: string | null
+          user_id: string
           viewer_count: number | null
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
           ended_at?: string | null
+          hls_endpoint?: string | null
           id?: string
-          is_active?: boolean | null
-          live_class_id?: string | null
-          rtmp_endpoint: string
+          recording_url?: string | null
+          rtmp_endpoint?: string | null
           started_at?: string | null
-          stream_key: string
+          status?: string | null
+          stream_key_id?: string | null
+          title?: string | null
           updated_at?: string | null
+          user_id: string
           viewer_count?: number | null
         }
         Update: {
           created_at?: string | null
+          description?: string | null
           ended_at?: string | null
+          hls_endpoint?: string | null
           id?: string
-          is_active?: boolean | null
-          live_class_id?: string | null
-          rtmp_endpoint?: string
+          recording_url?: string | null
+          rtmp_endpoint?: string | null
           started_at?: string | null
-          stream_key?: string
+          status?: string | null
+          stream_key_id?: string | null
+          title?: string | null
           updated_at?: string | null
+          user_id?: string
           viewer_count?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "stream_sessions_live_class_id_fkey"
-            columns: ["live_class_id"]
+            foreignKeyName: "stream_sessions_stream_key_id_fkey"
+            columns: ["stream_key_id"]
             isOneToOne: false
-            referencedRelation: "live_classes"
+            referencedRelation: "stream_keys"
             referencedColumns: ["id"]
           },
         ]
@@ -6636,7 +6678,7 @@ export type Database = {
         Returns: string
       }
       generate_stream_key: {
-        Args: { user_id: string }
+        Args: { p_user_id: string }
         Returns: string
       }
       get_auth_users_data: {
@@ -6782,12 +6824,8 @@ export type Database = {
         Returns: undefined
       }
       start_stream_session: {
-        Args: { user_id: string }
+        Args: { p_user_id: string; p_title?: string; p_description?: string }
         Returns: string
-      }
-      stop_stream_session: {
-        Args: { session_id: string }
-        Returns: undefined
       }
       track_class_attendance: {
         Args: { p_class_id: string; p_user_id: string; p_action: string }
@@ -6814,6 +6852,14 @@ export type Database = {
       update_class_status: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      update_stream_status: {
+        Args: {
+          p_session_id: string
+          p_status: string
+          p_viewer_count?: number
+        }
+        Returns: boolean
       }
       update_user_stats: {
         Args: { p_user_id: string; p_stat_type: string; p_increment?: number }
