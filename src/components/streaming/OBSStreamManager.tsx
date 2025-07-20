@@ -42,7 +42,7 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
 
   // Base RTMP server URL for your streaming server
-  const RTMP_SERVER_URL = 'rtmp://stream.haritahive.com/live';
+  const RTMP_SERVER_URL = 'rtmp://localhost:1935/live';
 
   useEffect(() => {
     if (user) {
