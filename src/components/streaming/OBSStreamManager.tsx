@@ -40,16 +40,29 @@ export const OBSStreamManager: React.FC = () => {
   const [streamDescription, setStreamDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Base streaming server URL using our edge function
-  const RTMP_SERVER_URL = `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/streaming-server`;
+  // RTMP Server URL - Updated for live classes
+  const RTMP_SERVER_URL = 'rtmp://live.haritahive.com/rtmp';
+
+  // Check if user is super admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user?.email === 'contact@haritahive.com') {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdminStatus();
+  }, [user]);
 
   useEffect(() => {
-    if (user) {
+    if (user && isAdmin) {
       loadStreamKey();
       loadCurrentSession();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const loadStreamKey = async () => {
     if (!user) return;
@@ -123,6 +136,23 @@ export const OBSStreamManager: React.FC = () => {
     }
   };
 
+  const notifyUsersOfLiveStream = async (title: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-live-notifications', {
+        body: { 
+          streamTitle: title,
+          streamUrl: 'https://haritahive.com/live-classes'
+        }
+      });
+      
+      if (error) {
+        console.error('Error sending notifications:', error);
+      }
+    } catch (error) {
+      console.error('Error sending notifications:', error);
+    }
+  };
+
   const startStream = async () => {
     if (!user) return;
 
@@ -136,11 +166,20 @@ export const OBSStreamManager: React.FC = () => {
 
       if (error) throw error;
 
+      // Send notifications to all users
+      await notifyUsersOfLiveStream(streamTitle || 'Live Stream');
+
       await loadCurrentSession();
       toast({
         title: "Stream Session Started",
-        description: "Your stream is ready. Start streaming in OBS now!",
+        description: "Your stream is ready and users have been notified!",
       });
+
+      // Redirect to live classes page after 2 seconds
+      setTimeout(() => {
+        window.open('https://haritahive.com/live-classes', '_blank');
+      }, 2000);
+
     } catch (error) {
       console.error('Error starting stream:', error);
       toast({
@@ -203,6 +242,20 @@ export const OBSStreamManager: React.FC = () => {
       <Card>
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">Please log in to access streaming features.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+          <p className="text-muted-foreground">
+            Live streaming is only available for administrators.
+          </p>
         </CardContent>
       </Card>
     );
