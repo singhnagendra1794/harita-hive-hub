@@ -98,6 +98,10 @@ import Studio from "./pages/Studio";
 import Portfolio from "./pages/Portfolio";
 import Mentorship from "./pages/Mentorship";
 
+// Live Streaming Portal pages
+import GoLive from "./pages/GoLive";
+import WatchLive from "./pages/WatchLive";
+
 function App() {
   const queryClient = new QueryClient();
   return (
@@ -242,6 +246,16 @@ function App() {
          <Route path="/streaming" element={
            <ProtectedRoute>
              <Streaming />
+           </ProtectedRoute>
+         } />
+         <Route path="/go-live" element={
+           <ProtectedRoute>
+             <GoLive />
+           </ProtectedRoute>
+         } />
+         <Route path="/watch-live" element={
+           <ProtectedRoute>
+             <WatchLive />
            </ProtectedRoute>
          } />
                   <Route path="/job-posting" element={

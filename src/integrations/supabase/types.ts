@@ -3029,6 +3029,42 @@ export type Database = {
         }
         Relationships: []
       }
+      live_streams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_live: boolean
+          stream_key: string
+          stream_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_live?: boolean
+          stream_key: string
+          stream_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_live?: boolean
+          stream_key?: string
+          stream_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       map_projects: {
         Row: {
           created_at: string | null
@@ -6672,6 +6708,10 @@ export type Database = {
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_live_stream_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_referral_code: {
         Args: { user_id: string }
