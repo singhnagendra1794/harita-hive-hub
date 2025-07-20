@@ -42,8 +42,17 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Direct platform streaming server
-  const RTMP_SERVER_URL = 'rtmp://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server/publish';
+  // Working RTMP streaming options
+  const RTMP_SERVERS = {
+    youtube: 'rtmp://a.rtmp.youtube.com/live2',
+    twitch: 'rtmp://live.twitch.tv/app',
+    facebook: 'rtmps://live-api-s.facebook.com:443/rtmp',
+    custom: 'rtmp://live.haritahive.com/live', // Your custom server when ready
+    nginx: 'rtmp://your-server.com:1935/live' // Example NGINX RTMP server
+  };
+  
+  const [selectedServer, setSelectedServer] = useState('youtube');
+  const getCurrentRTMPURL = () => RTMP_SERVERS[selectedServer as keyof typeof RTMP_SERVERS];
 
   // Check if user is super admin
   useEffect(() => {
@@ -335,17 +344,32 @@ export const OBSStreamManager: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <Label>1. RTMP Server URL</Label>
+              <Label>1. Select Streaming Platform</Label>
+              <select 
+                value={selectedServer} 
+                onChange={(e) => setSelectedServer(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="youtube">YouTube Live</option>
+                <option value="twitch">Twitch</option>
+                <option value="facebook">Facebook Live</option>
+                <option value="custom">Custom Server (HaritaHive)</option>
+                <option value="nginx">NGINX RTMP Server</option>
+              </select>
+            </div>
+
+            <div>
+              <Label>2. RTMP Server URL</Label>
               <div className="flex gap-2 mt-1">
                 <Input
-                  value={RTMP_SERVER_URL}
+                  value={getCurrentRTMPURL()}
                   readOnly
                   className="font-mono"
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => copyToClipboard(RTMP_SERVER_URL, 'RTMP Server URL')}
+                  onClick={() => copyToClipboard(getCurrentRTMPURL(), 'RTMP Server URL')}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -353,7 +377,7 @@ export const OBSStreamManager: React.FC = () => {
             </div>
 
             <div>
-              <Label>2. Stream Key</Label>
+              <Label>3. Stream Key</Label>
               <div className="flex gap-2 mt-1">
                 <Input
                   value={streamKey?.stream_key || 'Generate stream key first'}
@@ -380,12 +404,20 @@ export const OBSStreamManager: React.FC = () => {
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Open OBS Studio</li>
               <li>Go to Settings → Stream</li>
-              <li>Select "Custom..." as Service</li>
-              <li>Copy the RTMP Server URL above</li>
-              <li>Copy your Stream Key above</li>
+              <li>Select "Custom..." as Service (or choose your platform directly)</li>
+              <li>Copy the RTMP Server URL from above</li>
+              <li>Copy your Stream Key from above</li>
               <li>Click "OK" to save settings</li>
               <li>Click "Start Streaming" when ready</li>
             </ol>
+            
+            <Alert className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Note:</strong> For YouTube Live, you need to enable live streaming in your YouTube account first. 
+                For Twitch, use your Twitch stream key. For custom servers, make sure the server is running and accessible.
+              </AlertDescription>
+            </Alert>
           </div>
         </CardContent>
       </Card>
