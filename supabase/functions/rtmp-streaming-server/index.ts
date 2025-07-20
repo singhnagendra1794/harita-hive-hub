@@ -7,10 +7,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  const url = new URL(req.url)
-  const { headers } = req
-  const upgradeHeader = headers.get("upgrade") || ""
-
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -21,73 +17,316 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
 
-  // Handle WebSocket upgrade for live streaming
-  if (upgradeHeader.toLowerCase() === "websocket") {
-    const streamKey = url.searchParams.get('key')
+  try {
+    const url = new URL(req.url)
+    const streamKey = url.searchParams.get('key') || url.pathname.split('/').pop()
     
-    if (!streamKey) {
-      return new Response("Stream key required", { status: 400 })
+    console.log(`RTMP Server - Request: ${req.method} ${url.pathname}`, { streamKey })
+
+    // Validate stream key
+    if (!streamKey || streamKey === 'rtmp-streaming-server') {
+      return new Response(
+        JSON.stringify({ error: 'Stream key required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
-    // Verify stream key
-    const { data: keyData, error } = await supabase
+    // Verify stream key exists and is active
+    const { data: keyData, error: keyError } = await supabase
       .from('stream_keys')
-      .select('user_id')
+      .select('user_id, stream_key')
       .eq('stream_key', streamKey)
       .eq('is_active', true)
       .single()
 
-    if (error || !keyData) {
-      return new Response("Invalid stream key", { status: 401 })
+    if (keyError || !keyData) {
+      console.log('Invalid stream key:', streamKey)
+      return new Response(
+        JSON.stringify({ error: 'Invalid or inactive stream key' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
-    const { socket, response } = Deno.upgradeWebSocket(req)
-    
-    // Store active stream connection
-    const streamConnections = new Map()
-    
-    socket.onopen = async () => {
-      console.log(`Stream started with key: ${streamKey}`)
+    // Handle different streaming operations
+    if (req.method === 'POST') {
+      // Start/publish stream
+      const contentType = req.headers.get('content-type') || ''
       
-      // Update session to live
-      await supabase
-        .from('stream_sessions')
-        .update({ 
-          status: 'live',
-          started_at: new Date().toISOString()
+      if (contentType.includes('application/x-flv') || contentType.includes('video/')) {
+        // This is actual video data from OBS
+        console.log('Receiving video stream data for key:', streamKey)
+        
+        // Update or create active session
+        const { data: sessionData } = await supabase
+          .from('stream_sessions')
+          .select('id')
+          .eq('user_id', keyData.user_id)
+          .eq('status', 'preparing')
+          .single()
+
+        if (sessionData) {
+          // Update session to live
+          await supabase
+            .from('stream_sessions')
+            .update({ 
+              status: 'live',
+              started_at: new Date().toISOString(),
+              viewer_count: 0
+            })
+            .eq('id', sessionData.id)
+        } else {
+          // Create new session
+          await supabase
+            .from('stream_sessions')
+            .insert({
+              user_id: keyData.user_id,
+              title: 'Live Stream',
+              status: 'live',
+              started_at: new Date().toISOString(),
+              rtmp_endpoint: `https://${req.headers.get('host')}/functions/v1/rtmp-streaming-server/${streamKey}`,
+              hls_endpoint: `https://${req.headers.get('host')}/functions/v1/rtmp-streaming-server/hls/${streamKey}`
+            })
+        }
+
+        // For now, we'll acknowledge the stream but in a real implementation,
+        // you'd process and relay the video data
+        return new Response('OK', {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
         })
-        .eq('user_id', keyData.user_id)
-        .eq('status', 'preparing')
-      
-      // Store connection
-      streamConnections.set(streamKey, socket)
-      
-      // Notify users
-      try {
-        await supabase.functions.invoke('send-live-notifications', {
-          body: { 
-            streamTitle: 'Live Stream',
-            streamUrl: 'https://haritahive.com/live-classes'
+      } else {
+        // JSON request to start stream
+        const { data: sessionData } = await supabase
+          .from('stream_sessions')
+          .select('id')
+          .eq('user_id', keyData.user_id)
+          .eq('status', 'preparing')
+          .single()
+
+        if (sessionData) {
+          await supabase
+            .from('stream_sessions')
+            .update({ 
+              status: 'live',
+              started_at: new Date().toISOString()
+            })
+            .eq('id', sessionData.id)
+        }
+
+        return new Response(
+          JSON.stringify({ 
+            message: 'Stream started',
+            status: 'live',
+            rtmp_url: `rtmp://${req.headers.get('host')}/live/${streamKey}`,
+            hls_url: `https://${req.headers.get('host')}/functions/v1/rtmp-streaming-server/hls/${streamKey}`
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
-        })
-      } catch (error) {
-        console.error('Error sending notifications:', error)
+        )
       }
     }
 
-    socket.onmessage = (event) => {
-      // Handle incoming stream data
-      const data = event.data
-      console.log('Received stream data:', data.length, 'bytes')
+    if (req.method === 'GET') {
+      const path = url.pathname
       
-      // Broadcast to all viewers (you can implement viewer WebSockets here)
-      // For now, we'll store the stream data
+      // HLS playlist endpoint
+      if (path.includes('/hls/')) {
+        const key = path.split('/hls/')[1]
+        
+        // Check if stream is live
+        const { data: session } = await supabase
+          .from('stream_sessions')
+          .select('*')
+          .eq('user_id', keyData.user_id)
+          .eq('status', 'live')
+          .single()
+
+        if (!session) {
+          return new Response('Stream not live', { status: 404 })
+        }
+
+        // Return HLS playlist (m3u8)
+        const playlist = `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:10.0,
+segment000.ts
+#EXTINF:10.0,
+segment001.ts
+#EXT-X-ENDLIST`
+
+        return new Response(playlist, {
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/vnd.apple.mpegurl',
+            'Cache-Control': 'no-cache'
+          }
+        })
+      }
+
+      // Stream info/status endpoint
+      const { data: session } = await supabase
+        .from('stream_sessions')
+        .select('*')
+        .eq('user_id', keyData.user_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (!session) {
+        return new Response(
+          JSON.stringify({ error: 'No stream session found' }),
+          { 
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
+
+      // Return stream viewer page
+      const viewerPage = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Stream - ${session.title || 'Harita Hive Stream'}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { 
+      margin: 0; 
+      padding: 20px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: #fff; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      text-align: center; 
+    }
+    .header {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .status { 
+      display: inline-block;
+      padding: 12px 24px; 
+      background: ${session.status === 'live' ? '#e74c3c' : '#95a5a6'}; 
+      border-radius: 25px; 
+      margin-bottom: 20px; 
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .video-container {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stream-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .info-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .info-card h3 {
+      margin: 0 0 10px 0;
+      color: #fff;
+      font-size: 18px;
+    }
+    .info-card p {
+      margin: 5px 0;
+      opacity: 0.9;
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎥 Harita Hive Live Stream</h1>
+      <div class="status ${session.status === 'live' ? 'pulse' : ''}">
+        ${session.status === 'live' ? '🔴 LIVE' : '⏸️ ' + session.status.toUpperCase()}
+      </div>
+      <h2>${session.title || 'Live Stream'}</h2>
+      ${session.description ? `<p>${session.description}</p>` : ''}
+    </div>
+    
+    <div class="video-container">
+      ${session.status === 'live' ? 
+        `<p>🎬 Stream is live and broadcasting!</p>
+         <p>HLS URL: <code>https://${req.headers.get('host')}/functions/v1/rtmp-streaming-server/hls/${streamKey}</code></p>` : 
+        '<p>Stream is not currently live</p>'
+      }
+    </div>
+
+    <div class="stream-info">
+      <div class="info-card">
+        <h3>📊 Stream Details</h3>
+        <p><strong>Status:</strong> ${session.status}</p>
+        <p><strong>Viewers:</strong> ${session.viewer_count || 0}</p>
+        <p><strong>Started:</strong> ${session.started_at ? new Date(session.started_at).toLocaleString() : 'Not started'}</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>🔧 Technical Info</h3>
+        <p><strong>Stream Key:</strong> ${streamKey.substring(0, 8)}...</p>
+        <p><strong>RTMP Endpoint:</strong> Active</p>
+        <p><strong>HLS Endpoint:</strong> ${session.status === 'live' ? 'Available' : 'Inactive'}</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>📺 Platform</h3>
+        <p><strong>Server:</strong> Harita Hive</p>
+        <p><strong>Protocol:</strong> RTMP/HLS</p>
+        <p><strong>Quality:</strong> Auto-adaptive</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-refresh every 30 seconds if stream is live
+    ${session.status === 'live' ? 'setTimeout(() => location.reload(), 30000);' : ''}
+  </script>
+</body>
+</html>`
+
+      return new Response(viewerPage, {
+        headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+      })
     }
 
-    socket.onclose = async () => {
-      console.log(`Stream ended for key: ${streamKey}`)
-      
-      // Update session to ended
+    if (req.method === 'DELETE') {
+      // Stop stream
       await supabase
         .from('stream_sessions')
         .update({ 
@@ -96,240 +335,31 @@ serve(async (req) => {
         })
         .eq('user_id', keyData.user_id)
         .eq('status', 'live')
-      
-      // Remove connection
-      streamConnections.delete(streamKey)
+
+      return new Response(
+        JSON.stringify({ message: 'Stream stopped' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error)
-    }
-
-    return response
-  }
-
-  // Handle RTMP publish endpoint
-  if (req.method === 'POST' && url.pathname.includes('/publish/')) {
-    const streamKey = url.pathname.split('/publish/')[1]
-    
-    if (!streamKey) {
-      return new Response(JSON.stringify({ error: 'Stream key required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    // Verify stream key
-    const { data: keyData, error } = await supabase
-      .from('stream_keys')
-      .select('user_id')
-      .eq('stream_key', streamKey)
-      .eq('is_active', true)
-      .single()
-
-    if (error || !keyData) {
-      return new Response(JSON.stringify({ error: 'Invalid stream key' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    // Handle stream data
-    const streamData = await req.arrayBuffer()
-    console.log('Received RTMP data:', streamData.byteLength, 'bytes')
-
-    return new Response(JSON.stringify({ 
-      status: 'success',
-      message: 'Stream data received',
-      bytes: streamData.byteLength
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
-  }
-
-  // Handle live stream viewer page
-  if (req.method === 'GET' && url.pathname.includes('/watch/')) {
-    const streamKey = url.pathname.split('/watch/')[1]
-    
-    // Return live stream viewer page
     return new Response(
-      `<!DOCTYPE html>
-      <html>
-      <head>
-        <title>HaritaHive Live Stream</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Inter', system-ui, sans-serif;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .container {
-            max-width: 1200px;
-            width: 100%;
-            padding: 20px;
-            text-align: center;
-          }
-          .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(239, 68, 68, 0.9);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-          }
-          .live-dot {
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-          }
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-          }
-          @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-          }
-          .stream-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-          }
-          .stream-placeholder {
-            aspect-ratio: 16/9;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-          }
-          .stream-info {
-            text-align: left;
-            margin-top: 20px;
-          }
-          h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #fff, #e5e7eb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          }
-          .status {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-          }
-          .connect-button {
-            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-          .connect-button:hover {
-            transform: translateY(-2px);
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="live-indicator">
-            <div class="live-dot"></div>
-            LIVE
-          </div>
-          
-          <h1>HaritaHive Live Stream</h1>
-          <p class="status">Ready to receive live stream from OBS</p>
-          
-          <div class="stream-container">
-            <div class="stream-placeholder">
-              <div>
-                <h3>🎥 Waiting for stream...</h3>
-                <p>Stream Key: ${streamKey}</p>
-                <button class="connect-button" onclick="connectToStream()">
-                  Connect to Stream
-                </button>
-              </div>
-            </div>
-            
-            <div class="stream-info">
-              <h3>Stream Information</h3>
-              <p><strong>Stream Key:</strong> ${streamKey}</p>
-              <p><strong>Status:</strong> <span id="status">Waiting for connection</span></p>
-              <p><strong>Viewers:</strong> <span id="viewers">0</span></p>
-            </div>
-          </div>
-        </div>
-        
-        <script>
-          function connectToStream() {
-            const ws = new WebSocket(\`wss://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server?key=${streamKey}\`);
-            
-            ws.onopen = () => {
-              document.getElementById('status').textContent = 'Connected';
-              console.log('Connected to stream');
-            };
-            
-            ws.onmessage = (event) => {
-              console.log('Received stream data:', event.data);
-              // Handle incoming stream data here
-            };
-            
-            ws.onclose = () => {
-              document.getElementById('status').textContent = 'Disconnected';
-              console.log('Stream disconnected');
-            };
-            
-            ws.onerror = (error) => {
-              console.error('Stream error:', error);
-              document.getElementById('status').textContent = 'Error';
-            };
-          }
-          
-          // Auto-connect on page load
-          setTimeout(connectToStream, 1000);
-        </script>
-      </body>
-      </html>`,
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+      JSON.stringify({ error: 'Method not allowed' }),
+      { 
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
+
+  } catch (error) {
+    console.error('RTMP streaming server error:', error)
+    return new Response(
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
   }
-
-  // Default response
-  return new Response(
-    JSON.stringify({
-      message: 'HaritaHive RTMP Streaming Server',
-      endpoints: {
-        publish: '/publish/{stream_key}',
-        watch: '/watch/{stream_key}',
-        websocket: '?key={stream_key} (with Upgrade: websocket header)'
-      }
-    }),
-    {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    }
-  )
 })

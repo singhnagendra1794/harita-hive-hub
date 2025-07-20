@@ -42,16 +42,16 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Working RTMP streaming options
+  // RTMP streaming server options
   const RTMP_SERVERS = {
+    haritahive: `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server`, // Harita Hive RTMP Server
     youtube: 'rtmp://a.rtmp.youtube.com/live2',
     twitch: 'rtmp://live.twitch.tv/app',
     facebook: 'rtmps://live-api-s.facebook.com:443/rtmp',
-    haritahive: `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/streaming-server`, // Supabase edge function
-    nginx: 'rtmp://your-server.com:1935/live' // Example NGINX RTMP server
+    nginx: 'rtmp://your-server.com:1935/live' // Custom NGINX RTMP server
   };
   
-  const [selectedServer, setSelectedServer] = useState('youtube');
+  const [selectedServer, setSelectedServer] = useState('haritahive');
   const getCurrentRTMPURL = () => RTMP_SERVERS[selectedServer as keyof typeof RTMP_SERVERS];
 
   // Check if user is super admin
@@ -350,11 +350,11 @@ export const OBSStreamManager: React.FC = () => {
                 onChange={(e) => setSelectedServer(e.target.value)}
                 className="w-full p-2 border rounded-md"
               >
+                <option value="haritahive">Harita Hive RTMP Server</option>
                 <option value="youtube">YouTube Live</option>
                 <option value="twitch">Twitch</option>
                 <option value="facebook">Facebook Live</option>
-                <option value="custom">Custom Server (HaritaHive)</option>
-                <option value="nginx">NGINX RTMP Server</option>
+                <option value="nginx">Custom NGINX RTMP Server</option>
               </select>
             </div>
 
