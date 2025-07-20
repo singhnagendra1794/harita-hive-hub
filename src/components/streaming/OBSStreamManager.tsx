@@ -507,6 +507,87 @@ export const OBSStreamManager: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* HLS Viewer Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Monitor className="h-5 w-5" />
+            Stream Viewer Links
+          </CardTitle>
+          <CardDescription>
+            Share these links with your audience to watch the live stream
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {streamKey ? (
+            <div className="space-y-3">
+              <div>
+                <Label>HLS Stream URL (for video players)</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/${streamKey.stream_key}.m3u8`}
+                    readOnly
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(
+                      `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/${streamKey.stream_key}.m3u8`,
+                      'HLS URL'
+                    )}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div>
+                <Label>Direct Watch Page</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`}
+                    readOnly
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(
+                      `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`,
+                      'Watch Page URL'
+                    )}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`, '_blank')}
+                  className="flex-1"
+                >
+                  Open Watch Page
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open('https://haritahive.com/live-classes', '_blank')}
+                  className="flex-1"
+                >
+                  Open Main Live Page
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              Generate a stream key first to get viewer links
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
