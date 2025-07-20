@@ -47,7 +47,7 @@ export const OBSStreamManager: React.FC = () => {
     youtube: 'rtmp://a.rtmp.youtube.com/live2',
     twitch: 'rtmp://live.twitch.tv/app',
     facebook: 'rtmps://live-api-s.facebook.com:443/rtmp',
-    custom: 'rtmp://live.haritahive.com/live', // Your custom server when ready
+    haritahive: `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/streaming-server`, // Supabase edge function
     nginx: 'rtmp://your-server.com:1935/live' // Example NGINX RTMP server
   };
   
