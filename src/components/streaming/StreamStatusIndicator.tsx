@@ -10,7 +10,7 @@ interface StreamSession {
   id: string;
   title: string;
   description: string;
-  status: 'preparing' | 'live' | 'ended';
+  status: string;
   viewer_count: number;
   started_at: string;
   ended_at?: string;
@@ -54,13 +54,22 @@ export const StreamStatusIndicator: React.FC = () => {
 
   const fetchActiveStreams = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('stream-management', {
-        body: { action: 'get_active_streams' }
-      });
+      // Direct query to stream_sessions table instead of edge function
+      const { data, error } = await supabase
+        .from('stream_sessions')
+        .select(`
+          *,
+          stream_keys!stream_sessions_stream_key_id_fkey (stream_key)
+        `)
+        .eq('status', 'live')
+        .order('started_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching streams:', error);
+        return;
+      }
       
-      setActiveStreams(data.streams || []);
+      setActiveStreams(data || []);
     } catch (error) {
       console.error('Error fetching active streams:', error);
     } finally {
@@ -69,14 +78,34 @@ export const StreamStatusIndicator: React.FC = () => {
   };
 
   const joinStream = (sessionId: string) => {
-    // Update viewer count when someone joins
-    supabase.functions.invoke('stream-management', {
-      body: { 
-        action: 'update_viewer_count', 
-        sessionId 
-      }
-    });
+    // Update viewer count directly in database
+    const updateViewerCount = async () => {
+      try {
+        // Get current viewer count first
+        const { data: session } = await supabase
+          .from('stream_sessions')
+          .select('viewer_count')
+          .eq('id', sessionId)
+          .single();
 
+        if (session) {
+          const { error } = await supabase
+            .from('stream_sessions')
+            .update({ 
+              viewer_count: session.viewer_count + 1,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', sessionId);
+          
+          if (error) console.error('Error updating viewer count:', error);
+        }
+      } catch (error) {
+        console.error('Error updating viewer count:', error);
+      }
+    };
+    
+    updateViewerCount();
+    
     // Navigate to stream viewer
     window.location.href = `/live-classes/${sessionId}`;
   };

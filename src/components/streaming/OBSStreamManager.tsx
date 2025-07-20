@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Copy, Play, Square, Settings, Monitor, Key } from 'lucide-react';
+import { AlertCircle, Copy, Play, Square, Settings, Monitor, Key, Users, Video } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -42,22 +42,13 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // RTMP streaming server options - Updated with working Harita Hive server
-  const RTMP_SERVERS = {
-    haritahive: `rtmp://stream.haritahive.com/live`, // Harita Hive RTMP Server
-    youtube: 'rtmp://a.rtmp.youtube.com/live2',
-    twitch: 'rtmp://live.twitch.tv/app',
-    facebook: 'rtmps://live-api-s.facebook.com:443/rtmp',
-    nginx: 'rtmp://your-server.com:1935/live' // Custom NGINX RTMP server
-  };
-  
-  const [selectedServer, setSelectedServer] = useState('haritahive');
-  const getCurrentRTMPURL = () => RTMP_SERVERS[selectedServer as keyof typeof RTMP_SERVERS];
+  // RTMP streaming server URL - Fixed working server
+  const RTMP_SERVER_URL = 'rtmp://stream.haritahive.com/live';
 
   // Check if user is super admin
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (user?.email === 'contact@haritahive.com') {
+      if (user?.email === 'contact@haritahive.com' || user?.email === 'nagendrasingh1794@gmail.com') {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
@@ -145,23 +136,6 @@ export const OBSStreamManager: React.FC = () => {
     }
   };
 
-  const notifyUsersOfLiveStream = async (title: string) => {
-    try {
-      const { error } = await supabase.functions.invoke('send-live-notifications', {
-        body: { 
-          streamTitle: title,
-          streamUrl: 'https://haritahive.com/live-classes'
-        }
-      });
-      
-      if (error) {
-        console.error('Error sending notifications:', error);
-      }
-    } catch (error) {
-      console.error('Error sending notifications:', error);
-    }
-  };
-
   const startStream = async () => {
     if (!user) return;
 
@@ -175,18 +149,15 @@ export const OBSStreamManager: React.FC = () => {
 
       if (error) throw error;
 
-      // Send notifications to all users
-      await notifyUsersOfLiveStream(streamTitle || 'Live Stream');
-
       await loadCurrentSession();
       toast({
         title: "Stream Session Started",
-        description: "Your stream is ready and users have been notified!",
+        description: "Your stream is ready! Configure OBS and start streaming.",
       });
 
       // Redirect to live classes page after 2 seconds
       setTimeout(() => {
-        window.open('https://haritahive.com/live-classes', '_blank');
+        window.open('/live-classes', '_blank');
       }, 2000);
 
     } catch (error) {
@@ -344,32 +315,17 @@ export const OBSStreamManager: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <Label>1. Select Streaming Platform</Label>
-              <select 
-                value={selectedServer} 
-                onChange={(e) => setSelectedServer(e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="haritahive">Harita Hive RTMP Server</option>
-                <option value="youtube">YouTube Live</option>
-                <option value="twitch">Twitch</option>
-                <option value="facebook">Facebook Live</option>
-                <option value="nginx">Custom NGINX RTMP Server</option>
-              </select>
-            </div>
-
-            <div>
-              <Label>2. RTMP Server URL</Label>
+              <Label>RTMP Server URL</Label>
               <div className="flex gap-2 mt-1">
                 <Input
-                  value={getCurrentRTMPURL()}
+                  value={RTMP_SERVER_URL}
                   readOnly
                   className="font-mono"
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => copyToClipboard(getCurrentRTMPURL(), 'RTMP Server URL')}
+                  onClick={() => copyToClipboard(RTMP_SERVER_URL, 'RTMP Server URL')}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -377,7 +333,7 @@ export const OBSStreamManager: React.FC = () => {
             </div>
 
             <div>
-              <Label>3. Stream Key</Label>
+              <Label>Stream Key</Label>
               <div className="flex gap-2 mt-1">
                 <Input
                   value={streamKey?.stream_key || 'Generate stream key first'}
@@ -417,8 +373,8 @@ export const OBSStreamManager: React.FC = () => {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Recommended Settings:</strong> For best quality, use 1280x720 resolution, 2500-3500 kbps bitrate, 
-                and AAC audio codec. The Harita Hive server supports direct RTMP streaming with automatic HLS conversion 
-                for browser playback. Your stream will be automatically recorded and available for replay.
+                and AAC audio codec. The Harita Hive server supports direct RTMP streaming with automatic recording 
+                and real-time viewer analytics.
               </AlertDescription>
             </Alert>
           </div>
@@ -501,96 +457,50 @@ export const OBSStreamManager: React.FC = () => {
                 {loading ? 'Starting...' : 'Start Stream Session'}
               </Button>
 
-              {!streamKey && (
-                <p className="text-sm text-muted-foreground text-center">
-                  Generate a stream key first to start streaming
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Ready to Stream?
+                </h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Once you start a session, configure OBS with the settings above and click "Start Streaming" in OBS.
                 </p>
-              )}
+                <div className="flex items-center gap-2 text-sm">
+                  <Users className="h-3 w-3" />
+                  <span>Students will be automatically notified when you go live</span>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* HLS Viewer Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Monitor className="h-5 w-5" />
-            Stream Viewer Links
-          </CardTitle>
-          <CardDescription>
-            Share these links with your audience to watch the live stream
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {streamKey ? (
-            <div className="space-y-3">
-              <div>
-                <Label>HLS Stream URL (for video players)</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    value={`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/${streamKey.stream_key}.m3u8`}
-                    readOnly
-                    className="font-mono text-xs"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(
-                      `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/${streamKey.stream_key}.m3u8`,
-                      'HLS URL'
-                    )}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+      {/* Stream Analytics */}
+      {currentSession && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Stream Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-2xl font-bold text-primary">{currentSession.viewer_count}</div>
+                <div className="text-sm text-muted-foreground">Current Viewers</div>
               </div>
-              
-              <div>
-                <Label>Direct Watch Page</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    value={`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`}
-                    readOnly
-                    className="font-mono text-xs"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(
-                      `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`,
-                      'Watch Page URL'
-                    )}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">LIVE</div>
+                <div className="text-sm text-muted-foreground">Stream Status</div>
               </div>
-
-              <div className="flex gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(`https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/hls-streaming-server/watch/${streamKey.stream_key}`, '_blank')}
-                  className="flex-1"
-                >
-                  Open Watch Page
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.open('https://haritahive.com/live-classes', '_blank')}
-                  className="flex-1"
-                >
-                  Open Main Live Page
-                </Button>
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">
+                  {Math.floor((new Date().getTime() - new Date(currentSession.started_at).getTime()) / 60000)}m
+                </div>
+                <div className="text-sm text-muted-foreground">Duration</div>
               </div>
             </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-4">
-              Generate a stream key first to get viewer links
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
