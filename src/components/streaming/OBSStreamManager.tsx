@@ -41,8 +41,8 @@ export const OBSStreamManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
 
-  // Base RTMP server URL for your streaming server
-  const RTMP_SERVER_URL = 'rtmp://localhost:1935/live';
+  // Base streaming server URL using our edge function
+  const RTMP_SERVER_URL = `https://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/streaming-server`;
 
   useEffect(() => {
     if (user) {
