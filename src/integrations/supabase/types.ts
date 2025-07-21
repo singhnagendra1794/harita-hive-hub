@@ -3029,6 +3029,60 @@ export type Database = {
         }
         Relationships: []
       }
+      live_sessions: {
+        Row: {
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          hls_url: string | null
+          id: string
+          instructor_id: string | null
+          instructor_name: string | null
+          is_live: boolean
+          recorded_url: string | null
+          started_at: string | null
+          stream_key: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          viewer_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          hls_url?: string | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          is_live?: boolean
+          recorded_url?: string | null
+          started_at?: string | null
+          stream_key: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          hls_url?: string | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          is_live?: boolean
+          recorded_url?: string | null
+          started_at?: string | null
+          stream_key?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Relationships: []
+      }
       live_streams: {
         Row: {
           created_at: string
@@ -6715,6 +6769,10 @@ export type Database = {
       }
       generate_referral_code: {
         Args: { user_id: string }
+        Returns: string
+      }
+      generate_session_stream_key: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       generate_stream_key: {

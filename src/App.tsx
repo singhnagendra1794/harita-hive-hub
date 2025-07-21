@@ -101,6 +101,7 @@ import Mentorship from "./pages/Mentorship";
 // Live Streaming Portal pages
 import GoLive from "./pages/GoLive";
 import WatchLive from "./pages/WatchLive";
+import LiveClassesPage from "./pages/LiveClassesPage";
 
 function App() {
   const queryClient = new QueryClient();
@@ -258,7 +259,8 @@ function App() {
              <WatchLive />
            </ProtectedRoute>
          } />
-                  <Route path="/job-posting" element={
+         <Route path="/live-classes" element={<LiveClassesPage />} />
+                   <Route path="/job-posting" element={
                     <ProtectedRoute>
                       <JobPosting />
                     </ProtectedRoute>
