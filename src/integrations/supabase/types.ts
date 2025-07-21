@@ -2934,6 +2934,7 @@ export type Database = {
       }
       live_classes: {
         Row: {
+          course_title: string | null
           created_at: string
           created_by: string
           description: string | null
@@ -2949,6 +2950,7 @@ export type Database = {
           viewer_count: number | null
         }
         Insert: {
+          course_title?: string | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -2964,6 +2966,7 @@ export type Database = {
           viewer_count?: number | null
         }
         Update: {
+          course_title?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
@@ -6875,7 +6878,7 @@ export type Database = {
         | "marine"
         | "energy"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
-      stream_status: "live" | "ended"
+      stream_status: "live" | "ended" | "scheduled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7046,7 +7049,7 @@ export const Constants = {
         "energy",
       ],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
-      stream_status: ["live", "ended"],
+      stream_status: ["live", "ended", "scheduled"],
     },
   },
 } as const
