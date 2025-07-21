@@ -219,8 +219,8 @@ const LiveClasses = () => {
                     <p className="text-sm text-muted-foreground mb-2">Starts in:</p>
                     <CountdownTimer targetDate={nextGeospatialClass.start_time} />
                     <div className="mt-2">
-                      <Badge variant="outline" className="text-xs">
-                        FREE ACCESS
+                      <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                        PREMIUM
                       </Badge>
                     </div>
                   </div>
