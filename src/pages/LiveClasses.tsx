@@ -47,7 +47,10 @@ const LiveClasses = () => {
     try {
       const response = await supabase.functions.invoke('get-live-classes');
       if (response.error) throw response.error;
-      setLiveClasses(response.data || []);
+      
+      // Handle the response data correctly
+      const classes = response.data?.live_classes || response.data || [];
+      setLiveClasses(classes);
     } catch (error) {
       console.error('Error fetching live classes:', error);
       toast({
