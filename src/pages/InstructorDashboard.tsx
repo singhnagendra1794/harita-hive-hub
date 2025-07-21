@@ -91,7 +91,7 @@ const InstructorDashboard = () => {
 
   const fetchMySessions = async () => {
     try {
-      const response = await supabase.functions.invoke('get-my-sessions');
+      const response = await supabase.functions.invoke('get-instructor-streams');
       if (response.error) throw response.error;
       
       const data = response.data;
@@ -120,7 +120,7 @@ const InstructorDashboard = () => {
 
     setCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-stream-key', {
+      const { data, error } = await supabase.functions.invoke('create-stream', {
         body: {
           title: formData.title.trim(),
           description: formData.description.trim()
@@ -131,7 +131,7 @@ const InstructorDashboard = () => {
 
       toast({
         title: "Success",
-        description: "Stream created successfully! You can now start streaming."
+        description: "Stream created successfully! Use the RTMP server and stream key in OBS to start streaming."
       });
 
       setFormData({ title: '', description: '' });
@@ -379,12 +379,12 @@ const InstructorDashboard = () => {
                               <span className="text-muted-foreground">RTMP Server:</span>
                               <div className="flex items-center gap-2">
                                 <code className="bg-background px-2 py-1 rounded text-xs">
-                                   rtmp://stream.haritahive.com/live
+                                   rtmp://a.rtmp.youtube.com/live2
                                 </code>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => copyToClipboard('rtmp://stream.haritahive.com/live', 'RTMP Server')}
+                                  onClick={() => copyToClipboard('rtmp://a.rtmp.youtube.com/live2', 'RTMP Server')}
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
@@ -523,7 +523,7 @@ const InstructorDashboard = () => {
                     <div className="text-sm text-muted-foreground space-y-1 mt-1">
                       <p>• Open OBS Studio → Settings → Stream</p>
                       <p>• Service: Custom...</p>
-                      <p>• Server: <code className="bg-muted px-1 py-0.5 rounded">rtmp://stream.haritahive.com/live</code></p>
+                      <p>• Server: <code className="bg-muted px-1 py-0.5 rounded">rtmp://a.rtmp.youtube.com/live2</code></p>
                       <p>• Stream Key: Copy from your stream above</p>
                     </div>
                   </div>

@@ -82,7 +82,7 @@ const LiveClasses = () => {
     
     try {
       // Fetch all live classes with basic retry logic
-      const response = await supabase.functions.invoke('get-live-classes');
+      const response = await supabase.functions.invoke('get-live-streams');
       
       if (response.error) throw response.error;
       
@@ -301,7 +301,7 @@ const LiveClasses = () => {
                     </div>
                   ) : (
                     <LiveVideoPlayer
-                      src={`https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
+                      src={currentLive.hls_url || `https://haritahive.com/stream/${currentLive.stream_key}`}
                       title={currentLive.title}
                       className="w-full h-full"
                       onError={handleVideoError}
