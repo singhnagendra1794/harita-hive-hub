@@ -17,23 +17,18 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <ErrorBoundary>
-      <NotificationWrapper>
-        <MobileOptimizations />
-        <EnhancedAnalytics />
-        <div className="min-h-screen flex flex-col bg-background">
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
-        <Toaster />
-        <ScrollToTop />
-        <FeedbackWidget />
-        <OnboardingTour />
-      </NotificationWrapper>
-    </ErrorBoundary>
+    <div className="min-h-screen flex flex-col bg-background">
+      <MobileOptimizations />
+      <EnhancedAnalytics />
+      <Navbar />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+      <ScrollToTop />
+      <FeedbackWidget />
+      <OnboardingTour />
+    </div>
   );
 };
 

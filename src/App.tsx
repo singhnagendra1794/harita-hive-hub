@@ -127,43 +127,47 @@ function App() {
                 <BrowserRouter>
                 <ScrollToTop />
                   <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                   <Route path="/beta" element={<RouteWrapper><Beta /></RouteWrapper>} />
-                   <Route path="/investors" element={<RouteWrapper><Investors /></RouteWrapper>} />
-                   <Route path="/pricing" element={<RouteWrapper><Pricing /></RouteWrapper>} />
-            <Route path="/newsletter" element={<RouteWrapper><Newsletter /></RouteWrapper>} />
-            <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
-                   <Route path="/challenge" element={<RouteWrapper><Challenge /></RouteWrapper>} />
-           <Route path="/upcoming-course" element={<RouteWrapper><UpcomingCourse /></RouteWrapper>} />
-           <Route path="/skill-roadmap" element={<RouteWrapper><SkillRoadmap /></RouteWrapper>} />
-           <Route path="/projects-gallery" element={<RouteWrapper><ProjectsGallery /></RouteWrapper>} />
-           <Route path="/leaderboard" element={<RouteWrapper><Leaderboard /></RouteWrapper>} />
+                  <Route path="/" element={<Layout><Index /></Layout>} />
+                  <Route path="/home" element={<Layout><Home /></Layout>} />
+                  <Route path="/auth" element={<Layout><Auth /></Layout>} />
+                  <Route path="/login" element={<Layout><Login /></Layout>} />
+                  <Route path="/signup" element={<Layout><Signup /></Layout>} />
+                   <Route path="/beta" element={<Layout><RouteWrapper><Beta /></RouteWrapper></Layout>} />
+                   <Route path="/investors" element={<Layout><RouteWrapper><Investors /></RouteWrapper></Layout>} />
+                   <Route path="/pricing" element={<Layout><RouteWrapper><Pricing /></RouteWrapper></Layout>} />
+            <Route path="/newsletter" element={<Layout><RouteWrapper><Newsletter /></RouteWrapper></Layout>} />
+            <Route path="/blog" element={<Layout><RouteWrapper><Blog /></RouteWrapper></Layout>} />
+                   <Route path="/challenge" element={<Layout><RouteWrapper><Challenge /></RouteWrapper></Layout>} />
+           <Route path="/upcoming-course" element={<Layout><RouteWrapper><UpcomingCourse /></RouteWrapper></Layout>} />
+           <Route path="/skill-roadmap" element={<Layout><RouteWrapper><SkillRoadmap /></RouteWrapper></Layout>} />
+           <Route path="/projects-gallery" element={<Layout><RouteWrapper><ProjectsGallery /></RouteWrapper></Layout>} />
+           <Route path="/leaderboard" element={<Layout><RouteWrapper><Leaderboard /></RouteWrapper></Layout>} />
           
-          <Route path="/job-board" element={<JobBoard />} />
-          <Route path="/freelance-projects" element={<FreelanceProjects />} />
-          <Route path="/studio" element={<Studio />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/mentorship" element={<Mentorship />} />
-          <Route path="/for-companies" element={<CompanyDashboard />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/about" element={<About />} />
-          <Route path="/browse-courses" element={<BrowseCourses />} />
-                <Route path="/courses/geospatial-technology-unlocked" element={<GeospatialTechnologyUnlocked />} />
-                <Route path="/courses/geospatial-fullstack-developer" element={<GeospatialFullstackDeveloper />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/refund-policy" element={<RefundPolicy />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/job-board" element={<Layout><RouteWrapper><JobBoard /></RouteWrapper></Layout>} />
+          <Route path="/freelance-projects" element={<Layout><RouteWrapper><FreelanceProjects /></RouteWrapper></Layout>} />
+          <Route path="/studio" element={<Layout><RouteWrapper><Studio /></RouteWrapper></Layout>} />
+          <Route path="/portfolio" element={<Layout><RouteWrapper><Portfolio /></RouteWrapper></Layout>} />
+          <Route path="/mentorship" element={<Layout><RouteWrapper><Mentorship /></RouteWrapper></Layout>} />
+          <Route path="/for-companies" element={<Layout><RouteWrapper><CompanyDashboard /></RouteWrapper></Layout>} />
+                  <Route path="/faq" element={<Layout><RouteWrapper><FAQ /></RouteWrapper></Layout>} />
+                  <Route path="/about" element={<Layout><RouteWrapper><About /></RouteWrapper></Layout>} />
+          <Route path="/browse-courses" element={<Layout><RouteWrapper><BrowseCourses /></RouteWrapper></Layout>} />
+                <Route path="/courses/geospatial-technology-unlocked" element={<Layout><RouteWrapper><GeospatialTechnologyUnlocked /></RouteWrapper></Layout>} />
+                <Route path="/courses/geospatial-fullstack-developer" element={<Layout><RouteWrapper><GeospatialFullstackDeveloper /></RouteWrapper></Layout>} />
+          <Route path="/privacy" element={<Layout><RouteWrapper><Privacy /></RouteWrapper></Layout>} />
+          <Route path="/terms" element={<Layout><RouteWrapper><Terms /></RouteWrapper></Layout>} />
+          <Route path="/refund-policy" element={<Layout><RouteWrapper><RefundPolicy /></RouteWrapper></Layout>} />
+          <Route path="/contact" element={<Layout><RouteWrapper><Contact /></RouteWrapper></Layout>} />
                   
                   {/* Plan selection */}
                   <Route path="/choose-plan" element={
-                    <ProtectedRoute>
-                      <ChoosePlan />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <ChoosePlan />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   
                    {/* Public monetization pages */}
@@ -189,147 +193,263 @@ function App() {
                   
                   {/* Protected Routes */}
                    <Route path="/dashboard" element={
-                     <ProtectedRoute>
-                       <Suspense fallback={<PageLoader />}>
-                         <Dashboard />
-                       </Suspense>
-                     </ProtectedRoute>
+                     <Layout>
+                       <ProtectedRoute>
+                         <RouteWrapper>
+                           <Dashboard />
+                         </RouteWrapper>
+                       </ProtectedRoute>
+                     </Layout>
                    } />
                    <Route path="/learn" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <Learn />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <Learn />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   <Route path="/projects" element={
-                    <ProtectedRoute>
-                      <Projects />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Projects />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                    <Route path="/project-templates" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <ProjectTemplates />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <ProjectTemplates />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                    <Route path="/map-playground" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <MapPlayground />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <MapPlayground />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   <Route path="/notes" element={
-                    <ProtectedRoute>
-                      <Notes />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Notes />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/community" element={
-                    <ProtectedRoute>
-                      <Community />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Community />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/spatial-analysis" element={
-                    <ProtectedRoute>
-                      <SpatialAnalysis />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <SpatialAnalysis />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                    <Route path="/geoai-lab" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <GeoAILab />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <GeoAILab />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                    <Route path="/geo-processing-lab" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <GeoProcessingLab />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <GeoProcessingLab />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   <Route path="/code-snippets" element={
-                    <ProtectedRoute>
-                      <CodeSnippets />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <CodeSnippets />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
-          <Route path="/live-classes" element={<LiveClasses />} />
+          <Route path="/live-classes" element={
+            <Layout>
+              <RouteWrapper>
+                <LiveClasses />
+              </RouteWrapper>
+            </Layout>
+          } />
           <Route path="/instructor-dashboard" element={
-            <ProtectedRoute>
-              <InstructorDashboard />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute>
+                <RouteWrapper>
+                  <InstructorDashboard />
+                </RouteWrapper>
+              </ProtectedRoute>
+            </Layout>
           } />
           <Route path="/streaming" element={
-            <ProtectedRoute>
-              <Streaming />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute>
+                <RouteWrapper>
+                  <Streaming />
+                </RouteWrapper>
+              </ProtectedRoute>
+            </Layout>
           } />
           <Route path="/go-live" element={
-            <ProtectedRoute>
-              <GoLive />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute>
+                <RouteWrapper>
+                  <GoLive />
+                </RouteWrapper>
+              </ProtectedRoute>
+            </Layout>
           } />
           <Route path="/watch-live" element={
-            <ProtectedRoute>
-              <WatchLive />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute>
+                <RouteWrapper>
+                  <WatchLive />
+                </RouteWrapper>
+              </ProtectedRoute>
+            </Layout>
           } />
                    <Route path="/job-posting" element={
-                    <ProtectedRoute>
-                      <JobPosting />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <JobPosting />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/resume-posting" element={
-                    <ProtectedRoute>
-                      <ResumePosting />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <ResumePosting />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                    <Route path="/qgis-project" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <QgisProject />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <QgisProject />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   <Route path="/geo-dashboard" element={
-                    <ProtectedRoute>
-                      <GeoDashboard />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <GeoDashboard />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                    <Route path="/ai-studio" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <AIStudio />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <AIStudio />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   <Route path="/search" element={
-                    <ProtectedRoute>
-                      <Search />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Search />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/payment" element={
-                    <ProtectedRoute>
-                      <Payment />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Payment />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/checkout" element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Checkout />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/premium-upgrade" element={
-                    <ProtectedRoute>
-                      <PremiumUpgrade />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <PremiumUpgrade />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/admin" element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <AdminDashboard />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/admin/users" element={
-                    <ProtectedRoute>
-                      <SuperAdminDashboard />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <SuperAdminDashboard />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                   <Route path="/admin/bulk-users" element={
-                    <ProtectedRoute>
-                      <AdminUserManagement />
-                    </ProtectedRoute>
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <AdminUserManagement />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
                   } />
                    <Route path="/webgis-builder" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <WebGISBuilder />
-                     </SubscriptionRoute>
+                     <Layout>
+                       <SubscriptionRoute requiredTier="pro">
+                         <RouteWrapper>
+                           <WebGISBuilder />
+                         </RouteWrapper>
+                       </SubscriptionRoute>
+                     </Layout>
                    } />
                   
                    
