@@ -39,6 +39,11 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
@@ -134,6 +139,23 @@ serve(async (req) => {
     } catch (emailError) {
       console.error('Email sending error:', emailError);
       // Don't fail the enrollment if email fails
+    }
+
+    // Update user's enrolled courses tracking
+    try {
+      const { error: profileError } = await supabaseAdmin
+        .rpc('update_user_enrolled_courses', {
+          p_user_id: user.id,
+          p_course_title: 'Geospatial Technology Unlocked'
+        });
+      
+      if (profileError) {
+        console.error('Failed to update user enrolled courses:', profileError);
+        // Don't fail the enrollment if profile update fails
+      }
+    } catch (profileUpdateError) {
+      console.error('Profile update error:', profileUpdateError);
+      // Don't fail the enrollment if profile update fails
     }
 
     return new Response(JSON.stringify({ 

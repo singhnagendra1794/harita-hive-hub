@@ -92,7 +92,60 @@ const handler = async (req: Request): Promise<Response> => {
         throw updateError;
       }
 
-      // Get the payment transaction to find plan type and user
+      // Check if this is a course enrollment payment first
+      const { data: enrollment, error: enrollmentError } = await supabase
+        .from('enrollments')
+        .select('user_id, full_name')
+        .eq('razorpay_order_id', payment.order_id)
+        .single();
+
+      if (enrollment) {
+        // This is a course enrollment payment
+        console.log('Processing course enrollment payment for user:', enrollment.user_id);
+        
+        // Update user's enrolled courses tracking
+        const { error: courseError } = await supabase
+          .rpc('update_user_enrolled_courses', {
+            p_user_id: enrollment.user_id,
+            p_course_title: 'Geospatial Technology Unlocked'
+          });
+        
+        if (courseError) {
+          console.error('Error updating enrolled courses:', courseError);
+        }
+
+        // Update user subscription to professional after course purchase
+        const { error: subscriptionError } = await supabase
+          .from('user_subscriptions')
+          .update({
+            subscription_tier: 'pro',
+            status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', enrollment.user_id);
+
+        if (subscriptionError) {
+          console.error('Error updating subscription:', subscriptionError);
+        }
+
+        // Update profile plan
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            plan: 'professional',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', enrollment.user_id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
+
+        console.log('Course enrollment payment processed successfully');
+        return new Response('Course enrollment payment processed', { status: 200, headers: corsHeaders });
+      }
+
+      // If not course enrollment, check for subscription payment
       const { data: transaction, error: fetchError } = await supabase
         .from('payment_transactions')
         .select('user_id, subscription_type')
@@ -127,6 +180,20 @@ const handler = async (req: Request): Promise<Response> => {
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.user_id);
+
+      // If this is a course enrollment payment, update enrolled courses
+      if (transaction.subscription_type && transaction.subscription_type.includes('course')) {
+        const { error: courseError } = await supabase
+          .rpc('update_user_enrolled_courses', {
+            p_user_id: transaction.user_id,
+            p_course_title: 'Geospatial Technology Unlocked'
+          });
+        
+        if (courseError) {
+          console.error('Error updating enrolled courses:', courseError);
+          // Don't fail the payment process if course update fails
+        }
+      }
 
       if (profileError) {
         console.error('Error updating profile:', profileError);

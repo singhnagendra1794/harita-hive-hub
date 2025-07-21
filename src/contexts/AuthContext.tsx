@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PostSignupCourseModal } from '@/components/auth/PostSignupCourseModal';
 
 interface AuthContextType {
   user: User | null;
@@ -82,6 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPostSignupModal, setShowPostSignupModal] = useState(false);
+  const [newUserName, setNewUserName] = useState<string>('');
 
   const refreshSession = async (): Promise<boolean> => {
     try {
@@ -135,6 +138,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setTimeout(() => {
               sendAdminNotification(session.user);
             }, 1000); // Delay to ensure user profile is created
+            
+            // Show post-signup course modal for new users
+            const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '';
+            setNewUserName(userName);
+            setTimeout(() => {
+              setShowPostSignupModal(true);
+            }, 2000); // Small delay to let welcome message show first
           }
           
           // Set up auto-refresh timer
@@ -267,6 +277,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <PostSignupCourseModal
+        isOpen={showPostSignupModal}
+        onClose={() => setShowPostSignupModal(false)}
+        userName={newUserName}
+      />
     </AuthContext.Provider>
   );
 };

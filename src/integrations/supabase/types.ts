@@ -3579,6 +3579,8 @@ export type Database = {
           community_posts: number | null
           course_count: number | null
           created_at: string
+          enrolled_courses: string[] | null
+          enrolled_courses_count: number | null
           first_name: string | null
           full_name: string | null
           id: string
@@ -3593,6 +3595,8 @@ export type Database = {
           community_posts?: number | null
           course_count?: number | null
           created_at?: string
+          enrolled_courses?: string[] | null
+          enrolled_courses_count?: number | null
           first_name?: string | null
           full_name?: string | null
           id: string
@@ -3607,6 +3611,8 @@ export type Database = {
           community_posts?: number | null
           course_count?: number | null
           created_at?: string
+          enrolled_courses?: string[] | null
+          enrolled_courses_count?: number | null
           first_name?: string | null
           full_name?: string | null
           id?: string
@@ -6826,6 +6832,10 @@ export type Database = {
           p_viewer_count?: number
         }
         Returns: boolean
+      }
+      update_user_enrolled_courses: {
+        Args: { p_user_id: string; p_course_title: string }
+        Returns: undefined
       }
       update_user_stats: {
         Args: { p_user_id: string; p_stat_type: string; p_increment?: number }
