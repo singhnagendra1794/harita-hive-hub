@@ -16,20 +16,31 @@ const PerformanceMonitor = () => {
         // Log performance metrics for monitoring
         console.log(`${entry.entryType}: ${entry.name} - ${entry.duration}ms`);
         
-        // Send to analytics service if needed
+        // Log critical performance metrics
+        if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') {
+          console.info('FCP:', entry.startTime);
+        }
+        
         if (entry.entryType === 'largest-contentful-paint') {
-          console.log('LCP:', entry.startTime);
+          console.info('LCP:', entry.startTime);
+          if (entry.startTime > 2500) {
+            console.warn('Poor LCP performance:', entry.startTime);
+          }
         }
         
         if (entry.entryType === 'first-input') {
-          const fidEntry = entry as any; // Type assertion for FID entry
-          console.log('FID:', fidEntry.processingStart - fidEntry.startTime);
+          const fidEntry = entry as any;
+          const fid = fidEntry.processingStart - fidEntry.startTime;
+          console.info('FID:', fid);
+          if (fid > 100) {
+            console.warn('Poor FID performance:', fid);
+          }
         }
         
         if (entry.entryType === 'layout-shift') {
-          const clsEntry = entry as any; // Type assertion for CLS entry
-          if (!clsEntry.hadRecentInput) {
-            console.log('CLS:', clsEntry.value);
+          const clsEntry = entry as any;
+          if (!clsEntry.hadRecentInput && clsEntry.value > 0.1) {
+            console.warn('Layout shift detected:', clsEntry.value);
           }
         }
       });

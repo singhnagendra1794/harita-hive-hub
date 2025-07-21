@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     // Get the stream session details
     const { data: session, error: fetchError } = await supabaseClient
       .from('stream_sessions')
-      .select('*, stream_keys!inner(stream_key)')
+      .select('*')
       .eq('id', sessionId)
       .single()
 
@@ -75,7 +75,23 @@ Deno.serve(async (req) => {
       )
     }
 
-    const streamKey = session.stream_keys.stream_key
+    // Get the stream key for the user
+    const { data: streamKeyData, error: keyError } = await supabaseClient
+      .from('stream_keys')
+      .select('stream_key')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single()
+
+    if (keyError) {
+      console.error('Error fetching stream key:', keyError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch stream key' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const streamKey = streamKeyData.stream_key
 
     // Return stream configuration for OBS
     return new Response(

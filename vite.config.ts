@@ -20,24 +20,34 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Enable code splitting for better caching
+    target: 'es2020',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Separate vendor chunks for better caching
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          charts: ['recharts'],
-          maps: ['leaflet', 'react-leaflet', 'mapbox-gl'],
-          supabase: ['@supabase/supabase-js'],
-          query: ['@tanstack/react-query'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('leaflet') || id.includes('mapbox')) {
+              return 'vendor-maps';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            return 'vendor-other';
+          }
         },
       },
     },
-    // Reduce chunk size warnings threshold
-    chunkSizeWarningLimit: 1000,
-    // Enable source maps for production debugging
-    sourcemap: mode === 'development',
+    chunkSizeWarningLimit: 500,
+    sourcemap: false,
   },
   // Enable CSS code splitting
   css: {

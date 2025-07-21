@@ -14,94 +14,103 @@ import NotificationWrapper from "@/components/NotificationWrapper";
 import AILearningAssistant from "@/components/ai/AILearningAssistant";
 import Layout from "@/components/Layout";
 import GlobalAuthCheck from "@/components/auth/GlobalAuthCheck";
+import RouteWrapper from "@/components/RouteWrapper";
+import PerformanceMonitor from "@/components/PerformanceMonitor";
 
-// Page imports
+// Lazy load pages for better performance
+import { lazy, Suspense } from "react";
+
+// Critical pages loaded immediately
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Learn from "./pages/Learn";
-import Projects from "./pages/Projects";
-import Notes from "./pages/Notes";
-import Community from "./pages/Community";
-import SpatialAnalysis from "./pages/SpatialAnalysis";
-import CodeSnippets from "./pages/CodeSnippets";
-import LiveClasses from "./pages/LiveClasses";
-import InstructorDashboard from "./pages/InstructorDashboard";
 
-import Streaming from "./pages/Streaming";
-import JobPosting from "./pages/JobPosting";
-import ResumePosting from "./pages/ResumePosting";
-import QgisProject from "./pages/QgisProject";
-import GeoDashboard from "./pages/GeoDashboard";
-import AIStudio from "./pages/AIStudio";
-import GeoAILab from "./pages/GeoAILab";
-import GeoProcessingLab from "./pages/GeoProcessingLab";
-import Search from "./pages/Search";
-import Payment from "./pages/Payment";
-import Checkout from "./pages/Checkout";
-import PremiumUpgrade from "./pages/PremiumUpgrade";
-import Pricing from "./pages/Pricing";
-import Newsletter from "./pages/Newsletter";
-import Blog from "./pages/Blog";
-import EnhancedPluginMarketplace from "./pages/EnhancedPluginMarketplace";
-import AdminDashboard from "./pages/AdminDashboard";
-import Investors from "./pages/Investors";
-import Beta from "./pages/Beta";
-import NotFound from "./pages/NotFound";
-import MapPlayground from "./pages/MapPlayground";
-import ProjectTemplates from "./pages/ProjectTemplates";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import RefundPolicy from "./pages/RefundPolicy";
-import Contact from "./pages/Contact";
-import TalentPool from "./pages/TalentPool";
-import CorporateTraining from "./pages/CorporateTraining";
-import GISMarketplace from "./pages/GISMarketplace";
-import TaskBoard from "./pages/TaskBoard";
-import CertificationHub from "./pages/CertificationHub";
-import PluginMarketplace from "./pages/PluginMarketplace";
-import WebGISBuilder from "./pages/WebGISBuilder";
-import ChoosePlan from "./pages/ChoosePlan";
-import EnterpriseDataIntegration from "./pages/EnterpriseDataIntegration";
-import IoTDataProcessing from "./pages/IoTDataProcessing";
-import GeoAIEngine from "./pages/GeoAIEngine";
-import ComplianceToolkit from "./pages/ComplianceToolkit";
-import SpatialRiskAnalysis from "./pages/SpatialRiskAnalysis";
-import DeveloperPortal from "./pages/DeveloperPortal";
-import EnterpriseDashboard from "./pages/EnterpriseDashboard";
-import UpcomingCourse from "./pages/UpcomingCourse";
-import SkillRoadmap from "./pages/SkillRoadmap";
-import ProjectsGallery from "./pages/ProjectsGallery";
-import Leaderboard from "./pages/Leaderboard";
-import JobBoard from "./pages/JobBoard";
-import CompanyDashboard from "./pages/CompanyDashboard";
-import FAQ from "./pages/FAQ";
-import About from "./pages/About";
-import BrowseCourses from "./pages/BrowseCourses";
-import GeospatialTechnologyUnlocked from "./pages/courses/GeospatialTechnologyUnlocked";
-import GeospatialFullstackDeveloper from "./pages/courses/GeospatialFullstackDeveloper";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import AdminUserManagement from "./pages/AdminUserManagement";
+// Lazy load non-critical pages
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Learn = lazy(() => import("./pages/Learn"));
+const Projects = lazy(() => import("./pages/Projects"));
+const Notes = lazy(() => import("./pages/Notes"));
+const Community = lazy(() => import("./pages/Community"));
+const SpatialAnalysis = lazy(() => import("./pages/SpatialAnalysis"));
+const CodeSnippets = lazy(() => import("./pages/CodeSnippets"));
+const LiveClasses = lazy(() => import("./pages/LiveClasses"));
+const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
+const Streaming = lazy(() => import("./pages/Streaming"));
+const JobPosting = lazy(() => import("./pages/JobPosting"));
+const ResumePosting = lazy(() => import("./pages/ResumePosting"));
+const QgisProject = lazy(() => import("./pages/QgisProject"));
+const GeoDashboard = lazy(() => import("./pages/GeoDashboard"));
+const AIStudio = lazy(() => import("./pages/AIStudio"));
+const GeoAILab = lazy(() => import("./pages/GeoAILab"));
+const GeoProcessingLab = lazy(() => import("./pages/GeoProcessingLab"));
+const Search = lazy(() => import("./pages/Search"));
+const Payment = lazy(() => import("./pages/Payment"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const PremiumUpgrade = lazy(() => import("./pages/PremiumUpgrade"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Newsletter = lazy(() => import("./pages/Newsletter"));
+const Blog = lazy(() => import("./pages/Blog"));
+const EnhancedPluginMarketplace = lazy(() => import("./pages/EnhancedPluginMarketplace"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
-// Import the new feature pages
-import SkillCopilot from "./pages/SkillCopilot";
-import Toolkits from "./pages/Toolkits";
-import JobsAIDiscovery from "./pages/JobsAIDiscovery";
-import ProjectStudio from "./pages/ProjectStudio";
-import Labs from "./pages/Labs";
-import Challenge from "./pages/Challenge";
-
-import FreelanceProjects from "./pages/FreelanceProjects";
-import Studio from "./pages/Studio";
-import Portfolio from "./pages/Portfolio";
-import Mentorship from "./pages/Mentorship";
-
-// Live Streaming Portal pages
-import GoLive from "./pages/GoLive";
-import WatchLive from "./pages/WatchLive";
+// Loading component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+// More lazy loaded pages
+const Investors = lazy(() => import("./pages/Investors"));
+const Beta = lazy(() => import("./pages/Beta"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const MapPlayground = lazy(() => import("./pages/MapPlayground"));
+const ProjectTemplates = lazy(() => import("./pages/ProjectTemplates"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const Contact = lazy(() => import("./pages/Contact"));
+const TalentPool = lazy(() => import("./pages/TalentPool"));
+const CorporateTraining = lazy(() => import("./pages/CorporateTraining"));
+const GISMarketplace = lazy(() => import("./pages/GISMarketplace"));
+const TaskBoard = lazy(() => import("./pages/TaskBoard"));
+const CertificationHub = lazy(() => import("./pages/CertificationHub"));
+const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
+const WebGISBuilder = lazy(() => import("./pages/WebGISBuilder"));
+const ChoosePlan = lazy(() => import("./pages/ChoosePlan"));
+const EnterpriseDataIntegration = lazy(() => import("./pages/EnterpriseDataIntegration"));
+const IoTDataProcessing = lazy(() => import("./pages/IoTDataProcessing"));
+const GeoAIEngine = lazy(() => import("./pages/GeoAIEngine"));
+const ComplianceToolkit = lazy(() => import("./pages/ComplianceToolkit"));
+const SpatialRiskAnalysis = lazy(() => import("./pages/SpatialRiskAnalysis"));
+const DeveloperPortal = lazy(() => import("./pages/DeveloperPortal"));
+const EnterpriseDashboard = lazy(() => import("./pages/EnterpriseDashboard"));
+const UpcomingCourse = lazy(() => import("./pages/UpcomingCourse"));
+const SkillRoadmap = lazy(() => import("./pages/SkillRoadmap"));
+const ProjectsGallery = lazy(() => import("./pages/ProjectsGallery"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const JobBoard = lazy(() => import("./pages/JobBoard"));
+const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const About = lazy(() => import("./pages/About"));
+const BrowseCourses = lazy(() => import("./pages/BrowseCourses"));
+const GeospatialTechnologyUnlocked = lazy(() => import("./pages/courses/GeospatialTechnologyUnlocked"));
+const GeospatialFullstackDeveloper = lazy(() => import("./pages/courses/GeospatialFullstackDeveloper"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const AdminUserManagement = lazy(() => import("./pages/AdminUserManagement"));
+const SkillCopilot = lazy(() => import("./pages/SkillCopilot"));
+const Toolkits = lazy(() => import("./pages/Toolkits"));
+const JobsAIDiscovery = lazy(() => import("./pages/JobsAIDiscovery"));
+const ProjectStudio = lazy(() => import("./pages/ProjectStudio"));
+const Labs = lazy(() => import("./pages/Labs"));
+const Challenge = lazy(() => import("./pages/Challenge"));
+const FreelanceProjects = lazy(() => import("./pages/FreelanceProjects"));
+const Studio = lazy(() => import("./pages/Studio"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Mentorship = lazy(() => import("./pages/Mentorship"));
+const GoLive = lazy(() => import("./pages/GoLive"));
+const WatchLive = lazy(() => import("./pages/WatchLive"));
 
 function App() {
   const queryClient = new QueryClient();
@@ -123,16 +132,16 @@ function App() {
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
-                  <Route path="/beta" element={<Beta />} />
-                  <Route path="/investors" element={<Investors />} />
-                  <Route path="/pricing" element={<Pricing />} />
-            <Route path="/newsletter" element={<Newsletter />} />
-            <Route path="/blog" element={<Blog />} />
-                  <Route path="/challenge" element={<Challenge />} />
-          <Route path="/upcoming-course" element={<UpcomingCourse />} />
-          <Route path="/skill-roadmap" element={<SkillRoadmap />} />
-          <Route path="/projects-gallery" element={<ProjectsGallery />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
+                   <Route path="/beta" element={<RouteWrapper><Beta /></RouteWrapper>} />
+                   <Route path="/investors" element={<RouteWrapper><Investors /></RouteWrapper>} />
+                   <Route path="/pricing" element={<RouteWrapper><Pricing /></RouteWrapper>} />
+            <Route path="/newsletter" element={<RouteWrapper><Newsletter /></RouteWrapper>} />
+            <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
+                   <Route path="/challenge" element={<RouteWrapper><Challenge /></RouteWrapper>} />
+           <Route path="/upcoming-course" element={<RouteWrapper><UpcomingCourse /></RouteWrapper>} />
+           <Route path="/skill-roadmap" element={<RouteWrapper><SkillRoadmap /></RouteWrapper>} />
+           <Route path="/projects-gallery" element={<RouteWrapper><ProjectsGallery /></RouteWrapper>} />
+           <Route path="/leaderboard" element={<RouteWrapper><Leaderboard /></RouteWrapper>} />
           
           <Route path="/job-board" element={<JobBoard />} />
           <Route path="/freelance-projects" element={<FreelanceProjects />} />
@@ -179,11 +188,13 @@ function App() {
                     } />
                   
                   {/* Protected Routes */}
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/dashboard" element={
+                     <ProtectedRoute>
+                       <Suspense fallback={<PageLoader />}>
+                         <Dashboard />
+                       </Suspense>
+                     </ProtectedRoute>
+                   } />
                    <Route path="/learn" element={
                      <SubscriptionRoute requiredTier="pro">
                        <Learn />
@@ -389,8 +400,9 @@ function App() {
                      <Route path="*" element={<NotFound />} />
                   </Routes>
                  
-                  {/* AI Learning Assistant - Available on all pages */}
-                  <AILearningAssistant />
+                   {/* Performance monitoring and AI Assistant */}
+                   <PerformanceMonitor />
+                   <AILearningAssistant />
                 </BrowserRouter>
             </TooltipProvider>
           </ChatbotProvider>
