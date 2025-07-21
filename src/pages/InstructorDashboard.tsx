@@ -61,6 +61,14 @@ interface LiveClass {
 const InstructorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user is super admin
+  useEffect(() => {
+    if (user && user.email !== 'contact@haritahive.com') {
+      navigate('/dashboard');
+      return;
+    }
+  }, [user, navigate]);
   const [mySessions, setMySessions] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);

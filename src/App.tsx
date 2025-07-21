@@ -235,7 +235,11 @@ function App() {
                     </ProtectedRoute>
                   } />
           <Route path="/live-classes" element={<LiveClasses />} />
-          <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
+          <Route path="/instructor-dashboard" element={
+            <ProtectedRoute>
+              <InstructorDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/streaming" element={
             <ProtectedRoute>
               <Streaming />
