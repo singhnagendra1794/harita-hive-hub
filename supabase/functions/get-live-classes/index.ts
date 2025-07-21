@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
     // Enhance the data with additional URLs
     const enhancedClasses = (liveClasses || []).map(liveClass => ({
       ...liveClass,
-      hls_url: `http://localhost:8080/hls/${liveClass.stream_key}.m3u8`,
-      recording_url: liveClass.recording_url || `http://localhost:8080/recordings/${liveClass.stream_key}.mp4`,
+      hls_url: `https://stream.haritahive.com/hls/${liveClass.stream_key}.m3u8`,
+      recording_url: liveClass.recording_url || `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`,
       is_live: liveClass.status === 'live',
       has_ended: liveClass.status === 'ended',
       duration_minutes: liveClass.end_time 

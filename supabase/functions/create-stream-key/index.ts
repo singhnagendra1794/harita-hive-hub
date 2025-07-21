@@ -82,11 +82,12 @@ Deno.serve(async (req) => {
         success: true,
         live_class: liveClass,
         stream_key: streamKey,
-        rtmp_url: `rtmp://localhost:1935/live`,
-        hls_url: `http://localhost:8080/hls/${streamKey}.m3u8`,
+        rtmp_url: `rtmp://stream.haritahive.com/live`,
+        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
+        recording_url: `https://stream.haritahive.com/recordings/${streamKey}.mp4`,
         dashboard_url: `/instructor-dashboard`,
         obs_setup: {
-          server: 'rtmp://localhost:1935/live',
+          server: 'rtmp://stream.haritahive.com/live',
           stream_key: streamKey,
           recommended_settings: {
             video_bitrate: '2500 Kbps',

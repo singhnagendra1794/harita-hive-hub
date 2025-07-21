@@ -34,6 +34,15 @@ export const LiveVideoPlayer = ({ src, title, className = "", onError, onLoad }:
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         console.error('HLS error:', data);
+        if (onError) {
+          onError(data);
+        }
+      });
+
+      hls.on(Hls.Events.MANIFEST_LOADED, () => {
+        if (onLoad) {
+          onLoad();
+        }
       });
 
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -41,6 +50,31 @@ export const LiveVideoPlayer = ({ src, title, className = "", onError, onLoad }:
       video.src = src;
       video.addEventListener('loadedmetadata', () => {
         video.play().catch(console.error);
+        if (onLoad) {
+          onLoad();
+        }
+      });
+      
+      video.addEventListener('error', (error) => {
+        console.error('Video error:', error);
+        if (onError) {
+          onError(error);
+        }
+      });
+    } else {
+      // Fallback for MP4 recordings
+      video.src = src;
+      video.addEventListener('loadedmetadata', () => {
+        if (onLoad) {
+          onLoad();
+        }
+      });
+      
+      video.addEventListener('error', (error) => {
+        console.error('Video error:', error);
+        if (onError) {
+          onError(error);
+        }
       });
     }
 

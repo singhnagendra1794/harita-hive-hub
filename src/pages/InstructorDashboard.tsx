@@ -371,12 +371,12 @@ const InstructorDashboard = () => {
                               <span className="text-muted-foreground">RTMP Server:</span>
                               <div className="flex items-center gap-2">
                                 <code className="bg-background px-2 py-1 rounded text-xs">
-                                   rtmp://localhost:1935/live
+                                   rtmp://stream.haritahive.com/live
                                 </code>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => copyToClipboard('rtmp://localhost:1935/live', 'RTMP Server')}
+                                  onClick={() => copyToClipboard('rtmp://stream.haritahive.com/live', 'RTMP Server')}
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
@@ -507,7 +507,7 @@ const InstructorDashboard = () => {
                     <div className="text-sm text-muted-foreground space-y-1 mt-1">
                       <p>• Open OBS Studio → Settings → Stream</p>
                       <p>• Service: Custom...</p>
-                      <p>• Server: <code className="bg-muted px-1 py-0.5 rounded">rtmp://localhost:1935/live</code></p>
+                      <p>• Server: <code className="bg-muted px-1 py-0.5 rounded">rtmp://stream.haritahive.com/live</code></p>
                       <p>• Stream Key: Copy from your stream above</p>
                     </div>
                   </div>

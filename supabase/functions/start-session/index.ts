@@ -45,7 +45,7 @@ serve(async (req) => {
         instructor_id: user.id,
         stream_key: streamKey,
         is_live: true,
-        hls_url: `http://localhost:8080/hls/${streamKey}.m3u8`,
+        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
         started_at: new Date().toISOString()
       })
       .select()
@@ -63,8 +63,8 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         session,
-        rtmp_url: `rtmp://localhost:1935/live/${streamKey}`,
-        hls_url: `http://localhost:8080/hls/${streamKey}.m3u8`
+        rtmp_url: `rtmp://stream.haritahive.com/live/${streamKey}`,
+        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

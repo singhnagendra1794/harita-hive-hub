@@ -67,9 +67,9 @@ Deno.serve(async (req) => {
     // Enhance the data with additional URLs and streaming details
     const enhancedSessions = (mySessions || []).map(session => ({
       ...session,
-      rtmp_url: `rtmp://localhost:1935/live`,
-      hls_url: `http://localhost:8080/hls/${session.stream_key}.m3u8`,
-      recording_url: session.recording_url || `http://localhost:8080/recordings/${session.stream_key}.mp4`,
+      rtmp_url: `rtmp://stream.haritahive.com/live`,
+      hls_url: `https://stream.haritahive.com/hls/${session.stream_key}.m3u8`,
+      recording_url: session.recording_url || `https://stream.haritahive.com/recordings/${session.stream_key}.mp4`,
       is_live: session.status === 'live',
       has_ended: session.status === 'ended',
       can_start: session.status === 'ended' && !session.end_time, // Can start if created but not live and not ended with end_time
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
         ? Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))
         : null,
       obs_setup: {
-        server: `rtmp://localhost:1935/live`,
+        server: `rtmp://stream.haritahive.com/live`,
         stream_key: session.stream_key,
         recommended_settings: {
           video_bitrate: '2500 Kbps',

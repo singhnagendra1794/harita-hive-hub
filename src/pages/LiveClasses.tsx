@@ -301,7 +301,7 @@ const LiveClasses = () => {
                     </div>
                   ) : (
                     <LiveVideoPlayer
-                      src={currentLive.hls_url || `http://localhost:8080/hls/${currentLive.stream_key}.m3u8`}
+                      src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
                       title={currentLive.title}
                       className="w-full h-full"
                       onError={handleVideoError}
@@ -388,8 +388,29 @@ const LiveClasses = () => {
                     <Button 
                       className="w-full" 
                       onClick={() => {
+                        // Show video player for recorded content
                         if (liveClass.recording_url) {
-                          window.open(liveClass.recording_url, '_blank');
+                          // Create a modal or new window with video player
+                          const recordingWindow = window.open('', '_blank');
+                          if (recordingWindow) {
+                            recordingWindow.document.write(`
+                              <html>
+                                <head>
+                                  <title>${liveClass.title} - Recording</title>
+                                  <style>
+                                    body { margin: 0; background: #000; }
+                                    video { width: 100%; height: 100vh; }
+                                  </style>
+                                </head>
+                                <body>
+                                  <video controls autoplay>
+                                    <source src="${liveClass.recording_url}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                  </video>
+                                </body>
+                              </html>
+                            `);
+                          }
                         } else {
                           toast({
                             title: "Recording Not Available",

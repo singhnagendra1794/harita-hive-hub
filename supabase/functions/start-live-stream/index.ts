@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
           success: true,
           live_class: liveClass,
           message: 'Stream is already live',
-          hls_url: `http://localhost:8080/hls/${liveClass.stream_key}.m3u8`
+          hls_url: `https://stream.haritahive.com/hls/${liveClass.stream_key}.m3u8`
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -95,8 +95,8 @@ Deno.serve(async (req) => {
         success: true,
         live_class: updatedClass,
         message: 'Stream started successfully',
-        hls_url: `http://localhost:8080/hls/${updatedClass.stream_key}.m3u8`,
-        rtmp_url: `rtmp://localhost:1935/live`,
+        hls_url: `https://stream.haritahive.com/hls/${updatedClass.stream_key}.m3u8`,
+        rtmp_url: `rtmp://stream.haritahive.com/live`,
         stream_key: updatedClass.stream_key,
         viewer_url: `/live-classes?stream=${updatedClass.stream_key}`
       }),
