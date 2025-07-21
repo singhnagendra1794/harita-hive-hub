@@ -19,4 +19,46 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Enable code splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor chunks for better caching
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+          charts: ['recharts'],
+          maps: ['leaflet', 'react-leaflet', 'mapbox-gl'],
+          supabase: ['@supabase/supabase-js'],
+          query: ['@tanstack/react-query'],
+        },
+      },
+    },
+    // Reduce chunk size warnings threshold
+    chunkSizeWarningLimit: 1000,
+    // Enable source maps for production debugging
+    sourcemap: mode === 'development',
+  },
+  // Enable CSS code splitting
+  css: {
+    preprocessorOptions: {
+      // Optimize CSS processing
+      postcss: {
+        plugins: [
+          // Add autoprefixer and cssnano in production
+        ],
+      },
+    },
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@supabase/supabase-js',
+      '@tanstack/react-query',
+    ],
+    exclude: ['@vite/client', '@vite/env'],
+  },
 }));

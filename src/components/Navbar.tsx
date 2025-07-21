@@ -84,6 +84,8 @@ const Navbar = () => {
                 src="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" 
                 alt="Harita Hive Logo" 
                 className="h-8 w-8"
+                loading="eager"
+                decoding="async"
               />
               <span className="text-2xl font-bold text-primary">Harita Hive</span>
             </Link>

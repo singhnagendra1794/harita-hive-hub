@@ -16,6 +16,8 @@ const Footer = () => {
                 src="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" 
                 alt="Harita Hive Logo" 
                 className="h-8 w-8"
+                loading="lazy"
+                decoding="async"
               />
               <span className="font-bold text-xl">Harita Hive</span>
             </div>
