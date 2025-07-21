@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Layout from '../components/Layout';
+
 import { useAuth } from "@/contexts/AuthContext";
 
 const Pricing = () => {
@@ -66,8 +66,7 @@ const Pricing = () => {
   const pricing = getPricingForRegion(region);
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -248,7 +247,6 @@ const Pricing = () => {
         </div>
 
       </div>
-    </Layout>
   );
 };
 

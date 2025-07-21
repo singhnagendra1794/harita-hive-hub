@@ -1,5 +1,5 @@
 
-import Layout from '@/components/Layout';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,11 +23,9 @@ const Auth = () => {
   };
 
   return (
-    <Layout>
-      <div className="container max-w-md py-12 mx-auto">
-        <MultiAuthForm mode={mode} onToggleMode={toggleMode} />
-      </div>
-    </Layout>
+    <div className="container max-w-md py-12 mx-auto">
+      <MultiAuthForm mode={mode} onToggleMode={toggleMode} />
+    </div>
   );
 };
 
