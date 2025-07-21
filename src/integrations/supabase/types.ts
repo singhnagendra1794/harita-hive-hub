@@ -623,15 +623,7 @@ export type Database = {
           user_id?: string
           votes?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "class_qa_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "live_classes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       class_registrations: {
         Row: {
@@ -661,15 +653,7 @@ export type Database = {
           registered_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "class_registrations_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "live_classes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       code_snippet_favorites: {
         Row: {
@@ -2950,172 +2934,40 @@ export type Database = {
       }
       live_classes: {
         Row: {
-          access_tier: string
-          auto_record: boolean | null
-          chat_enabled: boolean | null
-          class_status: string | null
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
-          ends_at: string | null
+          end_time: string | null
           id: string
-          instructor: string | null
-          is_live: boolean
-          recording_url: string | null
-          rtmp_endpoint: string | null
-          starts_at: string
-          stream_key: string | null
-          stream_server_url: string | null
-          stream_type: string | null
-          stream_url: string | null
-          thumbnail_url: string | null
-          title: string
-          updated_at: string
-          video_url: string
-          viewer_count: number | null
-          youtube_video_id: string
-        }
-        Insert: {
-          access_tier?: string
-          auto_record?: boolean | null
-          chat_enabled?: boolean | null
-          class_status?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          ends_at?: string | null
-          id?: string
-          instructor?: string | null
-          is_live?: boolean
-          recording_url?: string | null
-          rtmp_endpoint?: string | null
-          starts_at: string
-          stream_key?: string | null
-          stream_server_url?: string | null
-          stream_type?: string | null
-          stream_url?: string | null
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string
-          video_url: string
-          viewer_count?: number | null
-          youtube_video_id: string
-        }
-        Update: {
-          access_tier?: string
-          auto_record?: boolean | null
-          chat_enabled?: boolean | null
-          class_status?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          ends_at?: string | null
-          id?: string
-          instructor?: string | null
-          is_live?: boolean
-          recording_url?: string | null
-          rtmp_endpoint?: string | null
-          starts_at?: string
-          stream_key?: string | null
-          stream_server_url?: string | null
-          stream_type?: string | null
-          stream_url?: string | null
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string
-          video_url?: string
-          viewer_count?: number | null
-          youtube_video_id?: string
-        }
-        Relationships: []
-      }
-      live_sessions: {
-        Row: {
-          created_at: string
-          description: string | null
-          ended_at: string | null
-          hls_url: string | null
-          id: string
-          instructor_id: string | null
-          instructor_name: string | null
-          is_live: boolean
-          recorded_url: string | null
-          started_at: string | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["stream_status"]
           stream_key: string
-          thumbnail_url: string | null
           title: string
           updated_at: string
-          viewer_count: number | null
         }
         Insert: {
           created_at?: string
+          created_by: string
           description?: string | null
-          ended_at?: string | null
-          hls_url?: string | null
+          end_time?: string | null
           id?: string
-          instructor_id?: string | null
-          instructor_name?: string | null
-          is_live?: boolean
-          recorded_url?: string | null
-          started_at?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["stream_status"]
           stream_key: string
-          thumbnail_url?: string | null
           title: string
           updated_at?: string
-          viewer_count?: number | null
         }
         Update: {
           created_at?: string
+          created_by?: string
           description?: string | null
-          ended_at?: string | null
-          hls_url?: string | null
+          end_time?: string | null
           id?: string
-          instructor_id?: string | null
-          instructor_name?: string | null
-          is_live?: boolean
-          recorded_url?: string | null
-          started_at?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["stream_status"]
           stream_key?: string
-          thumbnail_url?: string | null
           title?: string
           updated_at?: string
-          viewer_count?: number | null
-        }
-        Relationships: []
-      }
-      live_streams: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_live: boolean
-          stream_key: string
-          stream_url: string | null
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_live?: boolean
-          stream_key: string
-          stream_url?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_live?: boolean
-          stream_key?: string
-          stream_url?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -6779,6 +6631,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string
       }
+      generate_unique_stream_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_auth_users_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -7010,6 +6866,7 @@ export type Database = {
         | "marine"
         | "energy"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
+      stream_status: "live" | "ended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7180,6 +7037,7 @@ export const Constants = {
         "energy",
       ],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
+      stream_status: ["live", "ended"],
     },
   },
 } as const

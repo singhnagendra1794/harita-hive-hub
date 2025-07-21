@@ -101,7 +101,6 @@ import Mentorship from "./pages/Mentorship";
 // Live Streaming Portal pages
 import GoLive from "./pages/GoLive";
 import WatchLive from "./pages/WatchLive";
-import LiveClassesPage from "./pages/LiveClassesPage";
 
 function App() {
   const queryClient = new QueryClient();
@@ -234,32 +233,27 @@ function App() {
                       <CodeSnippets />
                     </ProtectedRoute>
                   } />
-        <Route path="/live-classes" element={
-          <ProtectedRoute>
-            <LiveClasses />
-          </ProtectedRoute>
-        } />
-         <Route path="/live-classes/:id" element={
-           <ProtectedRoute>
-             <LiveClassViewer />
-           </ProtectedRoute>
-         } />
-         <Route path="/streaming" element={
-           <ProtectedRoute>
-             <Streaming />
-           </ProtectedRoute>
-         } />
-         <Route path="/go-live" element={
-           <ProtectedRoute>
-             <GoLive />
-           </ProtectedRoute>
-         } />
-         <Route path="/watch-live" element={
-           <ProtectedRoute>
-             <WatchLive />
-           </ProtectedRoute>
-         } />
-         <Route path="/live-classes" element={<LiveClassesPage />} />
+          <Route path="/live-classes" element={<LiveClasses />} />
+          <Route path="/live-classes/:id" element={
+            <ProtectedRoute>
+              <LiveClassViewer />
+            </ProtectedRoute>
+          } />
+          <Route path="/streaming" element={
+            <ProtectedRoute>
+              <Streaming />
+            </ProtectedRoute>
+          } />
+          <Route path="/go-live" element={
+            <ProtectedRoute>
+              <GoLive />
+            </ProtectedRoute>
+          } />
+          <Route path="/watch-live" element={
+            <ProtectedRoute>
+              <WatchLive />
+            </ProtectedRoute>
+          } />
                    <Route path="/job-posting" element={
                     <ProtectedRoute>
                       <JobPosting />

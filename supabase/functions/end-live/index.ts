@@ -35,55 +35,45 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { title, description } = await req.json()
+    const { stream_key } = await req.json()
 
-    if (!title) {
+    if (!stream_key) {
       return new Response(
-        JSON.stringify({ error: 'Title is required' }),
+        JSON.stringify({ error: 'Stream key is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Generate unique stream key
-    const { data: streamKey, error: keyError } = await supabaseClient
-      .rpc('generate_unique_stream_key')
-
-    if (keyError) {
-      console.error('Error generating stream key:', keyError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate stream key' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Create new live class
+    // Mark class as ended
     const { data, error } = await supabaseClient
       .from('live_classes')
-      .insert({
-        title,
-        description,
-        stream_key: streamKey,
-        created_by: user.id,
-        status: 'ended'
+      .update({ 
+        status: 'ended',
+        end_time: new Date().toISOString()
       })
+      .eq('stream_key', stream_key)
+      .eq('created_by', user.id)
       .select()
       .single()
 
     if (error) {
       console.error('Database error:', error)
       return new Response(
-        JSON.stringify({ error: 'Failed to create live class' }),
+        JSON.stringify({ error: 'Failed to end live class' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!data) {
+      return new Response(
+        JSON.stringify({ error: 'Live class not found or not authorized' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        stream_key: streamKey,
-        rtmp_url: `rtmp://stream.haritahive.com/live`,
-        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
-        recording_url: `https://stream.haritahive.com/recordings/${streamKey}.mp4`,
         live_class: data
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
