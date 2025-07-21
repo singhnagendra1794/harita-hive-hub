@@ -5,7 +5,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CreatorConsole } from '@/components/admin/CreatorConsole';
 import { BetaAnalyticsDashboard } from '@/components/beta/BetaAnalyticsDashboard';
 import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDashboard';
-import LiveClassManager from '@/components/admin/LiveClassManager';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import SuperAdminPanel from '@/components/admin/SuperAdminPanel';
@@ -111,7 +111,7 @@ const AdminDashboardPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <LiveClassManager />
+                  <p className="text-muted-foreground">Live class management features have been moved to the new Live Classes page at /live-classes</p>
                 </CardContent>
               </Card>
             </div>

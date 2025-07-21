@@ -12,7 +12,7 @@ import { useUserActivity } from "@/hooks/useUserActivity";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 // Removed useSessionValidation to avoid conflicts with Supabase auth
-import LiveClassBanner from "./LiveClassBanner";
+
 import { ArrowRight, Crown, Zap, Lock, Loader2, Shield, RefreshCw } from "lucide-react";
 import { BookOpen, Map, Brain, Users, Code, Briefcase, Calendar, Layers, Building, Package, Puzzle, Award, GraduationCap, FileCode2, FileSearch2, FileBarChart, Globe, Wrench, Presentation, UserPlus, Trophy, DollarSign, Upload, Target, Gamepad2, Play, BookText, ClipboardList, Compass, School, BrainCircuit, FileText, Database, Microscope } from "lucide-react";
 

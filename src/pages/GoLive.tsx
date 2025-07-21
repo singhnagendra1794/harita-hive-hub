@@ -39,9 +39,9 @@ const GoLive: React.FC = () => {
 
   const loadUserStream = async () => {
     const { data, error } = await supabase
-      .from('live_streams')
+      .from('live_classes')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('created_by', user?.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -51,7 +51,7 @@ const GoLive: React.FC = () => {
       setTitle(data.title);
       setDescription(data.description || '');
       setStreamKey(data.stream_key);
-      setIsLive(data.is_live);
+      setIsLive(data.status === 'live');
     }
   };
 
@@ -67,16 +67,22 @@ const GoLive: React.FC = () => {
 
     setLoading(true);
     try {
-      // Generate stream key
-      const { data: keyData } = await supabase.rpc('generate_live_stream_key');
+      // Use generate-stream-key edge function
+      const { data: response, error: keyError } = await supabase.functions.invoke('generate-stream-key');
+      
+      if (keyError) throw keyError;
+      
+      const streamKey = response.stream_key;
       
       const { data, error } = await supabase
-        .from('live_streams')
+        .from('live_classes')
         .insert({
           title: title.trim(),
           description: description.trim(),
-          stream_key: keyData,
-          user_id: user.id
+          stream_key: streamKey,
+          created_by: user.id,
+          start_time: new Date().toISOString(),
+          status: 'ended' // Created but not live yet
         })
         .select()
         .single();
@@ -109,11 +115,9 @@ const GoLive: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await supabase.functions.invoke('start-stream', {
-        body: {
-          streamId,
-          action: isLive ? 'stop' : 'start'
-        }
+      const functionName = isLive ? 'end-live' : 'start-live';
+      const response = await supabase.functions.invoke(functionName, {
+        body: { classId: streamId }
       });
 
       if (response.error) throw response.error;
