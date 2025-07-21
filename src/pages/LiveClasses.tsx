@@ -301,7 +301,7 @@ const LiveClasses = () => {
                     </div>
                   ) : (
                     <LiveVideoPlayer
-                      src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
+                      src={currentLive.hls_url || `http://localhost:8080/hls/${currentLive.stream_key}.m3u8`}
                       title={currentLive.title}
                       className="w-full h-full"
                       onError={handleVideoError}

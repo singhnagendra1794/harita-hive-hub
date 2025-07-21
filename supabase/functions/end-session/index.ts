@@ -37,7 +37,7 @@ serve(async (req) => {
       .update({
         is_live: false,
         ended_at: new Date().toISOString(),
-        recorded_url: recorded_url || `https://stream.haritahive.com/recordings/${session_id}.mp4`
+        recorded_url: recorded_url || `http://localhost:8080/recordings/${session_id}.mp4`
       })
       .eq('id', session_id)
       .eq('instructor_id', user.id)
