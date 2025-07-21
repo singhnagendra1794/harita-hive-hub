@@ -139,12 +139,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               sendAdminNotification(session.user);
             }, 1000); // Delay to ensure user profile is created
             
-            // Show post-signup course modal for new users
-            const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '';
-            setNewUserName(userName);
-            setTimeout(() => {
-              setShowPostSignupModal(true);
-            }, 2000); // Small delay to let welcome message show first
+            // Check if user has premium email and handle accordingly
+            setTimeout(async () => {
+              try {
+                // Check if user email is in premium list
+                const { data: isPremium, error } = await supabase
+                  .rpc('is_professional_email', { email_to_check: session.user.email });
+                
+                if (error) {
+                  console.error('Error checking premium email:', error);
+                  // Show normal modal if we can't check
+                  const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '';
+                  setNewUserName(userName);
+                  setShowPostSignupModal(true);
+                  return;
+                }
+
+                if (isPremium) {
+                  // Update enrolled courses count for premium users
+                  await supabase
+                    .from('profiles')
+                    .update({ enrolled_courses_count: 1 })
+                    .eq('id', session.user.id);
+
+                  // Redirect to Geospatial Technology Unlocked course
+                  setTimeout(() => {
+                    window.location.href = '/courses/geospatial-technology-unlocked';
+                  }, 1000);
+                } else {
+                  // Show post-signup course modal for non-premium users
+                  const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '';
+                  setNewUserName(userName);
+                  setShowPostSignupModal(true);
+                }
+              } catch (error) {
+                console.error('Error in premium user handling:', error);
+                // Fallback to showing normal modal
+                const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '';
+                setNewUserName(userName);
+                setShowPostSignupModal(true);
+              }
+            }, 2000); // Small delay to let welcome message show first and ensure profile is created
           }
           
           // Set up auto-refresh timer
