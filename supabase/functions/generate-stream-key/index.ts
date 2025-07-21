@@ -81,9 +81,9 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true,
         stream_key: streamKey,
-        rtmp_url: `rtmp://stream.haritahive.com/live`,
-        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
-        recording_url: `https://stream.haritahive.com/recordings/${streamKey}.mp4`,
+        rtmp_url: `rtmp://localhost:1935/live`,
+        hls_url: `http://localhost:8080/hls/${streamKey}.m3u8`,
+        recording_url: `http://localhost:8080/recordings/${streamKey}.mp4`,
         live_class: data
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
