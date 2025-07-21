@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url)
     const status = url.searchParams.get('status') || 'all'
+    const course = url.searchParams.get('course')
     const limit = parseInt(url.searchParams.get('limit') || '50')
 
     let query = supabaseClient
@@ -35,6 +36,7 @@ Deno.serve(async (req) => {
         thumbnail_url,
         recording_url,
         viewer_count,
+        course_title,
         created_at,
         updated_at
       `)
@@ -49,6 +51,11 @@ Deno.serve(async (req) => {
     } else if (status !== 'all') {
       // For any other status value, filter by it
       query = query.eq('status', status)
+    }
+
+    // Filter by course if specified
+    if (course) {
+      query = query.eq('course_title', course)
     }
 
     const { data: liveClasses, error } = await query

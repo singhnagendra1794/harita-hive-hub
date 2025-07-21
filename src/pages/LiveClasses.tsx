@@ -3,7 +3,7 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Calendar, Clock, Users, Play, Eye } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, Eye, BookOpen } from "lucide-react";
 import { LiveVideoPlayer } from '@/components/LiveVideoPlayer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -13,13 +13,14 @@ interface LiveClass {
   title: string;
   description: string;
   stream_key: string;
-  status: 'live' | 'ended';
+  status: 'live' | 'ended' | 'scheduled';
   start_time: string;
   end_time: string | null;
   created_by: string;
   thumbnail_url: string | null;
   recording_url: string | null;
   viewer_count: number;
+  course_title?: string;
   created_at: string;
   updated_at: string;
   hls_url?: string;
@@ -28,10 +29,44 @@ interface LiveClass {
   duration_minutes?: number | null;
 }
 
+// Countdown Component
+const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const target = new Date(targetDate).getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      } else {
+        setTimeLeft('Starting soon!');
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="text-lg font-mono text-primary">
+      {timeLeft}
+    </div>
+  );
+};
+
 const LiveClasses = () => {
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
   const [currentLive, setCurrentLive] = useState<LiveClass | null>(null);
   const [pastClasses, setPastClasses] = useState<LiveClass[]>([]);
+  const [scheduledClasses, setScheduledClasses] = useState<LiveClass[]>([]);
+  const [nextGeospatialClass, setNextGeospatialClass] = useState<LiveClass | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState<string | null>(null);
 
@@ -44,6 +79,7 @@ const LiveClasses = () => {
 
   const fetchLiveClasses = async () => {
     try {
+      // Fetch all live classes
       const response = await supabase.functions.invoke('get-live-classes');
       if (response.error) throw response.error;
       
@@ -51,6 +87,19 @@ const LiveClasses = () => {
       setLiveClasses(data?.live_classes || []);
       setCurrentLive(data?.current_live || null);
       setPastClasses(data?.past_classes || []);
+      setScheduledClasses(data?.scheduled_classes || []);
+
+      // Fetch next Geospatial Technology Unlocked session
+      const geospatialResponse = await supabase.functions.invoke('get-live-classes', {
+        body: { course: 'Geospatial Technology Unlocked', status: 'scheduled' }
+      });
+      
+      if (geospatialResponse.data?.scheduled_classes?.length > 0) {
+        // Get the next scheduled session (closest to now)
+        const nextSession = geospatialResponse.data.scheduled_classes
+          .sort((a: LiveClass, b: LiveClass) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
+        setNextGeospatialClass(nextSession);
+      }
     } catch (error) {
       console.error('Error fetching live classes:', error);
       toast({
@@ -109,6 +158,73 @@ const LiveClasses = () => {
             Join interactive live sessions with expert instructors and access recorded content
           </p>
         </div>
+
+        {/* Geospatial Technology Unlocked Course Section */}
+        {nextGeospatialClass && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <BookOpen className="h-6 w-6" />
+              🎯 Next: Geospatial Technology Unlocked
+            </h2>
+            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                        Geospatial Technology Unlocked
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl mb-2">{nextGeospatialClass.title}</CardTitle>
+                    {nextGeospatialClass.description && (
+                      <CardDescription className="mb-3">{nextGeospatialClass.description}</CardDescription>
+                    )}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {formatDate(nextGeospatialClass.start_time)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {formatTime(nextGeospatialClass.start_time)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="text-sm text-muted-foreground mb-2">Starts in:</p>
+                    <CountdownTimer targetDate={nextGeospatialClass.start_time} />
+                    <div className="mt-2">
+                      <Badge variant="outline" className="text-xs">
+                        FREE ACCESS
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {nextGeospatialClass.thumbnail_url && (
+                  <div className="aspect-video bg-gray-900 rounded-lg mb-4 overflow-hidden">
+                    <img 
+                      src={nextGeospatialClass.thumbnail_url} 
+                      alt={nextGeospatialClass.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    Instructor: Nagendra Singh
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="h-4 w-4" />
+                    Course Session
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Current Live Stream Section */}
         {currentLive ? (
