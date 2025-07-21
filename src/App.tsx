@@ -29,6 +29,7 @@ import Community from "./pages/Community";
 import SpatialAnalysis from "./pages/SpatialAnalysis";
 import CodeSnippets from "./pages/CodeSnippets";
 import LiveClasses from "./pages/LiveClasses";
+import InstructorDashboard from "./pages/InstructorDashboard";
 
 import Streaming from "./pages/Streaming";
 import JobPosting from "./pages/JobPosting";
@@ -234,6 +235,7 @@ function App() {
                     </ProtectedRoute>
                   } />
           <Route path="/live-classes" element={<LiveClasses />} />
+          <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
           <Route path="/streaming" element={
             <ProtectedRoute>
               <Streaming />

@@ -5,9 +5,11 @@ interface LiveVideoPlayerProps {
   src: string;
   title?: string;
   className?: string;
+  onError?: (error: any) => void;
+  onLoad?: () => void;
 }
 
-export const LiveVideoPlayer = ({ src, title, className = "" }: LiveVideoPlayerProps) => {
+export const LiveVideoPlayer = ({ src, title, className = "", onError, onLoad }: LiveVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 

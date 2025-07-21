@@ -2939,11 +2939,14 @@ export type Database = {
           description: string | null
           end_time: string | null
           id: string
+          recording_url: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["stream_status"]
           stream_key: string
+          thumbnail_url: string | null
           title: string
           updated_at: string
+          viewer_count: number | null
         }
         Insert: {
           created_at?: string
@@ -2951,11 +2954,14 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           id?: string
+          recording_url?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key: string
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
+          viewer_count?: number | null
         }
         Update: {
           created_at?: string
@@ -2963,11 +2969,14 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           id?: string
+          recording_url?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key?: string
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          viewer_count?: number | null
         }
         Relationships: []
       }

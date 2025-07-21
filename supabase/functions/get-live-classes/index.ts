@@ -19,20 +19,39 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url)
     const status = url.searchParams.get('status') || 'all'
+    const limit = parseInt(url.searchParams.get('limit') || '50')
 
     let query = supabaseClient
       .from('live_classes')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .select(`
+        id,
+        title,
+        description,
+        stream_key,
+        status,
+        start_time,
+        end_time,
+        created_by,
+        thumbnail_url,
+        recording_url,
+        viewer_count,
+        created_at,
+        updated_at
+      `)
+      .order('start_time', { ascending: false })
+      .limit(limit)
 
     // Filter by status if specified
     if (status === 'live') {
       query = query.eq('status', 'live')
     } else if (status === 'ended') {
       query = query.eq('status', 'ended')
+    } else if (status !== 'all') {
+      // For any other status value, filter by it
+      query = query.eq('status', status)
     }
 
-    const { data, error } = await query
+    const { data: liveClasses, error } = await query
 
     if (error) {
       console.error('Database error:', error)
@@ -42,16 +61,37 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Enhance the data with additional URLs
+    const enhancedClasses = (liveClasses || []).map(liveClass => ({
+      ...liveClass,
+      hls_url: `https://stream.haritahive.com/hls/${liveClass.stream_key}.m3u8`,
+      recording_url: liveClass.recording_url || `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`,
+      is_live: liveClass.status === 'live',
+      has_ended: liveClass.status === 'ended',
+      duration_minutes: liveClass.end_time 
+        ? Math.round((new Date(liveClass.end_time).getTime() - new Date(liveClass.start_time).getTime()) / (1000 * 60))
+        : null
+    }))
+
+    // Separate current live class and others
+    const currentLiveClass = enhancedClasses.find(cls => cls.status === 'live')
+    const pastClasses = enhancedClasses.filter(cls => cls.status === 'ended')
+    const scheduledClasses = enhancedClasses.filter(cls => cls.status === 'scheduled')
+
     return new Response(
       JSON.stringify({ 
         success: true,
-        live_classes: data || []
+        live_classes: enhancedClasses,
+        current_live: currentLiveClass || null,
+        past_classes: pastClasses,
+        scheduled_classes: scheduledClasses,
+        total_count: enhancedClasses.length
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in get-live-classes:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
