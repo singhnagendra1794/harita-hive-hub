@@ -71,16 +71,19 @@ const LiveClasses = () => {
   const [playerError, setPlayerError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLiveClasses();
+    fetchLiveClasses(0);
     // Refresh every 30 seconds
-    const interval = setInterval(fetchLiveClasses, 30000);
+    const interval = setInterval(() => fetchLiveClasses(0), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchLiveClasses = async () => {
+  const fetchLiveClasses = async (retryCount = 0) => {
+    const maxRetries = 3;
+    
     try {
-      // Fetch all live classes
+      // Fetch all live classes with basic retry logic
       const response = await supabase.functions.invoke('get-live-classes');
+      
       if (response.error) throw response.error;
       
       const data = response.data;
@@ -100,16 +103,38 @@ const LiveClasses = () => {
           .sort((a: LiveClass, b: LiveClass) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
         setNextGeospatialClass(nextSession);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching live classes:', error);
+      
+      // Retry on network errors up to maxRetries times
+      if (retryCount < maxRetries && (
+        error.name === 'FunctionsFetchError' || 
+        error.name === 'TypeError' || 
+        error.message?.includes('Failed to fetch') ||
+        error.message?.includes('NetworkError') ||
+        error.message?.includes('timeout')
+      )) {
+        console.log(`Retrying... attempt ${retryCount + 1}/${maxRetries}`);
+        setTimeout(() => {
+          fetchLiveClasses(retryCount + 1);
+        }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s, 3s
+        return;
+      }
+      
+      // Show error message only after all retries failed
       toast({
-        title: "Error",
-        description: "Failed to fetch live classes",
+        title: "Connection Issue",
+        description: `Unable to load live classes. Please check your connection and try refreshing.`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setLoading(true);
+    fetchLiveClasses(0);
   };
 
   const handleVideoError = (error: any) => {
@@ -261,15 +286,15 @@ const LiveClasses = () => {
                         <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p className="text-lg mb-2">Stream Loading...</p>
                         <p className="text-sm text-gray-400">{playerError}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-4"
-                          onClick={() => {
-                            setPlayerError(null);
-                            fetchLiveClasses();
-                          }}
-                        >
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="mt-4"
+                           onClick={() => {
+                             setPlayerError(null);
+                             fetchLiveClasses(0);
+                           }}
+                         >
                           Retry
                         </Button>
                       </div>
@@ -399,7 +424,7 @@ const LiveClasses = () => {
         <div className="text-center mt-8">
           <Button 
             variant="outline" 
-            onClick={fetchLiveClasses}
+            onClick={handleRefresh}
             disabled={loading}
           >
             <Eye className="h-4 w-4 mr-2" />
