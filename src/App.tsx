@@ -22,6 +22,7 @@ import { lazy, Suspense } from "react";
 
 // Critical pages loaded immediately
 import Index from "./pages/Index";
+import SimpleIndex from "./pages/SimpleIndex";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
@@ -127,7 +128,7 @@ function App() {
                 <BrowserRouter>
                 <ScrollToTop />
                   <Routes>
-                  <Route path="/" element={<Layout><Index /></Layout>} />
+                  <Route path="/" element={<Layout><SimpleIndex /></Layout>} />
                   <Route path="/home" element={<Layout><Home /></Layout>} />
                   <Route path="/auth" element={<Layout><Auth /></Layout>} />
                   <Route path="/login" element={<Layout><Login /></Layout>} />
