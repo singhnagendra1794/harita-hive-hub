@@ -215,12 +215,20 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   {isSuperAdmin() && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Admin Panel
-                      </Link>
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/instructor-dashboard" className="flex items-center">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Streaming Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
                   )}
                   <DropdownMenuItem asChild>
                     <Link to="/notes" className="flex items-center">
@@ -382,13 +390,22 @@ const Navbar = () => {
                       Dashboard
                     </Link>
                     {isSuperAdmin() && (
-                      <Link
-                        to="/admin"
-                        className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Admin Panel
-                      </Link>
+                      <>
+                        <Link
+                          to="/admin"
+                          className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Admin Panel
+                        </Link>
+                        <Link
+                          to="/instructor-dashboard"
+                          className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Streaming Dashboard
+                        </Link>
+                      </>
                     )}
                     <button
                       onClick={() => {
