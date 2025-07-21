@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import Layout from '@/components/Layout';
+
 
 import HeroSection from "../components/HeroSection";
 import BenefitsSection from "../components/BenefitsSection";
@@ -114,7 +114,7 @@ const Home = () => {
   ];
 
   return (
-    <Layout>
+    <>
       <HeroSection />
       
       {/* Beta Announcement Banner */}
@@ -264,7 +264,7 @@ const Home = () => {
       {/* Engagement Components */}
       <OnboardingTour />
       <FeedbackWidget />
-    </Layout>
+    </>
   );
 };
 
