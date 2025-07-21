@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       .update({
         status: 'ended',
         end_time: new Date().toISOString(),
-        recording_url: `http://localhost:8080/recordings/${liveClass.stream_key}.mp4`
+        recording_url: `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`
       })
       .eq('id', class_id)
       .eq('created_by', user.id)
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         success: true,
         live_class: updatedClass,
         message: 'Stream session ended successfully',
-        recording_url: `http://localhost:8080/recordings/${liveClass.stream_key}.mp4`
+        recording_url: `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

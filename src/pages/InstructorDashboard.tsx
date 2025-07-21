@@ -364,9 +364,9 @@ const InstructorDashboard = () => {
                         <div className="bg-muted/50 rounded-lg p-4 mb-4">
                           <h4 className="font-medium mb-3 flex items-center gap-2">
                             <Settings className="h-4 w-4" />
-                            OBS Setup
+                            OBS Setup - Paste these into OBS to go live
                           </h4>
-                          <div className="space-y-2 text-sm">
+                          <div className="space-y-3 text-sm">
                             <div className="flex items-center justify-between">
                               <span className="text-muted-foreground">RTMP Server:</span>
                               <div className="flex items-center gap-2">
@@ -396,6 +396,14 @@ const InstructorDashboard = () => {
                                   <Copy className="h-3 w-3" />
                                 </Button>
                               </div>
+                            </div>
+                            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                              <p className="text-blue-700 dark:text-blue-300 text-xs font-medium">
+                                📋 Instructions: Paste these into OBS to start streaming
+                              </p>
+                              <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">
+                                Settings → Stream → Service: Custom → Server + Stream Key
+                              </p>
                             </div>
                           </div>
                         </div>

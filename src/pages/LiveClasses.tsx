@@ -301,7 +301,7 @@ const LiveClasses = () => {
                     </div>
                   ) : (
                     <LiveVideoPlayer
-                      src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
+                      src={`https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
                       title={currentLive.title}
                       className="w-full h-full"
                       onError={handleVideoError}
@@ -388,35 +388,27 @@ const LiveClasses = () => {
                     <Button 
                       className="w-full" 
                       onClick={() => {
-                        // Show video player for recorded content
-                        if (liveClass.recording_url) {
-                          // Create a modal or new window with video player
-                          const recordingWindow = window.open('', '_blank');
-                          if (recordingWindow) {
-                            recordingWindow.document.write(`
-                              <html>
-                                <head>
-                                  <title>${liveClass.title} - Recording</title>
-                                  <style>
-                                    body { margin: 0; background: #000; }
-                                    video { width: 100%; height: 100vh; }
-                                  </style>
-                                </head>
-                                <body>
-                                  <video controls autoplay>
-                                    <source src="${liveClass.recording_url}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                  </video>
-                                </body>
-                              </html>
-                            `);
-                          }
-                        } else {
-                          toast({
-                            title: "Recording Not Available",
-                            description: "This recording is still being processed.",
-                            variant: "destructive"
-                          });
+                        // Play recorded video using AWS recording URL
+                        const recordingUrl = `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`;
+                        const recordingWindow = window.open('', '_blank');
+                        if (recordingWindow) {
+                          recordingWindow.document.write(`
+                            <html>
+                              <head>
+                                <title>${liveClass.title} - Recording</title>
+                                <style>
+                                  body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+                                  video { max-width: 100%; max-height: 100vh; width: auto; height: auto; }
+                                </style>
+                              </head>
+                              <body>
+                                <video controls autoplay>
+                                  <source src="${recordingUrl}" type="video/mp4">
+                                  Your browser does not support the video tag.
+                                </video>
+                              </body>
+                            </html>
+                          `);
                         }
                       }}
                     >
