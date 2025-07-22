@@ -49,7 +49,7 @@ export const useUserStats = () => {
       }
 
       if (data && data.length > 0) {
-        const userStatsData = data[0];
+        const userStatsData = data[0] as any; // Cast to any since types haven't been regenerated
         
         // Set real-time stats
         setStats({
