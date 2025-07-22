@@ -23,7 +23,7 @@ const PerformanceMonitor = () => {
         
         if (entry.entryType === 'largest-contentful-paint') {
           console.info('LCP:', entry.startTime);
-          if (entry.startTime > 2500) {
+          if (entry.startTime > 2000) {
             console.warn('Poor LCP performance:', entry.startTime);
           }
         }
@@ -54,15 +54,15 @@ const PerformanceMonitor = () => {
       console.warn('Some performance metrics not available:', e);
     }
 
-    // Monitor resource loading times
+    // Monitor resource loading times - only log if significant issues
     const measureResourcePerformance = () => {
       const resources = performance.getEntriesByType('resource');
       const slowResources = resources.filter((resource: PerformanceEntry) => 
-        resource.duration > 1000 // Resources taking more than 1 second
+        resource.duration > 2000 // Resources taking more than 2 seconds
       );
       
       if (slowResources.length > 0) {
-        console.warn('Slow loading resources:', slowResources);
+        console.warn('Slow loading resources:', slowResources.map(r => ({ name: r.name, duration: r.duration })));
       }
     };
 

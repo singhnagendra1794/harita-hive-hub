@@ -11,6 +11,7 @@ import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
 import HeaderTest from './layout/HeaderTest';
+import ResourcePreloader from './optimization/ResourcePreloader';
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <ResourcePreloader />
       <HeaderTest />
       <MobileOptimizations />
       <EnhancedAnalytics />

@@ -24,17 +24,23 @@ export default defineConfig(({ mode }) => ({
     minify: 'esbuild',
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          supabase: ['@supabase/supabase-js'],
+          charts: ['recharts'],
+          query: ['@tanstack/react-query'],
+          icons: ['lucide-react'],
+          utils: ['date-fns', 'clsx', 'tailwind-merge']
+        },
+      },
+    },
   },
   // Enable CSS code splitting
   css: {
-    preprocessorOptions: {
-      // Optimize CSS processing
-      postcss: {
-        plugins: [
-          // Add autoprefixer and cssnano in production
-        ],
-      },
-    },
+    devSourcemap: false,
   },
   // Optimize dependencies
   optimizeDeps: {
@@ -44,6 +50,9 @@ export default defineConfig(({ mode }) => ({
       'react-router-dom',
       '@supabase/supabase-js',
       '@tanstack/react-query',
+      'lucide-react',
+      'date-fns',
+      'clsx'
     ],
     exclude: ['@vite/client', '@vite/env'],
   },

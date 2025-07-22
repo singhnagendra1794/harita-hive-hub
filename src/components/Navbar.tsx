@@ -85,7 +85,9 @@ const Navbar = () => {
                 alt="Harita Hive Logo" 
                 className="h-8 w-8"
                 loading="eager"
-                decoding="async"
+                decoding="sync"
+                width={32}
+                height={32}
               />
               <span className="text-2xl font-bold text-primary">Harita Hive</span>
             </Link>

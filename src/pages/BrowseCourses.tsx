@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnrollmentForm } from "@/components/course-enrollment/EnrollmentForm";
 import { WaitlistForm } from "@/components/course-enrollment/WaitlistForm";
+import CourseCard from "@/components/cards/CourseCard";
 
 const BrowseCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -184,107 +185,16 @@ const BrowseCourses = () => {
 
         {/* Course Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {upcomingCourses.map((course) => {
-            const IconComponent = course.icon;
-            const progress = (course.enrolled / course.maxStudents) * 100;
-            
-            return (
-              <Card key={course.id} className={`hover:shadow-lg transition-shadow ${course.isPriority ? 'border-primary shadow-md' : ''}`}>
-                {course.isPriority && (
-                  <div className="bg-primary text-primary-foreground text-center py-2 rounded-t-lg">
-                    <span className="text-sm font-medium">⭐ FEATURED COURSE</span>
-                  </div>
-                )}
-                
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <IconComponent className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{course.title}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {course.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    {course.isLive ? (
-                      <Badge className="bg-green-500 text-white">
-                        LIVE TRAINING
-                      </Badge>
-                    ) : course.isUpcoming ? (
-                      <Badge className="bg-blue-500 text-white">
-                        LAUNCHING 2025
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">
-                        COMING SOON
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center">
-                      {"★".repeat(Math.floor(course.rating))}
-                      <span className="text-sm text-muted-foreground ml-1">
-                        {course.rating}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {course.enrolled}/{course.maxStudents} enrolled
-                      </span>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-green-800">
-                        {formatPrice(course)}
-                      </div>
-                      <div className="text-sm text-green-600">Course Price</div>
-                    </div>
-
-                    {course.isLive && course.id === "geospatial-technology-unlocked" ? (
-                      isEnrollmentOpen() ? (
-                        <Button 
-                          className="w-full"
-                          onClick={() => handleEnrollNow(course)}
-                        >
-                          Enroll Now
-                        </Button>
-                      ) : (
-                        <Button 
-                          className="w-full" 
-                          disabled
-                          variant="outline"
-                        >
-                          Enrollment Closed
-                        </Button>
-                      )
-                    ) : course.isLive ? (
-                      <Link to={course.courseUrl}>
-                        <Button className="w-full">
-                          View Course Details
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Button 
-                        className="w-full"
-                        onClick={() => handleJoinWaitlist(course)}
-                      >
-                        Join Waitlist - Get Early Access
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {upcomingCourses.map((course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              currencyMode={currencyMode}
+              isEnrollmentOpen={isEnrollmentOpen()}
+              onEnrollNow={handleEnrollNow}
+              onJoinWaitlist={handleJoinWaitlist}
+            />
+          ))}
         </div>
 
         {/* Enrollment Form Modal */}

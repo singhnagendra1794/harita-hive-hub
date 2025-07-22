@@ -3,7 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Video, Calendar, Clock, Users, Play, Eye, BookOpen } from "lucide-react";
-import { LiveVideoPlayer } from '@/components/LiveVideoPlayer';
+import LazyWrapper from '@/components/ui/lazy-wrapper';
+import LiveClassCard from '@/components/cards/LiveClassCard';
+import { useLazyLoad } from '@/hooks/useIntersectionObserver';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -71,8 +73,8 @@ const LiveClasses = () => {
 
   useEffect(() => {
     fetchLiveClasses(0);
-    // Refresh every 30 seconds
-    const interval = setInterval(() => fetchLiveClasses(0), 30000);
+    // Refresh every 60 seconds instead of 30 to reduce load
+    const interval = setInterval(() => fetchLiveClasses(0), 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -80,27 +82,31 @@ const LiveClasses = () => {
     const maxRetries = 3;
     
     try {
-      // Fetch all live classes with basic retry logic
-      const response = await supabase.functions.invoke('get-live-streams');
+      // Fetch all live classes with basic retry logic and limit results
+      const response = await supabase.functions.invoke('get-live-streams', {
+        body: { limit: 20 } // Limit results for faster loading
+      });
       
       if (response.error) throw response.error;
       
       const data = response.data;
       setLiveClasses(data?.live_classes || []);
       setCurrentLive(data?.current_live || null);
-      setPastClasses(data?.past_classes || []);
-      setScheduledClasses(data?.scheduled_classes || []);
+      setPastClasses(data?.past_classes?.slice(0, 10) || []); // Limit past classes
+      setScheduledClasses(data?.scheduled_classes?.slice(0, 5) || []); // Limit scheduled
 
-      // Fetch next Geospatial Technology Unlocked session
-      const geospatialResponse = await supabase.functions.invoke('get-live-classes', {
-        body: { course: 'Geospatial Technology Unlocked', status: 'scheduled' }
-      });
-      
-      if (geospatialResponse.data?.scheduled_classes?.length > 0) {
-        // Get the next scheduled session (closest to now)
-        const nextSession = geospatialResponse.data.scheduled_classes
-          .sort((a: LiveClass, b: LiveClass) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
-        setNextGeospatialClass(nextSession);
+      // Only fetch geospatial class if needed
+      if (!data?.current_live) {
+        const geospatialResponse = await supabase.functions.invoke('get-live-classes', {
+          body: { course: 'Geospatial Technology Unlocked', status: 'scheduled', limit: 1 }
+        });
+        
+        if (geospatialResponse.data?.scheduled_classes?.length > 0) {
+          // Get the next scheduled session (closest to now)
+          const nextSession = geospatialResponse.data.scheduled_classes
+            .sort((a: LiveClass, b: LiveClass) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
+          setNextGeospatialClass(nextSession);
+        }
       }
     } catch (error: any) {
       console.error('Error fetching live classes:', error);
@@ -229,6 +235,8 @@ const LiveClasses = () => {
                       src={nextGeospatialClass.thumbnail_url} 
                       alt={nextGeospatialClass.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 )}
@@ -296,13 +304,19 @@ const LiveClasses = () => {
                       </div>
                     </div>
                   ) : (
-                    <LiveVideoPlayer
-                      src={currentLive.hls_url || `https://haritahive.com/stream/${currentLive.stream_key}`}
-                      title={currentLive.title}
-                      className="w-full h-full"
-                      onError={handleVideoError}
-                      onLoad={handleVideoLoad}
-                    />
+                    <LazyWrapper fallback={
+                      <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      </div>
+                    }>
+                      <iframe
+                        src={currentLive.hls_url || `https://haritahive.com/stream/${currentLive.stream_key}`}
+                        title={currentLive.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </LazyWrapper>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -345,74 +359,33 @@ const LiveClasses = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastClasses.map((liveClass) => (
-                <Card key={liveClass.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="aspect-video bg-gray-900 rounded-lg mb-3 overflow-hidden relative">
-                      {liveClass.thumbnail_url ? (
-                        <img 
-                          src={liveClass.thumbnail_url} 
-                          alt={liveClass.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Video className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <Play className="h-8 w-8 text-white" />
-                      </div>
-                    </div>
-                    <CardTitle className="text-lg">{liveClass.title}</CardTitle>
-                    {liveClass.description && (
-                      <CardDescription>{liveClass.description}</CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(liveClass.start_time)}
-                      </div>
-                      {liveClass.duration_minutes && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {liveClass.duration_minutes}m
-                        </div>
-                      )}
-                    </div>
-                    <Button 
-                      className="w-full" 
-                      onClick={() => {
-                        // Play recorded video using AWS recording URL
-                        const recordingUrl = `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`;
-                        const recordingWindow = window.open('', '_blank');
-                        if (recordingWindow) {
-                          recordingWindow.document.write(`
-                            <html>
-                              <head>
-                                <title>${liveClass.title} - Recording</title>
-                                <style>
-                                  body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-                                  video { max-width: 100%; max-height: 100vh; width: auto; height: auto; }
-                                </style>
-                              </head>
-                              <body>
-                                <video controls autoplay>
-                                  <source src="${recordingUrl}" type="video/mp4">
-                                  Your browser does not support the video tag.
-                                </video>
-                              </body>
-                            </html>
-                          `);
-                        }
-                      }}
-                    >
-                      <Play className="h-4 w-4 mr-2" />
-                      Watch Recording
-                    </Button>
-                  </CardContent>
-                </Card>
+                <LiveClassCard
+                  key={liveClass.id}
+                  liveClass={liveClass}
+                  onWatchRecording={(streamKey) => {
+                    const recordingUrl = `https://stream.haritahive.com/recordings/${streamKey}.mp4`;
+                    const recordingWindow = window.open('', '_blank');
+                    if (recordingWindow) {
+                      recordingWindow.document.write(`
+                        <html>
+                          <head>
+                            <title>${liveClass.title} - Recording</title>
+                            <style>
+                              body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+                              video { max-width: 100%; max-height: 100vh; width: auto; height: auto; }
+                            </style>
+                          </head>
+                          <body>
+                            <video controls autoplay>
+                              <source src="${recordingUrl}" type="video/mp4">
+                              Your browser does not support the video tag.
+                            </video>
+                          </body>
+                        </html>
+                      `);
+                    }
+                  }}
+                />
               ))}
             </div>
           </div>
