@@ -37,7 +37,7 @@ const FreelanceProjects = () => {
       );
     }
 
-    if (budgetFilter) {
+    if (budgetFilter && budgetFilter !== "all") {
       filtered = filtered.filter(project => {
         const maxBudget = project.budget_type === "hourly" ? 
           (project.budget_max || 0) * 160 : // Assume 160 hours/month for hourly
@@ -51,15 +51,15 @@ const FreelanceProjects = () => {
       });
     }
 
-    if (difficultyFilter) {
+    if (difficultyFilter && difficultyFilter !== "all") {
       filtered = filtered.filter(project => project.difficulty === difficultyFilter);
     }
 
-    if (platformFilter) {
+    if (platformFilter && platformFilter !== "all") {
       filtered = filtered.filter(project => project.source === platformFilter);
     }
 
-    if (locationFilter) {
+    if (locationFilter && locationFilter !== "all") {
       if (locationFilter === "india") {
         filtered = filtered.filter(project => 
           project.location?.toLowerCase().includes('india') ||
@@ -182,7 +182,7 @@ const FreelanceProjects = () => {
                       <SelectValue placeholder="Budget Range" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Budgets</SelectItem>
+                      <SelectItem value="all">All Budgets</SelectItem>
                       <SelectItem value="under-10000">Under ₹10,000</SelectItem>
                       <SelectItem value="10000-50000">₹10,000 - ₹50,000</SelectItem>
                       <SelectItem value="over-50000">Over ₹50,000</SelectItem>
@@ -193,7 +193,7 @@ const FreelanceProjects = () => {
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Levels</SelectItem>
+                      <SelectItem value="all">All Levels</SelectItem>
                       <SelectItem value="beginner">Beginner</SelectItem>
                       <SelectItem value="intermediate">Intermediate</SelectItem>
                       <SelectItem value="advanced">Advanced</SelectItem>
@@ -204,7 +204,7 @@ const FreelanceProjects = () => {
                       <SelectValue placeholder="Platform" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Platforms</SelectItem>
+                      <SelectItem value="all">All Platforms</SelectItem>
                       <SelectItem value="Upwork">Upwork</SelectItem>
                       <SelectItem value="Freelancer">Freelancer</SelectItem>
                       <SelectItem value="Guru">Guru</SelectItem>
@@ -218,7 +218,7 @@ const FreelanceProjects = () => {
                       <SelectValue placeholder="Location" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Locations</SelectItem>
+                      <SelectItem value="all">All Locations</SelectItem>
                       <SelectItem value="india">India</SelectItem>
                       <SelectItem value="remote">Remote</SelectItem>
                     </SelectContent>
