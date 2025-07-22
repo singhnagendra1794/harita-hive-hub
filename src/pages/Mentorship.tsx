@@ -398,7 +398,6 @@ const Mentorship = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 };

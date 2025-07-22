@@ -19,7 +19,6 @@ const MapPlaygroundPage = () => {
         <div className="pt-24 h-full">
           <EnhancedWebGISViewer />
         </div>
-      </div>
     </div>
   );
 };

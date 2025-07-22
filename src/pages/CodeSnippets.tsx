@@ -264,7 +264,6 @@ const CodeSnippets = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   );
 };

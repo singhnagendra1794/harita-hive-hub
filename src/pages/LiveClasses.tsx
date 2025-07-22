@@ -440,7 +440,6 @@ const LiveClasses = () => {
             Refresh
           </Button>
         </div>
-      </div>
     </div>
   );
 };

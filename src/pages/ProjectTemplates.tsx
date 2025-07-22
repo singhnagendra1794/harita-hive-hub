@@ -283,7 +283,6 @@ const ProjectTemplates = () => {
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 };
