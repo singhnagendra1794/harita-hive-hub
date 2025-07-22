@@ -1,4 +1,3 @@
-import Layout from '@/components/Layout';
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -138,45 +137,40 @@ const SkillCopilot = () => {
 
   if (currentView === 'quiz' && selectedCategory) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <SkillQuiz
-            category={selectedCategory}
-            onComplete={handleQuizComplete}
-            onBack={handleBackToDashboard}
-          />
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8">
+        <SkillQuiz
+          category={selectedCategory}
+          onComplete={handleQuizComplete}
+          onBack={handleBackToDashboard}
+        />
+      </div>
     );
   }
 
   if (currentView === 'results') {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-6">
-            <Button onClick={handleBackToDashboard} variant="outline">
-              ← Back to Dashboard
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <RadarChart results={completedResults} />
-            <div className="lg:col-span-1">
-              <SkillRecommendations 
-                results={completedResults}
-                onDownloadReport={generateReport}
-              />
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Button onClick={handleBackToDashboard} variant="outline">
+            ← Back to Dashboard
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <RadarChart results={completedResults} />
+          <div className="lg:col-span-1">
+            <SkillRecommendations 
+              results={completedResults}
+              onDownloadReport={generateReport}
+            />
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -340,8 +334,7 @@ const SkillCopilot = () => {
             </CardContent>
           </Card>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 
