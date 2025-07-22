@@ -7,6 +7,7 @@ interface UserStats {
   projects_completed: number;
   community_posts: number;
   spatial_analyses: number;
+  enrolled_courses_count: number;
 }
 
 interface UserPlan {
@@ -55,7 +56,8 @@ export const useUserStats = () => {
           course_count: userStatsData.course_count || 0,
           projects_completed: userStatsData.projects_completed || 0,
           community_posts: userStatsData.community_posts || 0,
-          spatial_analyses: userStatsData.spatial_analyses || 0
+          spatial_analyses: userStatsData.spatial_analyses || 0,
+          enrolled_courses_count: userStatsData.enrolled_courses_count || 0
         });
 
         // Use subscription_tier as primary source

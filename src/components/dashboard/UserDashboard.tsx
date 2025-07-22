@@ -68,9 +68,9 @@ const UserDashboard = () => {
   const userStats: Stat[] = [
     { 
       title: "Courses Enrolled", 
-      value: (isProfessionalOrAbove() ? "1" : stats?.course_count?.toString()) ?? "0", 
+      value: stats?.enrolled_courses_count?.toString() ?? "0", 
       icon: BookOpen,
-      href: isProfessionalOrAbove() ? "/courses/geospatial-technology-unlocked" : "/browse-courses"
+      href: (stats?.enrolled_courses_count && stats.enrolled_courses_count > 0) ? "/courses/geospatial-technology-unlocked" : "/browse-courses"
     },
     { 
       title: "Projects Completed", 
