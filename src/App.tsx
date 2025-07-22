@@ -128,7 +128,7 @@ function App() {
                 <BrowserRouter>
                 <ScrollToTop />
                   <Routes>
-                  <Route path="/" element={<Layout><SimpleIndex /></Layout>} />
+                  <Route path="/" element={<Layout><Index /></Layout>} />
                   <Route path="/home" element={<Layout><Home /></Layout>} />
                   <Route path="/auth" element={<Layout><Auth /></Layout>} />
                   <Route path="/login" element={<Layout><Login /></Layout>} />
