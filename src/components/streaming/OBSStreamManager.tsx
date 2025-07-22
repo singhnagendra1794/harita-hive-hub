@@ -137,17 +137,35 @@ export const OBSStreamManager: React.FC = () => {
   };
 
   const startStream = async () => {
-    if (!user) return;
+    if (!user || !streamKey) return;
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('start_stream_session', {
+      // Create live class entry with status 'live'
+      const { data: liveClass, error: liveClassError } = await supabase
+        .from('live_classes')
+        .insert({
+          title: streamTitle || 'Live Stream',
+          description: streamDescription || '',
+          stream_key: streamKey.stream_key,
+          status: 'live',
+          start_time: new Date().toISOString(),
+          created_by: user.id,
+          viewer_count: 0
+        })
+        .select()
+        .single();
+
+      if (liveClassError) throw liveClassError;
+
+      // Also create stream session for backward compatibility
+      const { error: sessionError } = await supabase.rpc('start_stream_session', {
         p_user_id: user.id,
         p_title: streamTitle || 'Live Stream',
         p_description: streamDescription
       });
 
-      if (error) throw error;
+      if (sessionError) console.warn('Stream session creation warning:', sessionError);
 
       await loadCurrentSession();
       toast({

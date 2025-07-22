@@ -75,8 +75,8 @@ const LiveClasses = () => {
 
   useEffect(() => {
     fetchLiveClasses(0);
-    // Refresh every 60 seconds instead of 30 to reduce load
-    const interval = setInterval(() => fetchLiveClasses(0), 60000);
+    // Auto-refresh every 30 seconds to check for new live sessions
+    const interval = setInterval(() => fetchLiveClasses(0), 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -84,27 +84,42 @@ const LiveClasses = () => {
     const maxRetries = 3;
     
     try {
-      // Fetch all live classes with basic retry logic and limit results
-      const response = await supabase.functions.invoke('get-live-streams', {
-        body: { limit: 20 } // Limit results for faster loading
-      });
-      
-      if (response.error) throw response.error;
-      
-      const data = response.data;
-      setLiveClasses(data?.live_classes || []);
-      setCurrentLive(data?.current_live || null);
-      setPastClasses(data?.past_classes?.slice(0, 10) || []); // Limit past classes
-      setScheduledClasses(data?.scheduled_classes?.slice(0, 5) || []); // Limit scheduled
+      // Fetch current live streams directly from live_classes table
+      const { data: liveData, error: liveError } = await supabase
+        .from('live_classes')
+        .select('*')
+        .eq('status', 'live')
+        .order('start_time', { ascending: false });
 
-      // Only fetch geospatial class if needed
-      if (!data?.current_live) {
+      if (liveError) throw liveError;
+
+      // Set current live stream with HLS URL
+      const currentLiveStream = liveData?.[0] ? {
+        ...liveData[0],
+        hls_url: `https://stream.haritahive.com/hls/${liveData[0].stream_key}.m3u8`
+      } : null;
+
+      setCurrentLive(currentLiveStream);
+
+      // Fetch past classes (ended recordings)
+      const { data: pastData, error: pastError } = await supabase
+        .from('live_classes')
+        .select('*')
+        .eq('status', 'ended')
+        .order('start_time', { ascending: false })
+        .limit(10);
+
+      if (pastError) throw pastError;
+
+      setPastClasses(pastData || []);
+
+      // Only fetch geospatial class if no current live
+      if (!currentLiveStream) {
         const geospatialResponse = await supabase.functions.invoke('get-live-classes', {
           body: { course: 'Geospatial Technology Unlocked', status: 'scheduled', limit: 1 }
         });
         
         if (geospatialResponse.data?.scheduled_classes?.length > 0) {
-          // Get the next scheduled session (closest to now)
           const nextSession = geospatialResponse.data.scheduled_classes
             .sort((a: LiveClass, b: LiveClass) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
           setNextGeospatialClass(nextSession);
@@ -124,11 +139,10 @@ const LiveClasses = () => {
         console.log(`Retrying... attempt ${retryCount + 1}/${maxRetries}`);
         setTimeout(() => {
           fetchLiveClasses(retryCount + 1);
-        }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s, 3s
+        }, 1000 * (retryCount + 1));
         return;
       }
       
-      // Show error message only after all retries failed
       toast({
         title: "Connection Issue",
         description: `Unable to load live classes. Please check your connection and try refreshing.`,
@@ -306,28 +320,14 @@ const LiveClasses = () => {
                           </Button>
                         </div>
                       </div>
-                    ) : currentLive.hls_url ? (
+                    ) : (
                       <LiveVideoPlayer
-                        src={currentLive.hls_url}
+                        src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
                         title={currentLive.title}
                         className="w-full h-full"
                         onError={handleVideoError}
                         onLoad={handleVideoLoad}
                       />
-                    ) : (
-                      <LazyWrapper fallback={
-                        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        </div>
-                      }>
-                        <iframe
-                          src={`https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
-                          title={currentLive.title}
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </LazyWrapper>
                     )}
                   </div>
                 </ScreenProtection>
@@ -353,7 +353,7 @@ const LiveClasses = () => {
             <Card>
               <CardContent className="p-12 text-center">
                 <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No Live Stream</h3>
+                <h3 className="text-lg font-medium mb-2">No stream is live now.</h3>
                 <p className="text-muted-foreground">
                   No classes are currently live. Check back soon or browse our recorded sessions below!
                 </p>
