@@ -10,6 +10,8 @@ import MobileOptimizations from './mobile/MobileOptimizations';
 import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
+import HeaderTest from './layout/HeaderTest';
+import QATestSuite from './QATestSuite';
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,6 +20,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HeaderTest />
       <MobileOptimizations />
       <EnhancedAnalytics />
       <Navbar />
@@ -28,6 +31,7 @@ const Layout = ({ children }: LayoutProps) => {
       <ScrollToTop />
       <FeedbackWidget />
       <OnboardingTour />
+      <QATestSuite />
     </div>
   );
 };

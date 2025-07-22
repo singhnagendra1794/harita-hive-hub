@@ -112,6 +112,7 @@ const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
 const GoLive = lazy(() => import("./pages/GoLive"));
 const WatchLive = lazy(() => import("./pages/WatchLive"));
+const CourseRedirectHandler = lazy(() => import("./components/course-access/CourseRedirectHandler"));
 
 function App() {
   console.log("App component rendering...");
@@ -547,9 +548,25 @@ function App() {
                            <Labs />
                          </SubscriptionRoute>
                        </Layout>
-                     } />
-                     
-                     <Route path="*" element={<Layout><NotFound /></Layout>} />
+                      } />
+                      
+                      {/* Course Access Routes */}
+                      <Route path="/enrolled-courses" element={
+                        <Layout>
+                          <ProtectedRoute>
+                            <CourseRedirectHandler />
+                          </ProtectedRoute>
+                        </Layout>
+                      } />
+                      <Route path="/course/:courseId" element={
+                        <Layout>
+                          <ProtectedRoute>
+                            <CourseRedirectHandler />
+                          </ProtectedRoute>
+                        </Layout>
+                      } />
+                      
+                      <Route path="*" element={<Layout><NotFound /></Layout>} />
                   </Routes>
                  
                    {/* Performance monitoring and AI Assistant */}
