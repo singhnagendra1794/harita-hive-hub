@@ -154,11 +154,9 @@ function App() {
           <Route path="/freelance-projects" element={
             <Layout>
               <RouteWrapper>
-                <PageErrorBoundary>
-                  <Suspense fallback={<PageLoader />}>
-                    <FreelanceProjects />
-                  </Suspense>
-                </PageErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <FreelanceProjects />
+                </Suspense>
               </RouteWrapper>
             </Layout>
           } />
@@ -187,64 +185,64 @@ function App() {
                     </Layout>
                   } />
                   
-                   {/* Public monetization pages */}
+                     {/* Public monetization pages */}
                      <Route path="/talent-pool" element={
                        <Layout>
-                         <PageErrorBoundary>
+                         <RouteWrapper>
                            <Suspense fallback={<PageLoader />}>
                              <TalentPool />
                            </Suspense>
-                         </PageErrorBoundary>
+                         </RouteWrapper>
                        </Layout>
                      } />
                      <Route path="/corporate-training" element={
                        <Layout>
-                         <PageErrorBoundary>
+                         <RouteWrapper>
                            <Suspense fallback={<PageLoader />}>
                              <CorporateTraining />
                            </Suspense>
-                         </PageErrorBoundary>
+                         </RouteWrapper>
                        </Layout>
                      } />
                      <Route path="/task-board" element={
                        <Layout>
-                         <PageErrorBoundary>
+                         <RouteWrapper>
                            <Suspense fallback={<PageLoader />}>
                              <TaskBoard />
                            </Suspense>
-                         </PageErrorBoundary>
+                         </RouteWrapper>
                        </Layout>
                      } />
                      <Route path="/certifications" element={
                        <Layout>
-                         <PageErrorBoundary>
+                         <RouteWrapper>
                            <Suspense fallback={<PageLoader />}>
                              <CertificationHub />
                            </Suspense>
-                         </PageErrorBoundary>
+                         </RouteWrapper>
                        </Layout>
                      } />
                    
-                    {/* Premium marketplace features */}
+                     {/* Premium marketplace features */}
                      <Route path="/gis-marketplace" element={
                        <Layout>
                          <SubscriptionRoute requiredTier="pro">
-                           <PageErrorBoundary>
+                           <RouteWrapper>
                              <Suspense fallback={<PageLoader />}>
                                <GISMarketplace />
                              </Suspense>
-                           </PageErrorBoundary>
+                           </RouteWrapper>
                          </SubscriptionRoute>
                        </Layout>
                      } />
                       <Route path="/plugin-marketplace" element={
                         <Layout>
                           <SubscriptionRoute requiredTier="pro">
-                            <PageErrorBoundary>
+                            <RouteWrapper>
                               <Suspense fallback={<PageLoader />}>
                                 <PluginMarketplace />
                               </Suspense>
-                            </PageErrorBoundary>
+                            </RouteWrapper>
                           </SubscriptionRoute>
                         </Layout>
                       } />
@@ -571,29 +569,33 @@ function App() {
                       <Route path="/skill-copilot" element={
                         <Layout>
                           <ProtectedRoute>
-                            <SkillCopilot />
+                            <RouteWrapper>
+                              <Suspense fallback={<PageLoader />}>
+                                <SkillCopilot />
+                              </Suspense>
+                            </RouteWrapper>
                           </ProtectedRoute>
                         </Layout>
                       } />
                        <Route path="/toolkits" element={
                          <Layout>
                            <ProtectedRoute>
-                             <PageErrorBoundary>
+                             <RouteWrapper>
                                <Suspense fallback={<PageLoader />}>
                                  <Toolkits />
                                </Suspense>
-                             </PageErrorBoundary>
+                             </RouteWrapper>
                            </ProtectedRoute>
                          </Layout>
                        } />
                          <Route path="/jobs-ai-discovery" element={
                            <Layout>
                              <ProtectedRoute>
-                               <PageErrorBoundary>
+                               <RouteWrapper>
                                  <Suspense fallback={<PageLoader />}>
                                    <JobsAIDiscovery />
                                  </Suspense>
-                               </PageErrorBoundary>
+                               </RouteWrapper>
                              </ProtectedRoute>
                            </Layout>
                          } />
@@ -607,11 +609,11 @@ function App() {
                       <Route path="/labs" element={
                         <Layout>
                           <SubscriptionRoute requiredTier="pro">
-                            <PageErrorBoundary>
+                            <RouteWrapper>
                               <Suspense fallback={<PageLoader />}>
                                 <Labs />
                               </Suspense>
-                            </PageErrorBoundary>
+                            </RouteWrapper>
                           </SubscriptionRoute>
                         </Layout>
                        } />
