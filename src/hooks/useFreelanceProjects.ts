@@ -37,7 +37,7 @@ export const useFreelanceProjects = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  console.log('useFreelanceProjects hook initialized');
+  // Remove console.log for production performance
 
   const fetchProjects = async () => {
     try {

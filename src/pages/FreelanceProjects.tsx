@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { Search, MapPin, DollarSign, Clock, Star, ExternalLink, Plus, RefreshCw, Bookmark, Filter, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,109 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFreelanceProjects, FreelanceProject } from "@/hooks/useFreelanceProjects";
 
+// Memoized project card component for better performance
+const ProjectCard = memo(({ 
+  project, 
+  user, 
+  onSave, 
+  onApply,
+  formatBudget,
+  getDifficultyColor,
+  getPlatformColor 
+}: {
+  project: FreelanceProject;
+  user: any;
+  onSave: (project: FreelanceProject) => void;
+  onApply: (project: FreelanceProject) => void;
+  formatBudget: (project: FreelanceProject) => string;
+  getDifficultyColor: (difficulty: string) => string;
+  getPlatformColor: (platform: string) => string;
+}) => (
+  <Card className={`hover:shadow-lg transition-all duration-300 ${project.is_internal ? 'border-primary/30 bg-primary/5' : ''}`}>
+    <CardHeader>
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <CardTitle className="text-xl">{project.title}</CardTitle>
+            <Badge className={getPlatformColor(project.source || 'Unknown')}>
+              {project.source}
+            </Badge>
+            {project.is_internal && <Badge variant="default">Verified Client</Badge>}
+            {project.is_remote && <Badge variant="outline">Remote</Badge>}
+            <Badge className={getDifficultyColor(project.difficulty)}>
+              {project.difficulty}
+            </Badge>
+          </div>
+          <p className="text-lg font-semibold text-primary">{project.client_name}</p>
+          {project.client_rating && (
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-semibold">{project.client_rating}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-4 text-muted-foreground mt-2 flex-wrap">
+            <div className="flex items-center gap-1">
+              <DollarSign className="h-4 w-4" />
+              {formatBudget(project)}
+            </div>
+            {project.duration && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {project.duration}
+              </div>
+            )}
+            {project.location && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                {project.location}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {user && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSave(project)}
+            >
+              <Bookmark className="h-4 w-4" />
+            </Button>
+          )}
+          {project.is_internal ? (
+            <Button>Apply Now</Button>
+          ) : (
+            <Button 
+              onClick={() => onApply(project)}
+              variant="outline"
+            >
+              Apply on {project.source}
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <p className="text-muted-foreground mb-4 leading-relaxed">{project.description}</p>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {project.skills.map((skill) => (
+          <Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>
+        ))}
+      </div>
+      <div className="flex justify-between items-center text-sm text-muted-foreground">
+        <span>Posted {new Date(project.posted_date).toLocaleDateString()}</span>
+        <span>{project.applicants_count} applicant{project.applicants_count !== 1 ? 's' : ''}</span>
+      </div>
+    </CardContent>
+  </Card>
+));
+
+ProjectCard.displayName = 'ProjectCard';
+
 const FreelanceProjects = () => {
   const { user } = useAuth();
   const { projects, loading, refreshing, refreshProjects, saveProject, trackApplication } = useFreelanceProjects();
-  const [filteredProjects, setFilteredProjects] = useState<FreelanceProject[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("");
@@ -22,25 +121,26 @@ const FreelanceProjects = () => {
   const [activeTab, setActiveTab] = useState("browse");
   const { toast } = useToast();
 
-  // Debug logging
-  console.log('FreelanceProjects component rendering', { loading, projects: projects?.length });
-
-  useEffect(() => {
-    let filtered = projects;
+  // Memoize filtered projects for performance
+  const filteredProjects = useMemo(() => {
+    if (!projects || projects.length === 0) return [];
+    
+    let filtered = [...projects];
 
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (project.client_name && project.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
+        project.title.toLowerCase().includes(searchLower) ||
+        project.description.toLowerCase().includes(searchLower) ||
+        project.skills.some(skill => skill.toLowerCase().includes(searchLower)) ||
+        (project.client_name && project.client_name.toLowerCase().includes(searchLower))
       );
     }
 
     if (budgetFilter && budgetFilter !== "all") {
       filtered = filtered.filter(project => {
         const maxBudget = project.budget_type === "hourly" ? 
-          (project.budget_max || 0) * 160 : // Assume 160 hours/month for hourly
+          (project.budget_max || 0) * 160 : 
           (project.budget_max || 0);
         switch (budgetFilter) {
           case "under-10000": return maxBudget < 10000;
@@ -75,7 +175,7 @@ const FreelanceProjects = () => {
       }
     }
 
-    setFilteredProjects(filtered);
+    return filtered;
   }, [searchTerm, budgetFilter, difficultyFilter, platformFilter, locationFilter, projects]);
 
   const handlePostProject = () => {

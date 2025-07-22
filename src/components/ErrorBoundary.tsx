@@ -34,30 +34,34 @@ class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
+      // Log error for debugging but don't show scary error messages
+      console.error('Application Error:', this.state.error);
+      
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <AlertTriangle className="h-12 w-12 text-destructive" />
+                <AlertTriangle className="h-12 w-12 text-warning" />
               </div>
-              <CardTitle>Oops! Something went wrong</CardTitle>
+              <CardTitle>Page Loading Issue</CardTitle>
               <CardDescription>
-                We encountered an unexpected error. Please try refreshing the page.
+                We're having trouble loading this page. This usually resolves itself with a refresh.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="p-3 bg-destructive/10 rounded-md">
-                  <p className="text-sm font-mono text-destructive">
-                    {this.state.error.message}
-                  </p>
-                </div>
-              )}
               <Button onClick={this.handleReload} className="w-full">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Page
               </Button>
+              <div className="text-center">
+                <a 
+                  href="/" 
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  ← Go to Homepage
+                </a>
+              </div>
             </CardContent>
           </Card>
         </div>

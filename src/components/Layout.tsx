@@ -11,6 +11,7 @@ import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
 import HeaderTest from './layout/HeaderTest';
+import HeaderOptimizer from './optimization/HeaderOptimizer';
 import ResourcePreloader from './optimization/ResourcePreloader';
 
 interface LayoutProps {
@@ -22,6 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen flex flex-col bg-background">
       <ResourcePreloader />
       <HeaderTest />
+      <HeaderOptimizer />
       <MobileOptimizations />
       <EnhancedAnalytics />
       <Navbar />
