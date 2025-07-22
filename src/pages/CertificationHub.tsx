@@ -38,10 +38,9 @@ const CertificationHub = () => {
     return (
       <div className="container py-8">
         <div className="flex items-center justify-center min-h-96">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading certification courses...</p>
-            </div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading certification courses...</p>
           </div>
         </div>
       </div>
@@ -52,13 +51,12 @@ const CertificationHub = () => {
     return (
       <div className="container py-8">
         <div className="text-center py-12">
-            <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error loading certifications</h3>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
+          <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Error loading certifications</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
         </div>
       </div>
     );
@@ -66,8 +64,8 @@ const CertificationHub = () => {
 
   return (
     <div className="container py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
+      {/* Header */}
+      <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Certifications</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Earn industry-recognized credentials with blockchain verification. Validate your GIS skills and advance your career.
@@ -213,9 +211,9 @@ const CertificationHub = () => {
                 <a href="/upcoming-course">Browse Upcoming Courses</a>
               </Button>
             </CardContent>
-          </Card>
-        )}
-      </div>
+        </Card>
+      )}
+    </div>
   );
 };
 
