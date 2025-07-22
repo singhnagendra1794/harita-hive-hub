@@ -1,11 +1,6 @@
 import { lazy } from 'react';
 
-// Lazy load heavy components for better performance
-export const LiveVideoPlayer = lazy(() => import('@/components/LiveVideoPlayer'));
-export const EnhancedSpatialWorkspace = lazy(() => import('@/components/spatial/EnhancedSpatialWorkspace'));
-export const EnhancedCodeSnippets = lazy(() => import('@/components/code-snippets/EnhancedCodeSnippets'));
-export const QGISIntegration = lazy(() => import('@/components/qgis/QGISIntegration'));
-export const MapboxMap = lazy(() => import('@/components/maps/MapboxMap'));
+// Lazy load heavy components for better performance - only include existing components
 
 // Default loading component
 export const ComponentLoader = () => {

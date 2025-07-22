@@ -16,7 +16,7 @@ export const useOptimizedJobs = (searchTerm: string = '', filters: any = {}) => 
   const pageSize = 20;
 
   // Debounce search to avoid excessive API calls
-  const debouncedSearch = useDebounce(searchTerm, 300);
+  const debouncedSearch = useDebounce(() => searchTerm, 300);
 
   // Generate cache key based on search and filters
   const cacheKey = `jobs-${debouncedSearch}-${JSON.stringify(filters)}-${page}`;
