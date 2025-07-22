@@ -10,6 +10,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LiveVideoPlayer } from '@/components/LiveVideoPlayer';
 import ScreenProtection from '@/components/security/ScreenProtection';
+import NowStreamingSection from '@/components/live-classes/NowStreamingSection';
+import UpcomingEventsSection from '@/components/live-classes/UpcomingEventsSection';
+import GeoTalkReplaysSection from '@/components/live-classes/GeoTalkReplaysSection';
+import FeaturedExpertsSection from '@/components/live-classes/FeaturedExpertsSection';
+import GeoLeaderboardSection from '@/components/live-classes/GeoLeaderboardSection';
 
 interface LiveClass {
   id: string;
@@ -195,241 +200,105 @@ const LiveClasses = () => {
 
   return (
     <div className="container py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Live Classes</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join interactive live sessions with expert instructors and access recorded content
-          </p>
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Global Geospatial Leadership Hub
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Connect with world-class experts, attend live sessions, and be part of the future of geospatial technology
+        </p>
+        <div className="flex justify-center gap-4 mt-6 flex-wrap">
+          <Badge variant="outline" className="text-sm">🌍 Global Community</Badge>
+          <Badge variant="outline" className="text-sm">🔴 Live Streaming</Badge>
+          <Badge variant="outline" className="text-sm">🎓 Expert-Led Sessions</Badge>
+          <Badge variant="outline" className="text-sm">📚 Premium Recordings</Badge>
         </div>
+      </div>
 
-        {/* Geospatial Technology Unlocked Course Section */}
-        {nextGeospatialClass && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <BookOpen className="h-6 w-6" />
-              🎯 Next: Geospatial Technology Unlocked
-            </h2>
-            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                        Geospatial Technology Unlocked
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-xl mb-2">{nextGeospatialClass.title}</CardTitle>
-                    {nextGeospatialClass.description && (
-                      <CardDescription className="mb-3">{nextGeospatialClass.description}</CardDescription>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(nextGeospatialClass.start_time)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {formatTime(nextGeospatialClass.start_time)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm text-muted-foreground mb-2">Starts in:</p>
-                    <CountdownTimer targetDate={nextGeospatialClass.start_time} />
-                    <div className="mt-2">
-                      <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
-                        PREMIUM
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {nextGeospatialClass.thumbnail_url && (
-                  <div className="aspect-video bg-gray-900 rounded-lg mb-4 overflow-hidden">
-                    <img 
-                      src={nextGeospatialClass.thumbnail_url} 
-                      alt={nextGeospatialClass.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                )}
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    Instructor: Nagendra Singh
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    Course Session
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+      <NowStreamingSection
+        currentLive={currentLive}
+        onError={handleVideoError}
+        onLoad={handleVideoLoad}
+        playerError={playerError}
+        onRefresh={handleRefresh}
+      />
 
-        {/* Current Live Stream Section */}
-        {currentLive ? (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Video className="h-6 w-6" />
-              🔴 Live Now
-            </h2>
-            <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{currentLive.title}</CardTitle>
-                    {currentLive.description && (
-                      <CardDescription className="mt-2">{currentLive.description}</CardDescription>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <Badge 
-                      variant={currentLive.status === 'live' ? 'destructive' : 'secondary'} 
-                      className={currentLive.status === 'live' ? 'animate-pulse mb-2' : 'mb-2'}
-                    >
-                      {currentLive.status === 'live' ? '🔴 LIVE' : '⏳ SCHEDULED'}
+      <UpcomingEventsSection />
+
+      <GeoTalkReplaysSection />
+
+      <FeaturedExpertsSection />
+
+      <GeoLeaderboardSection />
+
+      {/* Legacy sections for backward compatibility */}
+      {nextGeospatialClass && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <BookOpen className="h-6 w-6" />
+            🎯 Featured Course: Geospatial Technology Unlocked
+          </h2>
+          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Geospatial Technology Unlocked
                     </Badge>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      {currentLive.viewer_count || 0} viewers
+                  </div>
+                  <CardTitle className="text-xl mb-2">{nextGeospatialClass.title}</CardTitle>
+                  {nextGeospatialClass.description && (
+                    <CardDescription className="mb-3">{nextGeospatialClass.description}</CardDescription>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(nextGeospatialClass.start_time)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {formatTime(nextGeospatialClass.start_time)}
                     </div>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <ScreenProtection enabled={true}>
-                  <div className="aspect-video bg-black rounded-lg mb-4 overflow-hidden">
-                    {currentLive.status === 'scheduled' ? (
-                      <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
-                        <div className="text-center">
-                          <Video className="h-12 w-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                          <p className="text-lg mb-2">Stream Preparing...</p>
-                          <p className="text-sm text-gray-400">
-                            Instructor is setting up. Stream will start automatically when ready.
-                          </p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="mt-4"
-                            onClick={() => fetchLiveClasses(0)}
-                          >
-                            Check Again
-                          </Button>
-                        </div>
-                      </div>
-                    ) : playerError ? (
-                      <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
-                        <div className="text-center">
-                          <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p className="text-lg mb-2">Stream Loading...</p>
-                          <p className="text-sm text-gray-400">{playerError}</p>
-                           <Button 
-                             variant="outline" 
-                             size="sm" 
-                             className="mt-4"
-                             onClick={() => {
-                               setPlayerError(null);
-                               fetchLiveClasses(0);
-                             }}
-                           >
-                            Retry
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <LiveVideoPlayer
-                        src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
-                        title={currentLive.title}
-                        className="w-full h-full"
-                        onError={handleVideoError}
-                        onLoad={handleVideoLoad}
-                      />
-                    )}
-                  </div>
-                </ScreenProtection>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    Started at {formatTime(currentLive.start_time)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {formatDate(currentLive.start_time)}
+                <div className="text-right ml-4">
+                  <p className="text-sm text-muted-foreground mb-2">Starts in:</p>
+                  <CountdownTimer targetDate={nextGeospatialClass.start_time} />
+                  <div className="mt-2">
+                    <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                      PREMIUM
+                    </Badge>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Video className="h-6 w-6" />
-              Live Stream
-            </h2>
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No stream is live now.</h3>
-                <p className="text-muted-foreground">
-                  No classes are currently live. Check back soon or browse our recorded sessions below!
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Past Classes Section */}
-        {pastClasses.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Play className="h-6 w-6" />
-              Recorded Sessions
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastClasses.map((liveClass) => (
-                <LiveClassCard
-                  key={liveClass.id}
-                  liveClass={liveClass}
-                 onWatchRecording={(streamKey) => {
-                     const recordingUrl = liveClass.recording_url || `https://stream.haritahive.com/recordings/${streamKey}.mp4`;
-                     
-                     // Use dedicated video player page instead of popup
-                     const videoPageUrl = `/watch-recording?url=${encodeURIComponent(recordingUrl)}&title=${encodeURIComponent(liveClass.title)}`;
-                     window.open(videoPageUrl, '_blank');
-                   }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {pastClasses.length === 0 && !currentLive && (
-          <div className="text-center py-12">
-            <Video className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium mb-2">No Classes Available</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              There are no live or recorded classes available at the moment. 
-              Check back soon for exciting new content!
-            </p>
-          </div>
-        )}
-
-        {/* Refresh Button */}
-        <div className="text-center mt-8">
-          <Button 
-            variant="outline" 
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {nextGeospatialClass.thumbnail_url && (
+                <div className="aspect-video bg-gray-900 rounded-lg mb-4 overflow-hidden">
+                  <img 
+                    src={nextGeospatialClass.thumbnail_url} 
+                    alt={nextGeospatialClass.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  Instructor: Nagendra Singh
+                </div>
+                <div className="flex items-center gap-1">
+                  <BookOpen className="h-4 w-4" />
+                  Course Session
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      )}
     </div>
   );
 };
