@@ -22,28 +22,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2020',
     minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('@radix-ui')) {
-              return 'vendor-react';
-            }
-            if (id.includes('recharts')) {
-              return 'vendor-charts';
-            }
-            if (id.includes('leaflet') || id.includes('mapbox')) {
-              return 'vendor-maps';
-            }
-            if (id.includes('@supabase')) {
-              return 'vendor-supabase';
-            }
-            return 'vendor-other';
-          }
-        },
-      },
-    },
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 1000,
     sourcemap: false,
   },
   // Enable CSS code splitting
