@@ -51,7 +51,7 @@ const Navbar = () => {
     { href: "/jobs-ai-discovery", label: "AI Job Discovery" },
     { href: "/talent-pool", label: "Hire Talent" },
     { href: "/certifications", label: "Certifications" },
-    { href: "/ava", label: "AVA Assistant" },
+    { href: "/geova", label: "GEOVA Mentor" },
     { href: "/corporate-training", label: "Corporate Training" },
   ];
 

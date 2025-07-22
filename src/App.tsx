@@ -56,6 +56,8 @@ const Newsletter = lazy(() => import("./pages/Newsletter"));
 const Blog = lazy(() => import("./pages/Blog"));
 const EnhancedPluginMarketplace = lazy(() => import("./pages/EnhancedPluginMarketplace"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AVAAssistant = lazy(() => import("./pages/AVAAssistant"));
+const GEOVAAssistant = lazy(() => import("./pages/GEOVAAssistant"));
 
 // Loading component
 const PageLoader = () => (
