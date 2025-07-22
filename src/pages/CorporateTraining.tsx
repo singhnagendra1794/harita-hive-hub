@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -299,8 +298,7 @@ const CorporateTraining = () => {
   };
 
   return (
-    <Layout>
-      <div className="min-h-screen">
+    <div className="min-h-screen">
         {/* Landing Banner */}
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">
           <div className="container">
@@ -749,7 +747,6 @@ const CorporateTraining = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 

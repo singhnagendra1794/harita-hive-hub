@@ -1,8 +1,5 @@
 
-
-import Layout from '@/components/Layout';
 import { useState } from "react";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,24 +36,22 @@ const CertificationHub = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <div className="flex items-center justify-center min-h-96">
+      <div className="container py-8">
+        <div className="flex items-center justify-center min-h-96">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Loading certification courses...</p>
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <div className="text-center py-12">
+      <div className="container py-8">
+        <div className="text-center py-12">
             <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Error loading certifications</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
@@ -65,13 +60,12 @@ const CertificationHub = () => {
             </Button>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container py-8">
+    <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Certifications</h1>
@@ -222,7 +216,6 @@ const CertificationHub = () => {
           </Card>
         )}
       </div>
-    </Layout>
   );
 };
 
