@@ -11,7 +11,6 @@ import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
 import HeaderTest from './layout/HeaderTest';
-import QATestSuite from './QATestSuite';
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,7 +30,6 @@ const Layout = ({ children }: LayoutProps) => {
       <ScrollToTop />
       <FeedbackWidget />
       <OnboardingTour />
-      <QATestSuite />
     </div>
   );
 };
