@@ -261,7 +261,7 @@ const UserDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {userStats.map((stat, index) => {
           const StatCard = ({ children }: { children: React.ReactNode }) => {
-            if (stat.href && (parseInt(stat.value) > 0 || stat.title === "Courses Enrolled")) {
+            if (stat.href) {
               return (
                 <Link to={stat.href} className="block">
                   <Card className="cursor-pointer hover:shadow-lg transition-shadow">
@@ -280,7 +280,7 @@ const UserDashboard = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
                     <p className="text-2xl font-bold">{stat.value}</p>
-                    {stat.href && (parseInt(stat.value) > 0 || stat.title === "Courses Enrolled") && (
+                    {stat.href && (
                       <p className="text-xs text-primary mt-1">Click to view →</p>
                     )}
                   </div>
