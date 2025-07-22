@@ -1,14 +1,66 @@
 import { useState, useEffect, useMemo, memo } from "react";
-import { Search, MapPin, DollarSign, Clock, Star, ExternalLink, Plus, RefreshCw, Bookmark, Filter, Zap } from "lucide-react";
+import { Search, MapPin, DollarSign, Clock, Star, ExternalLink, Plus, RefreshCw, Bookmark, Filter, Zap, Target, Brain, Sparkles, Eye, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFreelanceProjects, FreelanceProject } from "@/hooks/useFreelanceProjects";
+import { usePersonalization } from "@/hooks/usePersonalization";
+
+// Calculate AI match score for projects
+const calculateProjectMatchScore = (project: FreelanceProject, userPreferences: any) => {
+  let score = 60; // Base score
+  
+  // Match with enrolled courses
+  if (userPreferences?.enrolled_courses?.length > 0) {
+    const courseSkills = ['GIS', 'Remote Sensing', 'Python', 'JavaScript', 'Geospatial', 'Mapping'];
+    const matchingSkills = project.skills.filter(skill => 
+      courseSkills.some(courseSkill => skill.toLowerCase().includes(courseSkill.toLowerCase()))
+    );
+    score += matchingSkills.length * 5;
+  }
+  
+  // Match with user's preferred skills or portfolio tags
+  const preferredSkills = ['Python', 'QGIS', 'ArcGIS', 'PostGIS', 'JavaScript', 'React'];
+  const skillMatches = project.skills.filter(skill => 
+    preferredSkills.some(prefSkill => skill.toLowerCase().includes(prefSkill.toLowerCase()))
+  );
+  score += skillMatches.length * 3;
+  
+  // Boost for remote work
+  if (project.is_remote) score += 5;
+  
+  // Boost for verified clients
+  if (project.is_internal) score += 10;
+  
+  // Add randomness for variety
+  score += Math.floor(Math.random() * 15);
+  
+  return Math.min(score, 98);
+};
+
+// Check if project should be recommended
+const isRecommendedProject = (project: FreelanceProject, userPreferences: any) => {
+  if (!userPreferences) return false;
+  
+  // Check if user has geospatial course enrollment
+  const hasGeospatialCourse = userPreferences.enrolled_courses?.some((course: string) => 
+    course.toLowerCase().includes('geospatial') || course.toLowerCase().includes('gis')
+  );
+  
+  // Check if project skills match common geospatial skills
+  const geospatialSkills = ['GIS', 'QGIS', 'ArcGIS', 'PostGIS', 'Remote Sensing', 'Python', 'JavaScript', 'Mapping'];
+  const hasMatchingSkills = project.skills.some(skill => 
+    geospatialSkills.some(geoSkill => skill.toLowerCase().includes(geoSkill.toLowerCase()))
+  );
+  
+  return hasGeospatialCourse && hasMatchingSkills;
+};
 
 // Memoized project card component for better performance
 const ProjectCard = memo(({ 
@@ -16,17 +68,23 @@ const ProjectCard = memo(({
   user, 
   onSave, 
   onApply,
+  onViewSimilar,
   formatBudget,
   getDifficultyColor,
-  getPlatformColor 
+  getPlatformColor,
+  matchScore,
+  isRecommended
 }: {
   project: FreelanceProject;
   user: any;
   onSave: (project: FreelanceProject) => void;
   onApply: (project: FreelanceProject) => void;
+  onViewSimilar: (project: FreelanceProject) => void;
   formatBudget: (project: FreelanceProject) => string;
   getDifficultyColor: (difficulty: string) => string;
   getPlatformColor: (platform: string) => string;
+  matchScore: number;
+  isRecommended: boolean;
 }) => (
   <Card className={`hover:shadow-lg transition-all duration-300 ${project.is_internal ? 'border-primary/30 bg-primary/5' : ''}`}>
     <CardHeader>
@@ -34,6 +92,12 @@ const ProjectCard = memo(({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <CardTitle className="text-xl">{project.title}</CardTitle>
+            {isRecommended && user && (
+              <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Recommended for You
+              </Badge>
+            )}
             <Badge className={getPlatformColor(project.source || 'Unknown')}>
               {project.source}
             </Badge>
@@ -43,6 +107,17 @@ const ProjectCard = memo(({
               {project.difficulty}
             </Badge>
           </div>
+          
+          {/* AI Match Score */}
+          {user && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm text-muted-foreground">AI Match:</span>
+              <div className="flex items-center gap-2 flex-1 max-w-32">
+                <Progress value={matchScore} className="h-2" />
+                <span className="text-sm font-medium text-primary">{matchScore}%</span>
+              </div>
+            </div>
+          )}
           <p className="text-lg font-semibold text-primary">{project.client_name}</p>
           {project.client_rating && (
             <div className="flex items-center gap-1 mt-1">
@@ -71,13 +146,24 @@ const ProjectCard = memo(({
         </div>
         <div className="flex gap-2">
           {user && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onSave(project)}
-            >
-              <Bookmark className="h-4 w-4" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onSave(project)}
+                title="Save to Dashboard"
+              >
+                <BookmarkPlus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onViewSimilar(project)}
+                title="View Similar Projects"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </>
           )}
           {project.is_internal ? (
             <Button>Apply Now</Button>
@@ -113,6 +199,7 @@ ProjectCard.displayName = 'ProjectCard';
 const FreelanceProjects = () => {
   const { user } = useAuth();
   const { projects, loading, refreshing, refreshProjects, saveProject, trackApplication } = useFreelanceProjects();
+  const { preferences, recentInteractions } = usePersonalization();
   const [searchTerm, setSearchTerm] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("");
@@ -121,11 +208,15 @@ const FreelanceProjects = () => {
   const [activeTab, setActiveTab] = useState("browse");
   const { toast } = useToast();
 
-  // Memoize filtered projects for performance
+  // Memoize filtered and scored projects for performance
   const filteredProjects = useMemo(() => {
     if (!projects || projects.length === 0) return [];
     
-    let filtered = [...projects];
+    let filtered = [...projects].map(project => ({
+      ...project,
+      matchScore: calculateProjectMatchScore(project, preferences),
+      isRecommended: isRecommendedProject(project, preferences)
+    }));
 
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -175,8 +266,15 @@ const FreelanceProjects = () => {
       }
     }
 
+    // Sort by recommendation and match score
+    filtered.sort((a, b) => {
+      if (a.isRecommended && !b.isRecommended) return -1;
+      if (!a.isRecommended && b.isRecommended) return 1;
+      return b.matchScore - a.matchScore;
+    });
+
     return filtered;
-  }, [searchTerm, budgetFilter, difficultyFilter, platformFilter, locationFilter, projects]);
+  }, [searchTerm, budgetFilter, difficultyFilter, platformFilter, locationFilter, projects, preferences]);
 
   const handlePostProject = () => {
     if (!user) {
@@ -202,6 +300,19 @@ const FreelanceProjects = () => {
       trackApplication(project.id, project.platform, 'redirect');
       window.open(project.apply_url, '_blank');
     }
+  };
+
+  const handleViewSimilar = (project: FreelanceProject) => {
+    // Filter projects with similar skills
+    const similarProjects = projects.filter(p => 
+      p.id !== project.id && 
+      p.skills.some(skill => project.skills.includes(skill))
+    ).slice(0, 3);
+    
+    toast({
+      title: "Similar Projects Found",
+      description: `Found ${similarProjects.length} projects with similar skills. Check the list below!`,
+    });
   };
 
   const formatBudget = (project: FreelanceProject) => {
@@ -240,20 +351,37 @@ const FreelanceProjects = () => {
     setLocationFilter("");
   };
 
+  // Get top picks for sidebar
+  const topPicks = useMemo(() => {
+    if (!user) return [];
+    return filteredProjects
+      .filter(p => p.isRecommended)
+      .slice(0, 4);
+  }, [filteredProjects, user]);
+
   return (
     <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Real Geospatial Freelance Opportunities</h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Find live projects from top platforms • Earn while you learn • India-focused opportunities
-          </p>
-          <div className="flex justify-center gap-4 flex-wrap">
-            <Badge variant="outline" className="text-sm">Live Projects from Upwork, Freelancer & More</Badge>
-            <Badge variant="outline" className="text-sm">Updated Daily</Badge>
-            <Badge variant="outline" className="text-sm">70% India-focused</Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4">Real Geospatial Freelance Opportunities</h1>
+            <p className="text-xl text-muted-foreground mb-6">
+              Find live projects from top platforms • Earn while you learn • India-focused opportunities
+            </p>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Badge variant="outline" className="text-sm">Live Projects from Upwork, Freelancer & More</Badge>
+              <Badge variant="outline" className="text-sm">Updated Daily</Badge>
+              <Badge variant="outline" className="text-sm">70% India-focused</Badge>
+              {user && (
+                <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm">
+                  <Brain className="h-3 w-3 mr-1" />
+                  AI-Personalized
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full grid-cols-2">

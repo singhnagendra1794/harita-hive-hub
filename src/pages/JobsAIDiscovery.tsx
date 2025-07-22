@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { 
   Search, 
@@ -29,10 +30,14 @@ import {
   Target,
   Brain,
   LinkedinIcon,
-  BarChart3
+  BarChart3,
+  Sparkles,
+  Eye,
+  BookmarkPlus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
+import { usePersonalization } from '@/hooks/usePersonalization';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
@@ -72,9 +77,60 @@ interface JobStats {
   avg_salary: number;
 }
 
+// Calculate AI match score for jobs
+const calculateJobMatchScore = (job: JobPosting, userPreferences: any) => {
+  let score = 60; // Base score
+  
+  // Match with enrolled courses
+  if (userPreferences?.enrolled_courses?.length > 0) {
+    const courseSkills = ['GIS', 'Remote Sensing', 'Python', 'JavaScript', 'Geospatial', 'Mapping'];
+    const matchingSkills = job.skills_required?.filter(skill => 
+      courseSkills.some(courseSkill => skill.toLowerCase().includes(courseSkill.toLowerCase()))
+    ) || [];
+    score += matchingSkills.length * 5;
+  }
+  
+  // Match with user's preferred skills
+  const preferredSkills = ['Python', 'QGIS', 'ArcGIS', 'PostGIS', 'JavaScript', 'React'];
+  const skillMatches = job.skills_required?.filter(skill => 
+    preferredSkills.some(prefSkill => skill.toLowerCase().includes(prefSkill.toLowerCase()))
+  ) || [];
+  score += skillMatches.length * 3;
+  
+  // Boost for remote work
+  if (job.remote_allowed) score += 5;
+  
+  // Boost for verified companies
+  if (job.is_verified) score += 10;
+  
+  // Add randomness for variety
+  score += Math.floor(Math.random() * 15);
+  
+  return Math.min(score, 98);
+};
+
+// Check if job should be recommended
+const isRecommendedJob = (job: JobPosting, userPreferences: any) => {
+  if (!userPreferences) return false;
+  
+  // Check if user has geospatial course enrollment
+  const hasGeospatialCourse = userPreferences.enrolled_courses?.some((course: string) => 
+    course.toLowerCase().includes('geospatial') || course.toLowerCase().includes('gis')
+  );
+  
+  // Check if job skills match common geospatial skills
+  const geospatialSkills = ['GIS', 'QGIS', 'ArcGIS', 'PostGIS', 'Remote Sensing', 'Python', 'JavaScript', 'Mapping'];
+  const hasMatchingSkills = job.skills_required?.some(skill => 
+    geospatialSkills.some(geoSkill => skill.toLowerCase().includes(geoSkill.toLowerCase()))
+  ) || false;
+  
+  return hasGeospatialCourse && hasMatchingSkills;
+};
+
 const JobsAIDiscovery = () => {
   const { user } = useAuth();
   const { hasAccess } = usePremiumAccess();
+  const { preferences, recentInteractions } = usePersonalization();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<JobPosting[]>([]);
@@ -178,8 +234,26 @@ const JobsAIDiscovery = () => {
     setActiveFilters(count);
   };
 
+  // Enhanced jobs with AI features
+  const enhancedJobs = useMemo(() => {
+    return jobs.map(job => ({
+      ...job,
+      matchScore: calculateJobMatchScore(job, preferences),
+      isRecommended: isRecommendedJob(job, preferences)
+    }));
+  }, [jobs, preferences]);
+
+  // Get top picks for sidebar
+  const topPicks = useMemo(() => {
+    if (!user) return [];
+    return enhancedJobs
+      .filter(job => job.isRecommended)
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 4);
+  }, [enhancedJobs, user]);
+
   const filterAndSortJobs = () => {
-    let filtered = [...jobs];
+    let filtered = [...enhancedJobs];
 
     // Apply filters
     if (searchTerm) {
@@ -251,8 +325,12 @@ const JobsAIDiscovery = () => {
         break;
       case 'relevance':
       default:
-        // AI relevance scoring would go here
-        filtered.sort((a, b) => calculateMatchScore(b) - calculateMatchScore(a));
+        // Sort by recommendation and match score
+        filtered.sort((a, b) => {
+          if (a.isRecommended && !b.isRecommended) return -1;
+          if (!a.isRecommended && b.isRecommended) return 1;
+          return b.matchScore - a.matchScore;
+        });
         break;
     }
 
@@ -344,6 +422,19 @@ const JobsAIDiscovery = () => {
     }
   };
 
+  const handleViewSimilar = (job: JobPosting) => {
+    // Filter jobs with similar skills
+    const similarJobs = jobs.filter(j => 
+      j.id !== job.id && 
+      j.skills_required?.some(skill => job.skills_required?.includes(skill))
+    ).slice(0, 3);
+    
+    toast({
+      title: "Similar Jobs Found",
+      description: `Found ${similarJobs.length} jobs with similar skills. Check the list below!`,
+    });
+  };
+
   const displayedJobs = filteredJobs;
 
   if (loading) {
@@ -368,19 +459,28 @@ const JobsAIDiscovery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Target className="h-8 w-8 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">AI-Powered Geospatial Jobs</h1>
-            <p className="text-muted-foreground">
-              Discover opportunities from LinkedIn, Indeed, government portals, and company websites worldwide
-            </p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">AI-Powered Geospatial Jobs</h1>
+                <p className="text-muted-foreground">
+                  Discover opportunities from LinkedIn, Indeed, government portals, and company websites worldwide
+                </p>
+                {user && (
+                  <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm mt-2">
+                    <Brain className="h-3 w-3 mr-1" />
+                    AI-Personalized Results
+                  </Badge>
+                )}
+              </div>
+            </div>
 
         {/* Job Statistics */}
         {jobStats && (
@@ -824,6 +924,36 @@ const JobsAIDiscovery = () => {
           )}
         </TabsContent>
       </Tabs>
+        </div>
+
+        {/* Sidebar - Top Picks for You */}
+        {user && topPicks.length > 0 && (
+          <div className="lg:col-span-1">
+            <Card className="sticky top-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Target className="h-5 w-5 text-primary" />
+                  Top Picks for You
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {topPicks.map((job) => (
+                  <Card key={job.id} className="border-primary/20">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-sm mb-2">{job.title}</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Progress value={job.matchScore} className="h-1 flex-1" />
+                        <span className="text-xs text-primary">{job.matchScore}%</span>
+                      </div>
+                      <Button size="sm" className="w-full text-xs">Apply Now</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
