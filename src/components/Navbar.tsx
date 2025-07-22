@@ -75,7 +75,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full max-w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-x-hidden">
+    <nav className="sticky top-0 z-50 w-full max-w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-x-hidden" style={{ overflow: 'visible' }}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
         <div className="flex h-16 items-center justify-between w-full">
           {/* Logo */}
@@ -95,7 +95,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation - Hidden on small screens */}
-          <div className="hidden lg:flex items-center space-x-1 flex-1 justify-center max-w-full overflow-hidden">
+          <div className="hidden lg:flex items-center space-x-1 flex-1 justify-center max-w-full" style={{ overflow: 'visible' }}>
             {/* Learning Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -103,7 +103,7 @@ const Navbar = () => {
                   Learning <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {learningLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -119,7 +119,7 @@ const Navbar = () => {
                   Tools <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {toolsLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -135,7 +135,7 @@ const Navbar = () => {
                   Work <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {workLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -151,7 +151,7 @@ const Navbar = () => {
                   Create <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {createLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -167,7 +167,7 @@ const Navbar = () => {
                   Career <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {careerLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -183,7 +183,7 @@ const Navbar = () => {
                   Community <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+              <DropdownMenuContent align="start" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                 {communityLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -212,7 +212,7 @@ const Navbar = () => {
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
+                <DropdownMenuContent align="end" className="w-56 max-w-[90vw] bg-background/95 backdrop-blur-sm border z-[9999] shadow-lg" sideOffset={8}>
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
