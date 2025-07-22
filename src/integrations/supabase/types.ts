@@ -6715,6 +6715,7 @@ export type Database = {
           community_posts: number
           spatial_analyses: number
           plan: string
+          enrolled_courses_count: number
         }[]
       }
       get_user_subscription_safe: {
