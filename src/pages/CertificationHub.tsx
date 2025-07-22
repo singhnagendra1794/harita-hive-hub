@@ -1,4 +1,5 @@
 
+
 import Layout from '@/components/Layout';
 import { useState } from "react";
 
@@ -70,7 +71,7 @@ const CertificationHub = () => {
 
   return (
     <Layout>
-    <div className="container py-8">
+      <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Certifications</h1>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Layout from "../components/Layout";
 import PremiumAccessGate from "../components/premium/PremiumAccessGate";
 import EnhancedMapBuilder from "../components/webgis/EnhancedMapBuilder";
 import EnhancedProjectDashboard from "../components/webgis/EnhancedProjectDashboard";
@@ -47,8 +46,7 @@ const WebGISBuilder = () => {
   };
 
   return (
-    <Layout>
-      <PremiumAccessGate 
+    <PremiumAccessGate
         requiredTier="enterprise"
         featureName="WebGIS Builder"
         featureDescription="Create professional web-based GIS applications with drag-and-drop interface, real-time data sources, spatial analysis tools, and collaboration features."
@@ -110,7 +108,6 @@ const WebGISBuilder = () => {
           </DialogContent>
         </Dialog>
       </PremiumAccessGate>
-    </Layout>
   );
 };
 

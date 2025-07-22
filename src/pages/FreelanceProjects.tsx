@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Search, MapPin, DollarSign, Clock, Star, ExternalLink, Plus, RefreshCw, Bookmark, Filter, Zap } from "lucide-react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,8 +138,7 @@ const FreelanceProjects = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Real Geospatial Freelance Opportunities</h1>
@@ -421,8 +419,7 @@ const FreelanceProjects = () => {
             </div>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 
