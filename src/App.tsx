@@ -116,6 +116,7 @@ const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
 const GoLive = lazy(() => import("./pages/GoLive"));
 const WatchLive = lazy(() => import("./pages/WatchLive"));
+const WatchRecording = lazy(() => import("./pages/WatchRecording"));
 const CourseRedirectHandler = lazy(() => import("./components/course-access/CourseRedirectHandler"));
 
 function App() {
@@ -356,6 +357,13 @@ function App() {
             <Layout>
               <RouteWrapper>
                 <LiveClasses />
+              </RouteWrapper>
+            </Layout>
+          } />
+          <Route path="/watch-recording" element={
+            <Layout>
+              <RouteWrapper>
+                <WatchRecording />
               </RouteWrapper>
             </Layout>
           } />

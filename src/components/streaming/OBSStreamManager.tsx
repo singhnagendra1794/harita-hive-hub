@@ -173,48 +173,7 @@ export const OBSStreamManager: React.FC = () => {
     createInitialStreamSession();
   }, [user, streamKey, isAdmin]);
 
-  const endStream = async () => {
-    if (!currentSession) return;
-
-    setLoading(true);
-    try {
-      // Update live_classes status to 'ended' and set recording URL
-      const { error: liveClassError } = await supabase
-        .from('live_classes')
-        .update({
-          status: 'ended',
-          end_time: new Date().toISOString(),
-          recording_url: `https://stream.haritahive.com/recordings/${streamKey?.stream_key}.mp4`
-        })
-        .eq('stream_key', streamKey?.stream_key)
-        .eq('status', 'live');
-
-      if (liveClassError) console.warn('Live class update warning:', liveClassError);
-
-      // Also update stream session for backward compatibility
-      const { error } = await supabase.rpc('update_stream_status', {
-        p_session_id: currentSession.id,
-        p_status: 'ended'
-      });
-
-      if (error) throw error;
-
-      setCurrentSession(null);
-      toast({
-        title: "Stream Ended",
-        description: "Your stream session has been ended successfully.",
-      });
-    } catch (error) {
-      console.error('Error ending stream:', error);
-      toast({
-        title: "Error",
-        description: "Failed to end stream session. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Remove manual end stream - OBS controls this via webhook
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -404,33 +363,32 @@ export const OBSStreamManager: React.FC = () => {
             Stream Status
           </CardTitle>
           <CardDescription>
-            Your streaming session is automatically managed by OBS
+            Your streaming is automatically managed by OBS - no manual controls needed
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <Video className="h-4 w-4" />
             <AlertDescription>
-              <strong>Ready to Stream!</strong> Just open OBS, configure with the settings above, and click "Start Streaming". 
-              The system will automatically detect when you go live and update your stream status.
+              <strong>Ready to Stream!</strong> Your stream key is configured above. Open OBS and click "Start Streaming" to go live automatically.
             </AlertDescription>
           </Alert>
           
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <Video className="h-4 w-4" />
-              How it Works
+              Automatic Stream Management
             </h4>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Configure OBS with the RTMP settings above</li>
-              <li>Click "Start Streaming" in OBS to go live</li>
-              <li>System automatically detects your stream and updates status</li>
-              <li>Viewers can watch live at /live-classes</li>
-              <li>Click "Stop Streaming" in OBS to end - recording is saved automatically</li>
+              <li>Click "Start Streaming" in OBS to go live instantly</li>
+              <li>Your status updates automatically to "live"</li>
+              <li>Viewers can watch at /live-classes</li>
+              <li>Click "Stop Streaming" in OBS to end and save recording</li>
             </ol>
           </div>
           
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <Button 
               variant="outline" 
               onClick={() => window.open('/live-classes', '_blank')}
