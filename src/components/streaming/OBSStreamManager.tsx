@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Copy, Play, Square, Settings, Monitor, Key, Users, Video } from 'lucide-react';
+import { AlertCircle, Copy, Play, Square, Settings, Monitor, Key, Users, Video, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -136,60 +136,42 @@ export const OBSStreamManager: React.FC = () => {
     }
   };
 
-  const startStream = async () => {
-    if (!user || !streamKey) return;
-
-    setLoading(true);
-    try {
-      // Create live class entry with status 'scheduled' (will become 'live' when RTMP starts)
-      const { data: liveClass, error: liveClassError } = await supabase
+  // Auto-create scheduled stream session when component loads if none exists
+  useEffect(() => {
+    const createInitialStreamSession = async () => {
+      if (!user || !streamKey || !isAdmin) return;
+      
+      // Check if there's already a scheduled or live session
+      const { data: existingSession } = await supabase
         .from('live_classes')
-        .insert({
-          title: streamTitle || 'Live Stream',
-          course_title: streamTitle || 'Live Stream',
-          description: streamDescription || '',
-          stream_key: streamKey.stream_key,
-          status: 'scheduled',
-          start_time: new Date().toISOString(),
-          created_by: user.id,
-          viewer_count: 0
-        })
-        .select()
+        .select('*')
+        .eq('created_by', user.id)
+        .in('status', ['scheduled', 'live'])
         .single();
-
-      if (liveClassError) throw liveClassError;
-
-      // Also create stream session for backward compatibility
-      const { error: sessionError } = await supabase.rpc('start_stream_session', {
-        p_user_id: user.id,
-        p_title: streamTitle || 'Live Stream',
-        p_description: streamDescription
-      });
-
-      if (sessionError) console.warn('Stream session creation warning:', sessionError);
-
-      await loadCurrentSession();
-      toast({
-        title: "Stream Session Started",
-        description: "Your stream is ready! Now start streaming in OBS to go live.",
-      });
-
-      // Redirect to live classes page after 3 seconds
-      setTimeout(() => {
-        window.open('/live-classes', '_blank');
-      }, 3000);
-
-    } catch (error) {
-      console.error('Error starting stream:', error);
-      toast({
-        title: "Error",
-        description: "Failed to start stream session. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+        
+      if (!existingSession) {
+        // Create a default scheduled session that's ready for streaming
+        const { error: liveClassError } = await supabase
+          .from('live_classes')
+          .insert({
+            title: 'Live Stream Session',
+            course_title: 'Live Stream Session',
+            description: 'Ready to stream - will go live when OBS starts streaming',
+            stream_key: streamKey.stream_key,
+            status: 'scheduled',
+            start_time: new Date().toISOString(),
+            created_by: user.id,
+            viewer_count: 0
+          });
+          
+        if (liveClassError) {
+          console.error('Error creating initial stream session:', liveClassError);
+        }
+      }
+    };
+    
+    createInitialStreamSession();
+  }, [user, streamKey, isAdmin]);
 
   const endStream = async () => {
     if (!currentSession) return;
@@ -414,126 +396,52 @@ export const OBSStreamManager: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Stream Session Management */}
+      {/* Stream Status */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Monitor className="h-5 w-5" />
-            Stream Session
+            Stream Status
           </CardTitle>
           <CardDescription>
-            Start and manage your live streaming session
+            Your streaming session is automatically managed by OBS
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {currentSession ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium">{currentSession.title}</h4>
-                  <p className="text-sm text-muted-foreground">{currentSession.description}</p>
-                </div>
-                <Badge variant="default" className="bg-red-500">
-                  🔴 LIVE
-                </Badge>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <Label>Viewers</Label>
-                  <p className="font-mono">{currentSession.viewer_count}</p>
-                </div>
-                <div>
-                  <Label>Started</Label>
-                  <p className="font-mono">{new Date(currentSession.started_at).toLocaleTimeString()}</p>
-                </div>
-              </div>
-
-              <Button
-                variant="destructive"
-                onClick={endStream}
-                disabled={loading}
-                className="w-full"
-              >
-                <Square className="h-4 w-4 mr-2" />
-                {loading ? 'Ending...' : 'End Stream'}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="stream-title">Stream Title</Label>
-                <Input
-                  id="stream-title"
-                  value={streamTitle}
-                  onChange={(e) => setStreamTitle(e.target.value)}
-                  placeholder="Enter your stream title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="stream-description">Description (Optional)</Label>
-                <Input
-                  id="stream-description"
-                  value={streamDescription}
-                  onChange={(e) => setStreamDescription(e.target.value)}
-                  placeholder="Describe your stream"
-                />
-              </div>
-
-              <Button
-                onClick={startStream}
-                disabled={loading || !streamKey}
-                className="w-full"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                {loading ? 'Starting...' : 'Start Stream Session'}
-              </Button>
-
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Ready to Stream?
-                </h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Once you start a session, configure OBS with the settings above and click "Start Streaming" in OBS.
-                </p>
-                <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-3 w-3" />
-                  <span>Students will be automatically notified when you go live</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <Alert>
+            <Video className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Ready to Stream!</strong> Just open OBS, configure with the settings above, and click "Start Streaming". 
+              The system will automatically detect when you go live and update your stream status.
+            </AlertDescription>
+          </Alert>
+          
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              How it Works
+            </h4>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Configure OBS with the RTMP settings above</li>
+              <li>Click "Start Streaming" in OBS to go live</li>
+              <li>System automatically detects your stream and updates status</li>
+              <li>Viewers can watch live at /live-classes</li>
+              <li>Click "Stop Streaming" in OBS to end - recording is saved automatically</li>
+            </ol>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              variant="outline" 
+              onClick={() => window.open('/live-classes', '_blank')}
+              className="w-full"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View Live Classes Page
+            </Button>
+          </div>
         </CardContent>
       </Card>
-
-      {/* Stream Analytics */}
-      {currentSession && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Stream Analytics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-primary">{currentSession.viewer_count}</div>
-                <div className="text-sm text-muted-foreground">Current Viewers</div>
-              </div>
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">LIVE</div>
-                <div className="text-sm text-muted-foreground">Stream Status</div>
-              </div>
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {Math.floor((new Date().getTime() - new Date(currentSession.started_at).getTime()) / 60000)}m
-                </div>
-                <div className="text-sm text-muted-foreground">Duration</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

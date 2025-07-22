@@ -52,7 +52,26 @@ Deno.serve(async (req) => {
     const userId = streamKeyData.user_id
 
     if (action === 'publish') {
-      // Stream started - update session to live
+      // Stream started - update live_classes to live
+      const { data: liveClass, error: liveClassError } = await supabaseClient
+        .from('live_classes')
+        .update({
+          status: 'live',
+          start_time: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('stream_key', stream_key)
+        .in('status', ['scheduled', 'preparing'])
+        .select()
+        .single()
+
+      if (liveClassError) {
+        console.error('Error updating live class to live:', liveClassError)
+      } else {
+        console.log('Live class updated to live:', liveClass)
+      }
+
+      // Also update stream_sessions for backward compatibility
       const { data: session, error: updateError } = await supabaseClient
         .from('stream_sessions')
         .update({
@@ -61,7 +80,7 @@ Deno.serve(async (req) => {
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
-        .eq('status', 'preparing')
+        .in('status', ['preparing', 'scheduled'])
         .select()
         .single()
 
@@ -69,19 +88,32 @@ Deno.serve(async (req) => {
         console.error('Error updating session to live:', updateError)
       } else {
         console.log('Session updated to live:', session)
-        
-        // Send live notifications
-        await supabaseClient.functions.invoke('send-live-notifications', {
-          body: {
-            stream_id: session.id,
-            stream_title: session.title,
-            instructor_id: userId
-          }
-        })
       }
 
     } else if (action === 'unpublish') {
-      // Stream ended - update session to ended
+      // Stream ended - update live_classes to ended with recording URL
+      const recordingUrl = `https://stream.haritahive.com/recordings/${stream_key}.mp4`
+      
+      const { data: liveClass, error: liveClassError } = await supabaseClient
+        .from('live_classes')
+        .update({
+          status: 'ended',
+          end_time: new Date().toISOString(),
+          recording_url: recordingUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('stream_key', stream_key)
+        .eq('status', 'live')
+        .select()
+        .single()
+
+      if (liveClassError) {
+        console.error('Error updating live class to ended:', liveClassError)
+      } else {
+        console.log('Live class updated to ended with recording:', liveClass)
+      }
+
+      // Also update stream_sessions for backward compatibility
       const { data: session, error: updateError } = await supabaseClient
         .from('stream_sessions')
         .update({

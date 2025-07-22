@@ -396,26 +396,82 @@ const LiveClasses = () => {
                   key={liveClass.id}
                   liveClass={liveClass}
                   onWatchRecording={(streamKey) => {
-                    const recordingUrl = `https://stream.haritahive.com/recordings/${streamKey}.mp4`;
-                    const recordingWindow = window.open('', '_blank');
+                    const recordingUrl = liveClass.recording_url || `https://stream.haritahive.com/recordings/${streamKey}.mp4`;
+                    
+                    // Create a new window with proper video player
+                    const recordingWindow = window.open('', '_blank', 'width=1200,height=800');
                     if (recordingWindow) {
                       recordingWindow.document.write(`
+                        <!DOCTYPE html>
                         <html>
                           <head>
                             <title>${liveClass.title} - Recording</title>
+                            <meta charset="utf-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
                             <style>
-                              body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-                              video { max-width: 100%; max-height: 100vh; width: auto; height: auto; }
+                              * { margin: 0; padding: 0; box-sizing: border-box; }
+                              body { 
+                                background: #000; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                min-height: 100vh;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                              }
+                              .container {
+                                max-width: 100%;
+                                max-height: 100vh;
+                                padding: 20px;
+                                text-align: center;
+                              }
+                              video { 
+                                max-width: 100%; 
+                                max-height: 80vh; 
+                                width: auto; 
+                                height: auto;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                              }
+                              .title {
+                                color: white;
+                                margin-bottom: 16px;
+                                font-size: 18px;
+                                font-weight: 600;
+                              }
+                              .error {
+                                color: #ff6b6b;
+                                padding: 20px;
+                                background: rgba(255,107,107,0.1);
+                                border-radius: 8px;
+                                margin-top: 20px;
+                              }
                             </style>
                           </head>
                           <body>
-                            <video controls autoplay>
-                              <source src="${recordingUrl}" type="video/mp4">
-                              Your browser does not support the video tag.
-                            </video>
+                            <div class="container">
+                              <div class="title">${liveClass.title}</div>
+                              <video controls autoplay preload="metadata" crossorigin="anonymous">
+                                <source src="${recordingUrl}" type="video/mp4">
+                                <p class="error">Your browser does not support the video tag or the recording is not available yet.</p>
+                              </video>
+                            </div>
+                            <script>
+                              const video = document.querySelector('video');
+                              video.addEventListener('error', function(e) {
+                                console.error('Video error:', e);
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'error';
+                                errorDiv.innerHTML = 'Recording not available yet. It may still be processing after the stream ended.';
+                                document.querySelector('.container').appendChild(errorDiv);
+                              });
+                            </script>
                           </body>
                         </html>
                       `);
+                      recordingWindow.document.close();
+                    } else {
+                      // Fallback if popup blocked
+                      window.open(recordingUrl, '_blank');
                     }
                   }}
                 />
