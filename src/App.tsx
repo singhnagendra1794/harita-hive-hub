@@ -57,6 +57,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const EnhancedPluginMarketplace = lazy(() => import("./pages/EnhancedPluginMarketplace"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AVAAssistant = lazy(() => import("./pages/AVAAssistant"));
+const AVATest = lazy(() => import("./pages/AVATest"));
 const GEOVAAssistant = lazy(() => import("./pages/GEOVAAssistant"));
 
 // Loading component
@@ -626,8 +627,19 @@ function App() {
                             </RouteWrapper>
                           </SubscriptionRoute>
                         </Layout>
-                       } />
-                      
+                        } />
+                        <Route path="/ava-test" element={
+                          <Layout>
+                            <ProtectedRoute>
+                              <RouteWrapper>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AVATest />
+                                </Suspense>
+                              </RouteWrapper>
+                            </ProtectedRoute>
+                          </Layout>
+                        } />
+                       
                       {/* Course Access Routes */}
                       <Route path="/enrolled-courses" element={
                         <Layout>

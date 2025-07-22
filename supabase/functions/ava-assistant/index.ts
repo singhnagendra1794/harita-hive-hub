@@ -41,10 +41,14 @@ serve(async (req) => {
       previous_messages = [] 
     } = await req.json();
 
-    console.log('AVA Request:', { message, user_id, context_type });
+    console.log('AVA Request:', { message: message?.slice(0, 100), user_id, context_type });
 
     if (!message) {
       throw new Error('Message is required');
+    }
+
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
     // Get user context and history
@@ -68,29 +72,42 @@ serve(async (req) => {
       conversationLength: conversationHistory.length
     });
 
-    // Call OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages,
-        temperature: 0.7,
-        max_tokens: 1500,
-        stream: false,
-      }),
-    });
+    // Call OpenAI with timeout and better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
-    }
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini', // Using faster model for better response times
+          messages,
+          temperature: 0.7,
+          max_tokens: 1200,
+          stream: false,
+        }),
+        signal: controller.signal
+      });
 
-    const data = await response.json();
-    const assistantResponse = data.choices[0].message.content;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('OpenAI API Error:', error);
+        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error('Invalid response format from OpenAI');
+      }
+
+      const assistantResponse = data.choices[0].message.content;
 
     // Save conversation to database
     await saveConversation({
@@ -105,25 +122,49 @@ serve(async (req) => {
     // Update user memory
     await updateUserMemory(user_id, message, assistantResponse, context_type);
 
-    return new Response(JSON.stringify({
-      response: assistantResponse,
-      conversation_id,
-      context_used: relevantContext.map(c => ({ type: c.type, title: c.title })),
-      follow_up_suggestions: generateFollowUpSuggestions(message, context_type)
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      return new Response(JSON.stringify({
+        response: assistantResponse,
+        conversation_id,
+        context_used: relevantContext.map(c => ({ type: c.type, title: c.title })),
+        follow_up_suggestions: generateFollowUpSuggestions(message, context_type)
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
 
+    } catch (openaiError) {
+      console.error('OpenAI Error:', openaiError);
+      clearTimeout(timeoutId);
+      
+      // Return fallback response for OpenAI-specific errors
+      return new Response(JSON.stringify({
+        response: null,
+        fallback_response: "I'm experiencing some technical difficulties with my AI processing right now. Could you try rephrasing your question or asking something else? 🤔",
+        error_type: 'openai_error',
+        conversation_id
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
-    console.error('AVA Error:', error);
+    console.error('AVA General Error:', error);
+    
+    // Provide different error responses based on error type
+    let fallbackMessage = "I'm having trouble processing your request right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish?";
+    
+    if (error.message?.includes('timeout') || error.message?.includes('fetch')) {
+      fallbackMessage = "I'm experiencing connection issues. Please try again in a moment. 🔄";
+    } else if (error.message?.includes('API key')) {
+      fallbackMessage = "I'm having authentication issues. Please contact support@haritahive.com for assistance. 🔑";
+    }
+
     return new Response(JSON.stringify({ 
       error: error.message,
-      fallback_response: "I'm having trouble processing your request right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish?"
+      fallback_response: fallbackMessage,
+      error_type: 'general_error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  }
 });
 
 async function getUserContext(userId: string) {
@@ -154,7 +195,6 @@ async function getUserContext(userId: string) {
     console.error('Error fetching user context:', error);
     return { profile: {}, subscription: { subscription_tier: 'free' }, courses: [], skill_level: 'beginner' };
   }
-}
 
 async function getRelevantContext(message: string, contextType: string): Promise<ContextData[]> {
   const contexts: ContextData[] = [];

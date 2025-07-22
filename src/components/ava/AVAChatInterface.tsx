@@ -46,10 +46,31 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialMessage);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHealthy, setIsHealthy] = useState(true);
   const [conversationId] = useState(() => crypto.randomUUID());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      const welcomeMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "Hi! I'm AVA — your Geospatial Copilot. I can help you with GIS workflows, spatial analysis, QGIS tutorials, code examples, and more. Ask me anything about mapping or geospatial technology! 🗺️\n\nTry asking: 'How do I create a buffer in QGIS?' or 'Show me Python code for reading shapefiles'",
+        timestamp: new Date().toISOString(),
+        follow_up_suggestions: [
+          "How do I get started with QGIS?",
+          "Show me Python code for spatial analysis",
+          "Help me with PostGIS queries",
+          "What's the best way to style maps?"
+        ]
+      };
+      setMessages([welcomeMessage]);
+    }
+
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +101,12 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ava-assistant', {
+      // Add timeout wrapper
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 15000)
+      );
+
+      const responsePromise = supabase.functions.invoke('ava-assistant', {
         body: {
           message: messageText.trim(),
           conversation_id: conversationId,
@@ -93,7 +119,12 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
         }
       });
 
-      if (error) throw error;
+      const { data, error } = await Promise.race([responsePromise, timeoutPromise]) as any;
+
+      if (error) {
+        console.error('AVA Edge Function Error:', error);
+        throw new Error(error.message || 'Failed to get response from AVA');
+      }
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -105,12 +136,16 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      setIsHealthy(true);
+
     } catch (error) {
       console.error('AVA Error:', error);
+      setIsHealthy(false);
+      
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "I'm having trouble right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish?",
+        content: "I'm temporarily unavailable. Please check your connection and try again later, or email support@haritahive.com for assistance. 🚧",
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -155,6 +190,44 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
       title: "Copied to Clipboard",
       description: "Response copied successfully!"
     });
+  };
+
+  // Health check function
+  const testConnection = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('ava-assistant', {
+        body: {
+          message: "Hello AVA, can you hear me?",
+          conversation_id: "health-check",
+          user_id: user?.id || "test",
+          context_type: "health_check"
+        }
+      });
+      
+      const isConnected = !error;
+      setIsHealthy(isConnected);
+      
+      toast({
+        title: isConnected ? "✅ AVA is Online" : "❌ AVA is Offline",
+        description: isConnected 
+          ? "AVA is responding properly!" 
+          : "AVA is having connection issues.",
+        variant: isConnected ? "default" : "destructive"
+      });
+      
+      return isConnected;
+    } catch (error) {
+      setIsHealthy(false);
+      toast({
+        title: "❌ Connection Test Failed",
+        description: "Could not reach AVA. Please try again later.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -217,10 +290,22 @@ export const AVAChatInterface: React.FC<AVAChatInterfaceProps> = ({
           <div className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
             <span>AVA - Your Geospatial AI Assistant</span>
+            <div className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`} />
           </div>
-          <Badge variant="outline" className="ml-auto">
-            {contextType}
-          </Badge>
+          <div className="ml-auto flex items-center gap-2">
+            <Badge variant="outline">
+              {contextType}
+            </Badge>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={testConnection}
+              disabled={isLoading}
+              className="text-xs"
+            >
+              🚦 Test AVA
+            </Button>
+          </div>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Ask me about GIS workflows, tools, spatial analysis, and more!

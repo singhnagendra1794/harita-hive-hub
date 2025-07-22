@@ -21,11 +21,32 @@ interface UseAVAOptions {
 export const useAVA = (options: UseAVAOptions = {}) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHealthy, setIsHealthy] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   const [conversationId] = useState(() => options.conversationId || crypto.randomUUID());
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const sendMessage = useCallback(async (messageText: string) => {
+  // Initialize with welcome message
+  useState(() => {
+    if (messages.length === 0) {
+      const welcomeMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "Hi! I'm AVA — your Geospatial Copilot. I can help you with GIS workflows, spatial analysis, QGIS tutorials, code examples, and more. Ask me anything about mapping or geospatial technology! 🗺️\n\nTry asking: 'How do I create a buffer in QGIS?' or 'Show me Python code for reading shapefiles'",
+        timestamp: new Date().toISOString(),
+        follow_up_suggestions: [
+          "How do I get started with QGIS?",
+          "Show me Python code for spatial analysis",
+          "Help me with PostGIS queries",
+          "What's the best way to style maps?"
+        ]
+      };
+      setMessages([welcomeMessage]);
+    }
+  });
+
+  const sendMessage = useCallback(async (messageText: string, isRetry = false) => {
     if (!messageText.trim() || !user) return;
 
     const userMessage: ChatMessage = {
@@ -35,11 +56,18 @@ export const useAVA = (options: UseAVAOptions = {}) => {
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    if (!isRetry) {
+      setMessages(prev => [...prev, userMessage]);
+    }
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ava-assistant', {
+      // Add timeout wrapper
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 15000)
+      );
+
+      const responsePromise = supabase.functions.invoke('ava-assistant', {
         body: {
           message: messageText.trim(),
           conversation_id: conversationId,
@@ -52,7 +80,12 @@ export const useAVA = (options: UseAVAOptions = {}) => {
         }
       });
 
-      if (error) throw error;
+      const { data, error } = await Promise.race([responsePromise, timeoutPromise]) as any;
+
+      if (error) {
+        console.error('AVA Edge Function Error:', error);
+        throw new Error(error.message || 'Failed to get response from AVA');
+      }
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -64,12 +97,28 @@ export const useAVA = (options: UseAVAOptions = {}) => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      setIsHealthy(true);
+      setRetryCount(0);
+      return assistantMessage;
+
     } catch (error) {
       console.error('AVA Error:', error);
+      
+      // Retry logic for mild failures
+      if (retryCount < 2 && !isRetry) {
+        console.log(`Retrying AVA request... Attempt ${retryCount + 1}`);
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => sendMessage(messageText, true), 1000);
+        return;
+      }
+
+      setIsHealthy(false);
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "I'm having trouble right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish?",
+        content: retryCount >= 2 
+          ? "I'm temporarily unavailable after multiple attempts. Please check your connection and try again later, or email support@haritahive.com for assistance. 🚧"
+          : "I'm having trouble right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish? 🔧",
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -82,7 +131,7 @@ export const useAVA = (options: UseAVAOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, user, conversationId, options.contextType, toast]);
+  }, [user, conversationId, options.contextType, toast, retryCount, messages]);
 
   const provideFeedback = useCallback(async (messageId: string, feedback: number) => {
     try {
@@ -145,13 +194,53 @@ export const useAVA = (options: UseAVAOptions = {}) => {
     }
   }, [conversationId, user]);
 
+  // Health check function
+  const testConnection = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('ava-assistant', {
+        body: {
+          message: "Hello AVA, can you hear me?",
+          conversation_id: "health-check",
+          user_id: user?.id || "test",
+          context_type: "health_check"
+        }
+      });
+      
+      const isConnected = !error;
+      setIsHealthy(isConnected);
+      
+      toast({
+        title: isConnected ? "✅ AVA is Online" : "❌ AVA is Offline",
+        description: isConnected 
+          ? "AVA is responding properly!" 
+          : "AVA is having connection issues.",
+        variant: isConnected ? "default" : "destructive"
+      });
+      
+      return isConnected;
+    } catch (error) {
+      setIsHealthy(false);
+      toast({
+        title: "❌ Connection Test Failed",
+        description: "Could not reach AVA. Please try again later.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, toast]);
+
   return {
     messages,
     isLoading,
+    isHealthy,
     conversationId,
     sendMessage,
     provideFeedback,
     clearConversation,
-    getConversationHistory
+    getConversationHistory,
+    testConnection
   };
 };
