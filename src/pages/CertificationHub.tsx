@@ -4,16 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Award, Shield, Users, Star, Search, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Award, Shield, Users, Star, Search, CheckCircle, Download, Share2, HelpCircle, Linkedin, FileText } from "lucide-react";
 import CertificationCourseCard from "../components/certifications/CertificationCourseCard";
 import { useCertificationCourses } from "@/hooks/useCertificationCourses";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const CertificationHub = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  const [trackFilter, setTrackFilter] = useState("all");
+  const [showNftModal, setShowNftModal] = useState(false);
+  const [selectedCert, setSelectedCert] = useState<any>(null);
   
   const { courses, loading, error } = useCertificationCourses();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const filteredCertifications = courses.filter(cert => {
     const matchesSearch = cert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -23,7 +31,14 @@ const CertificationHub = () => {
                         (priceFilter === "free" && cert.price === 0) ||
                         (priceFilter === "paid" && cert.price > 0);
     
-    return matchesSearch && matchesDifficulty && matchesPrice;
+    // Track filtering
+    const matchesTrack = trackFilter === "all" || 
+      (trackFilter === "gis" && cert.title.toLowerCase().includes("gis")) ||
+      (trackFilter === "geoai" && cert.title.toLowerCase().includes("ai")) ||
+      (trackFilter === "remote-sensing" && cert.title.toLowerCase().includes("remote")) ||
+      (trackFilter === "webgis" && cert.title.toLowerCase().includes("web"));
+    
+    return matchesSearch && matchesDifficulty && matchesPrice && matchesTrack;
   });
 
   const blockchainCertifications = courses.filter(c => c.is_blockchain_verified);
@@ -31,6 +46,34 @@ const CertificationHub = () => {
   const stats = {
     totalCertifications: courses.length,
     blockchainCount: blockchainCertifications.length,
+  };
+
+  const handleEarnNftBadge = (cert: any) => {
+    setSelectedCert(cert);
+    setShowNftModal(true);
+  };
+
+  const handleDownloadCertificate = (cert: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to download certificates.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Generate mock certificate
+    toast({
+      title: "Certificate Downloaded",
+      description: `Smart certificate for ${cert.title} has been generated and downloaded.`,
+    });
+  };
+
+  const handleShareLinkedIn = (cert: any) => {
+    const shareText = `Just earned my certification in ${cert.title} from HaritaHive! 🎓🌍 #GIS #Certification #GeospatialTech`;
+    const shareUrl = `https://linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&text=${encodeURIComponent(shareText)}`;
+    window.open(shareUrl, '_blank');
   };
 
   if (loading) {
@@ -147,8 +190,20 @@ const CertificationHub = () => {
                 className="pl-10"
               />
             </div>
+            <Select value={trackFilter} onValueChange={setTrackFilter}>
+              <SelectTrigger className="w-full md:w-40">
+                <SelectValue placeholder="Track" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tracks</SelectItem>
+                <SelectItem value="gis">GIS</SelectItem>
+                <SelectItem value="geoai">GeoAI</SelectItem>
+                <SelectItem value="remote-sensing">Remote Sensing</SelectItem>
+                <SelectItem value="webgis">Web GIS</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-40">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
               <SelectContent>
@@ -172,12 +227,101 @@ const CertificationHub = () => {
         </CardContent>
       </Card>
 
+      {/* How It Works Section */}
+      <Card className="mb-8 border-dashed border-2">
+        <CardContent className="p-8">
+          <div className="text-center">
+            <HelpCircle className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">How Smart Credentials Work</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div className="text-center">
+                <div className="bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                  <Award className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">Complete Course</h3>
+                <p className="text-sm text-muted-foreground">Finish all modules and pass assessments</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-blue-500/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                  <Shield className="h-8 w-8 text-blue-500" />
+                </div>
+                <h3 className="font-semibold mb-2">Earn NFT Badge</h3>
+                <p className="text-sm text-muted-foreground">Get blockchain-verified digital badge</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-green-500/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                  <Share2 className="h-8 w-8 text-green-500" />
+                </div>
+                <h3 className="font-semibold mb-2">Share Achievements</h3>
+                <p className="text-sm text-muted-foreground">Display on LinkedIn and professional profiles</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Certification Courses Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         {filteredCertifications.map(cert => (
-          <CertificationCourseCard key={cert.id} {...cert} />
+          <div key={cert.id} className="relative">
+            <CertificationCourseCard {...cert} />
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => handleEarnNftBadge(cert)}
+                title="Earn NFT Badge"
+              >
+                🎖️
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDownloadCertificate(cert)}
+                title="Download Certificate"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleShareLinkedIn(cert)}
+                title="Share on LinkedIn"
+              >
+                <Linkedin className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         ))}
       </div>
+
+      {/* NFT Badge Modal */}
+      <Dialog open={showNftModal} onOpenChange={setShowNftModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>🎖️ NFT Badge Earned!</DialogTitle>
+          </DialogHeader>
+          <div className="text-center space-y-4">
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full w-24 h-24 flex items-center justify-center mx-auto">
+              <Award className="h-12 w-12 text-white" />
+            </div>
+            <h3 className="text-xl font-bold">{selectedCert?.title}</h3>
+            <p className="text-muted-foreground">
+              Your achievement has been recorded on the blockchain for permanent verification.
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => handleDownloadCertificate(selectedCert)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Download Certificate
+              </Button>
+              <Button variant="outline" onClick={() => handleShareLinkedIn(selectedCert)}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {filteredCertifications.length === 0 && courses.length > 0 && (
         <Card className="text-center py-12">

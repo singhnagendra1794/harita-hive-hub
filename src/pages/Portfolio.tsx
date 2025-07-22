@@ -34,7 +34,10 @@ interface Project {
   imageUrl?: string;
   completedDate: string;
   duration?: string;
-  source: "harita-hive" | "custom";
+  source: "harita-hive" | "custom" | "live-class";
+  skills?: string[];
+  isPublished?: boolean;
+  aiSummary?: string;
 }
 
 interface Skill {
@@ -75,6 +78,7 @@ const Portfolio = () => {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [autoDetectedProjects, setAutoDetectedProjects] = useState<Project[]>([]);
+  const [liveClassProjects, setLiveClassProjects] = useState<Project[]>([]);
 
   const [skills, setSkills] = useState<Skill[]>([]);
   const [autoDetectedSkills, setAutoDetectedSkills] = useState<Skill[]>([]);
@@ -126,6 +130,36 @@ const Portfolio = () => {
       { name: "Python", level: "advanced", category: "programming", source: "auto" },
       { name: "QGIS", level: "intermediate", category: "gis", source: "auto" },
       { name: "Google Earth Engine", level: "beginner", category: "analysis", source: "auto" }
+    ]);
+
+    // Mock projects from live classes
+    setLiveClassProjects([
+      {
+        id: "live-1",
+        title: "Urban Heat Island Analysis Dashboard",
+        description: "Interactive web dashboard analyzing urban heat patterns using satellite imagery and weather data from our live GeoAI workshop.",
+        type: "web-map" as const,
+        technologies: ["Python", "Streamlit", "Folium", "Google Earth Engine"],
+        demoUrl: "https://haritahive.com/demos/urban-heat-dashboard",
+        completedDate: "2024-01-15",
+        source: "live-class" as const,
+        skills: ["Remote Sensing", "Python", "Data Visualization", "Web Development"],
+        isPublished: true,
+        aiSummary: "This project showcases advanced geospatial analysis skills, combining remote sensing data with interactive web technologies to create meaningful environmental insights."
+      },
+      {
+        id: "live-2", 
+        title: "Flood Risk Assessment Tool",
+        description: "Machine learning model for flood prediction created during the 'AI for Disaster Management' live session.",
+        type: "analysis" as const,
+        technologies: ["Python", "TensorFlow", "PostGIS", "Docker"],
+        githubUrl: "https://github.com/user/flood-risk-ml",
+        completedDate: "2024-02-20",
+        source: "live-class" as const,
+        skills: ["Machine Learning", "PostGIS", "Disaster Management", "Python"],
+        isPublished: false,
+        aiSummary: "Demonstrates proficiency in applying machine learning to geospatial problems, with focus on real-world disaster management applications."
+      }
     ]);
   };
 
@@ -271,6 +305,7 @@ const Portfolio = () => {
               projects={projects}
               onSave={handleSaveProjects}
               haritaHiveProjects={autoDetectedProjects}
+              liveClassProjects={liveClassProjects}
             />
           </TabsContent>
 
@@ -286,7 +321,7 @@ const Portfolio = () => {
             <ExportSection 
               data={{
                 personalInfo,
-                projects: [...autoDetectedProjects, ...projects],
+                projects: [...autoDetectedProjects, ...liveClassProjects, ...projects],
                 skills: [...autoDetectedSkills, ...skills],
                 certificates
               }}

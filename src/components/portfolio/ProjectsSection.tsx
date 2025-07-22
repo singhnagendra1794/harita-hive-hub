@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Save, X, Github, Globe, Eye, Upload, Calendar } from "lucide-react";
+import { Plus, Edit, Save, X, Github, Globe, Eye, Upload, Calendar, Video } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { EnhancedProjectCard } from "./EnhancedProjectCard";
 
 interface Project {
   id: string;
@@ -20,13 +21,17 @@ interface Project {
   imageUrl?: string;
   completedDate: string;
   duration?: string;
-  source: "harita-hive" | "custom";
+  source: "harita-hive" | "custom" | "live-class";
+  skills?: string[];
+  isPublished?: boolean;
+  aiSummary?: string;
 }
 
 interface ProjectsSectionProps {
   projects: Project[];
   onSave: (projects: Project[]) => void;
   haritaHiveProjects?: Project[]; // Auto-fetched from platform
+  liveClassProjects?: Project[]; // Projects from live classes
 }
 
 const projectTypes = [
@@ -44,12 +49,24 @@ const commonTechnologies = [
   "TensorFlow", "PyTorch", "R", "SQL", "Docker", "AWS", "Azure"
 ];
 
-export const ProjectsSection = ({ projects, onSave, haritaHiveProjects = [] }: ProjectsSectionProps) => {
+export const ProjectsSection = ({ 
+  projects, 
+  onSave, 
+  haritaHiveProjects = [], 
+  liveClassProjects = [] 
+}: ProjectsSectionProps) => {
   const [localProjects, setLocalProjects] = useState(projects);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
-  const allProjects = [...haritaHiveProjects, ...localProjects];
+  const allProjects = [...haritaHiveProjects, ...liveClassProjects, ...localProjects];
+
+  const handlePublishToggle = (projectId: string, published: boolean) => {
+    setLocalProjects(prev => 
+      prev.map(p => p.id === projectId ? { ...p, isPublished: published } : p)
+    );
+    onSave(localProjects.map(p => p.id === projectId ? { ...p, isPublished: published } : p));
+  };
 
   const handleSaveProject = (project: Project) => {
     if (editingProject) {
@@ -93,6 +110,26 @@ export const ProjectsSection = ({ projects, onSave, haritaHiveProjects = [] }: P
         </Dialog>
       </div>
 
+      {/* Showcase Projects From Live Classes */}
+      {liveClassProjects.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Video className="h-5 w-5 text-red-500" />
+            <Badge variant="default" className="bg-red-500">Live Class</Badge>
+            Showcase Projects From Live Classes
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {liveClassProjects.map(project => (
+              <EnhancedProjectCard 
+                key={project.id} 
+                project={project}
+                onPublishToggle={handlePublishToggle}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Auto-fetched Harita Hive Projects */}
       {haritaHiveProjects.length > 0 && (
         <div>
@@ -102,7 +139,7 @@ export const ProjectsSection = ({ projects, onSave, haritaHiveProjects = [] }: P
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {haritaHiveProjects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+              <EnhancedProjectCard key={project.id} project={project} />
             ))}
           </div>
         </div>
@@ -114,11 +151,12 @@ export const ProjectsSection = ({ projects, onSave, haritaHiveProjects = [] }: P
           <h3 className="text-lg font-semibold mb-4">Custom Projects</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {localProjects.map(project => (
-              <ProjectCard 
+              <EnhancedProjectCard 
                 key={project.id} 
                 project={project} 
                 onEdit={() => setEditingProject(project)}
                 onDelete={() => handleDeleteProject(project.id)}
+                onPublishToggle={handlePublishToggle}
                 showActions
               />
             ))}

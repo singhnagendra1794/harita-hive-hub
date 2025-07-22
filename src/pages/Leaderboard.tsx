@@ -255,6 +255,28 @@ const Leaderboard = () => {
     return badgeIcons[badgeType as keyof typeof badgeIcons] || '🏆';
   };
 
+  const getTierBadge = (points: number) => {
+    if (points >= 1000) return { icon: '💎', name: 'Platinum', color: 'text-purple-500' };
+    if (points >= 500) return { icon: '🏆', name: 'Gold', color: 'text-yellow-500' };
+    if (points >= 200) return { icon: '🥈', name: 'Silver', color: 'text-gray-400' };
+    if (points >= 50) return { icon: '🥉', name: 'Bronze', color: 'text-amber-600' };
+    return { icon: '🌱', name: 'Rookie', color: 'text-green-500' };
+  };
+
+  const getActivityTooltip = (type: string) => {
+    const tooltips = {
+      tool_upload: 'Tools uploaded to marketplace (+10 pts)',
+      code_share: 'Code snippets shared (+5 pts)',
+      note_share: 'Notes and tutorials shared (+7 pts)',
+      challenge_join: 'Challenges participated in (+8 pts)',
+      post_create: 'Community posts created (+3 pts)',
+      comment_create: 'Comments on discussions (+2 pts)',
+      like_give: 'Likes given to content (+1 pt)',
+      course_complete: 'Courses completed (+15 pts)'
+    };
+    return tooltips[type as keyof typeof tooltips] || 'Activity points earned';
+  };
+
   if (isLoading) {
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -351,6 +373,14 @@ const Leaderboard = () => {
                         <p className="text-3xl font-bold text-primary mb-2">
                           {getCurrentPoints(userData)}
                         </p>
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <span className={`text-2xl ${getTierBadge(getCurrentPoints(userData)).color}`}>
+                            {getTierBadge(getCurrentPoints(userData)).icon}
+                          </span>
+                          <Badge variant="secondary" className="text-xs">
+                            {getTierBadge(getCurrentPoints(userData)).name}
+                          </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground mb-3">
                           {timeFilter === 'weekly' ? 'Weekly' : timeFilter === 'monthly' ? 'Monthly' : 'Total'} Points
                         </p>
@@ -404,11 +434,16 @@ const Leaderboard = () => {
                                   <h3 className="font-semibold">
                                     {userData.profiles?.full_name || 'Anonymous'}
                                   </h3>
-                                  {userData.user_badges?.slice(0, 2).map((badge, idx) => (
-                                    <span key={idx} title={badge.badge_name} className="text-sm">
-                                      {getBadgeIcon(badge.badge_type)}
+                                  <div className="flex items-center gap-1">
+                                    <span className={`text-sm ${getTierBadge(getCurrentPoints(userData)).color}`} title={`${getTierBadge(getCurrentPoints(userData)).name} Tier`}>
+                                      {getTierBadge(getCurrentPoints(userData)).icon}
                                     </span>
-                                  ))}
+                                    {userData.user_badges?.slice(0, 2).map((badge, idx) => (
+                                      <span key={idx} title={badge.badge_name} className="text-sm">
+                                        {getBadgeIcon(badge.badge_type)}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
                                   {getScoreBreakdown(userData)}
@@ -417,25 +452,25 @@ const Leaderboard = () => {
                                 {/* Activity Breakdown */}
                                 <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                                   {userData.tool_uploads > 0 && (
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1" title={getActivityTooltip('tool_upload')}>
                                       <Upload className="h-3 w-3" />
                                       {userData.tool_uploads}
                                     </span>
                                   )}
                                   {userData.code_shares > 0 && (
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1" title={getActivityTooltip('code_share')}>
                                       <Code className="h-3 w-3" />
                                       {userData.code_shares}
                                     </span>
                                   )}
                                   {userData.challenge_participations > 0 && (
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1" title={getActivityTooltip('challenge_join')}>
                                       <Target className="h-3 w-3" />
                                       {userData.challenge_participations}
                                     </span>
                                   )}
                                   {userData.courses_completed > 0 && (
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1" title={getActivityTooltip('course_complete')}>
                                       <BookOpen className="h-3 w-3" />
                                       {userData.courses_completed}
                                     </span>
