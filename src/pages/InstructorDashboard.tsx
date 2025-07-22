@@ -29,7 +29,7 @@ interface LiveClass {
   title: string;
   description: string;
   stream_key: string;
-  status: 'live' | 'ended';
+  status: 'preparing' | 'live' | 'ended';
   start_time: string;
   end_time: string | null;
   created_by: string;
@@ -226,8 +226,8 @@ const InstructorDashboard = () => {
   }
 
   const activeSessions = mySessions.filter(s => s.status === 'live');
-  const readyToStart = mySessions.filter(s => s.status === 'ended' && !s.end_time);
-  const endedSessions = mySessions.filter(s => s.status === 'ended' && s.end_time);
+  const readyToStart = mySessions.filter(s => s.status === 'preparing');
+  const endedSessions = mySessions.filter(s => s.status === 'ended');
 
   return (
     <div className="container py-12">
