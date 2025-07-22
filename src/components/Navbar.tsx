@@ -75,11 +75,11 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-background border-b sticky top-0 z-50">
-      <div className="container">
-        <div className="flex items-center justify-between h-16">
+    <nav className="sticky top-0 z-50 w-full max-w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-x-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
+        <div className="flex h-16 items-center justify-between w-full">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Link to="/" className="flex items-center space-x-2">
               <img 
                 src="/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png" 
@@ -90,12 +90,12 @@ const Navbar = () => {
                 width={32}
                 height={32}
               />
-              <span className="text-2xl font-bold text-primary">Harita Hive</span>
+              <span className="text-xl font-bold text-primary hidden sm:inline-block">Harita Hive</span>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          {/* Desktop Navigation - Hidden on small screens */}
+          <div className="hidden lg:flex items-center space-x-1 flex-1 justify-center max-w-full overflow-hidden">
             {/* Learning Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -103,7 +103,7 @@ const Navbar = () => {
                   Learning <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {learningLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -119,7 +119,7 @@ const Navbar = () => {
                   Tools <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {toolsLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -135,7 +135,7 @@ const Navbar = () => {
                   Work <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {workLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -151,7 +151,7 @@ const Navbar = () => {
                   Create <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {createLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -167,7 +167,7 @@ const Navbar = () => {
                   Career <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {careerLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -183,7 +183,7 @@ const Navbar = () => {
                   Community <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm border z-50">
+              <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                 {communityLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link to={link.href} className="w-full">{link.label}</Link>
@@ -201,8 +201,8 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Auth Buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
+          {/* Auth Buttons - Responsive */}
+          <div className="hidden lg:flex items-center space-x-2 flex-shrink-0">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -212,7 +212,7 @@ const Navbar = () => {
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-background border z-50">
+                <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-sm border z-[100] shadow-lg">
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center">
                       <User className="h-4 w-4 mr-2" />

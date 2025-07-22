@@ -20,14 +20,14 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background w-full max-w-full overflow-x-hidden">
       <ResourcePreloader />
       <HeaderTest />
       <HeaderOptimizer />
       <MobileOptimizations />
       <EnhancedAnalytics />
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {children}
       </main>
       <Footer />

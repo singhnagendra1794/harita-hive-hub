@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CRITICAL: Prevent horizontal overflow globally */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Responsive constraints for laptop screens */
+@media (max-width: 1440px) {
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
