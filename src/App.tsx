@@ -173,25 +173,31 @@ function App() {
                   } />
                   
                    {/* Public monetization pages */}
-                   <Route path="/talent-pool" element={<TalentPool />} />
-                   <Route path="/corporate-training" element={<CorporateTraining />} />
-                   <Route path="/task-board" element={<TaskBoard />} />
-                   <Route path="/certifications" element={<CertificationHub />} />
+                    <Route path="/talent-pool" element={<Layout><TalentPool /></Layout>} />
+                    <Route path="/corporate-training" element={<Layout><CorporateTraining /></Layout>} />
+                    <Route path="/task-board" element={<Layout><TaskBoard /></Layout>} />
+                    <Route path="/certifications" element={<Layout><CertificationHub /></Layout>} />
                    
-                   {/* Premium marketplace features */}
-                   <Route path="/gis-marketplace" element={
-                     <SubscriptionRoute requiredTier="pro">
-                       <GISMarketplace />
-                     </SubscriptionRoute>
-                   } />
-                    <Route path="/plugin-marketplace" element={
-                      <SubscriptionRoute requiredTier="pro">
-                        <PluginMarketplace />
-                      </SubscriptionRoute>
+                    {/* Premium marketplace features */}
+                    <Route path="/gis-marketplace" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="pro">
+                          <GISMarketplace />
+                        </SubscriptionRoute>
+                      </Layout>
                     } />
-                    <Route path="/enhanced-marketplace" element={
-                      <EnhancedPluginMarketplace />
-                    } />
+                     <Route path="/plugin-marketplace" element={
+                       <Layout>
+                         <SubscriptionRoute requiredTier="pro">
+                           <PluginMarketplace />
+                         </SubscriptionRoute>
+                       </Layout>
+                     } />
+                     <Route path="/enhanced-marketplace" element={
+                       <Layout>
+                         <EnhancedPluginMarketplace />
+                       </Layout>
+                     } />
                   
                   {/* Protected Routes */}
                    <Route path="/dashboard" element={
@@ -455,71 +461,95 @@ function App() {
                    } />
                   
                    
-                   {/* Enterprise-only routes */}
-                   <Route path="/enterprise-data-integration" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <EnterpriseDataIntegration />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/iot-data-processing" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <IoTDataProcessing />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/geoai-engine" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <GeoAIEngine />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/compliance-toolkit" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <ComplianceToolkit />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/spatial-risk-analysis" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <SpatialRiskAnalysis />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/developer-portal" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <DeveloperPortal />
-                     </SubscriptionRoute>
-                   } />
-                   <Route path="/enterprise-dashboard" element={
-                     <SubscriptionRoute requiredTier="enterprise">
-                       <EnterpriseDashboard />
-                     </SubscriptionRoute>
+                    {/* Enterprise-only routes */}
+                    <Route path="/enterprise-data-integration" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <EnterpriseDataIntegration />
+                        </SubscriptionRoute>
+                      </Layout>
                     } />
+                    <Route path="/iot-data-processing" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <IoTDataProcessing />
+                        </SubscriptionRoute>
+                      </Layout>
+                    } />
+                    <Route path="/geoai-engine" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <GeoAIEngine />
+                        </SubscriptionRoute>
+                      </Layout>
+                    } />
+                    <Route path="/compliance-toolkit" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <ComplianceToolkit />
+                        </SubscriptionRoute>
+                      </Layout>
+                    } />
+                    <Route path="/spatial-risk-analysis" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <SpatialRiskAnalysis />
+                        </SubscriptionRoute>
+                      </Layout>
+                    } />
+                    <Route path="/developer-portal" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <DeveloperPortal />
+                        </SubscriptionRoute>
+                      </Layout>
+                    } />
+                    <Route path="/enterprise-dashboard" element={
+                      <Layout>
+                        <SubscriptionRoute requiredTier="enterprise">
+                          <EnterpriseDashboard />
+                        </SubscriptionRoute>
+                      </Layout>
+                     } />
                      
-                     {/* New Feature Routes */}
-                     <Route path="/skill-copilot" element={
-                       <ProtectedRoute>
-                         <SkillCopilot />
-                       </ProtectedRoute>
-                     } />
-                     <Route path="/toolkits" element={
-                       <ProtectedRoute>
-                         <Toolkits />
-                       </ProtectedRoute>
-                     } />
-                       <Route path="/jobs-ai-discovery" element={
-                         <ProtectedRoute>
-                           <JobsAIDiscovery />
-                         </ProtectedRoute>
-                       } />
-                     <Route path="/project-studio" element={
-                       <SubscriptionRoute requiredTier="pro">
-                         <ProjectStudio />
-                       </SubscriptionRoute>
-                     } />
+                      {/* New Feature Routes */}
+                      <Route path="/skill-copilot" element={
+                        <Layout>
+                          <ProtectedRoute>
+                            <SkillCopilot />
+                          </ProtectedRoute>
+                        </Layout>
+                      } />
+                      <Route path="/toolkits" element={
+                        <Layout>
+                          <ProtectedRoute>
+                            <Toolkits />
+                          </ProtectedRoute>
+                        </Layout>
+                      } />
+                        <Route path="/jobs-ai-discovery" element={
+                          <Layout>
+                            <ProtectedRoute>
+                              <JobsAIDiscovery />
+                            </ProtectedRoute>
+                          </Layout>
+                        } />
+                      <Route path="/project-studio" element={
+                        <Layout>
+                          <SubscriptionRoute requiredTier="pro">
+                            <ProjectStudio />
+                          </SubscriptionRoute>
+                        </Layout>
+                      } />
                      <Route path="/labs" element={
-                       <SubscriptionRoute requiredTier="pro">
-                         <Labs />
-                       </SubscriptionRoute>
+                       <Layout>
+                         <SubscriptionRoute requiredTier="pro">
+                           <Labs />
+                         </SubscriptionRoute>
+                       </Layout>
                      } />
                      
-                     <Route path="*" element={<NotFound />} />
+                     <Route path="*" element={<Layout><NotFound /></Layout>} />
                   </Routes>
                  
                    {/* Performance monitoring and AI Assistant */}

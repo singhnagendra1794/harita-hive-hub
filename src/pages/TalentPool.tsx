@@ -1,7 +1,6 @@
 
 
 import { useState } from "react";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,23 +82,20 @@ const TalentPool = () => {
 
   if (error) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <div className="text-center py-12">
-            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error loading job listings</h3>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
+      <div className="container py-8">
+        <div className="text-center py-12">
+          <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Error loading job listings</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
       <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -371,7 +367,6 @@ const TalentPool = () => {
           </Card>
         )}
       </div>
-    </Layout>
   );
 };
 
