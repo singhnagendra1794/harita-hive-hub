@@ -141,14 +141,15 @@ export const OBSStreamManager: React.FC = () => {
 
     setLoading(true);
     try {
-      // Create live class entry with status 'preparing' (will become 'live' when RTMP starts)
+      // Create live class entry with status 'scheduled' (will become 'live' when RTMP starts)
       const { data: liveClass, error: liveClassError } = await supabase
         .from('live_classes')
         .insert({
           title: streamTitle || 'Live Stream',
+          course_title: streamTitle || 'Live Stream',
           description: streamDescription || '',
           stream_key: streamKey.stream_key,
-          status: 'preparing',
+          status: 'scheduled',
           start_time: new Date().toISOString(),
           created_by: user.id,
           viewer_count: 0

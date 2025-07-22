@@ -84,11 +84,11 @@ const LiveClasses = () => {
     const maxRetries = 3;
     
     try {
-      // Fetch current live streams (both 'live' and 'preparing' status)
+      // Fetch current live streams (both 'live' and 'scheduled' status)
       const { data: liveData, error: liveError } = await supabase
         .from('live_classes')
         .select('*')
-        .in('status', ['live', 'preparing'])
+        .in('status', ['live', 'scheduled'])
         .order('start_time', { ascending: false });
 
       if (liveError) throw liveError;
@@ -292,7 +292,7 @@ const LiveClasses = () => {
                       variant={currentLive.status === 'live' ? 'destructive' : 'secondary'} 
                       className={currentLive.status === 'live' ? 'animate-pulse mb-2' : 'mb-2'}
                     >
-                      {currentLive.status === 'live' ? '🔴 LIVE' : '⏳ PREPARING'}
+                      {currentLive.status === 'live' ? '🔴 LIVE' : '⏳ SCHEDULED'}
                     </Badge>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
@@ -304,7 +304,7 @@ const LiveClasses = () => {
               <CardContent>
                 <ScreenProtection enabled={true}>
                   <div className="aspect-video bg-black rounded-lg mb-4 overflow-hidden">
-                    {currentLive.status === 'preparing' ? (
+                    {currentLive.status === 'scheduled' ? (
                       <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
                         <div className="text-center">
                           <Video className="h-12 w-12 mx-auto mb-4 opacity-50 animate-pulse" />
