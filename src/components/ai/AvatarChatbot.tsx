@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MessageCircle, 
   Send, 
@@ -77,18 +78,15 @@ const AvatarChatbot: React.FC<AvatarChatbotProps> = ({ isOpen, onToggle }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+      const { data, error } = await supabase.functions.invoke('ava-assistant', {
+        body: { 
           message: content,
           context: 'gis_learning_platform'
-        })
+        }
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
+      if (error) throw error;
 
-      const data = await response.json();
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
