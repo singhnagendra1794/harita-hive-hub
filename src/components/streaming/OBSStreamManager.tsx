@@ -141,14 +141,14 @@ export const OBSStreamManager: React.FC = () => {
 
     setLoading(true);
     try {
-      // Create live class entry with status 'live'
+      // Create live class entry with status 'preparing' (will become 'live' when RTMP starts)
       const { data: liveClass, error: liveClassError } = await supabase
         .from('live_classes')
         .insert({
           title: streamTitle || 'Live Stream',
           description: streamDescription || '',
           stream_key: streamKey.stream_key,
-          status: 'live',
+          status: 'preparing',
           start_time: new Date().toISOString(),
           created_by: user.id,
           viewer_count: 0
@@ -170,13 +170,13 @@ export const OBSStreamManager: React.FC = () => {
       await loadCurrentSession();
       toast({
         title: "Stream Session Started",
-        description: "Your stream is ready! Configure OBS and start streaming.",
+        description: "Your stream is ready! Now start streaming in OBS to go live.",
       });
 
-      // Redirect to live classes page after 2 seconds
+      // Redirect to live classes page after 3 seconds
       setTimeout(() => {
         window.open('/live-classes', '_blank');
-      }, 2000);
+      }, 3000);
 
     } catch (error) {
       console.error('Error starting stream:', error);
@@ -195,6 +195,20 @@ export const OBSStreamManager: React.FC = () => {
 
     setLoading(true);
     try {
+      // Update live_classes status to 'ended' and set recording URL
+      const { error: liveClassError } = await supabase
+        .from('live_classes')
+        .update({
+          status: 'ended',
+          end_time: new Date().toISOString(),
+          recording_url: `https://stream.haritahive.com/recordings/${streamKey?.stream_key}.mp4`
+        })
+        .eq('stream_key', streamKey?.stream_key)
+        .eq('status', 'live');
+
+      if (liveClassError) console.warn('Live class update warning:', liveClassError);
+
+      // Also update stream session for backward compatibility
       const { error } = await supabase.rpc('update_stream_status', {
         p_session_id: currentSession.id,
         p_status: 'ended'

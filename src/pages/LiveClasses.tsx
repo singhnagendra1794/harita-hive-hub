@@ -84,11 +84,11 @@ const LiveClasses = () => {
     const maxRetries = 3;
     
     try {
-      // Fetch current live streams directly from live_classes table
+      // Fetch current live streams (both 'live' and 'preparing' status)
       const { data: liveData, error: liveError } = await supabase
         .from('live_classes')
         .select('*')
-        .eq('status', 'live')
+        .in('status', ['live', 'preparing'])
         .order('start_time', { ascending: false });
 
       if (liveError) throw liveError;
@@ -288,8 +288,11 @@ const LiveClasses = () => {
                     )}
                   </div>
                   <div className="text-right">
-                    <Badge variant="destructive" className="animate-pulse mb-2">
-                      🔴 LIVE
+                    <Badge 
+                      variant={currentLive.status === 'live' ? 'destructive' : 'secondary'} 
+                      className={currentLive.status === 'live' ? 'animate-pulse mb-2' : 'mb-2'}
+                    >
+                      {currentLive.status === 'live' ? '🔴 LIVE' : '⏳ PREPARING'}
                     </Badge>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
@@ -301,7 +304,25 @@ const LiveClasses = () => {
               <CardContent>
                 <ScreenProtection enabled={true}>
                   <div className="aspect-video bg-black rounded-lg mb-4 overflow-hidden">
-                    {playerError ? (
+                    {currentLive.status === 'preparing' ? (
+                      <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                        <div className="text-center">
+                          <Video className="h-12 w-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                          <p className="text-lg mb-2">Stream Preparing...</p>
+                          <p className="text-sm text-gray-400">
+                            Instructor is setting up. Stream will start automatically when ready.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-4"
+                            onClick={() => fetchLiveClasses(0)}
+                          >
+                            Check Again
+                          </Button>
+                        </div>
+                      </div>
+                    ) : playerError ? (
                       <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
                         <div className="text-center">
                           <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
