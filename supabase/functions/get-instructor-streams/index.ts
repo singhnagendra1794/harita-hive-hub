@@ -33,28 +33,45 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Get sessions and stream keys separately for better debugging
     const { data: sessions, error: sessionsError } = await supabaseClient
       .from('stream_sessions')
-      .select(`
-        *,
-        stream_keys!inner(stream_key)
-      `)
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (sessionsError) {
       console.error('Error fetching sessions:', sessionsError)
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch sessions' }),
+        JSON.stringify({ error: 'Failed to fetch sessions', details: sessionsError }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Get the user's active stream key
+    const { data: streamKeyData, error: keyError } = await supabaseClient
+      .from('stream_keys')
+      .select('stream_key')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single()
+
+    if (keyError) {
+      console.error('Error fetching stream key:', keyError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch stream key', details: keyError }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const streamKey = streamKeyData?.stream_key
+
 
     const mySessions = (sessions || []).map((session: any) => ({
       id: session.id,
       title: session.title,
       description: session.description,
-      stream_key: session.stream_keys.stream_key,
+      stream_key: streamKey,
       status: session.status,
       start_time: session.started_at,
       end_time: session.ended_at,
@@ -65,7 +82,7 @@ Deno.serve(async (req) => {
       created_at: session.created_at,
       updated_at: session.updated_at,
       rtmp_url: `rtmp://stream.haritahive.com/live`,
-      hls_url: `https://stream.haritahive.com/hls/${session.stream_keys.stream_key}.m3u8`,
+      hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
       is_live: session.status === 'live',
       has_ended: session.status === 'ended',
       can_start: session.status === 'preparing',
@@ -73,7 +90,7 @@ Deno.serve(async (req) => {
         Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / (1000 * 60)) : null,
       obs_setup: {
         server: `rtmp://stream.haritahive.com/live`,
-        stream_key: session.stream_keys.stream_key,
+        stream_key: streamKey,
         recommended_settings: {
           video_bitrate: '3000 Kbps',
           audio_bitrate: '128 Kbps',
