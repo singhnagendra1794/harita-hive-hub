@@ -37,6 +37,8 @@ export const useFreelanceProjects = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  console.log('useFreelanceProjects hook initialized');
+
   const fetchProjects = async () => {
     try {
       // Check if external_projects table exists by attempting to query it
@@ -275,7 +277,18 @@ export const useFreelanceProjects = () => {
   };
 
   useEffect(() => {
-    fetchProjects();
+    const initializeProjects = async () => {
+      try {
+        await fetchProjects();
+      } catch (error) {
+        console.error('Failed to initialize projects:', error);
+        // Set empty array as fallback
+        setProjects([]);
+        setLoading(false);
+      }
+    };
+    
+    initializeProjects();
   }, []);
 
   return {

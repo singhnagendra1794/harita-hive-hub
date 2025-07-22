@@ -22,6 +22,9 @@ const FreelanceProjects = () => {
   const [activeTab, setActiveTab] = useState("browse");
   const { toast } = useToast();
 
+  // Debug logging
+  console.log('FreelanceProjects component rendering', { loading, projects: projects?.length });
+
   useEffect(() => {
     let filtered = projects;
 
