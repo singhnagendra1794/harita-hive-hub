@@ -411,3 +411,4 @@ function generateFollowUpSuggestions(message: string, contextType: string): stri
   
   return suggestions.slice(0, 2);
 }
+}
