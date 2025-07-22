@@ -504,86 +504,19 @@ const FreelanceProjects = () => {
                 ))
               ) : (
                 filteredProjects.map((project) => (
-                  <Card key={project.id} className={`hover:shadow-lg transition-all duration-300 ${project.is_internal ? 'border-primary/30 bg-primary/5' : ''}`}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <CardTitle className="text-xl">{project.title}</CardTitle>
-                            <Badge className={getPlatformColor(project.source || 'Unknown')}>
-                              {project.source}
-                            </Badge>
-                            {project.is_internal && <Badge variant="default">Verified Client</Badge>}
-                            {project.is_remote && <Badge variant="outline">Remote</Badge>}
-                            <Badge className={getDifficultyColor(project.difficulty)}>
-                              {project.difficulty}
-                            </Badge>
-                          </div>
-                          <p className="text-lg font-semibold text-primary">{project.client_name}</p>
-                          {project.client_rating && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm font-semibold">{project.client_rating}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-4 text-muted-foreground mt-2 flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4" />
-                              {formatBudget(project)}
-                            </div>
-                            {project.duration && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {project.duration}
-                              </div>
-                            )}
-                            {project.location && (
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {project.location}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {user && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSaveProject(project)}
-                            >
-                              <Bookmark className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {project.is_internal ? (
-                            <Button>
-                              Apply Now
-                            </Button>
-                          ) : (
-                            <Button 
-                              onClick={() => handleApplyToProject(project)}
-                              variant="outline"
-                            >
-                              Apply on {project.source}
-                              <ExternalLink className="h-4 w-4 ml-2" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground mb-4 leading-relaxed">{project.description}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {project.skills.map((skill) => (
-                          <Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>
-                        ))}
-                      </div>
-                      <div className="flex justify-between items-center text-sm text-muted-foreground">
-                        <span>Posted {new Date(project.posted_date).toLocaleDateString()}</span>
-                        <span>{project.applicants_count} applicant{project.applicants_count !== 1 ? 's' : ''}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    user={user}
+                    onSave={handleSaveProject}
+                    onApply={handleApplyToProject}
+                    onViewSimilar={handleViewSimilar}
+                    formatBudget={formatBudget}
+                    getDifficultyColor={getDifficultyColor}
+                    getPlatformColor={getPlatformColor}
+                    matchScore={project.matchScore}
+                    isRecommended={project.isRecommended}
+                  />
                 ))
               )}
             </div>
@@ -650,6 +583,59 @@ const FreelanceProjects = () => {
             </div>
           </div>
         )}
+        </div>
+
+        {/* Sidebar - Top Picks for You */}
+        {user && topPicks.length > 0 && (
+          <div className="lg:col-span-1">
+            <Card className="sticky top-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Target className="h-5 w-5 text-primary" />
+                  Top Picks for You
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Based on your courses and skills
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {topPicks.map((project) => (
+                  <Card key={project.id} className="border-primary/20 hover:border-primary/40 transition-colors">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-sm mb-2 line-clamp-2">{project.title}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">{project.client_name}</p>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Progress value={project.matchScore} className="h-1 flex-1" />
+                        <span className="text-xs font-medium text-primary">{project.matchScore}%</span>
+                      </div>
+                      <div className="flex gap-1 mb-3">
+                        {project.skills.slice(0, 2).map((skill) => (
+                          <Badge key={skill} variant="secondary" className="text-xs px-1 py-0">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {project.skills.length > 2 && (
+                          <Badge variant="secondary" className="text-xs px-1 py-0">
+                            +{project.skills.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => handleSaveProject(project)}>
+                          Save for Later
+                        </Button>
+                        <Button size="sm" className="flex-1 text-xs" onClick={() => handleApplyToProject(project)}>
+                          Apply Now
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
