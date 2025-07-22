@@ -196,6 +196,7 @@ async function getUserContext(userId: string) {
     console.error('Error fetching user context:', error);
     return { profile: {}, subscription: { subscription_tier: 'free' }, courses: [], skill_level: 'beginner' };
   }
+}
 
 async function getRelevantContext(message: string, contextType: string): Promise<ContextData[]> {
   const contexts: ContextData[] = [];
@@ -410,5 +411,4 @@ function generateFollowUpSuggestions(message: string, contextType: string): stri
   }
   
   return suggestions.slice(0, 2);
-}
 }

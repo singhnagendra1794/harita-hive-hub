@@ -81,16 +81,30 @@ const AvatarChatbot: React.FC<AvatarChatbotProps> = ({ isOpen, onToggle }) => {
       const { data, error } = await supabase.functions.invoke('ava-assistant', {
         body: { 
           message: content,
-          context: 'gis_learning_platform'
+          context: 'gis_learning_platform',
+          user_id: 'anonymous', // We can enhance this later with actual user ID
+          conversation_id: crypto.randomUUID()
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Function call failed: ${error.message}`);
+      }
 
-      
+      // Handle different response formats
+      let responseContent = '';
+      if (data?.response) {
+        responseContent = data.response;
+      } else if (data?.fallback_response) {
+        responseContent = data.fallback_response;
+      } else {
+        responseContent = 'I apologize, but I encountered an issue processing your request. Please try again.';
+      }
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: responseContent,
         role: 'assistant',
         timestamp: new Date(),
         hasAudio: audioEnabled
@@ -99,8 +113,8 @@ const AvatarChatbot: React.FC<AvatarChatbotProps> = ({ isOpen, onToggle }) => {
       setMessages(prev => [...prev, assistantMessage]);
 
       // Generate audio if enabled
-      if (audioEnabled) {
-        await generateAudio(data.response);
+      if (audioEnabled && responseContent) {
+        await generateAudio(responseContent);
       }
 
     } catch (error) {
