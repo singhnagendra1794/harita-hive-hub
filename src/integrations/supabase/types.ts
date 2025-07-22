@@ -155,6 +155,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ava_conversations: {
+        Row: {
+          assistant_response: string
+          context_data: Json | null
+          context_type: string | null
+          conversation_id: string
+          created_at: string
+          feedback: number | null
+          id: string
+          updated_at: string
+          user_id: string
+          user_message: string
+        }
+        Insert: {
+          assistant_response: string
+          context_data?: Json | null
+          context_type?: string | null
+          conversation_id: string
+          created_at?: string
+          feedback?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          user_message: string
+        }
+        Update: {
+          assistant_response?: string
+          context_data?: Json | null
+          context_type?: string | null
+          conversation_id?: string
+          created_at?: string
+          feedback?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          user_message?: string
+        }
+        Relationships: []
+      }
+      ava_user_memory: {
+        Row: {
+          context_type: string
+          created_at: string
+          frequency_count: number | null
+          id: string
+          key_topics: string[] | null
+          last_accessed: string | null
+          solution_provided: string | null
+          user_id: string
+          user_intent: string | null
+        }
+        Insert: {
+          context_type: string
+          created_at?: string
+          frequency_count?: number | null
+          id?: string
+          key_topics?: string[] | null
+          last_accessed?: string | null
+          solution_provided?: string | null
+          user_id: string
+          user_intent?: string | null
+        }
+        Update: {
+          context_type?: string
+          created_at?: string
+          frequency_count?: number | null
+          id?: string
+          key_topics?: string[] | null
+          last_accessed?: string | null
+          solution_provided?: string | null
+          user_id?: string
+          user_intent?: string | null
+        }
+        Relationships: []
+      }
       beta_analytics: {
         Row: {
           date_bucket: string | null
