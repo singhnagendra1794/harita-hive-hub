@@ -17,8 +17,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+console.log("App loading started...");
+
 const container = document.getElementById("root");
 if (!container) throw new Error('Failed to find the root element');
+
+console.log("Root element found, rendering App...");
 
 const root = createRoot(container);
 root.render(
@@ -26,3 +30,5 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+console.log("App render initiated");

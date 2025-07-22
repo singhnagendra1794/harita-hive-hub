@@ -114,6 +114,7 @@ const GoLive = lazy(() => import("./pages/GoLive"));
 const WatchLive = lazy(() => import("./pages/WatchLive"));
 
 function App() {
+  console.log("App component rendering...");
   const queryClient = new QueryClient();
   return (
     <ErrorBoundary>
