@@ -99,13 +99,13 @@ Deno.serve(async (req) => {
         success: true,
         session_id: sessionId,
         stream_key: streamKey,
-        rtmp_server: 'rtmp://a.rtmp.youtube.com/live2',
-        hls_url: `https://haritahive.com/stream/${streamKey}`,
+        rtmp_server: 'rtmp://stream.haritahive.com/live',
+        hls_url: `https://stream.haritahive.com/hls/${streamKey}.m3u8`,
         obs_setup: {
-          server: 'rtmp://a.rtmp.youtube.com/live2',
+          server: 'rtmp://stream.haritahive.com/live',
           stream_key: streamKey,
           recommended_settings: {
-            video_bitrate: '2500 Kbps',
+            video_bitrate: '3000 Kbps',
             audio_bitrate: '128 Kbps',
             resolution: '1920x1080',
             fps: 30,

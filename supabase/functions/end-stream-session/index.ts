@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -22,8 +21,11 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseClient.auth.getUser()
+
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
@@ -35,41 +37,24 @@ Deno.serve(async (req) => {
 
     if (!class_id) {
       return new Response(
-        JSON.stringify({ error: 'class_id is required' }),
+        JSON.stringify({ error: 'Session ID is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get the live class to verify ownership and get stream key
-    const { data: liveClass, error: fetchError } = await supabaseClient
-      .from('live_classes')
-      .select('*')
-      .eq('id', class_id)
-      .eq('created_by', user.id)
-      .single()
-
-    if (fetchError || !liveClass) {
-      return new Response(
-        JSON.stringify({ error: 'Live class not found or access denied' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Update the live class to ended status
-    const { data: updatedClass, error: updateError } = await supabaseClient
-      .from('live_classes')
-      .update({
+    const { data, error } = await supabaseClient
+      .from('stream_sessions')
+      .update({ 
         status: 'ended',
-        end_time: new Date().toISOString(),
-        recording_url: `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`
+        ended_at: new Date().toISOString()
       })
       .eq('id', class_id)
-      .eq('created_by', user.id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
-    if (updateError) {
-      console.error('Error ending stream session:', updateError)
+    if (error) {
+      console.error('Error ending stream session:', error)
       return new Response(
         JSON.stringify({ error: 'Failed to end stream session' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -77,17 +62,16 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({
+      JSON.stringify({ 
         success: true,
-        live_class: updatedClass,
-        message: 'Stream session ended successfully',
-        recording_url: `https://stream.haritahive.com/recordings/${liveClass.stream_key}.mp4`
+        message: 'Stream ended successfully',
+        session: data
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in end-stream-session:', error)
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

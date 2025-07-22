@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -22,7 +21,6 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Get the authenticated user
     const {
       data: { user },
       error: authError,
@@ -35,7 +33,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get user's stream sessions
     const { data: sessions, error: sessionsError } = await supabaseClient
       .from('stream_sessions')
       .select(`
@@ -53,7 +50,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Format sessions for the instructor dashboard
     const mySessions = (sessions || []).map((session: any) => ({
       id: session.id,
       title: session.title,
@@ -62,16 +58,24 @@ Deno.serve(async (req) => {
       status: session.status,
       start_time: session.started_at,
       end_time: session.ended_at,
+      created_by: session.user_id,
+      thumbnail_url: null,
+      recording_url: session.recording_url,
+      viewer_count: session.viewer_count || 0,
       created_at: session.created_at,
       updated_at: session.updated_at,
-      viewer_count: session.viewer_count || 0,
+      rtmp_url: `rtmp://stream.haritahive.com/live`,
+      hls_url: `https://stream.haritahive.com/hls/${session.stream_keys.stream_key}.m3u8`,
+      is_live: session.status === 'live',
+      has_ended: session.status === 'ended',
+      can_start: session.status === 'preparing',
       duration_minutes: session.ended_at && session.started_at ? 
         Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / (1000 * 60)) : null,
       obs_setup: {
-        server: 'rtmp://a.rtmp.youtube.com/live2',
+        server: `rtmp://stream.haritahive.com/live`,
         stream_key: session.stream_keys.stream_key,
         recommended_settings: {
-          video_bitrate: '2500 Kbps',
+          video_bitrate: '3000 Kbps',
           audio_bitrate: '128 Kbps',
           resolution: '1920x1080',
           fps: 30,

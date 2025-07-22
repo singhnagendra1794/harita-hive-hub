@@ -6686,6 +6686,13 @@ export type Database = {
           days_old: number
         }[]
       }
+      get_user_profile_for_stream: {
+        Args: { p_user_id: string }
+        Returns: {
+          full_name: string
+          email: string
+        }[]
+      }
       get_user_recommendations: {
         Args: { p_user_id: string; p_limit?: number }
         Returns: {

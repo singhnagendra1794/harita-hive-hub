@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -22,8 +21,11 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseClient.auth.getUser()
+
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
@@ -35,55 +37,24 @@ Deno.serve(async (req) => {
 
     if (!class_id) {
       return new Response(
-        JSON.stringify({ error: 'class_id is required' }),
+        JSON.stringify({ error: 'Session ID is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get the live class to verify ownership
-    const { data: liveClass, error: fetchError } = await supabaseClient
-      .from('live_classes')
-      .select('*')
-      .eq('id', class_id)
-      .eq('created_by', user.id)
-      .single()
-
-    if (fetchError || !liveClass) {
-      return new Response(
-        JSON.stringify({ error: 'Live class not found or access denied' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Check if already live
-    if (liveClass.status === 'live') {
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          live_class: liveClass,
-          message: 'Stream is already live',
-          hls_url: `https://stream.haritahive.com/hls/${liveClass.stream_key}.m3u8`
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Update the live class to live status
-    const { data: updatedClass, error: updateError } = await supabaseClient
-      .from('live_classes')
-      .update({
+    const { data, error } = await supabaseClient
+      .from('stream_sessions')
+      .update({ 
         status: 'live',
-        start_time: new Date().toISOString(),
-        end_time: null, // Clear any previous end time
-        viewer_count: 0 // Reset viewer count
+        started_at: new Date().toISOString()
       })
       .eq('id', class_id)
-      .eq('created_by', user.id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
-    if (updateError) {
-      console.error('Error starting live stream:', updateError)
+    if (error) {
+      console.error('Error starting live stream:', error)
       return new Response(
         JSON.stringify({ error: 'Failed to start live stream' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -91,20 +62,16 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({
+      JSON.stringify({ 
         success: true,
-        live_class: updatedClass,
         message: 'Stream started successfully',
-        hls_url: `https://stream.haritahive.com/hls/${updatedClass.stream_key}.m3u8`,
-        rtmp_url: `rtmp://stream.haritahive.com/live`,
-        stream_key: updatedClass.stream_key,
-        viewer_url: `/live-classes?stream=${updatedClass.stream_key}`
+        session: data
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in start-live-stream:', error)
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
