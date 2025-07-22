@@ -108,7 +108,7 @@ export const useGEOVA = (options: UseGEOVAOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, user, conversationId, options.contextType, voiceEnabled, toast]);
+  }, [user, conversationId, options.contextType, voiceEnabled, toast]);
 
   const sendVoiceMessage = useCallback(async (messageText: string) => {
     return await sendMessage(messageText, 'voice');

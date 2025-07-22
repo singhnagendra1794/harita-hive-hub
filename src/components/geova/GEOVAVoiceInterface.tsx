@@ -213,7 +213,7 @@ export const GEOVAVoiceInterface: React.FC<GEOVAVoiceInterfaceProps> = ({
   // Expose speakText to parent component
   useEffect(() => {
     onTextToSpeech(speakText);
-  }, [onTextToSpeech, speakText]);
+  }, [onTextToSpeech]);
 
   const toggleVoice = () => {
     setVoiceEnabled(!voiceEnabled);
