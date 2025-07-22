@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/Layout";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -235,16 +235,13 @@ const Portfolio = () => {
 
   if (isLoading) {
     return (
-      <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading portfolio...</div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -298,7 +295,6 @@ const Portfolio = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
   );
 };
 

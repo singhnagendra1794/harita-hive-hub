@@ -9,6 +9,7 @@ import { ChatbotProvider } from "@/components/ai/ChatbotProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SubscriptionRoute from "@/components/SubscriptionRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
 import NotificationWrapper from "@/components/NotificationWrapper";
 import AILearningAssistant from "@/components/ai/AILearningAssistant";
@@ -59,7 +60,10 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 // Loading component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      <p className="mt-4 text-muted-foreground">Loading...</p>
+    </div>
   </div>
 );
 // More lazy loaded pages
@@ -147,7 +151,17 @@ function App() {
            <Route path="/leaderboard" element={<Layout><RouteWrapper><Leaderboard /></RouteWrapper></Layout>} />
           
           <Route path="/job-board" element={<Layout><RouteWrapper><JobBoard /></RouteWrapper></Layout>} />
-          <Route path="/freelance-projects" element={<Layout><RouteWrapper><FreelanceProjects /></RouteWrapper></Layout>} />
+          <Route path="/freelance-projects" element={
+            <Layout>
+              <RouteWrapper>
+                <PageErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <FreelanceProjects />
+                  </Suspense>
+                </PageErrorBoundary>
+              </RouteWrapper>
+            </Layout>
+          } />
           <Route path="/studio" element={<Layout><RouteWrapper><Studio /></RouteWrapper></Layout>} />
           <Route path="/portfolio" element={<Layout><RouteWrapper><Portfolio /></RouteWrapper></Layout>} />
           <Route path="/mentorship" element={<Layout><RouteWrapper><Mentorship /></RouteWrapper></Layout>} />
@@ -174,26 +188,66 @@ function App() {
                   } />
                   
                    {/* Public monetization pages */}
-                    <Route path="/talent-pool" element={<Layout><TalentPool /></Layout>} />
-                    <Route path="/corporate-training" element={<Layout><CorporateTraining /></Layout>} />
-                    <Route path="/task-board" element={<Layout><TaskBoard /></Layout>} />
-                    <Route path="/certifications" element={<Layout><CertificationHub /></Layout>} />
+                     <Route path="/talent-pool" element={
+                       <Layout>
+                         <PageErrorBoundary>
+                           <Suspense fallback={<PageLoader />}>
+                             <TalentPool />
+                           </Suspense>
+                         </PageErrorBoundary>
+                       </Layout>
+                     } />
+                     <Route path="/corporate-training" element={
+                       <Layout>
+                         <PageErrorBoundary>
+                           <Suspense fallback={<PageLoader />}>
+                             <CorporateTraining />
+                           </Suspense>
+                         </PageErrorBoundary>
+                       </Layout>
+                     } />
+                     <Route path="/task-board" element={
+                       <Layout>
+                         <PageErrorBoundary>
+                           <Suspense fallback={<PageLoader />}>
+                             <TaskBoard />
+                           </Suspense>
+                         </PageErrorBoundary>
+                       </Layout>
+                     } />
+                     <Route path="/certifications" element={
+                       <Layout>
+                         <PageErrorBoundary>
+                           <Suspense fallback={<PageLoader />}>
+                             <CertificationHub />
+                           </Suspense>
+                         </PageErrorBoundary>
+                       </Layout>
+                     } />
                    
                     {/* Premium marketplace features */}
-                    <Route path="/gis-marketplace" element={
-                      <Layout>
-                        <SubscriptionRoute requiredTier="pro">
-                          <GISMarketplace />
-                        </SubscriptionRoute>
-                      </Layout>
-                    } />
-                     <Route path="/plugin-marketplace" element={
+                     <Route path="/gis-marketplace" element={
                        <Layout>
                          <SubscriptionRoute requiredTier="pro">
-                           <PluginMarketplace />
+                           <PageErrorBoundary>
+                             <Suspense fallback={<PageLoader />}>
+                               <GISMarketplace />
+                             </Suspense>
+                           </PageErrorBoundary>
                          </SubscriptionRoute>
                        </Layout>
                      } />
+                      <Route path="/plugin-marketplace" element={
+                        <Layout>
+                          <SubscriptionRoute requiredTier="pro">
+                            <PageErrorBoundary>
+                              <Suspense fallback={<PageLoader />}>
+                                <PluginMarketplace />
+                              </Suspense>
+                            </PageErrorBoundary>
+                          </SubscriptionRoute>
+                        </Layout>
+                      } />
                      <Route path="/enhanced-marketplace" element={
                        <Layout>
                          <EnhancedPluginMarketplace />
@@ -521,20 +575,28 @@ function App() {
                           </ProtectedRoute>
                         </Layout>
                       } />
-                      <Route path="/toolkits" element={
-                        <Layout>
-                          <ProtectedRoute>
-                            <Toolkits />
-                          </ProtectedRoute>
-                        </Layout>
-                      } />
-                        <Route path="/jobs-ai-discovery" element={
-                          <Layout>
-                            <ProtectedRoute>
-                              <JobsAIDiscovery />
-                            </ProtectedRoute>
-                          </Layout>
-                        } />
+                       <Route path="/toolkits" element={
+                         <Layout>
+                           <ProtectedRoute>
+                             <PageErrorBoundary>
+                               <Suspense fallback={<PageLoader />}>
+                                 <Toolkits />
+                               </Suspense>
+                             </PageErrorBoundary>
+                           </ProtectedRoute>
+                         </Layout>
+                       } />
+                         <Route path="/jobs-ai-discovery" element={
+                           <Layout>
+                             <ProtectedRoute>
+                               <PageErrorBoundary>
+                                 <Suspense fallback={<PageLoader />}>
+                                   <JobsAIDiscovery />
+                                 </Suspense>
+                               </PageErrorBoundary>
+                             </ProtectedRoute>
+                           </Layout>
+                         } />
                       <Route path="/project-studio" element={
                         <Layout>
                           <SubscriptionRoute requiredTier="pro">
@@ -542,13 +604,17 @@ function App() {
                           </SubscriptionRoute>
                         </Layout>
                       } />
-                     <Route path="/labs" element={
-                       <Layout>
-                         <SubscriptionRoute requiredTier="pro">
-                           <Labs />
-                         </SubscriptionRoute>
-                       </Layout>
-                      } />
+                      <Route path="/labs" element={
+                        <Layout>
+                          <SubscriptionRoute requiredTier="pro">
+                            <PageErrorBoundary>
+                              <Suspense fallback={<PageLoader />}>
+                                <Labs />
+                              </Suspense>
+                            </PageErrorBoundary>
+                          </SubscriptionRoute>
+                        </Layout>
+                       } />
                       
                       {/* Course Access Routes */}
                       <Route path="/enrolled-courses" element={

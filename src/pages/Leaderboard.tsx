@@ -30,7 +30,7 @@ import {
   Users,
   Calendar
 } from 'lucide-react';
-import Layout from '@/components/Layout';
+
 import { useAuth } from '@/contexts/AuthContext';
 
 interface LeaderboardUser {
@@ -257,19 +257,16 @@ const Leaderboard = () => {
 
   if (isLoading) {
     return (
-      <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="animate-spin h-12 w-12 mx-auto mb-4 text-primary" />
             <p className="text-muted-foreground">Loading leaderboard...</p>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -562,7 +559,6 @@ const Leaderboard = () => {
           </Card>
         </div>
       </div>
-    </Layout>
   );
 };
 

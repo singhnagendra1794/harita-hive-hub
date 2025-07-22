@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Video, Mic, Settings, Play, Download, Share, Globe, FileText, Camera, Users, TrendingUp, Star, Award } from "lucide-react";
-import Layout from "@/components/Layout";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -176,7 +176,6 @@ const Studio = () => {
   };
 
   return (
-    <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -483,7 +482,6 @@ const Studio = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
   );
 };
 

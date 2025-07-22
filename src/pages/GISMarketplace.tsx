@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Layout from "../components/Layout";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,7 +184,6 @@ const GISMarketplace = () => {
   };
 
   return (
-    <Layout>
       <div className="container py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -396,7 +395,6 @@ const GISMarketplace = () => {
           </Card>
         )}
       </div>
-    </Layout>
   );
 };
 

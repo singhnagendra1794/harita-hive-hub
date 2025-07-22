@@ -9,7 +9,7 @@ import { Calendar, Clock, BookOpen, Brain, Target, Users, ArrowRight, CheckCircl
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
-import Layout from '@/components/Layout';
+
 import { CourseWaitlistForm } from '@/components/CourseWaitlistForm';
 
 interface ScheduleItem {
@@ -134,7 +134,6 @@ const UpcomingCourse: React.FC = () => {
   }, {} as Record<string, ScheduleItem[]>);
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
 
       <div className="container mx-auto px-4 py-8">
@@ -475,7 +474,6 @@ const UpcomingCourse: React.FC = () => {
         </div>
       </div>
       </div>
-    </Layout>
   );
 };
 
