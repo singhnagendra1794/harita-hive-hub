@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -143,8 +142,7 @@ const ProjectTemplates = () => {
     .sort((a, b) => b.count - a.count);
 
   return (
-    <Layout>
-      <div className="container py-8">
+    <div className="container py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
@@ -286,7 +284,7 @@ const ProjectTemplates = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

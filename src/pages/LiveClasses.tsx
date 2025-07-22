@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -164,19 +163,16 @@ const LiveClasses = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+      <div className="container py-12">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Live Classes</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -445,7 +441,7 @@ const LiveClasses = () => {
           </Button>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

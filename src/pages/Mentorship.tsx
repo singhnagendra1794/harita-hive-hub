@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Bot, User, MessageCircle, Linkedin, Mail, MapPin, Award, ExternalLink, Sparkles, Clock, Users, Star } from "lucide-react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +29,7 @@ const Mentorship = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Your Mentorship Journey</h1>
@@ -401,7 +399,7 @@ const Mentorship = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </div>
   );
 };
 
