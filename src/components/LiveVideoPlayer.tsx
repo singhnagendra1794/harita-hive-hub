@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
+import ScreenProtection from './security/ScreenProtection';
 
 interface LiveVideoPlayerProps {
   src: string;
@@ -87,20 +88,33 @@ export const LiveVideoPlayer = ({ src, title, className = "", onError, onLoad }:
   }, [src]);
 
   return (
-    <div className={`relative ${className}`}>
-      <video
-        ref={videoRef}
-        className="w-full h-full rounded-lg bg-black"
-        controls
-        muted
-        playsInline
-        poster="/placeholder.svg"
-      />
-      {title && (
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-md">
-          <span className="text-sm font-medium">{title}</span>
-        </div>
-      )}
-    </div>
+    <ScreenProtection enabled={true}>
+      <div className={`relative ${className}`}>
+        <video
+          ref={videoRef}
+          className="w-full h-full rounded-lg bg-black"
+          controls
+          muted
+          playsInline
+          poster="/placeholder.svg"
+          controlsList="nodownload nofullscreen"
+          onContextMenu={(e) => e.preventDefault()}
+          style={{ pointerEvents: 'auto' }}
+        />
+        {title && (
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-md">
+            <span className="text-sm font-medium">{title}</span>
+          </div>
+        )}
+        {/* Anti-screenshot overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none bg-transparent"
+          style={{
+            background: 'linear-gradient(45deg, transparent 49%, rgba(0,0,0,0.01) 50%, transparent 51%)',
+            mixBlendMode: 'overlay'
+          }}
+        />
+      </div>
+    </ScreenProtection>
   );
 };

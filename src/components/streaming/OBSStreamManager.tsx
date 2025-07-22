@@ -42,8 +42,8 @@ export const OBSStreamManager: React.FC = () => {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // RTMP streaming server URL - Deployed RTMP server
-  const RTMP_SERVER_URL = 'rtmp://uphgdwrwaizomnyuwfwr.supabase.co/functions/v1/rtmp-streaming-server';
+  // RTMP streaming server URL - AWS EC2 RTMP server
+  const RTMP_SERVER_URL = 'rtmp://stream.haritahive.com/live';
 
   // Check if user is super admin
   useEffect(() => {

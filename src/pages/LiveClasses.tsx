@@ -8,6 +8,8 @@ import LiveClassCard from '@/components/cards/LiveClassCard';
 import { useLazyLoad } from '@/hooks/useIntersectionObserver';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { LiveVideoPlayer } from '@/components/LiveVideoPlayer';
+import ScreenProtection from '@/components/security/ScreenProtection';
 
 interface LiveClass {
   id: string;
@@ -283,42 +285,52 @@ const LiveClasses = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="aspect-video bg-black rounded-lg mb-4 overflow-hidden">
-                  {playerError ? (
-                    <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
-                      <div className="text-center">
-                        <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg mb-2">Stream Loading...</p>
-                        <p className="text-sm text-gray-400">{playerError}</p>
-                         <Button 
-                           variant="outline" 
-                           size="sm" 
-                           className="mt-4"
-                           onClick={() => {
-                             setPlayerError(null);
-                             fetchLiveClasses(0);
-                           }}
-                         >
-                          Retry
-                        </Button>
+                <ScreenProtection enabled={true}>
+                  <div className="aspect-video bg-black rounded-lg mb-4 overflow-hidden">
+                    {playerError ? (
+                      <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                        <div className="text-center">
+                          <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg mb-2">Stream Loading...</p>
+                          <p className="text-sm text-gray-400">{playerError}</p>
+                           <Button 
+                             variant="outline" 
+                             size="sm" 
+                             className="mt-4"
+                             onClick={() => {
+                               setPlayerError(null);
+                               fetchLiveClasses(0);
+                             }}
+                           >
+                            Retry
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <LazyWrapper fallback={
-                      <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                      </div>
-                    }>
-                      <iframe
-                        src={currentLive.hls_url || `https://haritahive.com/stream/${currentLive.stream_key}`}
+                    ) : currentLive.hls_url ? (
+                      <LiveVideoPlayer
+                        src={currentLive.hls_url}
                         title={currentLive.title}
                         className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                        onError={handleVideoError}
+                        onLoad={handleVideoLoad}
                       />
-                    </LazyWrapper>
-                  )}
-                </div>
+                    ) : (
+                      <LazyWrapper fallback={
+                        <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        </div>
+                      }>
+                        <iframe
+                          src={`https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
+                          title={currentLive.title}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </LazyWrapper>
+                    )}
+                  </div>
+                </ScreenProtection>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
