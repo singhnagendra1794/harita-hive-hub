@@ -96,14 +96,6 @@ export const useUserStats = () => {
     if (!user) return;
 
     try {
-      // Create default stats
-      setStats({
-        course_count: 0,
-        projects_completed: 0,
-        community_posts: 0,
-        spatial_analyses: 0
-      });
-
       // Check if user has professional email
       const isProEmail = user.email && [
         'bhumip107@gmail.com', 'kondojukushi10@gmail.com', 'adityapipil35@gmail.com',
@@ -116,8 +108,18 @@ export const useUserStats = () => {
         'asadullahm031@gmail.com', 'moumitadas19996@gmail.com', 'javvad.rizvi@gmail.com',
         'mandadi.jyothi123@gmail.com', 'udaypbrn@gmail.com', 'anshumanavasthi1411@gmail.com',
         'sruthythulasi2017@gmail.com', 'nagendrasingh1794@gmail.com', 'maneetsethi954@gmail.com',
-        'tharun.ravichandran@gmail.com'
+        'tharun.ravichandran@gmail.com', 'nikhilbt650@gmail.com', 'vanditaujwal8@gmail.com',
+        'dhiman.kashyap24@gmail.com', 'ankushrathod96@gmail.com', 'singhnagendrageotech@gmail.com'
       ].includes(user.email.toLowerCase());
+
+      // Create default stats
+      setStats({
+        course_count: 0,
+        projects_completed: 0,
+        community_posts: 0,
+        spatial_analyses: 0,
+        enrolled_courses_count: isProEmail ? 1 : 0
+      });
 
       const tier = isProEmail ? 'pro' : 'free';
       const planName = isProEmail ? 'professional' : 'free';
