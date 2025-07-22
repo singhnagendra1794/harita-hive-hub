@@ -422,15 +422,13 @@ const UserDashboard = () => {
           Explore our learning resources, connect with the community, and discover new opportunities.
         </p>
         <div className="flex justify-center gap-4">
-          <Link to="/auth">
-            <Button size="lg">Start Learning</Button>
+          <Link to="/browse-courses">
+            <Button size="lg" aria-label="Start Learning - Browse Courses">Start Learning</Button>
           </Link>
           <a 
-            href="https://discord.gg/haritahive" 
-            target="_blank" 
-            rel="noopener noreferrer"
+            href="https://haritahive.com/community"
           >
-            <Button variant="outline" size="lg">Join Community</Button>
+            <Button variant="outline" size="lg" aria-label="Join Community - Community Hub">Join Community</Button>
           </a>
         </div>
       </div>
