@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -218,13 +217,11 @@ const InstructorDashboard = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+      <div className="container py-12">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
@@ -233,8 +230,7 @@ const InstructorDashboard = () => {
   const endedSessions = mySessions.filter(s => s.status === 'ended' && s.end_time);
 
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Instructor Dashboard</h1>
           <p className="text-muted-foreground">
@@ -573,8 +569,7 @@ const InstructorDashboard = () => {
             </Button>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 
