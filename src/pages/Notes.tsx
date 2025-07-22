@@ -1,7 +1,4 @@
 
-
-import Layout from '@/components/Layout';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +63,6 @@ const Notes = () => {
   };
 
   return (
-    <Layout>
     <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">My Notes</h1>
@@ -195,7 +191,6 @@ const Notes = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 

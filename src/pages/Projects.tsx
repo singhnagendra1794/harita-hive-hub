@@ -1,12 +1,9 @@
 
-import Layout from '@/components/Layout';
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const Projects = () => {
   return (
-    <Layout>
     <div className="container py-8">
         <h1 className="text-3xl font-bold mb-8">Geospatial Projects</h1>
         
@@ -104,7 +101,6 @@ const Projects = () => {
           ))}
         </div>
       </div>
-    </Layout>
   );
 };
 

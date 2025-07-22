@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { useAISearch } from '@/hooks/useAISearch';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -61,8 +60,7 @@ const SearchPage = () => {
   ];
 
   return (
-    <Layout>
-      <div className="container py-8">
+    <div className="container py-8">
         {/* Search Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-6">Search</h1>
@@ -211,7 +209,6 @@ const SearchPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
