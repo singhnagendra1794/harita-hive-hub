@@ -92,13 +92,28 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
 
     setIsUploading(true);
     try {
+      // Debug: Log user authentication state
+      console.log('User authenticated:', !!user, 'User ID:', user.id);
+      console.log('File details:', {
+        name: uploadedFile.name,
+        size: uploadedFile.size,
+        type: uploadedFile.type
+      });
+
       // Upload file to storage
       const fileName = `${user.id}/${Date.now()}_${uploadedFile.name}`;
+      console.log('Uploading to path:', fileName);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('user-resumes')
         .upload(fileName, uploadedFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', uploadData);
 
       // Create resume record with correct schema (temporary type assertion until types regenerate)
       const { data: resumeData, error: resumeError } = await supabase

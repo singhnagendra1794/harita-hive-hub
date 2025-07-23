@@ -119,15 +119,13 @@ export const ResumeToRoadmapFlow: React.FC<ResumeToRoadmapFlowProps> = ({
         .from('user_resumes')
         .insert({
           user_id: user.id,
-          resume_data: {
-            fileName: file.name,
-            filePath: uploadData.path,
-            fileSize: file.size,
-            fileType: file.type,
-            uploadedAt: new Date().toISOString()
-          },
+          file_name: file.name,
+          file_path: uploadData.path,
+          file_size: file.size,
+          file_type: file.type,
+          uploaded_at: new Date().toISOString(),
           file_url: uploadData.path
-        })
+        } as any)
         .select()
         .single();
 

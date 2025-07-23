@@ -108,13 +108,12 @@ const SkillRoadmap = () => {
         .from('user_resumes')
         .insert({
           user_id: user.id,
-          resume_data: { 
-            fileName: file.name,
-            filePath: uploadData.path,
-            fileSize: file.size,
-            fileType: file.type 
-          }
-        })
+          file_name: file.name,
+          file_path: uploadData.path,
+          file_size: file.size,
+          file_type: file.type,
+          uploaded_at: new Date().toISOString()
+        } as any)
         .select()
         .single();
 
