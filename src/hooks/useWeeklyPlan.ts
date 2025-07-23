@@ -45,7 +45,30 @@ export const useWeeklyPlan = () => {
 
     setIsGenerating(true);
     try {
-      const plan = generateWeeklyPlanFromGoal(data.careerGoal, data.weeklyTime);
+      // Call the new edge function to generate personalized plan
+      const { data: planResponse, error } = await supabase.functions.invoke('generate-personalized-plan', {
+        body: { 
+          resumeId: data.resumeId, 
+          careerGoal: data.careerGoal, 
+          weeklyTime: data.weeklyTime,
+          userId: user.id 
+        }
+      });
+
+      if (error) throw error;
+      if (!planResponse.success) throw new Error(planResponse.error);
+
+      const plan = {
+        ...planResponse.plan,
+        days: planResponse.plan.days.map((day: any) => ({
+          ...day,
+          tasks: day.tasks.map((task: any) => ({
+            ...task,
+            icon: getTaskIcon(task.type)
+          }))
+        }))
+      };
+
       setWeeklyPlan(plan);
 
       toast({
