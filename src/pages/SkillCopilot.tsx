@@ -21,7 +21,10 @@ import {
   ChevronRight,
   MapPin,
   GraduationCap,
-  Rocket
+  Rocket,
+  Download,
+  Mail,
+  FileText
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -31,6 +34,9 @@ import { RadarChart } from '@/components/skill-assessment/RadarChart';
 import { SkillRecommendations } from '@/components/skill-assessment/SkillRecommendations';
 import { QuizCategory, QuizResult, AssessmentReport } from '@/types/skill-assessment';
 import { generateSkillReport } from '@/utils/pdfGenerator';
+import { ResumeUploadModal } from '@/components/skill-copilot/ResumeUploadModal';
+import { WeeklyPlanModal } from '@/components/skill-copilot/WeeklyPlanModal';
+import { useWeeklyPlan } from '@/hooks/useWeeklyPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -42,9 +48,18 @@ const SkillCopilot = () => {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
   const [selectedCategory, setSelectedCategory] = useState<QuizCategory | null>(null);
   const [completedResults, setCompletedResults] = useState<QuizResult[]>([]);
-  const [isWeeklyCoachOpen, setIsWeeklyCoachOpen] = useState(false);
-  const [weeklyPlan, setWeeklyPlan] = useState<any>(null);
-  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [isWeeklyPlanModalOpen, setIsWeeklyPlanModalOpen] = useState(false);
+  const [roadmapPDFGenerating, setRoadmapPDFGenerating] = useState<string | null>(null);
+  
+  const {
+    weeklyPlan,
+    isGenerating: isGeneratingPlan,
+    generatePersonalizedPlan,
+    downloadPDF,
+    emailPlan,
+    addToCalendar
+  } = useWeeklyPlan();
   
   const hasProAccess = hasAccess('pro');
 
@@ -101,14 +116,33 @@ const SkillCopilot = () => {
     }
   ];
 
+  const handleResumeUploadSuccess = async (data: { resumeId: string; careerGoal: string; weeklyTime: string }) => {
+    try {
+      await generatePersonalizedPlan(data);
+      setIsWeeklyPlanModalOpen(true);
+    } catch (error) {
+      console.error('Error generating plan:', error);
+    }
+  };
+
   const handleAddToRoadmap = async (roadmapId: string) => {
     if (!user) return;
     
     try {
-      // Add roadmap to user's profile or create tracking entry
+      // Generate roadmap using existing function
+      const { data: roadmapData, error } = await supabase.functions.invoke('generate-roadmap', {
+        body: {
+          resumeId: null, // Can work without resume
+          userId: user.id,
+          roadmapType: roadmapId
+        }
+      });
+
+      if (error) throw error;
+
       toast({
-        title: "Roadmap Added!",
-        description: "Check your dashboard to track progress on this roadmap.",
+        title: "Roadmap Added! 🎯",
+        description: "Your learning roadmap has been generated and saved to your dashboard.",
       });
     } catch (error) {
       console.error('Error adding roadmap:', error);
@@ -120,93 +154,117 @@ const SkillCopilot = () => {
     }
   };
 
-  const generateWeeklyPlan = async () => {
-    if (!user) return;
-    
-    setIsGeneratingPlan(true);
+  const handleDownloadRoadmapPDF = async (roadmapId: string, roadmapTitle: string) => {
+    setRoadmapPDFGenerating(roadmapId);
     try {
-      // Generate AI-powered weekly study plan
-      const plan = {
-        generatedAt: new Date().toISOString(),
-        week: `Week of ${new Date().toLocaleDateString()}`,
-        days: [
-          {
-            day: 'Monday',
-            theme: 'Study Foundation',
-            tasks: [
-              { type: 'study', task: 'Watch: "GIS Fundamentals" (45 min)', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Lab: Create your first QGIS project', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Update LinkedIn with new GIS skills', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Tuesday',
-            theme: 'Hands-on Practice',
-            tasks: [
-              { type: 'study', task: 'Read: "Python for GIS" Chapter 1-2', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Code: Automate a GIS workflow in Python', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Share your project on GitHub', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Wednesday',
-            theme: 'Database Skills',
-            tasks: [
-              { type: 'study', task: 'Course: "PostGIS Essentials" (1 hour)', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Project: Build a spatial database', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Apply to 2 GIS Analyst positions', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Thursday', 
-            theme: 'Web Mapping',
-            tasks: [
-              { type: 'study', task: 'Tutorial: "Leaflet.js Basics" (30 min)', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Create: Interactive web map portfolio', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Network with 3 GIS professionals', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Friday',
-            theme: 'Remote Sensing',
-            tasks: [
-              { type: 'study', task: 'Watch: "Satellite Image Analysis" (1 hour)', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Analyze: Land cover change detection', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Write blog post about your analysis', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Saturday',
-            theme: 'Project Work',
-            tasks: [
-              { type: 'study', task: 'Research: Latest GIS industry trends', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Work on: Personal GIS portfolio project', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Attend: Virtual GIS meetup/webinar', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          },
-          {
-            day: 'Sunday',
-            theme: 'Review & Plan',
-            tasks: [
-              { type: 'study', task: 'Review: Week\'s learning materials', icon: <BookOpen className="h-4 w-4" /> },
-              { type: 'build', task: 'Polish: One project from this week', icon: <Code className="h-4 w-4" /> },
-              { type: 'apply', task: 'Plan: Next week\'s learning goals', icon: <Briefcase className="h-4 w-4" /> }
-            ]
-          }
-        ]
-      };
-      
-      setWeeklyPlan(plan);
-    } catch (error) {
-      console.error('Error generating plan:', error);
+      const roadmapData = roadmaps.find(r => r.id === roadmapId);
+      if (!roadmapData) return;
+
+      const htmlContent = generateRoadmapPDFContent(roadmapData);
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+        setTimeout(() => {
+          newWindow.print();
+        }, 1000);
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to generate weekly plan. Please try again.",
+        title: "PDF Generated! 📥",
+        description: "Your roadmap PDF is ready for download.",
+      });
+    } catch (error) {
+      console.error('Error generating roadmap PDF:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate PDF. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setIsGeneratingPlan(false);
+      setRoadmapPDFGenerating(null);
     }
+  };
+
+  const handleEmailRoadmap = async (roadmapId: string) => {
+    if (!user?.email) return;
+
+    try {
+      const roadmapData = roadmaps.find(r => r.id === roadmapId);
+      if (!roadmapData) return;
+
+      const { error } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: user.email,
+          subject: 'Your HaritaHive Learning Roadmap is Ready!',
+          template: 'roadmap',
+          data: {
+            firstName: user.user_metadata?.first_name || 'there',
+            roadmapTitle: roadmapData.title,
+            roadmapData: roadmapData
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Sent! 📧",
+        description: "Your roadmap has been sent to your email.",
+      });
+    } catch (error) {
+      console.error('Error sending roadmap email:', error);
+      toast({
+        title: "Email Failed",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const generateRoadmapPDFContent = (roadmapData: any) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${roadmapData.title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+          .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #2563eb; padding-bottom: 20px; }
+          .roadmap-info { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+          .stage { margin-bottom: 20px; padding: 15px; border-left: 4px solid #2563eb; background: #f9fafb; }
+          .stage h3 { margin: 0 0 10px 0; color: #2563eb; }
+          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🎯 ${roadmapData.title}</h1>
+          <p>Generated on ${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="roadmap-info">
+          <h2>Roadmap Overview</h2>
+          <p><strong>Duration:</strong> ${roadmapData.duration}</p>
+          <p><strong>Difficulty:</strong> ${roadmapData.difficulty}</p>
+          <p><strong>Description:</strong> ${roadmapData.description}</p>
+        </div>
+
+        <h2>Learning Path</h2>
+        ${roadmapData.stages.map((stage: string, index: number) => `
+          <div class="stage">
+            <h3>Stage ${index + 1}</h3>
+            <p>${stage}</p>
+          </div>
+        `).join('')}
+
+        <div class="footer">
+          <p>This roadmap was generated by HaritaHive Skill Copilot</p>
+          <p>Continue your learning journey at haritahive.com</p>
+        </div>
+      </body>
+      </html>
+    `;
   };
 
   const categories: { name: QuizCategory; icon: string; description: string; questions: number }[] = [
@@ -372,73 +430,22 @@ const SkillCopilot = () => {
                   </CardDescription>
                 </div>
               </div>
-              <Dialog open={isWeeklyCoachOpen} onOpenChange={setIsWeeklyCoachOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={generateWeeklyPlan} disabled={isGeneratingPlan}>
-                    {isGeneratingPlan ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Rocket className="h-4 w-4 mr-2" />
-                        Get My Weekly Plan
-                      </>
-                    )}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      Your Personalized Weekly Study Plan
-                    </DialogTitle>
-                  </DialogHeader>
-                  {weeklyPlan && (
-                    <div className="space-y-6">
-                      <div className="text-center p-4 bg-primary/5 rounded-lg">
-                        <h3 className="text-lg font-semibold">{weeklyPlan.week}</h3>
-                        <p className="text-sm text-muted-foreground">Generated on {new Date(weeklyPlan.generatedAt).toLocaleDateString()}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={generateWeeklyPlan} 
-                          className="mt-2"
-                          disabled={isGeneratingPlan}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Regenerate Plan
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {weeklyPlan.days.map((day: any, index: number) => (
-                          <Card key={day.day} className="border-l-4 border-l-primary">
-                            <CardHeader className="pb-3">
-                              <CardTitle className="text-sm font-medium">{day.day}</CardTitle>
-                              <CardDescription className="text-xs">{day.theme}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                              {day.tasks.map((task: any, taskIndex: number) => (
-                                <div key={taskIndex} className="flex items-start gap-2 p-2 rounded bg-muted/50">
-                                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 mt-0.5">
-                                    {task.icon}
-                                  </div>
-                                  <div>
-                                    <div className="text-xs font-medium capitalize text-primary">{task.type}</div>
-                                    <div className="text-xs text-muted-foreground">{task.task}</div>
-                                  </div>
-                                </div>
-                              ))}
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </DialogContent>
-              </Dialog>
+              <Button 
+                onClick={() => setIsResumeModalOpen(true)}
+                disabled={isGeneratingPlan}
+              >
+                {isGeneratingPlan ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Get My Weekly Plan
+                  </>
+                )}
+              </Button>
             </div>
           </CardHeader>
         </Card>
@@ -495,13 +502,47 @@ const SkillCopilot = () => {
                         )}
                       </div>
                     </div>
-                    <Button 
-                      className="w-full" 
-                      onClick={() => handleAddToRoadmap(roadmap.id)}
-                    >
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Add to My Roadmap
-                    </Button>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1" 
+                          onClick={() => handleAddToRoadmap(roadmap.id)}
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Add to My Roadmap
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleDownloadRoadmapPDF(roadmap.id, roadmap.title)}
+                          disabled={roadmapPDFGenerating === roadmap.id}
+                        >
+                          {roadmapPDFGenerating === roadmap.id ? (
+                            <>
+                              <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="h-3 w-3 mr-1" />
+                              PDF
+                            </>
+                          )}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleEmailRoadmap(roadmap.id)}
+                        >
+                          <Mail className="h-3 w-3 mr-1" />
+                          Email
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -665,6 +706,32 @@ const SkillCopilot = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Modals */}
+        <ResumeUploadModal
+          open={isResumeModalOpen}
+          onOpenChange={setIsResumeModalOpen}
+          onSuccess={handleResumeUploadSuccess}
+        />
+
+        <WeeklyPlanModal
+          open={isWeeklyPlanModalOpen}
+          onOpenChange={setIsWeeklyPlanModalOpen}
+          plan={weeklyPlan}
+          onRegeneratePlan={() => {
+            // This would need the original resume data to regenerate
+            toast({
+              title: "Regenerate Plan",
+              description: "Please upload your resume again to regenerate the plan.",
+            });
+            setIsWeeklyPlanModalOpen(false);
+            setIsResumeModalOpen(true);
+          }}
+          onDownloadPDF={() => weeklyPlan && downloadPDF(weeklyPlan)}
+          onEmailPlan={() => weeklyPlan && emailPlan(weeklyPlan)}
+          onAddToCalendar={() => weeklyPlan && addToCalendar(weeklyPlan)}
+          isGenerating={isGeneratingPlan}
+        />
     </div>
   );
 };
