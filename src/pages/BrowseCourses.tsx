@@ -40,7 +40,7 @@ const BrowseCourses = () => {
     setCurrencyMode(locale.includes('IN') || locale === 'hi-IN' ? 'INR' : 'USD');
   }, []);
 
-  const upcomingCourses = [
+  const liveCourses = [
     {
       id: "geospatial-technology-unlocked",
       title: "Geospatial Technology Unlocked",
@@ -53,13 +53,17 @@ const BrowseCourses = () => {
       icon: GraduationCap,
       priceINR: "₹11,999",
       priceUSD: "$149",
-      enrolled: 26,
+      enrolled: 35,
       maxStudents: 50,
       rating: 5.0,
       isLive: true,
       isPriority: true,
-      courseUrl: "/courses/geospatial-technology-unlocked"
-    },
+      courseUrl: "/courses/geospatial-technology-unlocked",
+      enrollmentDeadline: "25th July, 11:59 PM"
+    }
+  ];
+
+  const upcomingCourses = [
     {
       id: 1,
       title: "Complete GIS Fundamentals",
@@ -72,16 +76,53 @@ const BrowseCourses = () => {
       icon: BookOpen,
       priceINR: "₹9,999",
       priceUSD: "$125",
-      enrolled: 156,
+      enrolled: 0,
       maxStudents: 200,
       rating: 4.9,
-      isUpcoming: true
+      isUpcoming: true,
+      launchDate: "January 15, 2025"
+    },
+    {
+      id: 2,
+      title: "Advanced Remote Sensing with Python",
+      description: "Deep dive into satellite imagery analysis and machine learning applications",
+      instructor: "Dr. Michael Rodriguez",
+      timeline: "March 2025 - May 2025",
+      duration: "10 weeks",
+      level: "Advanced",
+      category: "remote-sensing",
+      icon: BookOpen,
+      priceINR: "₹14,999",
+      priceUSD: "$199",
+      enrolled: 0,
+      maxStudents: 150,
+      rating: 4.8,
+      isUpcoming: true,
+      launchDate: "March 10, 2025"
+    },
+    {
+      id: 3,
+      title: "GeoAI and Machine Learning",
+      description: "Apply artificial intelligence techniques to geospatial data analysis",
+      instructor: "Prof. Lisa Wang",
+      timeline: "May 2025 - July 2025",
+      duration: "8 weeks",
+      level: "Expert",
+      category: "ai-ml",
+      icon: BookOpen,
+      priceINR: "₹18,999",
+      priceUSD: "$249",
+      enrolled: 0,
+      maxStudents: 100,
+      rating: 4.9,
+      isUpcoming: true,
+      launchDate: "May 20, 2025"
     }
   ];
 
   // Check if enrollment is still open for Geospatial Technology Unlocked
   const isEnrollmentOpen = () => {
-    const enrollmentDeadline = new Date('2025-07-21T13:30:00.000Z'); // 7 PM IST in UTC
+    const enrollmentDeadline = new Date('2025-07-25T18:29:00.000Z'); // 25th July, 11:59 PM IST in UTC
     return new Date() <= enrollmentDeadline;
   };
 
@@ -142,9 +183,9 @@ const BrowseCourses = () => {
   return (
     <div className="container py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Browse Upcoming Courses</h1>
+          <h1 className="text-4xl font-bold mb-4">Browse Courses</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive GIS training programs. Join the waitlist to secure your spot and get early bird pricing.
+            Comprehensive GIS training programs designed to advance your geospatial skills.
           </p>
         </div>
 
@@ -183,18 +224,46 @@ const BrowseCourses = () => {
           </div>
         </div>
 
-        {/* Course Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {upcomingCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              currencyMode={currencyMode}
-              isEnrollmentOpen={isEnrollmentOpen()}
-              onEnrollNow={handleEnrollNow}
-              onJoinWaitlist={handleJoinWaitlist}
-            />
-          ))}
+        {/* Live Courses Section */}
+        {liveCourses.length > 0 && (
+          <div className="mb-16">
+            <div className="flex items-center gap-3 mb-8">
+              <GraduationCap className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">🔴 Live Courses - Enroll Now</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {liveCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  currencyMode={currencyMode}
+                  isEnrollmentOpen={isEnrollmentOpen()}
+                  onEnrollNow={handleEnrollNow}
+                  onJoinWaitlist={handleJoinWaitlist}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Courses Section */}
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <Calendar className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold">🗓️ Upcoming Courses</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+            {upcomingCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                currencyMode={currencyMode}
+                isEnrollmentOpen={false}
+                onEnrollNow={handleEnrollNow}
+                onJoinWaitlist={handleJoinWaitlist}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Enrollment Form Modal */}

@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Users, Clock, Calendar, Star, AlertCircle, CheckCircle } from "lucide-react";
 import { useLazyLoad } from '@/hooks/useIntersectionObserver';
 
 interface CourseCardProps {
@@ -25,6 +25,8 @@ interface CourseCardProps {
     isUpcoming?: boolean;
     isPriority?: boolean;
     courseUrl?: string;
+    enrollmentDeadline?: string;
+    launchDate?: string;
   };
   currencyMode: 'INR' | 'USD';
   isEnrollmentOpen: boolean;
@@ -43,103 +45,134 @@ const CourseCard = memo(({ course, currencyMode, isEnrollmentOpen, onEnrollNow, 
   return (
     <Card 
       ref={ref}
-      className={`hover:shadow-lg transition-shadow ${course.isPriority ? 'border-primary shadow-md' : ''}`}
+      className="group hover:shadow-xl transition-all duration-300 hover:scale-[1.02] h-full flex flex-col"
     >
       {course.isPriority && shouldLoad && (
-        <div className="bg-primary text-primary-foreground text-center py-2 rounded-t-lg">
-          <span className="text-sm font-medium">⭐ FEATURED COURSE</span>
+        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-3 py-1 text-center">
+          🔥 LIMITED TIME OFFER
         </div>
       )}
       
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <IconComponent className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">{course.title}</CardTitle>
-              <CardDescription className="mt-1">
-                {course.description}
-              </CardDescription>
-            </div>
+      {course.enrollmentDeadline && course.isLive && shouldLoad && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 mx-4 mt-4 rounded">
+          <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm font-semibold">
+              ⏳ Enroll before {course.enrollmentDeadline}
+            </span>
           </div>
-          {shouldLoad && (
-            <>
-              {course.isLive ? (
-                <Badge className="bg-green-500 text-white">
-                  LIVE TRAINING
-                </Badge>
-              ) : course.isUpcoming ? (
-                <Badge className="bg-blue-500 text-white">
-                  LAUNCHING 2025
-                </Badge>
-              ) : (
-                <Badge variant="outline">
-                  COMING SOON
-                </Badge>
-              )}
-            </>
-          )}
+        </div>
+      )}
+      
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2 mb-3">
+            <IconComponent className="h-6 w-6 text-primary" />
+            <Badge variant="secondary" className="text-xs">
+              {course.level}
+            </Badge>
+            {shouldLoad && (
+              <>
+                {course.isLive && (
+                  <Badge variant="default" className="bg-red-500 hover:bg-red-600 text-xs">
+                    🔴 LIVE
+                  </Badge>
+                )}
+                {course.isUpcoming && (
+                  <Badge variant="outline" className="text-xs">
+                    Coming Soon
+                  </Badge>
+                )}
+              </>
+            )}
+          </div>
         </div>
         
-        {shouldLoad && (
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              {"★".repeat(Math.floor(course.rating))}
-              <span className="text-sm text-muted-foreground ml-1">
-                {course.rating}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {course.enrolled}/{course.maxStudents} enrolled
-              </span>
-            </div>
-          </div>
-        )}
+        <CardTitle className="text-xl font-bold leading-tight">
+          {course.title}
+        </CardTitle>
+        
+        <CardDescription className="text-sm text-muted-foreground line-clamp-2">
+          {course.description}
+        </CardDescription>
       </CardHeader>
       
       {shouldLoad && (
-        <CardContent>
-          <div className="space-y-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="text-2xl font-bold text-green-800">
-                {formatPrice()}
+        <CardContent className="flex-1 flex flex-col justify-between">
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>{course.duration}</span>
               </div>
-              <div className="text-sm text-green-600">Course Price</div>
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                <span className="text-xs">
+                  {course.isUpcoming ? course.launchDate : 'Live Now'}
+                </span>
+              </div>
             </div>
 
-            {course.isLive && course.id === "geospatial-technology-unlocked" ? (
-              isEnrollmentOpen ? (
-                <Button 
-                  className="w-full"
-                  onClick={() => onEnrollNow(course)}
-                >
-                  Enroll Now
-                </Button>
-              ) : (
-                <Button 
-                  className="w-full" 
-                  disabled
-                  variant="outline"
-                >
-                  Enrollment Closed
-                </Button>
-              )
-            ) : course.isLive && course.courseUrl ? (
-              <a href={course.courseUrl}>
-                <Button className="w-full">
-                  View Course Details
-                </Button>
-              </a>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Users className="h-4 w-4" />
+                <span>{course.enrolled}/{course.maxStudents} enrolled</span>
+              </div>
+              <div className="flex items-center gap-1 text-yellow-500">
+                <Star className="h-4 w-4 fill-current" />
+                <span className="text-muted-foreground">{course.rating}</span>
+              </div>
+            </div>
+
+            {course.enrolled > 0 && (
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${(course.enrolled / course.maxStudents) * 100}%` }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-2xl font-bold text-primary">
+                {formatPrice()}
+              </span>
+              {course.isLive && course.enrollmentDeadline && (
+                <span className="text-xs text-muted-foreground">
+                  Live cohort in progress
+                </span>
+              )}
+            </div>
+
+            {course.isLive && isEnrollmentOpen ? (
+              <Button 
+                onClick={() => onEnrollNow(course)} 
+                className="w-full"
+                size="lg"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Enroll Now
+              </Button>
+            ) : course.isUpcoming ? (
+              <Button 
+                onClick={() => onJoinWaitlist(course)} 
+                variant="outline" 
+                className="w-full"
+                size="lg"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Join Waitlist
+              </Button>
             ) : (
               <Button 
+                onClick={() => onJoinWaitlist(course)} 
+                variant="secondary" 
                 className="w-full"
-                onClick={() => onJoinWaitlist(course)}
+                size="lg"
               >
-                Join Waitlist - Get Early Access
+                Join Waitlist
               </Button>
             )}
           </div>
