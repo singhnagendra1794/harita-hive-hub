@@ -2458,6 +2458,161 @@ export type Database = {
         }
         Relationships: []
       }
+      geova_session_interactions: {
+        Row: {
+          content: string
+          geova_response: string | null
+          id: string
+          interaction_type: string
+          is_highlighted: boolean | null
+          metadata: Json | null
+          schedule_id: string | null
+          session_id: string | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          geova_response?: string | null
+          id?: string
+          interaction_type: string
+          is_highlighted?: boolean | null
+          metadata?: Json | null
+          schedule_id?: string | null
+          session_id?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          geova_response?: string | null
+          id?: string
+          interaction_type?: string
+          is_highlighted?: boolean | null
+          metadata?: Json | null
+          schedule_id?: string | null
+          session_id?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geova_session_interactions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "geova_teaching_schedule"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geova_session_interactions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geova_student_progress: {
+        Row: {
+          attendance_count: number | null
+          completed_days: number[] | null
+          course_title: string
+          created_at: string | null
+          current_day: number | null
+          id: string
+          last_attended: string | null
+          progress_percentage: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attendance_count?: number | null
+          completed_days?: number[] | null
+          course_title?: string
+          created_at?: string | null
+          current_day?: number | null
+          id?: string
+          last_attended?: string | null
+          progress_percentage?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attendance_count?: number | null
+          completed_days?: number[] | null
+          course_title?: string
+          created_at?: string | null
+          current_day?: number | null
+          id?: string
+          last_attended?: string | null
+          progress_percentage?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      geova_teaching_schedule: {
+        Row: {
+          course_title: string
+          created_at: string | null
+          day_number: number
+          duration_minutes: number | null
+          id: string
+          learning_objectives: string[] | null
+          practical_exercises: string[] | null
+          scheduled_date: string
+          scheduled_time: string | null
+          session_id: string | null
+          status: string | null
+          tools_used: string[] | null
+          topic_description: string | null
+          topic_title: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_title?: string
+          created_at?: string | null
+          day_number: number
+          duration_minutes?: number | null
+          id?: string
+          learning_objectives?: string[] | null
+          practical_exercises?: string[] | null
+          scheduled_date: string
+          scheduled_time?: string | null
+          session_id?: string | null
+          status?: string | null
+          tools_used?: string[] | null
+          topic_description?: string | null
+          topic_title: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_title?: string
+          created_at?: string | null
+          day_number?: number
+          duration_minutes?: number | null
+          id?: string
+          learning_objectives?: string[] | null
+          practical_exercises?: string[] | null
+          scheduled_date?: string
+          scheduled_time?: string | null
+          session_id?: string | null
+          status?: string | null
+          tools_used?: string[] | null
+          topic_description?: string | null
+          topic_title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geova_teaching_schedule_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gis_profiles: {
         Row: {
           available_for_hire: boolean | null
@@ -6704,6 +6859,10 @@ export type Database = {
         Args: { p_user_id: string; p_job_type: string }
         Returns: Json
       }
+      create_geova_daily_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -6906,6 +7065,10 @@ export type Database = {
       }
       update_class_status: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_geova_student_progress: {
+        Args: { p_user_id: string; p_day_number: number }
         Returns: undefined
       }
       update_stream_status: {
