@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { updatePageSEO, seoData } from '@/utils/seoUtils';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Mail, 
   Send, 
@@ -23,25 +23,26 @@ import {
   Filter,
   Grid,
   List,
-  Globe
+  Globe,
+  Plus,
+  Edit,
+  Sparkles,
+  BookOpen,
+  Calendar,
+  Bookmark,
+  Share,
+  Download,
+  Eye,
+  ArrowRight,
+  Newspaper
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface NewsletterPost {
-  id: string;
-  title: string;
-  summary: string | null;
-  content: string | null;
-  linkedin_url: string | null;
-  featured_image_url: string | null;
-  published_date: string;
-  tags: string[];
-  view_count: number;
-  is_featured: boolean | null;
-}
+import { NewsletterCreator } from '@/components/newsletter/NewsletterCreator';
+import { CuratedContent } from '@/components/newsletter/CuratedContent';
+import { AINewsletterSuggestions } from '@/components/newsletter/AINewsletterSuggestions';
 
 const Newsletter = () => {
   const { user } = useAuth();
@@ -51,65 +52,23 @@ const Newsletter = () => {
   const [fullName, setFullName] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [posts, setPosts] = useState<NewsletterPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<NewsletterPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeTab, setActiveTab] = useState('discover');
 
   useEffect(() => {
     // Update SEO for newsletter page
     const { title, description, keywords } = seoData.newsletter;
     updatePageSEO({
-      title,
-      description,
-      keywords,
+      title: 'Geospatial Newsletter Hub - Latest GeoAI & Tech Updates | HaritaHive',
+      description: 'Your one-stop hub for geospatial technology, GeoAI, automation, and data science newsletters. Discover curated content and create your own newsletter.',
+      keywords: 'geospatial newsletter, GeoAI newsletter, geospatial technology news, remote sensing updates, GIS automation, spatial data science',
       url: window.location.href,
       type: 'website'
     });
     
-    fetchNewsletterPosts();
     if (user) {
       checkSubscriptionStatus();
     }
   }, [user]);
-
-  // Filter posts based on search term and selected tag
-  useEffect(() => {
-    let filtered = posts;
-
-    if (searchTerm) {
-      filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    if (selectedTag) {
-      filtered = filtered.filter(post => post.tags.includes(selectedTag));
-    }
-
-    setFilteredPosts(filtered);
-  }, [posts, searchTerm, selectedTag]);
-
-  const fetchNewsletterPosts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('newsletter_posts')
-        .select('*')
-        .order('published_date', { ascending: false });
-
-      if (error) throw error;
-      setPosts(data || []);
-      setFilteredPosts(data || []);
-    } catch (error) {
-      console.error('Error fetching newsletter posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const checkSubscriptionStatus = async () => {
     if (!user?.email) return;
@@ -167,7 +126,7 @@ const Newsletter = () => {
         setIsSubscribed(true);
         toast({
           title: "Successfully Subscribed!",
-          description: "Welcome to the Harita Hive newsletter community.",
+          description: "Welcome to the HaritaHive newsletter community.",
         });
         setEmail('');
         setFullName('');
@@ -184,57 +143,50 @@ const Newsletter = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getTagColor = (tag: string) => {
-    const colors: Record<string, string> = {
-      'GeoAI': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      'Python': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      'Remote Sensing': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      'Careers': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      'OpenStreetMap': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-      'default': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-    };
-    return colors[tag] || colors.default;
-  };
-
-  // Get all unique tags from posts
-  const allTags = Array.from(new Set(posts.flatMap(post => post.tags)));
-
-  const handleTagFilter = (tag: string) => {
-    setSelectedTag(selectedTag === tag ? '' : tag);
-  };
-
   return (
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="text-center mb-16">
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="p-3 bg-primary/10 rounded-lg">
-            <Mail className="h-8 w-8 text-primary" />
+            <Newspaper className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold">
-            🌍 Never Miss a Geospatial Breakthrough
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            🌍 Geospatial Newsletter Hub
           </h1>
         </div>
         
-        <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-          Weekly insights, updates, tools, jobs, and industry trends — directly from Harita Hive.
+        <p className="text-xl text-muted-foreground mb-8 max-w-4xl mx-auto">
+          Your one-stop hub for the most relevant <strong>Geospatial Technology, GeoAI, Automation, Data Science, and Machine Learning</strong> newsletters—featuring curated content from the past month, direct article links, and a built-in newsletter creator.
         </p>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">25+</div>
+            <div className="text-sm text-muted-foreground">Featured Newsletters</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">150+</div>
+            <div className="text-sm text-muted-foreground">Curated Articles</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">5K+</div>
+            <div className="text-sm text-muted-foreground">Subscribers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">Weekly</div>
+            <div className="text-sm text-muted-foreground">Updates</div>
+          </div>
+        </div>
 
         {/* Newsletter Subscription Form */}
         {!isSubscribed ? (
           <Card className="max-w-md mx-auto">
             <CardHeader>
-              <CardTitle className="text-lg">Subscribe Now</CardTitle>
+              <CardTitle className="text-lg">Join the Community</CardTitle>
               <CardDescription>
-                Join 5,000+ geospatial professionals getting weekly updates
+                Stay updated with the latest geospatial technology trends
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -277,7 +229,7 @@ const Newsletter = () => {
                   onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
                 >
                   <Globe className="h-4 w-4 mr-2" />
-                  Subscribe on LinkedIn
+                  Follow on LinkedIn
                 </Button>
               </form>
             </CardContent>
@@ -297,283 +249,297 @@ const Newsletter = () => {
         )}
       </div>
 
-      {/* Latest Newsletters Grid */}
-      <div className="mb-16">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      {/* Main Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="discover" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Discover
+          </TabsTrigger>
+          <TabsTrigger value="curated" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            Curated Content
+          </TabsTrigger>
+          <TabsTrigger value="create" className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Create Newsletter
+          </TabsTrigger>
+          <TabsTrigger value="ai-suggestions" className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            AI Suggestions
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="discover" className="space-y-8">
+          {/* Featured Newsletters Section */}
           <div>
-            <h2 className="text-3xl font-bold">Harita Hive Newsletter</h2>
-            <p className="text-muted-foreground">All editions from our LinkedIn newsletter</p>
-            <div className="flex gap-2 mt-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7329705663612289024', '_blank')}
-              >
-                <Globe className="h-4 w-4 mr-1" />
-                Follow on LinkedIn
-              </Button>
-              {(hasRole('admin') || hasRole('super_admin')) && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.location.href = '/admin'}
-                >
-                  📝 Admin: Manage Newsletter
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              {filteredPosts.length} Editions
-            </Badge>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Search and Filter Controls */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search newsletters..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedTag === '' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedTag('')}
-            >
-              All Topics
-            </Button>
-            {allTags.slice(0, 6).map((tag) => (
-              <Button
-                key={tag}
-                variant={selectedTag === tag ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleTagFilter(tag)}
-                className="text-xs"
-              >
-                {tag}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+              <Star className="h-8 w-8 text-yellow-500" />
+              Featured Newsletters (July 2025)
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card className="group hover:shadow-lg transition-all duration-300 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
                 <CardHeader>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <Brain className="h-4 w-4 text-white" />
+                    </div>
+                    <Badge variant="secondary">AI Platform</Badge>
+                  </div>
+                  <CardTitle className="text-lg">Shovels.ai July 2025</CardTitle>
+                  <CardDescription>
+                    Updates on mapping & AI platform developments, permit data, and enterprise news
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-20 bg-muted rounded"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Eye className="h-4 w-4" />
+                      2.1K views
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Read More
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No newsletters found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters
-            </p>
-            <Button onClick={() => { setSearchTerm(''); setSelectedTag(''); }}>
-              Clear filters
-            </Button>
-          </div>
-        ) : (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-            {filteredPosts.map((post) => (
-                <Card key={post.id} className={`group hover:shadow-lg transition-all duration-300 ${post.is_featured ? 'ring-2 ring-primary/20 bg-primary/5' : ''} ${viewMode === 'list' ? 'flex flex-row' : ''}`}>
-                  {/* Featured Image */}
-                  {post.featured_image_url && (
-                    <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-32 rounded-l-lg flex-shrink-0' : 'aspect-video w-full rounded-t-lg'}`}>
-                      <img 
-                        src={post.featured_image_url} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
-                      {post.is_featured && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-yellow-500 text-yellow-900">
-                            <Star className="h-3 w-3 mr-1" />
-                            Featured
-                          </Badge>
-                        </div>
-                      )}
+
+              <Card className="group hover:shadow-lg transition-all duration-300 border-green-200 bg-green-50/50 dark:bg-green-950/20">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                      <Globe className="h-4 w-4 text-white" />
                     </div>
-                  )}
-                  
-                  <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
-                    <CardHeader className={post.featured_image_url ? 'pb-2' : ''}>
-                      <div className="flex items-start justify-between mb-2">
-                        <CardTitle className={`leading-tight group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-lg'}`}>
-                          {post.title}
-                          {post.is_featured && !post.featured_image_url && <Star className="h-4 w-4 text-yellow-500 inline ml-2" />}
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CalendarDays className="h-4 w-4" />
-                        {formatDate(post.published_date)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {post.summary && (
-                        <p className={`text-muted-foreground mb-4 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-3'}`}>
-                          {post.summary}
-                        </p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {post.tags?.slice(0, viewMode === 'list' ? 2 : 3).map((tag) => (
-                          <Badge key={tag} variant="secondary" className={getTagColor(tag)}>
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <div className={`flex items-center ${viewMode === 'list' ? 'justify-between' : 'justify-between'}`}>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          {post.view_count} views
-                        </div>
-                        {post.linkedin_url && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                            onClick={() => window.open(post.linkedin_url, '_blank')}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Read Now
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
+                    <Badge variant="secondary">Industry</Badge>
                   </div>
-                </Card>
-            ))}
+                  <CardTitle className="text-lg">NV5 Geospatial June 2025</CardTitle>
+                  <CardDescription>
+                    Industry projects update with real-world application examples and case studies
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Eye className="h-4 w-4" />
+                      1.8K views
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Read More
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-lg transition-all duration-300 border-purple-200 bg-purple-50/50 dark:bg-purple-950/20">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                      <GraduationCap className="h-4 w-4 text-white" />
+                    </div>
+                    <Badge variant="secondary">Research</Badge>
+                  </div>
+                  <CardTitle className="text-lg">I‑GUIDE Spring 2025</CardTitle>
+                  <CardDescription>
+                    Spatial AI challenges, workshops in sustainability, and academic research updates
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Eye className="h-4 w-4" />
+                      1.5K views
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Read More
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-lg transition-all duration-300 border-orange-200 bg-orange-50/50 dark:bg-orange-950/20">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                    </div>
+                    <Badge variant="secondary">Events</Badge>
+                  </div>
+                  <CardTitle className="text-lg">Geo Week Spotlight</CardTitle>
+                  <CardDescription>
+                    Esri UC highlights, drone AI in flood mapping, and industry event coverage
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Eye className="h-4 w-4" />
+                      2.8K views
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Read More
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Why Subscribe Section */}
-      <div className="mb-16">
-        <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl mb-2">Why Subscribe to Our Newsletter?</CardTitle>
-            <CardDescription className="text-lg">
-              Join thousands of GIS professionals staying ahead of the curve
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <Wrench className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">🛠️ New GIS Tools & Templates</h3>
-                  <p className="text-muted-foreground">
-                    Be first to hear about new tools, plugins, and templates that can boost your productivity.
-                  </p>
-                </div>
-              </div>
+          {/* Article Spotlight */}
+          <div>
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+              <BookOpen className="h-8 w-8 text-blue-500" />
+              Article Spotlight
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Card className="group hover:shadow-lg transition-all duration-300">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Startup News</Badge>
+                    <Badge variant="outline">$15M Series A</Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    Startup Raises $15M for Custom AI Maps
+                  </CardTitle>
+                  <CardDescription>
+                    Revolutionary platform for wildfire and flood monitoring using advanced geospatial AI and real-time satellite data processing.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        July 15, 2025
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        3.2K reads
+                      </span>
+                    </div>
+                    <Button size="sm">
+                      Read Article
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <GraduationCap className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">📚 Course Launches & Updates</h3>
-                  <p className="text-muted-foreground">
-                    Get notified on new course launches, updates, and exclusive early bird discounts.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">💼 Job Postings & Internships</h3>
-                  <p className="text-muted-foreground">
-                    Stay in sync with new job postings, internship alerts, and career opportunities.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                  <Brain className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">🧠 AI Tutorials & GeoAI Tips</h3>
-                  <p className="text-muted-foreground">
-                    Learn from AI tutorials, GeoAI tips, and see student projects that inspire.
-                  </p>
-                </div>
-              </div>
+              <Card className="group hover:shadow-lg transition-all duration-300">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Industry Trends</Badge>
+                    <Badge variant="outline">Case Studies</Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    How GeoAI is Shaping Field Operations
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive analysis of GeoAI applications in utility management, construction planning, and infrastructure development.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        July 12, 2025
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        2.7K reads
+                      </span>
+                    </div>
+                    <Button size="sm">
+                      Read Article
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* Newsletter Archive Section */}
-      <div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Newsletter Archive
-            </CardTitle>
-            <CardDescription>
-              Browse past newsletters organized by month and year
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                Archive feature coming soon! All newsletters will be organized by month and year for easy browsing.
-              </p>
-              <Badge variant="outline">Coming Soon</Badge>
+          {/* Upcoming Events */}
+          <div>
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+              <Calendar className="h-8 w-8 text-green-500" />
+              Upcoming Events & Newsletters
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <Calendar className="h-4 w-4 text-white" />
+                    </div>
+                    <Badge>Aug 15-17, 2025</Badge>
+                  </div>
+                  <CardTitle>GeoAI Conference 2025</CardTitle>
+                  <CardDescription>
+                    Major AI+GIS event featuring latest innovations in spatial artificial intelligence
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Learn More
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>GEO Insight Newsletter</CardTitle>
+                  <CardDescription>
+                    July 2025 edition featuring industry reflections & AI innovation trends
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" className="w-full">
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Subscribe
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>WGIC Horizon News</CardTitle>
+                  <CardDescription>
+                    Global mapping & sustainability trends with monthly industry updates
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" className="w-full">
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Subscribe
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="curated">
+          <CuratedContent />
+        </TabsContent>
+
+        <TabsContent value="create">
+          <NewsletterCreator />
+        </TabsContent>
+
+        <TabsContent value="ai-suggestions">
+          <AINewsletterSuggestions />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
