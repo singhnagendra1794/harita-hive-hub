@@ -271,6 +271,45 @@ export type Database = {
         }
         Relationships: []
       }
+      aws_streaming_config: {
+        Row: {
+          cloudfront_distribution_id: string
+          created_at: string
+          hls_playback_url: string
+          id: string
+          is_active: boolean
+          medialive_channel_id: string
+          medialive_input_id: string
+          rtmp_endpoint: string
+          s3_bucket_name: string
+          updated_at: string
+        }
+        Insert: {
+          cloudfront_distribution_id: string
+          created_at?: string
+          hls_playback_url: string
+          id?: string
+          is_active?: boolean
+          medialive_channel_id: string
+          medialive_input_id: string
+          rtmp_endpoint: string
+          s3_bucket_name: string
+          updated_at?: string
+        }
+        Update: {
+          cloudfront_distribution_id?: string
+          created_at?: string
+          hls_playback_url?: string
+          id?: string
+          is_active?: boolean
+          medialive_channel_id?: string
+          medialive_input_id?: string
+          rtmp_endpoint?: string
+          s3_bucket_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       beta_analytics: {
         Row: {
           date_bucket: string | null
@@ -2540,6 +2579,42 @@ export type Database = {
         }
         Relationships: []
       }
+      geova_class_schedule: {
+        Row: {
+          class_description: string | null
+          class_title: string
+          created_at: string
+          curriculum_data: Json
+          id: string
+          is_active: boolean
+          scheduled_time: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          class_description?: string | null
+          class_title: string
+          created_at?: string
+          curriculum_data?: Json
+          id?: string
+          is_active?: boolean
+          scheduled_time?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          class_description?: string | null
+          class_title?: string
+          created_at?: string
+          curriculum_data?: Json
+          id?: string
+          is_active?: boolean
+          scheduled_time?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       geova_recordings: {
         Row: {
           auto_generated_description: string | null
@@ -3484,12 +3559,17 @@ export type Database = {
       }
       live_classes: {
         Row: {
+          aws_stream_id: string | null
           course_title: string | null
           created_at: string
           created_by: string
           description: string | null
           end_time: string | null
+          geova_session_data: Json | null
+          hls_manifest_url: string | null
           id: string
+          is_ai_generated: boolean | null
+          recording_s3_key: string | null
           recording_url: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["stream_status"]
@@ -3500,12 +3580,17 @@ export type Database = {
           viewer_count: number | null
         }
         Insert: {
+          aws_stream_id?: string | null
           course_title?: string | null
           created_at?: string
           created_by: string
           description?: string | null
           end_time?: string | null
+          geova_session_data?: Json | null
+          hls_manifest_url?: string | null
           id?: string
+          is_ai_generated?: boolean | null
+          recording_s3_key?: string | null
           recording_url?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
@@ -3516,12 +3601,17 @@ export type Database = {
           viewer_count?: number | null
         }
         Update: {
+          aws_stream_id?: string | null
           course_title?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
           end_time?: string | null
+          geova_session_data?: Json | null
+          hls_manifest_url?: string | null
           id?: string
+          is_ai_generated?: boolean | null
+          recording_s3_key?: string | null
           recording_url?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
@@ -3531,7 +3621,15 @@ export type Database = {
           updated_at?: string
           viewer_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "live_classes_aws_stream_id_fkey"
+            columns: ["aws_stream_id"]
+            isOneToOne: false
+            referencedRelation: "aws_streaming_config"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       map_projects: {
         Row: {
@@ -5225,6 +5323,82 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      stream_analytics: {
+        Row: {
+          bitrate: number | null
+          class_id: string
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          quality_metrics: Json | null
+          viewer_count: number | null
+        }
+        Insert: {
+          bitrate?: number | null
+          class_id: string
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          quality_metrics?: Json | null
+          viewer_count?: number | null
+        }
+        Update: {
+          bitrate?: number | null
+          class_id?: string
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          quality_metrics?: Json | null
+          viewer_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_analytics_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_controls: {
+        Row: {
+          action: string
+          admin_user_id: string
+          class_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          class_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_controls_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stream_keys: {
         Row: {
@@ -7627,6 +7801,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      create_geova_daily_class: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       create_geova_daily_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -7818,9 +7996,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      start_aws_stream: {
+        Args: { p_class_id: string; p_admin_user_id: string }
+        Returns: Json
+      }
       start_stream_session: {
         Args: { p_user_id: string; p_title?: string; p_description?: string }
         Returns: string
+      }
+      stop_aws_stream: {
+        Args: {
+          p_class_id: string
+          p_admin_user_id: string
+          p_recording_s3_key?: string
+        }
+        Returns: Json
       }
       sync_geova_recordings_from_schedule: {
         Args: Record<PropertyKey, never>

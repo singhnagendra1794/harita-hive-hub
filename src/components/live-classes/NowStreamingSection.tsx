@@ -19,7 +19,11 @@ interface LiveClass {
   start_time: string;
   end_time: string | null;
   hls_url?: string;
+  hls_manifest_url?: string;
   viewer_count: number;
+  is_ai_generated?: boolean;
+  instructor?: string;
+  recording_s3_key?: string;
 }
 
 interface NowStreamingSectionProps {
@@ -93,6 +97,13 @@ const NowStreamingSection: React.FC<NowStreamingSectionProps> = ({
                 {currentLive.description && (
                   <p className="text-muted-foreground">{currentLive.description}</p>
                 )}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                  {currentLive.is_ai_generated ? (
+                    <span>🤖 {currentLive.instructor || 'GEOVA AI'}</span>
+                  ) : (
+                    <span>👨‍🏫 {currentLive.instructor || 'Expert Instructor'}</span>
+                  )}
+                </div>
               </div>
               
               <div className="text-right">
@@ -146,7 +157,7 @@ const NowStreamingSection: React.FC<NowStreamingSectionProps> = ({
                 </div>
               ) : (
                 <LiveVideoPlayer
-                  src={currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
+                  src={currentLive.hls_manifest_url || currentLive.hls_url || `https://stream.haritahive.com/hls/${currentLive.stream_key}.m3u8`}
                   title={currentLive.title}
                   className="w-full h-full"
                   onError={onError}
