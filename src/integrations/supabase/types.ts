@@ -7316,36 +7316,48 @@ export type Database = {
           created_at: string | null
           extracted_data: Json | null
           extraction_status: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
           file_url: string | null
           id: string
           match_scores: Json | null
           processed_at: string | null
-          resume_data: Json
           updated_at: string | null
+          uploaded_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           extracted_data?: Json | null
           extraction_status?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
           file_url?: string | null
           id?: string
           match_scores?: Json | null
           processed_at?: string | null
-          resume_data: Json
           updated_at?: string | null
+          uploaded_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           extracted_data?: Json | null
           extraction_status?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
           file_url?: string | null
           id?: string
           match_scores?: Json | null
           processed_at?: string | null
-          resume_data?: Json
           updated_at?: string | null
+          uploaded_at?: string | null
           user_id?: string
         }
         Relationships: []

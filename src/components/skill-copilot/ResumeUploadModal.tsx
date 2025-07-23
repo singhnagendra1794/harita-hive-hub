@@ -100,7 +100,7 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // Create resume record with correct schema
+      // Create resume record with correct schema (temporary type assertion until types regenerate)
       const { data: resumeData, error: resumeError } = await supabase
         .from('user_resumes')
         .insert({
@@ -110,7 +110,7 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
           file_size: uploadedFile.size,
           file_type: uploadedFile.type,
           uploaded_at: new Date().toISOString()
-        })
+        } as any)
         .select()
         .single();
 
