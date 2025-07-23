@@ -208,10 +208,18 @@ export const EnhancedPortfolioBuilder = ({
         <TabsContent value="export" className="space-y-6">
           <ExportSection 
             data={exportData}
-            onGenerateResume={(format) => {
-              const templateType = portfolio?.template_id ? 
-                templates.find(t => t.id === portfolio.template_id)?.category || 'geoai' : 'geoai';
-              return generateResume(format as any, templateType);
+            onGenerateResume={async (format) => {
+              if (format === 'json') {
+                // JSON export doesn't need backend processing
+                return;
+              } else if (format === 'github') {
+                // GitHub Pages export doesn't need backend processing
+                return;
+              } else {
+                const templateType = portfolio?.template_id ? 
+                  templates.find(t => t.id === portfolio.template_id)?.category || 'geoai' : 'geoai';
+                return generateResume(format as any, templateType);
+              }
             }}
           />
         </TabsContent>
