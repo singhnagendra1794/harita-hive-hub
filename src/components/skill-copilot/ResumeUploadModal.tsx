@@ -50,9 +50,38 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     maxFiles: 1,
-    onDrop: (acceptedFiles) => {
+    maxSize: 10485760, // 10MB in bytes
+    onDrop: (acceptedFiles, fileRejections) => {
+      if (fileRejections.length > 0) {
+        const rejection = fileRejections[0];
+        if (rejection.errors.find(e => e.code === 'file-too-large')) {
+          toast({
+            title: "File Too Large",
+            description: "Please select a file smaller than 10MB.",
+            variant: "destructive"
+          });
+        } else if (rejection.errors.find(e => e.code === 'file-invalid-type')) {
+          toast({
+            title: "Invalid File Type",
+            description: "Please select a PDF, DOC, or DOCX file.",
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+      
       if (acceptedFiles.length > 0) {
-        setUploadedFile(acceptedFiles[0]);
+        const file = acceptedFiles[0];
+        // Additional validation
+        if (file.size > 10485760) {
+          toast({
+            title: "File Too Large",
+            description: "Please select a file smaller than 10MB.",
+            variant: "destructive"
+          });
+          return;
+        }
+        setUploadedFile(file);
         setStep(2);
       }
     }
@@ -71,7 +100,7 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // Create resume record
+      // Create resume record with current schema
       const { data: resumeData, error: resumeError } = await supabase
         .from('user_resumes')
         .insert({
@@ -80,8 +109,10 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
             fileName: uploadedFile.name,
             filePath: uploadData.path,
             fileSize: uploadedFile.size,
-            fileType: uploadedFile.type
-          }
+            fileType: uploadedFile.type,
+            uploadedAt: new Date().toISOString()
+          },
+          file_url: uploadData.path
         })
         .select()
         .single();
@@ -101,11 +132,24 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       }
 
       setStep(3);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading resume:', error);
+      
+      let errorMessage = "Failed to upload resume. Please try again.";
+      
+      if (error?.message?.includes('File size')) {
+        errorMessage = "File is too large. Please select a file smaller than 10MB.";
+      } else if (error?.message?.includes('file type')) {
+        errorMessage = "Invalid file type. Please select a PDF, DOC, or DOCX file.";
+      } else if (error?.message?.includes('storage')) {
+        errorMessage = "Storage error. Please check your connection and try again.";
+      } else if (error?.message?.includes('user_resumes')) {
+        errorMessage = "Database error. Please contact support if this persists.";
+      }
+      
       toast({
         title: "Upload Failed",
-        description: "Failed to upload resume. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
