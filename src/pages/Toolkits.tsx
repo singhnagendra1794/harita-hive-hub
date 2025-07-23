@@ -1,435 +1,474 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Play, Star, Search, Filter, Package, ExternalLink } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { usePremiumAccess } from '@/hooks/usePremiumAccess';
-import { supabase } from '@/integrations/supabase/client';
-import UpgradePrompt from '@/components/premium/UpgradePrompt';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ToolkitCard from "@/components/toolkits/ToolkitCard";
+import { 
+  Search, 
+  Plus, 
+  Wrench, 
+  TrendingUp,
+  Target,
+  Zap,
+  Building,
+  Sprout,
+  TreePine,
+  MapPin,
+  Truck,
+  Shield,
+  Radio,
+  Heart,
+  Home,
+  Pickaxe,
+  Waves,
+  Sun,
+  Droplets
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
+// Sector definitions with icons and colors
+const sectors = [
+  {
+    id: 'urban-planning',
+    name: 'Urban Planning',
+    icon: Building,
+    color: 'bg-blue-50 border-blue-200',
+    description: 'City planning, zoning, and smart city solutions'
+  },
+  {
+    id: 'agriculture',
+    name: 'Agriculture',
+    icon: Sprout,
+    color: 'bg-green-50 border-green-200',
+    description: 'Precision farming, crop monitoring, and field management'
+  },
+  {
+    id: 'forestry',
+    name: 'Forestry & Environment',
+    icon: TreePine,
+    color: 'bg-emerald-50 border-emerald-200',
+    description: 'Forest monitoring, conservation, and environmental analysis'
+  },
+  {
+    id: 'infrastructure',
+    name: 'Infrastructure & Utilities',
+    icon: MapPin,
+    color: 'bg-gray-50 border-gray-200',
+    description: 'Infrastructure mapping, utility networks, and asset management'
+  },
+  {
+    id: 'transportation',
+    name: 'Transportation & Logistics',
+    icon: Truck,
+    color: 'bg-orange-50 border-orange-200',
+    description: 'Route optimization, fleet management, and logistics planning'
+  },
+  {
+    id: 'disaster',
+    name: 'Disaster Management',
+    icon: Shield,
+    color: 'bg-red-50 border-red-200',
+    description: 'Emergency response, risk assessment, and disaster preparedness'
+  },
+  {
+    id: 'telecom',
+    name: 'Telecom',
+    icon: Radio,
+    color: 'bg-purple-50 border-purple-200',
+    description: 'Network planning, coverage analysis, and site optimization'
+  },
+  {
+    id: 'health',
+    name: 'Health & Epidemiology',
+    icon: Heart,
+    color: 'bg-pink-50 border-pink-200',
+    description: 'Disease mapping, health facility planning, and epidemiological studies'
+  },
+  {
+    id: 'real-estate',
+    name: 'Real Estate & Land Use',
+    icon: Home,
+    color: 'bg-indigo-50 border-indigo-200',
+    description: 'Property valuation, land use analysis, and market research'
+  },
+  {
+    id: 'mining',
+    name: 'Mining & Geology',
+    icon: Pickaxe,
+    color: 'bg-amber-50 border-amber-200',
+    description: 'Geological surveys, mineral exploration, and mining operations'
+  },
+  {
+    id: 'marine',
+    name: 'Marine & Coastal',
+    icon: Waves,
+    color: 'bg-cyan-50 border-cyan-200',
+    description: 'Coastal monitoring, marine conservation, and oceanographic analysis'
+  },
+  {
+    id: 'renewable-energy',
+    name: 'Renewable Energy',
+    icon: Sun,
+    color: 'bg-yellow-50 border-yellow-200',
+    description: 'Solar/wind site selection, energy potential mapping'
+  },
+  {
+    id: 'water-resources',
+    name: 'Water Resources',
+    icon: Droplets,
+    color: 'bg-teal-50 border-teal-200',
+    description: 'Watershed analysis, flood modeling, and water quality monitoring'
+  }
+];
 
-interface ToolkitCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-}
+// Enhanced tools data organized by sectors
+const tools = [
+  // Urban Planning Tools
+  {
+    id: 'urban-analyzer',
+    name: 'Urban Growth Analyzer',
+    description: 'AI-powered tool for analyzing urban expansion patterns and predicting future growth using satellite imagery',
+    sector: 'urban-planning',
+    type: 'internal',
+    url: '/labs/urban-analyzer',
+    tags: ['AI', 'Analysis', 'Prediction', 'Satellite'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  },
+  {
+    id: 'qgis',
+    name: 'QGIS Desktop',
+    description: 'Free and open-source geographic information system for comprehensive urban planning and mapping',
+    sector: 'urban-planning',
+    type: 'external',
+    url: 'https://qgis.org',
+    tags: ['Desktop GIS', 'Open Source', 'Mapping'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  },
+  {
+    id: 'urban-3d',
+    name: '3D City Modeler',
+    description: 'Create detailed 3D models of urban areas for planning and visualization purposes',
+    sector: 'urban-planning',
+    type: 'internal',
+    url: '/labs/3d-modeler',
+    tags: ['3D Modeling', 'Visualization'],
+    featured: false,
+    hasGuide: true,
+    difficulty: 'advanced'
+  },
 
-interface Toolkit {
-  id: string;
-  title: string;
-  description: string;
-  category_id: string;
-  download_url: string;
-  demo_video_url: string;
-  sample_project_url: string;
-  tags: string[];
-  license_type: string;
-  rating: number;
-  download_count: number;
-  is_featured: boolean;
-  created_by: string;
-}
+  // Agriculture Tools
+  {
+    id: 'crop-classifier',
+    name: 'Crop Classifier',
+    description: 'Classify satellite images by crop type using NDVI & time series analysis for precision agriculture',
+    sector: 'agriculture',
+    type: 'internal',
+    url: '/labs/crop-classifier',
+    tags: ['Remote Sensing', 'Classification', 'NDVI', 'Precision Agriculture'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'beginner'
+  },
+  {
+    id: 'google-earth-engine',
+    name: 'Google Earth Engine',
+    description: 'Cloud-based platform for planetary-scale agricultural monitoring and analysis',
+    sector: 'agriculture',
+    type: 'external',
+    url: 'https://earthengine.google.com',
+    tags: ['Cloud Computing', 'Big Data', 'Monitoring'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'advanced'
+  },
+  {
+    id: 'farm-optimizer',
+    name: 'Farm Field Optimizer',
+    description: 'Optimize field boundaries and irrigation systems using topographic and soil data',
+    sector: 'agriculture',
+    type: 'internal',
+    url: '/labs/farm-optimizer',
+    tags: ['Optimization', 'Irrigation', 'Soil Analysis'],
+    featured: false,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  },
+
+  // Forestry Tools
+  {
+    id: 'forest-monitor',
+    name: 'Forest Change Monitor',
+    description: 'Real-time forest cover change detection using satellite imagery and machine learning',
+    sector: 'forestry',
+    type: 'internal',
+    url: '/labs/forest-monitor',
+    tags: ['Change Detection', 'Monitoring', 'Machine Learning'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'advanced'
+  },
+  {
+    id: 'carbon-calculator',
+    name: 'Carbon Stock Calculator',
+    description: 'Estimate forest carbon stocks and sequestration potential for climate projects',
+    sector: 'forestry',
+    type: 'internal',
+    url: '/labs/carbon-calculator',
+    tags: ['Carbon', 'Climate', 'Assessment'],
+    featured: false,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  },
+
+  // Disaster Management Tools
+  {
+    id: 'flood-predictor',
+    name: 'Flood Risk Predictor',
+    description: 'Predict flood risks using elevation models, rainfall data, and hydrological modeling',
+    sector: 'disaster',
+    type: 'internal',
+    url: '/labs/flood-predictor',
+    tags: ['Risk Assessment', 'Hydrology', 'Prediction'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'advanced'
+  },
+  {
+    id: 'emergency-mapper',
+    name: 'Emergency Response Mapper',
+    description: 'Real-time mapping tool for emergency response coordination and resource allocation',
+    sector: 'disaster',
+    type: 'internal',
+    url: '/labs/emergency-mapper',
+    tags: ['Emergency Response', 'Real-time', 'Coordination'],
+    featured: false,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  },
+
+  // Water Resources Tools
+  {
+    id: 'watershed-analyzer',
+    name: 'Watershed Analyzer',
+    description: 'Comprehensive watershed delineation and hydrological analysis tool',
+    sector: 'water-resources',
+    type: 'internal',
+    url: '/labs/watershed-analyzer',
+    tags: ['Watershed', 'Hydrology', 'Analysis'],
+    featured: true,
+    hasGuide: true,
+    difficulty: 'intermediate'
+  }
+];
 
 const Toolkits = () => {
+  const { toast } = useToast();
   const { user } = useAuth();
-  const { hasAccess } = usePremiumAccess();
-  const [categories, setCategories] = useState<ToolkitCategory[]>([]);
-  const [toolkits, setToolkits] = useState<Toolkit[]>([]);
-  const [filteredToolkits, setFilteredToolkits] = useState<Toolkit[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [loading, setLoading] = useState(true);
+  
+  const [search, setSearch] = useState('');
+  const [selectedSector, setSelectedSector] = useState('all');
+  const [bookmarkedTools, setBookmarkedTools] = useState(new Set<string>());
 
-  const hasProAccess = hasAccess('pro');
-  const hasEnterpriseAccess = hasAccess('enterprise');
+  // Filter tools based on search and sector
+  const filteredTools = tools.filter(tool => {
+    const matchesSearch = !search || 
+      tool.name.toLowerCase().includes(search.toLowerCase()) ||
+      tool.description.toLowerCase().includes(search.toLowerCase()) ||
+      tool.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()));
+    
+    const matchesSector = selectedSector === 'all' || tool.sector === selectedSector;
+    
+    return matchesSearch && matchesSector;
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Group tools by sector
+  const toolsBySector = sectors.reduce((acc, sector) => {
+    acc[sector.id] = filteredTools.filter(tool => tool.sector === sector.id);
+    return acc;
+  }, {} as Record<string, typeof tools>);
 
-  useEffect(() => {
-    filterToolkits();
-  }, [toolkits, searchTerm, selectedCategory]);
-
-  const fetchData = async () => {
-    try {
-      // Mock data with real download URLs for now since we don't have a backend
-      const mockCategories: ToolkitCategory[] = [
-        { id: 'processing', name: 'Data Processing', description: 'Tools for data cleaning, transformation, and analysis', icon: '⚙️' },
-        { id: 'visualization', name: 'Visualization', description: 'Mapping and visualization tools', icon: '📊' },
-        { id: 'analysis', name: 'Spatial Analysis', description: 'Advanced spatial analysis tools', icon: '🧠' },
-        { id: 'automation', name: 'Automation', description: 'Workflow automation and scripting', icon: '🔄' },
-        { id: 'web', name: 'Web GIS', description: 'Web mapping and web GIS development', icon: '🌐' }
-      ];
-
-      const mockToolkits: Toolkit[] = [
-        {
-          id: '1',
-          title: 'QGIS Buffer and Heatmap Combo Tool',
-          description: 'Combines buffer analysis with heatmap generation for comprehensive spatial analysis',
-          category_id: 'analysis',
-          download_url: '/downloads/buffer-heatmap-combo.zip',
-          demo_video_url: 'https://youtube.com/watch?v=demo1',
-          sample_project_url: '/downloads/buffer-heatmap-combo.zip',
-          tags: ['QGIS', 'Buffer', 'Heatmap', 'Analysis'],
-          license_type: 'MIT',
-          rating: 4.8,
-          download_count: 1247,
-          is_featured: true,
-          created_by: 'Harita Hive Team'
-        },
-        {
-          id: '2',
-          title: 'Coordinate Transformer Pro',
-          description: 'Advanced coordinate system transformation tool with batch processing',
-          category_id: 'processing',
-          download_url: '/downloads/coordinate-transformer.py',
-          demo_video_url: 'https://youtube.com/watch?v=demo2',
-          sample_project_url: '/downloads/coordinate-transformer.py',
-          tags: ['Python', 'Coordinates', 'CRS', 'Transformation'],
-          license_type: 'GPL-3.0',
-          rating: 4.6,
-          download_count: 892,
-          is_featured: true,
-          created_by: 'GeoSpatial Solutions'
-        },
-        {
-          id: '3',
-          title: 'GeoJSON Editor Suite',
-          description: 'Complete toolkit for editing, validating, and optimizing GeoJSON files',
-          category_id: 'processing',
-          download_url: '/downloads/geojson-editor.zip',
-          demo_video_url: 'https://youtube.com/watch?v=demo3',
-          sample_project_url: '/downloads/geojson-editor.zip',
-          tags: ['GeoJSON', 'Editor', 'Validation', 'Web'],
-          license_type: 'Apache-2.0',
-          rating: 4.9,
-          download_count: 2103,
-          is_featured: true,
-          created_by: 'OpenGIS Community'
-        },
-        {
-          id: '4',
-          title: 'Mapbox Clustering Algorithm',
-          description: 'Efficient point clustering for web maps with custom styling options',
-          category_id: 'web',
-          download_url: '/downloads/mapbox-clustering.js',
-          demo_video_url: 'https://youtube.com/watch?v=demo4',
-          sample_project_url: '/downloads/mapbox-clustering.js',
-          tags: ['Mapbox', 'Clustering', 'JavaScript', 'WebGL'],
-          license_type: 'MIT',
-          rating: 4.7,
-          download_count: 1534,
-          is_featured: true,
-          created_by: 'Web Mapping Pro'
-        },
-        {
-          id: '5',
-          title: 'NDVI Analysis Toolkit',
-          description: 'Complete NDVI calculation and analysis suite for vegetation monitoring',
-          category_id: 'analysis',
-          download_url: '/downloads/ndvi-analysis.qgz',
-          demo_video_url: 'https://youtube.com/watch?v=demo5',
-          sample_project_url: '/downloads/ndvi-analysis.qgz',
-          tags: ['NDVI', 'Vegetation', 'Remote Sensing', 'QGIS'],
-          license_type: 'CC-BY-4.0',
-          rating: 4.5,
-          download_count: 768,
-          is_featured: false,
-          created_by: 'Remote Sensing Lab'
-        },
-        {
-          id: '6',
-          title: 'Polygon Simplification Tool',
-          description: 'Optimize polygon geometries while preserving important features',
-          category_id: 'processing',
-          download_url: '/downloads/polygon-simplifier.py',
-          demo_video_url: 'https://youtube.com/watch?v=demo6',
-          sample_project_url: '/downloads/polygon-simplifier.py',
-          tags: ['Python', 'Polygons', 'Optimization', 'Geometry'],
-          license_type: 'BSD-3-Clause',
-          rating: 4.4,
-          download_count: 623,
-          is_featured: false,
-          created_by: 'Geometry Solutions'
-        }
-      ];
-
-      setCategories(mockCategories);
-      setToolkits(mockToolkits);
-      setLoading(false);
-
-      // Fetch categories
-      const { data: categoriesData } = await supabase
-        .from('toolkit_categories')
-        .select('*')
-        .order('name');
-
-      // Fetch toolkits
-      const { data: toolkitsData } = await supabase
-        .from('toolkits')
-        .select('*')
-        .order('is_featured', { ascending: false })
-        .order('rating', { ascending: false });
-
-      setCategories(categoriesData || []);
-      setToolkits(toolkitsData || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterToolkits = () => {
-    let filtered = toolkits;
-
-    if (searchTerm) {
-      filtered = filtered.filter(toolkit =>
-        toolkit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        toolkit.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        toolkit.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(toolkit => toolkit.category_id === selectedCategory);
-    }
-
-    setFilteredToolkits(filtered);
-  };
-
-  const handleDownload = async (toolkit: Toolkit) => {
-    if (!hasProAccess && !toolkit.is_featured) {
+  const handleBookmark = (toolId: string) => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please login to bookmark tools",
+        variant: "destructive"
+      });
       return;
     }
 
-    // Increment download count
-    await supabase
-      .from('toolkits')
-      .update({ download_count: toolkit.download_count + 1 })
-      .eq('id', toolkit.id);
-
-    // Open download link
-    if (toolkit.download_url) {
-      window.open(toolkit.download_url, '_blank');
-    }
-
-    // Refresh data
-    fetchData();
+    setBookmarkedTools(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(toolId)) {
+        newSet.delete(toolId);
+        toast({ title: "Removed from bookmarks" });
+      } else {
+        newSet.add(toolId);
+        toast({ title: "Added to bookmarks" });
+      }
+      return newSet;
+    });
   };
 
-  const getCategoryIcon = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
-    return category?.icon || '📦';
+  const handleSuggestTool = () => {
+    toast({
+      title: "Feature coming soon!",
+      description: "Tool suggestion form will be available shortly",
+    });
   };
 
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
-    return category?.name || 'General';
-  };
-
-  // Show limited preview for free users
-  const displayedToolkits = hasProAccess ? filteredToolkits : filteredToolkits.filter(t => t.is_featured).slice(0, 6);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-20 bg-muted rounded mb-4"></div>
-                <div className="flex gap-2">
-                  <div className="h-6 bg-muted rounded w-16"></div>
-                  <div className="h-6 bg-muted rounded w-16"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const featuredTools = tools.filter(tool => tool.featured);
+  const totalTools = tools.length;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Package className="h-8 w-8 text-primary" />
-          Geospatial Toolkits Hub
-        </h1>
-        <p className="text-muted-foreground">
-          Production-ready tools, templates, and plugins for every geospatial domain
-        </p>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search toolkits, tags, or descriptions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b bg-gradient-to-r from-teal-50 via-green-50 to-blue-50">
+        <div className="container py-12">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="relative">
+                <Wrench className="h-12 w-12 text-teal-600" />
+                <Zap className="h-5 w-5 text-yellow-500 absolute -top-1 -right-1" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-600 via-green-600 to-blue-600 bg-clip-text text-transparent">
+                Geospatial Toolkits
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto mb-8">
+              Discover the perfect geospatial tools for your domain. Organized by key sectors, 
+              from urban planning to agriculture, with everything you need to get started.
+            </p>
+            
+            {/* Stats */}
+            <div className="flex items-center justify-center gap-8 text-sm">
+              <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border shadow-sm">
+                <Target className="h-4 w-4 text-teal-600" />
+                <span className="font-medium">{sectors.length} Sectors</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border shadow-sm">
+                <Wrench className="h-4 w-4 text-green-600" />
+                <span className="font-medium">{totalTools} Tools</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border shadow-sm">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <span className="font-medium">{featuredTools.length} Featured</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {category.icon} {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
-      {/* Categories Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        {categories.map((category) => (
-          <Card 
-            key={category.id} 
-            className={`cursor-pointer transition-colors hover:bg-accent ${
-              selectedCategory === category.id ? 'ring-2 ring-primary' : ''
-            }`}
-            onClick={() => setSelectedCategory(category.id)}
-          >
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl mb-2">{category.icon}</div>
-              <h3 className="font-medium text-sm">{category.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {toolkits.filter(t => t.category_id === category.id).length} tools
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Toolkits Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {displayedToolkits.map((toolkit) => (
-          <Card key={toolkit.id} className="group hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">{getCategoryIcon(toolkit.category_id)}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {getCategoryName(toolkit.category_id)}
-                  </Badge>
-                  {toolkit.is_featured && (
-                    <Badge className="text-xs">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  {toolkit.license_type}
-                </Badge>
-              </div>
-              <CardTitle className="text-lg">{toolkit.title}</CardTitle>
-              <CardDescription className="line-clamp-2">
-                {toolkit.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {toolkit.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-                {toolkit.tags.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{toolkit.tags.length - 3} more
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{toolkit.rating.toFixed(1)}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {toolkit.download_count} downloads
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDownload(toolkit)}
-                  disabled={!hasProAccess && !toolkit.is_featured}
-                  className="text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-                
-                {toolkit.demo_video_url && (
-                  <Button size="sm" variant="outline" className="text-xs">
-                    <Play className="h-3 w-3 mr-1" />
-                    Demo
-                  </Button>
-                )}
-                
-                {toolkit.sample_project_url && (
-                  <Button size="sm" variant="outline" className="text-xs">
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    Sample
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Upgrade Prompt for Free Users */}
-      {!hasProAccess && (
-        <UpgradePrompt 
-          feature="Full Toolkits Access"
-          description="Unlock access to all premium toolkits, templates, and the ability to submit your own tools to the community."
-        />
-      )}
-
-      {/* Upload Section for Enterprise Users */}
-      {hasEnterpriseAccess && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Contribute Your Tools</CardTitle>
-            <CardDescription>
-              Share your geospatial tools and templates with the community
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button>
-              <Package className="h-4 w-4 mr-2" />
-              Upload Toolkit
+      <div className="container py-8">
+        {/* Search and Actions */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tools, sectors, or use cases..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 h-12"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleSuggestTool}>
+              <Plus className="h-4 w-4 mr-2" />
+              Suggest Tool
             </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+
+        {/* Sector Tabs */}
+        <Tabs value={selectedSector} onValueChange={setSelectedSector} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 mb-8">
+            <TabsTrigger value="all" className="text-xs">All Sectors</TabsTrigger>
+            {sectors.slice(0, 6).map(sector => (
+              <TabsTrigger key={sector.id} value={sector.id} className="text-xs">
+                {sector.name.split(' ')[0]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="all">
+            <div className="space-y-12">
+              {sectors.map(sector => {
+                const sectorTools = toolsBySector[sector.id];
+                const Icon = sector.icon;
+                
+                if (sectorTools.length === 0) return null;
+                
+                return (
+                  <section key={sector.id} className="space-y-6">
+                    <div className={`p-6 rounded-xl ${sector.color}`}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <Icon className="h-6 w-6 text-primary" />
+                        <h2 className="text-2xl font-bold">{sector.name}</h2>
+                        <Badge variant="secondary">{sectorTools.length} tools</Badge>
+                      </div>
+                      <p className="text-muted-foreground">{sector.description}</p>
+                    </div>
+                    
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {sectorTools.map(tool => (
+                        <ToolkitCard
+                          key={tool.id}
+                          tool={tool}
+                          onBookmark={handleBookmark}
+                          isBookmarked={bookmarkedTools.has(tool.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {sectors.map(sector => (
+            <TabsContent key={sector.id} value={sector.id}>
+              <div className="space-y-6">
+                <div className={`p-8 rounded-xl ${sector.color}`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <sector.icon className="h-8 w-8 text-primary" />
+                    <h2 className="text-3xl font-bold">{sector.name}</h2>
+                  </div>
+                  <p className="text-lg text-muted-foreground">{sector.description}</p>
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {toolsBySector[sector.id].map(tool => (
+                    <ToolkitCard
+                      key={tool.id}
+                      tool={tool}
+                      onBookmark={handleBookmark}
+                      isBookmarked={bookmarkedTools.has(tool.id)}
+                    />
+                  ))}
+                </div>
+                
+                {toolsBySector[sector.id].length === 0 && (
+                  <div className="text-center py-12">
+                    <sector.icon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No tools found</h3>
+                    <p className="text-muted-foreground">Try adjusting your search terms</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
+    </div>
   );
 };
 
