@@ -7284,27 +7284,36 @@ export type Database = {
       user_resumes: {
         Row: {
           created_at: string | null
+          extracted_data: Json | null
+          extraction_status: string | null
           file_url: string | null
           id: string
           match_scores: Json | null
+          processed_at: string | null
           resume_data: Json
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          extracted_data?: Json | null
+          extraction_status?: string | null
           file_url?: string | null
           id?: string
           match_scores?: Json | null
+          processed_at?: string | null
           resume_data: Json
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          extracted_data?: Json | null
+          extraction_status?: string | null
           file_url?: string | null
           id?: string
           match_scores?: Json | null
+          processed_at?: string | null
           resume_data?: Json
           updated_at?: string | null
           user_id?: string
