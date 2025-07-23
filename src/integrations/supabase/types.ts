@@ -7860,6 +7860,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      debug_storage_path: {
+        Args: { file_path: string; user_id: string }
+        Returns: Json
+      }
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
