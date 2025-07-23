@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Bot, User, MessageCircle, Linkedin, Mail, MapPin, Award, ExternalLink, Sparkles, Clock, Users, Star } from "lucide-react";
+import { Bot, User, MessageCircle, Linkedin, Mail, MapPin, Award, ExternalLink, Sparkles, Clock, Users, Star, Video } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ const Mentorship = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { currency, symbol } = useCurrencyPricing();
+  const navigate = useNavigate();
 
   const handleAskAI = async () => {
     if (!aiPrompt.trim()) return;
@@ -240,10 +242,10 @@ const Mentorship = () => {
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-2xl mb-2 flex items-center gap-2">
-                    Harita AI Copilot
+                    GEOVA AI Mentor
                     <Sparkles className="h-5 w-5 text-primary" />
                   </CardTitle>
-                  <p className="text-primary font-semibold mb-1">24/7 Intelligent Assistant</p>
+                  <p className="text-primary font-semibold mb-1">Live Teaching & 24/7 Support</p>
                   <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
                     <div className="h-2 w-2 bg-green-500 rounded-full" />
                     <span>Always Available</span>
@@ -256,9 +258,9 @@ const Mentorship = () => {
               {/* AI Description */}
               <div>
                 <p className="text-muted-foreground leading-relaxed">
-                  Your intelligent companion for instant career guidance, technical support, and 
-                  personalized learning recommendations. Powered by advanced AI trained on geospatial 
-                  industry knowledge and best practices.
+                  Advanced AI mentor that conducts live daily classes for geospatial technology, 
+                  provides instant 24/7 support, and delivers personalized learning paths. Join GEOVA's 
+                  live sessions every day from 5:00-7:00 AM IST for structured learning.
                 </p>
               </div>
 
@@ -271,23 +273,23 @@ const Mentorship = () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-1.5 w-1.5 bg-primary rounded-full" />
-                    <span>Career pathway recommendations</span>
+                    <span>Daily live classes (5:00-7:00 AM IST)</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-1.5 w-1.5 bg-primary rounded-full" />
-                    <span>Technical troubleshooting & code help</span>
+                    <span>Interactive Q&A during sessions</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-1.5 w-1.5 bg-primary rounded-full" />
-                    <span>Learning resource suggestions</span>
+                    <span>Hands-on coding & project guidance</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-1.5 w-1.5 bg-primary rounded-full" />
-                    <span>Industry insights & trend analysis</span>
+                    <span>Session recordings & progress tracking</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-1.5 w-1.5 bg-primary rounded-full" />
-                    <span>Skill gap analysis & improvement plans</span>
+                    <span>24/7 support between classes</span>
                   </div>
                 </div>
               </div>
@@ -317,29 +319,34 @@ const Mentorship = () => {
                   rows={3}
                   className="resize-none"
                 />
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handleAskAI}
-                  disabled={!aiPrompt.trim() || isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Ask AI Mentor
-                    </>
-                  )}
-                </Button>
-                
-                <div className="text-center">
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    Open Full Chat Interface
+                <div className="grid grid-cols-1 gap-3">
+                  <Button 
+                    className="w-full" 
+                    size="lg"
+                    onClick={() => navigate('/live-classes')}
+                  >
+                    <Video className="h-4 w-4 mr-2" />
+                    Join Live Classes
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    className="w-full" 
+                    size="lg"
+                    onClick={handleAskAI}
+                    disabled={!aiPrompt.trim() || isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Ask GEOVA Now
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
