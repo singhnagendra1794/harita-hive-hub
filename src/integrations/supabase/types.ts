@@ -3435,6 +3435,102 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_bookings: {
+        Row: {
+          booking_date: string | null
+          created_at: string | null
+          currency: string
+          email: string
+          full_name: string
+          id: string
+          mentor_name: string
+          notes: string | null
+          payment_id: string | null
+          payment_status: string | null
+          phone: string | null
+          query_description: string | null
+          session_date: string | null
+          session_duration: number
+          session_price: number
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_date?: string | null
+          created_at?: string | null
+          currency?: string
+          email: string
+          full_name: string
+          id?: string
+          mentor_name?: string
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          query_description?: string | null
+          session_date?: string | null
+          session_duration: number
+          session_price: number
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_date?: string | null
+          created_at?: string | null
+          currency?: string
+          email?: string
+          full_name?: string
+          id?: string
+          mentor_name?: string
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          query_description?: string | null
+          session_date?: string | null
+          session_duration?: number
+          session_price?: number
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_messages: {
+        Row: {
+          admin_replied: boolean | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          sender_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_replied?: boolean | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          sender_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_replied?: boolean | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          sender_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       missing_search_queries: {
         Row: {
           created_at: string

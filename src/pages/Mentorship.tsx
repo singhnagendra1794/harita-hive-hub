@@ -9,10 +9,16 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrencyPricing } from "@/hooks/useCurrencyPricing";
+import { BookingModal } from "@/components/mentorship/BookingModal";
+import { MessageModal } from "@/components/mentorship/MessageModal";
+import { GEOVAChat } from "@/components/mentorship/GEOVAChat";
 
 const Mentorship = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [isGEOVAChatOpen, setIsGEOVAChatOpen] = useState(false);
   const { toast } = useToast();
   const { currency, symbol } = useCurrencyPricing();
   const navigate = useNavigate();
@@ -20,16 +26,16 @@ const Mentorship = () => {
   const handleAskAI = async () => {
     if (!aiPrompt.trim()) return;
     
-    setIsLoading(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "AI Mentor Response",
-        description: "Your question has been processed. Check your chat for the response!",
-      });
-      setAiPrompt("");
-    }, 2000);
+    setIsGEOVAChatOpen(true);
+    setAiPrompt("");
+  };
+
+  const scrollToHumanMentor = () => {
+    const element = document.getElementById('human-mentor-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => setIsBookingModalOpen(true), 500);
+    }
   };
 
   return (
@@ -47,7 +53,7 @@ const Mentorship = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           
           {/* Human Mentor - Nagendra Singh */}
-          <Card className="relative overflow-hidden">
+          <Card id="human-mentor-section" className="relative overflow-hidden">
             <div className="absolute top-4 right-4">
               <Badge variant="secondary" className="bg-green-100 text-green-800">
                 <User className="h-3 w-3 mr-1" />
@@ -121,7 +127,7 @@ const Mentorship = () => {
                       View Full Profile & Book Session
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-3">
                         <Avatar className="h-12 w-12">
@@ -195,8 +201,19 @@ const Mentorship = () => {
 
                         {/* Contact Actions */}
                         <div className="grid grid-cols-2 gap-3">
-                          <Button className="w-full">Book Session</Button>
-                          <Button variant="outline" className="w-full">Send Message</Button>
+                          <Button 
+                            className="w-full hover:bg-primary/90 transition-colors" 
+                            onClick={() => setIsBookingModalOpen(true)}
+                          >
+                            Book Session
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full hover:bg-muted transition-colors" 
+                            onClick={() => setIsMessageModalOpen(true)}
+                          >
+                            Send Message
+                          </Button>
                         </div>
                       </div>
                     </DialogDescription>
@@ -331,7 +348,7 @@ const Mentorship = () => {
                   
                   <Button 
                     variant="outline"
-                    className="w-full" 
+                    className="w-full hover:bg-muted transition-colors" 
                     size="lg"
                     onClick={handleAskAI}
                     disabled={!aiPrompt.trim() || isLoading}
@@ -403,17 +420,43 @@ const Mentorship = () => {
               your journey in the geospatial industry.
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" className="min-w-[200px]">
+              <Button 
+                size="lg" 
+                className="min-w-[200px] hover:bg-primary/90 transition-colors"
+                onClick={() => setIsGEOVAChatOpen(true)}
+              >
                 <Bot className="h-4 w-4 mr-2" />
                 Try AI Mentor Free
               </Button>
-              <Button size="lg" variant="outline" className="min-w-[200px]">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="min-w-[200px] hover:bg-muted transition-colors"
+                onClick={scrollToHumanMentor}
+              >
                 <User className="h-4 w-4 mr-2" />
                 Book Human Session
               </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Modals */}
+        <BookingModal 
+          isOpen={isBookingModalOpen} 
+          onClose={() => setIsBookingModalOpen(false)} 
+        />
+        
+        <MessageModal 
+          isOpen={isMessageModalOpen} 
+          onClose={() => setIsMessageModalOpen(false)} 
+        />
+
+        {/* GEOVA Chat */}
+        <GEOVAChat 
+          isOpen={isGEOVAChatOpen} 
+          onClose={() => setIsGEOVAChatOpen(false)} 
+        />
     </div>
   );
 };
