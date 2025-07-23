@@ -1,15 +1,15 @@
 
 import PremiumAccessGate from "../components/premium/PremiumAccessGate";
-import EnhancedGeoProcessingWorkspace from "../components/geoprocessing/EnhancedGeoProcessingWorkspace";
+import HaritaHiveGeoProcessingLab from "../components/geoprocessing/HaritaHiveGeoProcessingLab";
 
 const GeoProcessingLab = () => {
   return (
     <PremiumAccessGate 
       requiredTier="pro"
-      featureName="Enterprise Geo-Processing Lab"
-      featureDescription="Access enterprise-grade spatial analysis tools with AI-powered insights, real-time processing, cloud export, and API automation capabilities."
+      featureName="HaritaHive GeoProcessing Lab"
+      featureDescription="World's most advanced browser-based spatial processing platform with real-time cloud processing, AI assistance, and professional-grade tools for raster and vector analysis."
     >
-      <EnhancedGeoProcessingWorkspace />
+      <HaritaHiveGeoProcessingLab />
     </PremiumAccessGate>
   );
 };
