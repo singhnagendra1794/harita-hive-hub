@@ -18,6 +18,8 @@ import { ScreenRecorder } from "@/components/studio/ScreenRecorder";
 import { MapWalkthroughCreator } from "@/components/studio/MapWalkthroughCreator";
 import { BeforeAfterAnalyzer } from "@/components/studio/BeforeAfterAnalyzer";
 import { StudioResourceCenter } from "@/components/studio/StudioResourceCenter";
+import { AIFeatures } from "@/components/studio/AIFeatures";
+import { EnhancedUploadSystem } from "@/components/studio/EnhancedUploadSystem";
 
 interface StudioContent {
   id: string;
@@ -148,12 +150,12 @@ const Studio = () => {
 
   const studioSections = [
     { id: 'my-studio', label: 'My Studio', icon: Monitor },
-    { id: 'upload-content', label: 'Upload Content', icon: Upload },
+    { id: 'upload-content', label: 'Enhanced Upload', icon: Upload },
+    { id: 'ai-features', label: 'AI Tools', icon: Sparkles },
     { id: 'record-screen', label: 'Record Screen', icon: ScreenShare },
     { id: 'map-walkthrough', label: 'Map Walkthrough', icon: MapPin },
     { id: 'before-after', label: 'Before/After Analysis', icon: BarChart3 },
     { id: 'showcase-gallery', label: 'Showcase Gallery', icon: Star },
-    { id: 'creator-tools', label: 'Creator Tools', icon: Sparkles },
     { id: 'downloads', label: 'Downloads', icon: Download },
   ];
 
@@ -290,7 +292,9 @@ const Studio = () => {
         );
 
       case 'upload-content':
-        return <VideoUploadComponent onUploadComplete={handleContentUpdate} />;
+        return <EnhancedUploadSystem onUploadComplete={handleContentUpdate} />;
+      case 'ai-features':
+        return <AIFeatures onUpdate={handleContentUpdate} />;
       case 'record-screen':
         return <ScreenRecorder onComplete={handleContentUpdate} />;
       case 'map-walkthrough':
