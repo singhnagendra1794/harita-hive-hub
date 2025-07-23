@@ -31,6 +31,7 @@ interface GISToolCardProps {
   compatibleSoftware?: string[];
   userPlan?: string;
   isProfessionalUser?: boolean;
+  hasMarketplaceAccess?: boolean;
   isQGISCompatible?: boolean;
   isOfflineCapable?: boolean;
   includesSampleData?: boolean;
@@ -55,6 +56,7 @@ const GISToolCard = ({
   compatibleSoftware,
   userPlan = 'free',
   isProfessionalUser = false,
+  hasMarketplaceAccess = false,
   isQGISCompatible = false,
   isOfflineCapable = false,
   includesSampleData = false,
@@ -83,32 +85,19 @@ const GISToolCard = ({
       return;
     }
 
+    if (!hasMarketplaceAccess) {
+      toast({
+        title: "Subscription Required",
+        description: "Please subscribe to the GIS Marketplace to download tools.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsDownloading(true);
     
     try {
-      // Check if user already owns this tool or has premium access
-      if (isPremiumUser || price === 0) {
-        await initiateSecureDownload();
-        return;
-      }
-
-      // Check if user already purchased this tool
-      const { data: existingPurchase } = await supabase
-        .from('tool_orders')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('tool_id', id)
-        .eq('status', 'completed')
-        .maybeSingle();
-
-      if (existingPurchase) {
-        await initiateSecureDownload();
-        return;
-      }
-
-      // Need to purchase - initiate Razorpay payment
-      await initiatePayment();
-      
+      await initiateSecureDownload();
     } catch (error) {
       console.error('Download error:', error);
       toast({
@@ -378,9 +367,8 @@ const GISToolCard = ({
           onClick={handleDownload} 
           className="flex-1" 
           disabled={isDownloading}
-          variant={isPremiumUser || price === 0 ? "default" : "default"}
         >
-          {isPremiumUser || price === 0 ? (
+          {hasMarketplaceAccess ? (
             <>
               <Download className="h-4 w-4 mr-2" />
               {isDownloading ? 'Downloading...' : 'Download Now'}
@@ -388,7 +376,7 @@ const GISToolCard = ({
           ) : (
             <>
               <CreditCard className="h-4 w-4 mr-2" />
-              {isDownloading ? 'Processing...' : 'Buy & Download'}
+              Subscribe to Download
             </>
           )}
         </Button>

@@ -2670,6 +2670,78 @@ export type Database = {
           },
         ]
       }
+      gis_marketplace_subscriptions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          id: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gis_marketplace_user_info: {
+        Row: {
+          email: string
+          full_name: string
+          id: string
+          intended_use: string | null
+          occupation: string | null
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          email: string
+          full_name: string
+          id?: string
+          intended_use?: string | null
+          occupation?: string | null
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          email?: string
+          full_name?: string
+          id?: string
+          intended_use?: string | null
+          occupation?: string | null
+          submitted_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       gis_profiles: {
         Row: {
           available_for_hire: boolean | null
@@ -2723,6 +2795,115 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      gis_tool_creators: {
+        Row: {
+          average_rating: number | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          portfolio_url: string | null
+          total_downloads: number | null
+          total_tools: number | null
+          updated_at: string | null
+          user_id: string
+          verification_status: string | null
+        }
+        Insert: {
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          portfolio_url?: string | null
+          total_downloads?: number | null
+          total_tools?: number | null
+          updated_at?: string | null
+          user_id: string
+          verification_status?: string | null
+        }
+        Update: {
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          portfolio_url?: string | null
+          total_downloads?: number | null
+          total_tools?: number | null
+          updated_at?: string | null
+          user_id?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      gis_tool_downloads: {
+        Row: {
+          download_type: string | null
+          downloaded_at: string | null
+          id: string
+          tool_id: string
+          user_id: string
+        }
+        Insert: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          id?: string
+          tool_id: string
+          user_id: string
+        }
+        Update: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          id?: string
+          tool_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gis_tool_downloads_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "gis_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gis_tool_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          rating: number
+          review: string | null
+          tool_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rating: number
+          review?: string | null
+          tool_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rating?: number
+          review?: string | null
+          tool_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gis_tool_ratings_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "gis_tools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gis_tools: {
         Row: {
@@ -7131,6 +7312,10 @@ export type Database = {
       check_geo_processing_limits: {
         Args: { p_user_id: string; p_job_type: string }
         Returns: Json
+      }
+      check_gis_marketplace_access: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       create_geova_daily_sessions: {
         Args: Record<PropertyKey, never>

@@ -1,5 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,21 +9,81 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import GISToolCard from "../components/marketplace/GISToolCard";
-import { Plus, Search, Filter, TrendingUp, Package, Users, CheckCircle, WifiOff, FileText, Database } from "lucide-react";
+import GISMarketplaceSubscriptionForm from "../components/marketplace/GISMarketplaceSubscriptionForm";
+import { Plus, Search, Filter, TrendingUp, Package, Users, CheckCircle, WifiOff, FileText, Database, Lock, Calendar, CreditCard } from "lucide-react";
 import { useUserStats } from "@/hooks/useUserStats";
+import { useGISMarketplaceAccess } from "@/hooks/useGISMarketplaceAccess";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const GISMarketplace = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  const [tools, setTools] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { plan } = useUserStats();
+  const { hasAccess, subscription, loading: accessLoading, getDaysRemaining, getSubscriptionStatus } = useGISMarketplaceAccess();
   
-  // Check if user has professional access
+  // Check for success status from subscription
+  const successStatus = searchParams.get('status');
+  
+  // Check if user has professional access or subscription access
   const isProfessionalUser = plan?.plan === 'professional' || plan?.subscription_tier === 'pro' || plan?.subscription_tier === 'enterprise';
+  const hasMarketplaceAccess = hasAccess || isProfessionalUser;
 
-  // Updated tools with standardized pricing at $14.99 USD - removed placeholder URLs
-  const tools = [
+  useEffect(() => {
+    if (successStatus === 'success') {
+      toast({
+        title: "Subscription Successful!",
+        description: "Welcome to the GIS Marketplace! You now have 3-month access to all premium tools.",
+      });
+    }
+  }, [successStatus, toast]);
+
+  useEffect(() => {
+    loadTools();
+  }, []);
+
+  const loadTools = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('gis_tools')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading tools:', error);
+        return;
+      }
+
+      setTools(data || []);
+    } catch (error) {
+      console.error('Error loading tools:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Redirect to auth if user is not signed in
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Show subscription form if user doesn't have access
+  if (!hasMarketplaceAccess && !accessLoading) {
+    return <GISMarketplaceSubscriptionForm />;
+  }
+
+  // Sample tools fallback if database is empty
+  const sampleTools = [
     {
       id: "1",
       title: "Advanced Spatial Analysis Toolkit",
@@ -163,9 +225,10 @@ const GISMarketplace = () => {
     }
   ];
 
+  const allTools = tools.length > 0 ? tools : sampleTools;
   const categories = ["Analysis", "Machine Learning", "Web Development", "Data Processing", "Remote Sensing", "Hydrology", "Visualization"];
   
-  const filteredTools = tools.filter(tool => {
+  const filteredTools = allTools.filter(tool => {
     const matchesSearch = tool.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tool.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || tool.category === selectedCategory;
@@ -176,20 +239,47 @@ const GISMarketplace = () => {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
-  const featuredTools = tools.filter(t => t.isFeatured);
+  const featuredTools = allTools.filter(t => t.is_featured);
   const stats = {
-    totalTools: tools.length,
-    totalDownloads: tools.reduce((sum, t) => sum + t.downloads, 0),
+    totalTools: allTools.length,
+    totalDownloads: allTools.reduce((sum, t) => sum + (t.download_count || t.downloads || 0), 0),
     activeCreators: 156
   };
 
+  if (accessLoading || loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading GIS Marketplace...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
       <div className="container py-8">
+        {/* Subscription Status Alert */}
+        {hasMarketplaceAccess && subscription && (
+          <Alert className="mb-6 bg-green-50 border-green-200">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>GIS Marketplace Access Active</strong> - 
+              {getDaysRemaining() ? ` ${getDaysRemaining()} days remaining` : ' Unlimited access'}
+              {subscription.expires_at && (
+                <span className="ml-2 text-sm">
+                  (Expires: {new Date(subscription.expires_at).toLocaleDateString()})
+                </span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">GIS Marketplace</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover and download GIS tools, scripts, templates, and resources created by the community.
+            Premium GIS tools, scripts, templates, and resources for geospatial professionals.
           </p>
         </div>
 
@@ -302,7 +392,7 @@ const GISMarketplace = () => {
             </div>
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Global Pricing:</strong> All tools available at $14.99 USD (₹1,249 INR) with instant download access
+                <strong>Subscription Access:</strong> 3-month subscription at ₹1,249 INR ($14.99 USD) with unlimited downloads
               </p>
             </div>
           </CardContent>
@@ -331,6 +421,7 @@ const GISMarketplace = () => {
                   {...tool} 
                   userPlan={plan?.plan || 'free'}
                   isProfessionalUser={isProfessionalUser}
+                  hasMarketplaceAccess={hasMarketplaceAccess}
                 />
               ))}
             </div>
@@ -344,6 +435,7 @@ const GISMarketplace = () => {
                   {...tool} 
                   userPlan={plan?.plan || 'free'}
                   isProfessionalUser={isProfessionalUser}
+                  hasMarketplaceAccess={hasMarketplaceAccess}
                 />
               ))}
             </div>
@@ -351,12 +443,13 @@ const GISMarketplace = () => {
 
           <TabsContent value="qgis">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tools.filter(tool => tool.isQGISCompatible).map(tool => (
+              {allTools.filter(tool => tool.is_qgis_compatible || tool.isQGISCompatible).map(tool => (
                 <GISToolCard 
                   key={tool.id} 
                   {...tool} 
                   userPlan={plan?.plan || 'free'}
                   isProfessionalUser={isProfessionalUser}
+                  hasMarketplaceAccess={hasMarketplaceAccess}
                 />
               ))}
             </div>
@@ -364,12 +457,13 @@ const GISMarketplace = () => {
 
           <TabsContent value="recent">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...tools].reverse().map(tool => (
+              {[...allTools].reverse().map(tool => (
                 <GISToolCard 
                   key={tool.id} 
                   {...tool} 
                   userPlan={plan?.plan || 'free'}
                   isProfessionalUser={isProfessionalUser}
+                  hasMarketplaceAccess={hasMarketplaceAccess}
                 />
               ))}
             </div>
