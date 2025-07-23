@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ScreenProtection from '@/components/security/ScreenProtection';
+import GEOVARecordingsList from '@/components/geova/GEOVARecordingsList';
 
 const WatchRecording = () => {
   const [searchParams] = useSearchParams();
@@ -40,26 +42,29 @@ const WatchRecording = () => {
     );
   }
 
+  // Show GEOVA recordings even if no specific video URL is provided
   if (error || !videoUrl) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center flex items-center gap-2 justify-center">
-              <Video className="h-5 w-5" />
-              Recording Unavailable
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">
-              {error || 'No recording URL provided'}
-            </p>
-            <Button onClick={() => navigate('/live-classes')} className="w-full">
+      <div className="min-h-screen bg-background">
+        <div className="container py-6">
+          <div className="mb-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/live-classes')}
+              className="mb-4"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Live Classes
             </Button>
-          </CardContent>
-        </Card>
+            <h1 className="text-3xl font-bold mb-2">Class Recordings</h1>
+            <p className="text-muted-foreground">
+              Access recordings of live classes and GEOVA's AI teaching sessions
+            </p>
+          </div>
+
+          {/* GEOVA Recordings Section */}
+          <GEOVARecordingsList />
+        </div>
       </div>
     );
   }
@@ -105,6 +110,12 @@ const WatchRecording = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Separator and GEOVA Recordings */}
+        <div className="mt-12">
+          <Separator className="mb-8" />
+          <GEOVARecordingsList />
+        </div>
       </div>
     </div>
   );
