@@ -37,12 +37,22 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface Template {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  features: string[];
+  category: string;
+  layers: string[];
+}
+
 const DragDropWebGISCreator = () => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const { toast } = useToast();
 
   const baseMaps = [
@@ -213,20 +223,22 @@ const DragDropWebGISCreator = () => {
     e.preventDefault();
   };
 
-  const handleTemplateUse = (template: any) => {
+  const handleTemplateUse = (template: Template) => {
     setSelectedTemplate(template);
     setTemplateDialogOpen(true);
   };
 
   const handleLoadTemplate = () => {
-    toast({
-      title: `Loading ${selectedTemplate.title}`,
-      description: "Template layers and styling are being applied to your project...",
-    });
+    if (selectedTemplate) {
+      toast({
+        title: `Loading ${selectedTemplate.title}`,
+        description: "Template layers and styling are being applied to your project...",
+      });
+    }
     setTemplateDialogOpen(false);
   };
 
-  const handleAiFeatureClick = (feature: any) => {
+  const handleAiFeatureClick = (feature: typeof aiCopilotFeatures[0]) => {
     toast({
       title: feature.title,
       description: feature.response,
