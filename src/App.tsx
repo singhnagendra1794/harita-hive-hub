@@ -108,6 +108,7 @@ const GeospatialFullstackDeveloper = lazy(() => import("./pages/courses/Geospati
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const AdminUserManagement = lazy(() => import("./pages/AdminUserManagement"));
 const SkillCopilot = lazy(() => import("./pages/SkillCopilot"));
+const SpatialAnalysisLab = lazy(() => import("./pages/SpatialAnalysisLab"));
 const Toolkits = lazy(() => import("./pages/Toolkits"));
 const JobsAIDiscovery = lazy(() => import("./pages/JobsAIDiscovery"));
 const ProjectStudio = lazy(() => import("./pages/ProjectStudio"));
@@ -587,18 +588,29 @@ function App() {
                             </RouteWrapper>
                           </ProtectedRoute>
                         </Layout>
-                      } />
-                       <Route path="/toolkits" element={
+                       } />
+                       <Route path="/spatial-analysis-lab" element={
                          <Layout>
                            <ProtectedRoute>
                              <RouteWrapper>
                                <Suspense fallback={<PageLoader />}>
-                                 <Toolkits />
+                                 <SpatialAnalysisLab />
                                </Suspense>
                              </RouteWrapper>
                            </ProtectedRoute>
                          </Layout>
                        } />
+                        <Route path="/toolkits" element={
+                          <Layout>
+                            <ProtectedRoute>
+                              <RouteWrapper>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Toolkits />
+                                </Suspense>
+                              </RouteWrapper>
+                            </ProtectedRoute>
+                          </Layout>
+                        } />
                          <Route path="/jobs-ai-discovery" element={
                            <Layout>
                              <ProtectedRoute>
