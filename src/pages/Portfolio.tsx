@@ -4,10 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { PersonalInfoForm } from "@/components/portfolio/PersonalInfoForm";
-import { ProjectsSection } from "@/components/portfolio/ProjectsSection";
-import { SkillsSection } from "@/components/portfolio/SkillsSection";
-import { ExportSection } from "@/components/portfolio/ExportSection";
+import { EnhancedPortfolioBuilder } from "@/components/portfolio/EnhancedPortfolioBuilder";
 
 interface PersonalInfo {
   name: string;
@@ -276,60 +273,15 @@ const Portfolio = () => {
   }
 
   return (
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Portfolio & Resume Builder</h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Showcase your geospatial expertise and build your professional presence
-          </p>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="skills">Skills</TabsTrigger>
-            <TabsTrigger value="export">Export</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="portfolio" className="space-y-6">
-            <PersonalInfoForm 
-              data={personalInfo}
-              onSave={handleSavePersonalInfo}
-            />
-          </TabsContent>
-
-          <TabsContent value="projects" className="space-y-6">
-            <ProjectsSection 
-              projects={projects}
-              onSave={handleSaveProjects}
-              haritaHiveProjects={autoDetectedProjects}
-              liveClassProjects={liveClassProjects}
-            />
-          </TabsContent>
-
-          <TabsContent value="skills" className="space-y-6">
-            <SkillsSection 
-              skills={skills}
-              onSave={handleSaveSkills}
-              autoDetectedSkills={autoDetectedSkills}
-            />
-          </TabsContent>
-
-          <TabsContent value="export" className="space-y-6">
-            <ExportSection 
-              data={{
-                personalInfo,
-                projects: [...autoDetectedProjects, ...liveClassProjects, ...projects],
-                skills: [...autoDetectedSkills, ...skills],
-                certificates
-              }}
-              onGenerateResume={handleGenerateResume}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+    <EnhancedPortfolioBuilder
+      personalInfo={personalInfo}
+      projects={[...autoDetectedProjects, ...liveClassProjects, ...projects]}
+      skills={[...autoDetectedSkills, ...skills]}
+      certificates={certificates}
+      onSavePersonalInfo={handleSavePersonalInfo}
+      onSaveProjects={handleSaveProjects}
+      onSaveSkills={handleSaveSkills}
+    />
   );
 };
 
