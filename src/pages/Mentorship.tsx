@@ -7,11 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrencyPricing } from "@/hooks/useCurrencyPricing";
 
 const Mentorship = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { currency, symbol } = useCurrencyPricing();
 
   const handleAskAI = async () => {
     if (!aiPrompt.trim()) return;
@@ -163,23 +165,30 @@ const Mentorship = () => {
                           <div className="space-y-2">
                             <div className="flex justify-between items-center p-3 border rounded-lg">
                               <div>
-                                <div className="font-medium">1-on-1 Career Guidance</div>
-                                <div className="text-sm text-muted-foreground">60 minutes • Personalized advice</div>
+                                <div className="font-medium">60-Minute Session</div>
+                                <div className="text-sm text-muted-foreground">60 mins • Career guidance & personalized advice</div>
                               </div>
                               <div className="text-right">
-                                <div className="font-bold">$89</div>
+                                <div className="font-bold">
+                                  {currency === 'INR' ? '₹499' : '$9.99'}
+                                </div>
                               </div>
                             </div>
                             <div className="flex justify-between items-center p-3 border rounded-lg">
                               <div>
-                                <div className="font-medium">Technical Deep Dive</div>
-                                <div className="text-sm text-muted-foreground">90 minutes • Hands-on coding</div>
+                                <div className="font-medium">90-Minute Session</div>
+                                <div className="text-sm text-muted-foreground">90 mins • Technical deep dive & hands-on coding</div>
                               </div>
                               <div className="text-right">
-                                <div className="font-bold">$129</div>
+                                <div className="font-bold">
+                                  {currency === 'INR' ? '₹799' : '$14.99'}
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <p className="text-xs text-muted-foreground mt-2 text-center">
+                            Price updated as of July 2025
+                          </p>
                         </div>
 
                         {/* Contact Actions */}
