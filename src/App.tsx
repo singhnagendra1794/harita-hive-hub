@@ -283,16 +283,16 @@ function App() {
                         </RouteWrapper>
                       </ProtectedRoute>
                     </Layout>
-                  } />
-                   <Route path="/project-templates" element={
-                     <Layout>
-                       <SubscriptionRoute requiredTier="pro">
-                         <RouteWrapper>
-                           <ProjectTemplates />
-                         </RouteWrapper>
-                       </SubscriptionRoute>
-                     </Layout>
                    } />
+                    <Route path="/project-templates" element={
+                      <Layout>
+                        <RouteWrapper>
+                          <Suspense fallback={<PageLoader />}>
+                            <ProjectTemplates />
+                          </Suspense>
+                        </RouteWrapper>
+                      </Layout>
+                    } />
                    <Route path="/map-playground" element={
                      <Layout>
                        <SubscriptionRoute requiredTier="pro">

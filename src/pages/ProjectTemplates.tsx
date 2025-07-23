@@ -1,288 +1,284 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EnhancedProjectTemplate } from "@/components/project-templates/EnhancedProjectTemplate";
-import { TemplateFilters } from "@/components/project-templates/TemplateFilters";
-import { TemplateUploadForm } from "@/components/project-templates/TemplateUploadForm";
-import { sampleProjectTemplates, sampleCollections } from "@/data/sampleProjectTemplates";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  FolderOpen, 
+  Download, 
+  FileText, 
+  Search, 
+  Filter, 
   Star, 
-  TrendingUp, 
   Users, 
-  CheckCircle,
-  Sparkles,
-  ArrowRight
+  ExternalLink, 
+  Code, 
+  MapPin, 
+  Satellite,
+  TreePine,
+  Building,
+  Zap
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
+import TemplateCard from '@/components/templates/TemplateCard';
+import { useProjectTemplates } from '@/hooks/useProjectTemplates';
 
 const ProjectTemplates = () => {
-  const [filters, setFilters] = useState({
-    search: '',
-    sectors: [],
-    tools: [],
-    skillLevels: [],
-    tags: [],
-    status: []
-  });
-  const [sortBy, setSortBy] = useState('featured');
-  const [templates] = useState(sampleProjectTemplates);
-  const [downloadingTemplates, setDownloadingTemplates] = useState(new Set());
-  const [userRatings, setUserRatings] = useState({});
-  const [favorites, setFavorites] = useState(new Set());
-  
-  const { toast } = useToast();
   const { user } = useAuth();
+  const { templates, loading, downloadTemplate, getTemplateGuide } = useProjectTemplates();
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
+  const [filteredTemplates, setFilteredTemplates] = useState(templates);
 
-  // Filter and sort templates
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = !filters.search || 
-      template.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      template.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-      template.tags.some(tag => tag.toLowerCase().includes(filters.search.toLowerCase()));
-    
-    const matchesSector = filters.sectors.length === 0 || filters.sectors.includes(template.sector);
-    const matchesTools = filters.tools.length === 0 || filters.tools.some(tool => template.tools_required.includes(tool));
-    const matchesSkillLevel = filters.skillLevels.length === 0 || filters.skillLevels.includes(template.skill_level);
-    const matchesTags = filters.tags.length === 0 || filters.tags.some(tag => template.tags.includes(tag));
-    const matchesStatus = filters.status.length === 0 ||
-      (filters.status.includes('featured') && template.is_featured) ||
-      (filters.status.includes('verified') && template.is_verified) ||
-      (filters.status.includes('recent') && new Date(template.created_at) > new Date(Date.now() - 30*24*60*60*1000));
+  useEffect(() => {
+    filterTemplates();
+  }, [templates, searchTerm, selectedCategory, selectedType]);
 
-    return matchesSearch && matchesSector && matchesTools && matchesSkillLevel && matchesTags && matchesStatus;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'featured': return (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
-      case 'popular': return b.download_count - a.download_count;
-      case 'rating': return b.rating_average - a.rating_average;
-      case 'recent': return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      default: return 0;
+  const filterTemplates = () => {
+    let filtered = templates;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(template =>
+        template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     }
-  });
 
-  const handleDownload = async (templateId: string, downloadType: string) => {
-    setDownloadingTemplates(prev => new Set([...prev, templateId]));
-    
-    // Simulate download
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setDownloadingTemplates(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(templateId);
-      return newSet;
-    });
+    // Category filter
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(template => template.category === selectedCategory);
+    }
 
-    toast({
-      title: "Download started",
-      description: "Template files are being prepared for download",
-    });
+    // Type filter
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(template => template.type === selectedType);
+    }
+
+    setFilteredTemplates(filtered);
   };
 
-  const handleRate = (templateId: string, rating: number) => {
-    setUserRatings(prev => ({ ...prev, [templateId]: rating }));
-    toast({
-      title: "Rating submitted",
-      description: "Thank you for your feedback!",
-    });
+  const handleDownload = async (templateId: string, isPremium: boolean) => {
+    if (isPremium && (!user || !user.email)) {
+      toast({
+        title: "Premium Template",
+        description: "Please sign in to access premium templates.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await downloadTemplate(templateId);
+      toast({
+        title: "Download Started",
+        description: "Your template download has begun.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Unable to download template. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleFavorite = (templateId: string) => {
-    setFavorites(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(templateId)) {
-        newSet.delete(templateId);
-        toast({ title: "Removed from favorites" });
-      } else {
-        newSet.add(templateId);
-        toast({ title: "Added to favorites" });
-      }
-      return newSet;
-    });
+  const handleViewGuide = async (templateId: string) => {
+    try {
+      const guideUrl = await getTemplateGuide(templateId);
+      window.open(guideUrl, '_blank');
+    } catch (error) {
+      toast({
+        title: "Guide Unavailable",
+        description: "Unable to open template guide. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpload = async (templateData: any) => {
-    // Simulate upload
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Template submitted",
-      description: "Your template has been submitted for review. We'll notify you once it's approved.",
-    });
-  };
+  const categories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'remote-sensing', label: 'Remote Sensing' },
+    { value: 'urban-planning', label: 'Urban Planning' },
+    { value: 'environmental', label: 'Environmental' },
+    { value: 'agriculture', label: 'Agriculture' },
+    { value: 'web-mapping', label: 'Web Mapping' },
+    { value: 'analysis', label: 'Spatial Analysis' }
+  ];
 
-  // Generate filter options from data
-  const availableSectors = Array.from(new Set(templates.map(t => t.sector))).map(sector => ({
-    value: sector,
-    label: sector.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    count: templates.filter(t => t.sector === sector).length,
-    icon: "🌍"
-  }));
+  const types = [
+    { value: 'all', label: 'All Types' },
+    { value: 'python', label: 'Python-based' },
+    { value: 'qgis', label: 'QGIS Project' },
+    { value: 'web', label: 'Web Application' },
+    { value: 'notebook', label: 'Jupyter Notebook' },
+    { value: 'dashboard', label: 'Dashboard' }
+  ];
 
-  const availableTools = Array.from(new Set(templates.flatMap(t => t.tools_required))).map(tool => ({
-    value: tool,
-    label: tool.toUpperCase(),
-    count: templates.filter(t => t.tools_required.includes(tool)).length
-  }));
-
-  const availableSkillLevels = ['beginner', 'intermediate', 'advanced', 'expert'].map(level => ({
-    value: level,
-    label: level.charAt(0).toUpperCase() + level.slice(1),
-    count: templates.filter(t => t.skill_level === level).length
-  }));
-
-  const availableTags = Array.from(new Set(templates.flatMap(t => t.tags)))
-    .map(tag => ({
-      value: tag,
-      label: tag,
-      count: templates.filter(t => t.tags.includes(tag)).length
-    }))
-    .sort((a, b) => b.count - a.count);
+  if (loading) {
+    return (
+      <div className="container py-12">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <FolderOpen className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-bold">Project Templates</h1>
-            <Sparkles className="h-8 w-8 text-yellow-500" />
-          </div>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-6">
-            Production-ready, sector-specific geospatial project templates for consultants, students, and enterprise GIS teams
-          </p>
-          
-          {/* Stats */}
-          <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground mb-8">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              All templates tested & verified
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              Enterprise ready
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              {templates.length} curated templates
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Community driven
-            </div>
-          </div>
-
-          {/* Upload CTA */}
-          <div className="flex items-center justify-center gap-4">
-            <TemplateUploadForm onUpload={handleUpload} />
-            <Button variant="outline" asChild>
-              <a href="/contact">Request Custom Template</a>
-            </Button>
-          </div>
+    <div className="container py-12">
+      {/* Header Section */}
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Project Templates
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Download ready-to-use geospatial projects with step-by-step guides, sample data, and complete implementations
+        </p>
+        
+        <div className="flex justify-center gap-4 mt-6 flex-wrap">
+          <Badge variant="outline" className="text-sm">
+            <Download className="h-3 w-3 mr-1" />
+            Instant Download
+          </Badge>
+          <Badge variant="outline" className="text-sm">
+            <FileText className="h-3 w-3 mr-1" />
+            Step-by-Step Guides
+          </Badge>
+          <Badge variant="outline" className="text-sm">
+            <Code className="h-3 w-3 mr-1" />
+            Complete Source Code
+          </Badge>
+          <Badge variant="outline" className="text-sm">
+            <Users className="h-3 w-3 mr-1" />
+            Portfolio Ready
+          </Badge>
         </div>
+      </div>
 
-        {/* Featured Collections */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Featured Collections</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {sampleCollections.filter(c => c.is_featured).map(collection => (
-              <Card key={collection.id} className="group hover:shadow-lg transition-all cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {collection.name}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">{collection.description}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{collection.template_ids.length} templates</Badge>
-                    <Badge variant="outline">Curated</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <TemplateFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              availableSectors={availableSectors}
-              availableTools={availableTools}
-              availableSkillLevels={availableSkillLevels}
-              availableTags={availableTags}
-              totalResults={filteredTemplates.length}
+      {/* Search and Filter Controls */}
+      <div className="mb-8 space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search templates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
           </div>
-
-          {/* Templates Grid */}
-          <div className="lg:col-span-3">
-            {/* Sort Options */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">
-                {filteredTemplates.length} Template{filteredTemplates.length !== 1 ? 's' : ''} Found
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                <div className="flex gap-1">
-                  {[
-                    { key: 'featured', label: 'Featured' },
-                    { key: 'popular', label: 'Popular' },
-                    { key: 'rating', label: 'Rating' },
-                    { key: 'recent', label: 'Recent' }
-                  ].map(option => (
-                    <Button
-                      key={option.key}
-                      variant={sortBy === option.key ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setSortBy(option.key)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Templates List */}
-            <div className="space-y-8">
-              {filteredTemplates.map(template => (
-                <EnhancedProjectTemplate
-                  key={template.id}
-                  template={template}
-                  onDownload={handleDownload}
-                  onRate={handleRate}
-                  onFavorite={handleFavorite}
-                  isDownloading={downloadingTemplates.has(template.id)}
-                  userRating={userRatings[template.id]}
-                  isFavorited={favorites.has(template.id)}
-                />
+          
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full md:w-[200px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(category => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
               ))}
-            </div>
+            </SelectContent>
+          </Select>
 
-            {filteredTemplates.length === 0 && (
-              <div className="text-center py-12">
-                <FolderOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No templates found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Try adjusting your filters or search terms
-                </p>
-                <Button onClick={() => setFilters({
-                  search: '', sectors: [], tools: [], skillLevels: [], tags: [], status: []
-                })}>
-                  Clear Filters
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger className="w-full md:w-[200px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {types.map(type => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Results Count */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} found
+          </p>
+          
+          {(!user || !user.email) && (
+            <Badge variant="outline" className="text-primary border-primary">
+              <Zap className="h-3 w-3 mr-1" />
+              Sign in for Premium Templates
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Templates Grid */}
+      {filteredTemplates.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTemplates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              onDownload={() => handleDownload(template.id, template.isPremium)}
+              onViewGuide={() => handleViewGuide(template.id)}
+              userHasAccess={user ? true : !template.isPremium}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="p-12 text-center">
+            <Search className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+            <h3 className="text-xl font-semibold mb-2">No Templates Found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchTerm || selectedCategory !== 'all' || selectedType !== 'all'
+                ? 'Try adjusting your search or filter criteria.'
+                : 'Templates will be available soon!'
+              }
+            </p>
+            {(searchTerm || selectedCategory !== 'all' || selectedType !== 'all') && (
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('all');
+                  setSelectedType('all');
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Upgrade CTA for Free Users */}
+      {(!user || !user.email) && (
+        <div className="mt-12 text-center">
+          <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold mb-4">Unlock All Premium Templates</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Get access to advanced projects, complete datasets, and professional-grade templates
+                used by industry experts and top students worldwide.
+              </p>
+              <div className="flex justify-center gap-4">
+                <Button size="lg">
+                  <Star className="h-4 w-4 mr-2" />
+                  Upgrade to Pro
+                </Button>
+                <Button variant="outline" size="lg">
+                  Learn More
                 </Button>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
+      )}
     </div>
   );
 };
