@@ -44,7 +44,7 @@ serve(async (req) => {
     // Download file from storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from('user-resumes')
-      .download(resumeRecord.file_url);
+      .download(resumeRecord.file_url || resumeRecord.resume_data?.filePath);
 
     if (downloadError) {
       throw new Error(`Failed to download resume: ${downloadError.message}`);

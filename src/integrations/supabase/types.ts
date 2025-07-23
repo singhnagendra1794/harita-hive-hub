@@ -5065,6 +5065,36 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_follow_up_questions: {
+        Row: {
+          created_at: string
+          id: string
+          questions: Json
+          responses: Json | null
+          resume_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          questions?: Json
+          responses?: Json | null
+          resume_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          questions?: Json
+          responses?: Json | null
+          resume_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resume_generations: {
         Row: {
           created_at: string | null

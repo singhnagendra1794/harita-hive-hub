@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Target, Clock, BookOpen, Loader2, CheckCircle, ArrowRight, Upload, FileText } from 'lucide-react';
+import { MapPin, Target, Clock, BookOpen, Loader2, CheckCircle, ArrowRight, Upload, FileText, Sparkles } from 'lucide-react';
+import { ResumeToRoadmapFlow } from '@/components/roadmap/ResumeToRoadmapFlow';
 
 
 interface RoadmapStep {
@@ -34,6 +35,7 @@ const SkillRoadmap = () => {
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState<'upload' | 'form' | 'roadmap'>('upload');
+  const [showResumeFlow, setShowResumeFlow] = useState(false);
   const { toast } = useToast();
 
   const fieldOptions = [
@@ -242,6 +244,16 @@ const SkillRoadmap = () => {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Upload your resume and get a personalized learning roadmap based on your experience and career goals
             </p>
+            <div className="mt-8">
+              <Button 
+                onClick={() => setShowResumeFlow(true)}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-primary-foreground text-primary-foreground hover:opacity-90"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Generate AI Roadmap from Resume
+              </Button>
+            </div>
           </div>
 
           {/* Progress Steps */}
@@ -475,6 +487,12 @@ const SkillRoadmap = () => {
               </div>
             </div>
           )}
+
+          {/* Resume to Roadmap Flow */}
+          <ResumeToRoadmapFlow 
+            open={showResumeFlow} 
+            onOpenChange={setShowResumeFlow}
+          />
         </div>
       </div>
   );

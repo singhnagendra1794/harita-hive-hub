@@ -57,6 +57,14 @@ serve(async (req) => {
       });
     }
 
+    // Get follow-up questions and responses if available
+    const { data: followUpData } = await supabase
+      .from('resume_follow_up_questions')
+      .select('*')
+      .eq('resume_id', resumeId)
+      .eq('user_id', userId)
+      .single();
+
     // Generate roadmap with OpenAI
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -69,15 +77,61 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert geospatial career advisor. Create detailed, actionable roadmaps for GIS professionals.'
+            content: 'You are an expert geospatial career advisor. Create detailed, actionable 6-month roadmaps for GIS professionals based on their resume analysis and career goals.'
           },
           {
             role: 'user',
-            content: `Create a 6-month geospatial career roadmap based on current industry trends. Include learning priorities, trending technologies like GeoAI, and skill development paths.`
+            content: `Create a personalized 6-month geospatial career roadmap based on the following:
+
+RESUME ANALYSIS:
+${JSON.stringify(resumeData.extracted_data, null, 2)}
+
+FOLLOW-UP RESPONSES:
+${followUpData?.responses ? JSON.stringify(followUpData.responses, null, 2) : 'No additional responses provided'}
+
+Please provide a structured roadmap in the following JSON format:
+{
+  "roadmapTitle": "6-Month Career Development Plan",
+  "targetRole": "specific role based on analysis",
+  "estimatedTimeToGoal": "6 months",
+  "months": [
+    {
+      "month": 1,
+      "focus": "Foundation Building",
+      "weeklyGoals": [
+        {
+          "week": 1,
+          "theme": "Getting Started",
+          "dailyTasks": [
+            {
+              "day": "Monday",
+              "tasks": [
+                {
+                  "type": "study",
+                  "task": "Learn QGIS basics",
+                  "duration": "2 hours",
+                  "resources": ["specific resource links"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skillsToAcquire": ["list of skills"],
+  "toolsToMaster": ["list of tools"],
+  "projectMilestones": ["list of projects"],
+  "certificationTargets": ["relevant certifications"],
+  "networkingGoals": ["networking objectives"],
+  "salaryProjection": "expected salary increase"
+}
+
+Make it highly specific to their current level and target goals.`
           }
         ],
         temperature: 0.3,
-        max_tokens: 2000
+        max_tokens: 3000
       }),
     });
 
