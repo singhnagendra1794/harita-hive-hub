@@ -2458,6 +2458,63 @@ export type Database = {
         }
         Relationships: []
       }
+      geova_recordings: {
+        Row: {
+          auto_generated_description: string | null
+          created_at: string
+          day_number: number
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          hls_url: string | null
+          id: string
+          mp4_url: string | null
+          recording_date: string
+          recording_status: string | null
+          recording_url: string | null
+          thumbnail_url: string | null
+          topic_description: string | null
+          topic_title: string
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          auto_generated_description?: string | null
+          created_at?: string
+          day_number: number
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          hls_url?: string | null
+          id?: string
+          mp4_url?: string | null
+          recording_date: string
+          recording_status?: string | null
+          recording_url?: string | null
+          thumbnail_url?: string | null
+          topic_description?: string | null
+          topic_title: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          auto_generated_description?: string | null
+          created_at?: string
+          day_number?: number
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          hls_url?: string | null
+          id?: string
+          mp4_url?: string | null
+          recording_date?: string
+          recording_status?: string | null
+          recording_url?: string | null
+          thumbnail_url?: string | null
+          topic_description?: string | null
+          topic_title?: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       geova_session_interactions: {
         Row: {
           content: string
@@ -4276,6 +4333,94 @@ export type Database = {
           },
         ]
       }
+      recording_analytics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          recording_id: string
+          timestamp_seconds: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          recording_id: string
+          timestamp_seconds?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          recording_id?: string
+          timestamp_seconds?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recording_analytics_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "geova_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recording_qa_interactions: {
+        Row: {
+          ai_responder: string | null
+          ai_response: string | null
+          created_at: string
+          id: string
+          interaction_type: string | null
+          question: string
+          recording_id: string
+          resolved: boolean | null
+          timestamp_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_responder?: string | null
+          ai_response?: string | null
+          created_at?: string
+          id?: string
+          interaction_type?: string | null
+          question: string
+          recording_id: string
+          resolved?: boolean | null
+          timestamp_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_responder?: string | null
+          ai_response?: string | null
+          created_at?: string
+          id?: string
+          interaction_type?: string | null
+          question?: string
+          recording_id?: string
+          resolved?: boolean | null
+          timestamp_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recording_qa_interactions_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "geova_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_usage: {
         Row: {
           created_at: string | null
@@ -4686,6 +4831,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_recording_bookmarks: {
+        Row: {
+          bookmarked_at: string
+          id: string
+          notes: string | null
+          recording_id: string
+          user_id: string
+        }
+        Insert: {
+          bookmarked_at?: string
+          id?: string
+          notes?: string | null
+          recording_id: string
+          user_id: string
+        }
+        Update: {
+          bookmarked_at?: string
+          id?: string
+          notes?: string | null
+          recording_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_recording_bookmarks_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "geova_recordings"
             referencedColumns: ["id"]
           },
         ]
@@ -6900,6 +7077,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_next_geova_class_time: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          next_class_date: string
+          next_class_time: string
+          next_class_topic: string
+          minutes_until_next: number
+        }[]
+      }
       get_regional_price: {
         Args: { p_base_price_usd: number; p_country_code?: string }
         Returns: {
@@ -7041,6 +7227,10 @@ export type Database = {
         Args: { p_user_id: string; p_title?: string; p_description?: string }
         Returns: string
       }
+      sync_geova_recordings_from_schedule: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       track_class_attendance: {
         Args: { p_class_id: string; p_user_id: string; p_action: string }
         Returns: undefined
@@ -7048,6 +7238,15 @@ export type Database = {
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }
         Returns: string
+      }
+      track_recording_view: {
+        Args: {
+          p_recording_id: string
+          p_user_id: string
+          p_event_type: string
+          p_timestamp_seconds?: number
+        }
+        Returns: undefined
       }
       track_user_activity: {
         Args: { p_user_id: string; p_activity_type: string; p_metadata?: Json }
