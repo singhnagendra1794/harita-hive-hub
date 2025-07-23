@@ -42,6 +42,7 @@ export interface ProjectTemplate {
   lastUpdated: string;
   fileSize: string;
   includes: string[];
+  downloadUrl?: string;
 }
 
 interface TemplateCardProps {

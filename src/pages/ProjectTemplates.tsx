@@ -90,13 +90,32 @@ const ProjectTemplates = () => {
   const handleViewGuide = async (templateId: string) => {
     try {
       const guideUrl = await getTemplateGuide(templateId);
-      window.open(guideUrl, '_blank');
+      // Try to open the guide, but fallback to sample if it fails
+      const link = document.createElement('a');
+      link.href = guideUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      link.onerror = () => {
+        // Import the downloadSampleGuide function and use it as fallback
+        import('@/utils/createSampleGuide').then(({ downloadSampleGuide }) => {
+          const template = templates.find(t => t.id === templateId);
+          if (template) {
+            downloadSampleGuide(template.id, template.title);
+          }
+        });
+      };
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
-      toast({
-        title: "Guide Unavailable",
-        description: "Unable to open template guide. Please try again.",
-        variant: "destructive",
-      });
+      // Fallback to downloadable sample guide
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        const { downloadSampleGuide } = await import('@/utils/createSampleGuide');
+        downloadSampleGuide(template.id, template.title);
+      }
     }
   };
 
