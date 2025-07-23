@@ -32,7 +32,7 @@ const FutureEventsTab = () => {
     try {
       setLoading(true);
       
-      // For now, using static data - replace with actual API call
+      // Show only the specific "How to Become an Earth Coder" event
       const staticEvents: UpcomingEvent[] = [
         {
           id: '1',
@@ -44,35 +44,8 @@ const FutureEventsTab = () => {
           meetingLink: 'https://meet.google.com/tjj-ozqq-ozi',
           type: 'webinar',
           instructor: 'Nagendra Singh',
-          capacity: 500,
-          registered: 234,
-          timezone: 'IST'
-        },
-        {
-          id: '2',
-          title: 'Advanced GIS Analysis Workshop',
-          description: 'Hands-on workshop covering spatial analysis techniques, data visualization, and real-world case studies using industry-standard tools.',
-          date: '2025-07-30',
-          time: '14:00',
-          duration: 120,
-          meetingLink: 'https://zoom.us/j/123456789',
-          type: 'workshop',
-          instructor: 'Dr. Sarah Johnson',
-          capacity: 50,
-          registered: 42,
-          timezone: 'IST'
-        },
-        {
-          id: '3',
-          title: 'Drone Mapping Masterclass',
-          description: 'Learn professional drone mapping techniques, data processing workflows, and applications in surveying and mapping projects.',
-          date: '2025-08-03',
-          time: '10:00',
-          duration: 180,
-          type: 'course',
-          instructor: 'Mike Chen',
-          capacity: 30,
-          registered: 18,
+          capacity: 200,
+          registered: 108,
           timezone: 'IST'
         }
       ];
