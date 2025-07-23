@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatbotProvider } from "@/components/ai/ChatbotProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -102,7 +102,7 @@ const OtherPages = {
   GoLive: createLazyRoute(() => import("./pages/GoLive")),
   WatchLive: createLazyRoute(() => import("./pages/WatchLive")),
   // Additional pages
-  UpcomingCourse: createLazyRoute(() => import("./pages/UpcomingCourse")),
+  
   SkillRoadmap: createLazyRoute(() => import("./pages/SkillRoadmap")),
   ProjectsGallery: createLazyRoute(() => import("./pages/ProjectsGallery")),
   Leaderboard: createLazyRoute(() => import("./pages/Leaderboard")),
@@ -151,7 +151,7 @@ function App() {
                     <Route path="/newsletter" element={<OtherPages.Newsletter />} />
                     <Route path="/blog" element={<OtherPages.Blog />} />
                     <Route path="/challenge" element={<OtherPages.Challenge />} />
-                    <Route path="/upcoming-course" element={<OtherPages.UpcomingCourse />} />
+                    <Route path="/upcoming-course" element={<Navigate to="/browse-courses" replace />} />
                     <Route path="/skill-roadmap" element={<OtherPages.SkillRoadmap />} />
                     <Route path="/projects-gallery" element={<OtherPages.ProjectsGallery />} />
                     <Route path="/leaderboard" element={<OtherPages.Leaderboard />} />

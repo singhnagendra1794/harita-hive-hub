@@ -461,7 +461,7 @@ const SkillRoadmap = () => {
                 <h3 className="text-xl font-semibold">Ready to Start Learning?</h3>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="lg" asChild>
-                    <a href="/upcoming-course">Enroll in Courses</a>
+                    <a href="/browse-courses">Enroll in Courses</a>
                   </Button>
                   <Button variant="outline" size="lg" onClick={() => {
                     setCurrentStep('upload');

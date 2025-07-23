@@ -13,7 +13,12 @@ import {
   GraduationCap,
   CheckCircle,
   DollarSign,
-  IndianRupee
+  IndianRupee,
+  Brain,
+  Globe,
+  Code,
+  MapPin,
+  BarChart3
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -40,7 +45,8 @@ const BrowseCourses = () => {
     setCurrencyMode(locale.includes('IN') || locale === 'hi-IN' ? 'INR' : 'USD');
   }, []);
 
-  const liveCourses = [
+  // Ongoing courses - currently active and accepting enrollments
+  const ongoingCourses = [
     {
       id: "geospatial-technology-unlocked",
       title: "Geospatial Technology Unlocked",
@@ -59,64 +65,102 @@ const BrowseCourses = () => {
       isLive: true,
       isPriority: true,
       courseUrl: "/courses/geospatial-technology-unlocked",
-      enrollmentDeadline: "25th July, 11:59 PM"
+      enrollmentDeadline: "25th July, 11:59 PM",
+      startDate: "July 21, 2025"
     }
   ];
 
+  // Upcoming courses - future courses accepting waitlist signups
   const upcomingCourses = [
     {
-      id: 1,
-      title: "Complete GIS Fundamentals",
-      description: "Master the basics of Geographic Information Systems with hands-on QGIS training",
-      instructor: "Dr. Sarah Chen",
+      id: "geoai-mastery-program",
+      title: "GeoAI Mastery Program",
+      description: "Transform your career with comprehensive 8-week program combining GIS, AI, and Machine Learning",
+      instructor: "GeoAI Experts",
       timeline: "January 2025 - March 2025",
-      duration: "12 weeks",
-      level: "Beginner",
-      category: "fundamentals",
-      icon: BookOpen,
-      priceINR: "₹9,999",
-      priceUSD: "$125",
+      duration: "8 weeks",
+      level: "Advanced",
+      category: "ai-ml",
+      icon: Brain,
+      priceINR: "₹24,999",
+      priceUSD: "$299",
       enrolled: 0,
-      maxStudents: 200,
-      rating: 4.9,
+      maxStudents: 100,
+      rating: 5.0,
       isUpcoming: true,
       launchDate: "January 15, 2025"
     },
     {
-      id: 2,
-      title: "Advanced Remote Sensing with Python",
-      description: "Deep dive into satellite imagery analysis and machine learning applications",
-      instructor: "Dr. Michael Rodriguez",
-      timeline: "March 2025 - May 2025",
-      duration: "10 weeks",
+      id: "arcgis-enterprise-mastery",
+      title: "ArcGIS Enterprise Mastery",
+      description: "From Server Setup to Custom Web Apps & Widgets. Master the full ArcGIS Enterprise stack with hands-on labs",
+      instructor: "Enterprise GIS Specialists",
+      timeline: "September 2025 - November 2025",
+      duration: "12 weeks",
       level: "Advanced",
-      category: "remote-sensing",
-      icon: BookOpen,
-      priceINR: "₹14,999",
-      priceUSD: "$199",
+      category: "enterprise-gis",
+      icon: Globe,
+      priceINR: "₹29,999",
+      priceUSD: "$399",
       enrolled: 0,
-      maxStudents: 150,
-      rating: 4.8,
-      isUpcoming: true,
-      launchDate: "March 10, 2025"
-    },
-    {
-      id: 3,
-      title: "GeoAI and Machine Learning",
-      description: "Apply artificial intelligence techniques to geospatial data analysis",
-      instructor: "Prof. Lisa Wang",
-      timeline: "May 2025 - July 2025",
-      duration: "8 weeks",
-      level: "Expert",
-      category: "ai-ml",
-      icon: BookOpen,
-      priceINR: "₹18,999",
-      priceUSD: "$249",
-      enrolled: 0,
-      maxStudents: 100,
+      maxStudents: 75,
       rating: 4.9,
       isUpcoming: true,
-      launchDate: "May 20, 2025"
+      launchDate: "September 10, 2025"
+    },
+    {
+      id: "python-gis-automation",
+      title: "Advanced Python for GIS Automation",
+      description: "Master Python scripting for complex geospatial workflows, including ArcPy, GDAL, and custom tool development",
+      instructor: "Python GIS Developers",
+      timeline: "October 2025 - December 2025",
+      duration: "10 weeks",
+      level: "Advanced",
+      category: "programming",
+      icon: Code,
+      priceINR: "₹19,999",
+      priceUSD: "$249",
+      enrolled: 0,
+      maxStudents: 120,
+      rating: 4.8,
+      isUpcoming: true,
+      launchDate: "October 15, 2025"
+    },
+    {
+      id: "drone-mapping-photogrammetry",
+      title: "Drone Mapping & Photogrammetry",
+      description: "Learn to process drone imagery, create orthomosaics, and generate 3D models for various applications",
+      instructor: "Remote Sensing Experts",
+      timeline: "December 2025 - February 2026",
+      duration: "8 weeks",
+      level: "Intermediate",
+      category: "remote-sensing",
+      icon: MapPin,
+      priceINR: "₹16,999",
+      priceUSD: "$219",
+      enrolled: 0,
+      maxStudents: 80,
+      rating: 4.7,
+      isUpcoming: true,
+      launchDate: "December 1, 2025"
+    },
+    {
+      id: "gis-data-science",
+      title: "GIS Data Science & Machine Learning",
+      description: "Apply machine learning techniques to geospatial data for predictive modeling and pattern recognition",
+      instructor: "Data Science Team",
+      timeline: "January 2026 - March 2026",
+      duration: "12 weeks",
+      level: "Advanced",
+      category: "data-science",
+      icon: BarChart3,
+      priceINR: "₹22,999",
+      priceUSD: "$289",
+      enrolled: 0,
+      maxStudents: 60,
+      rating: 4.9,
+      isUpcoming: true,
+      launchDate: "January 20, 2026"
     }
   ];
 
@@ -224,15 +268,15 @@ const BrowseCourses = () => {
           </div>
         </div>
 
-        {/* Live Courses Section */}
-        {liveCourses.length > 0 && (
+        {/* Ongoing Courses Section */}
+        {ongoingCourses.length > 0 && (
           <div className="mb-16">
             <div className="flex items-center gap-3 mb-8">
               <GraduationCap className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold">🔴 Live Courses - Enroll Now</h2>
+              <h2 className="text-2xl font-bold">📚 Ongoing Courses</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {liveCourses.map((course) => (
+              {ongoingCourses.map((course) => (
                 <CourseCard
                   key={course.id}
                   course={course}
@@ -252,7 +296,7 @@ const BrowseCourses = () => {
             <Calendar className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold">🗓️ Upcoming Courses</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {upcomingCourses.map((course) => (
               <CourseCard
                 key={course.id}

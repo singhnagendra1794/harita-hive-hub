@@ -351,7 +351,7 @@ const CertificationHub = () => {
               Check back soon for new certification opportunities!
             </p>
             <Button asChild>
-              <a href="/upcoming-course">Browse Upcoming Courses</a>
+              <a href="/browse-courses">Browse Courses</a>
             </Button>
           </CardContent>
         </Card>

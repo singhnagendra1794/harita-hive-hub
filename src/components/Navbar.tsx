@@ -192,8 +192,8 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/upcoming-course">
-              <Button variant="ghost" className="text-sm">Upcoming Course</Button>
+            <Link to="/browse-courses">
+              <Button variant="ghost" className="text-sm">Courses</Button>
             </Link>
 
             <Link to="/pricing">
@@ -368,11 +368,11 @@ const Navbar = () => {
               </div>
 
               <Link
-                to="/upcoming-course"
+                to="/browse-courses"
                 className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Upcoming Course
+                Courses
               </Link>
 
               <Link

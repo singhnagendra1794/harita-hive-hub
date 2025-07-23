@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatbotProvider } from "@/components/ai/ChatbotProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -94,7 +94,7 @@ const ComplianceToolkit = lazy(() => import("./pages/ComplianceToolkit"));
 const SpatialRiskAnalysis = lazy(() => import("./pages/SpatialRiskAnalysis"));
 const DeveloperPortal = lazy(() => import("./pages/DeveloperPortal"));
 const EnterpriseDashboard = lazy(() => import("./pages/EnterpriseDashboard"));
-const UpcomingCourse = lazy(() => import("./pages/UpcomingCourse"));
+
 const SkillRoadmap = lazy(() => import("./pages/SkillRoadmap"));
 const ProjectsGallery = lazy(() => import("./pages/ProjectsGallery"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
@@ -149,7 +149,7 @@ function App() {
             <Route path="/newsletter" element={<Layout><RouteWrapper><Newsletter /></RouteWrapper></Layout>} />
             <Route path="/blog" element={<Layout><RouteWrapper><Blog /></RouteWrapper></Layout>} />
                    <Route path="/challenge" element={<Layout><RouteWrapper><Challenge /></RouteWrapper></Layout>} />
-           <Route path="/upcoming-course" element={<Layout><RouteWrapper><UpcomingCourse /></RouteWrapper></Layout>} />
+           <Route path="/upcoming-course" element={<Navigate to="/browse-courses" replace />} />
            <Route path="/skill-roadmap" element={<Layout><RouteWrapper><SkillRoadmap /></RouteWrapper></Layout>} />
            <Route path="/projects-gallery" element={<Layout><RouteWrapper><ProjectsGallery /></RouteWrapper></Layout>} />
            <Route path="/leaderboard" element={<Layout><RouteWrapper><Leaderboard /></RouteWrapper></Layout>} />
