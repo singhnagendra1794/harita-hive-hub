@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { EnrollmentForm } from "@/components/course-enrollment/EnrollmentForm";
 import { WaitlistForm } from "@/components/course-enrollment/WaitlistForm";
 import CourseCard from "@/components/cards/CourseCard";
+import GeospatialTechUnlockedDetails from "@/components/course-details/GeospatialTechUnlockedDetails";
 
 const BrowseCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -275,18 +276,31 @@ const BrowseCourses = () => {
               <GraduationCap className="h-6 w-6 text-primary" />
               <h2 className="text-2xl font-bold">📚 Ongoing Courses</h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {ongoingCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  currencyMode={currencyMode}
-                  isEnrollmentOpen={isEnrollmentOpen()}
-                  onEnrollNow={handleEnrollNow}
-                  onJoinWaitlist={handleJoinWaitlist}
-                />
-              ))}
+            
+            {/* Featured Course: Geospatial Technology Unlocked */}
+            <div className="mb-8">
+              <GeospatialTechUnlockedDetails
+                currencyMode={currencyMode}
+                isEnrollmentOpen={isEnrollmentOpen()}
+                onEnrollNow={() => handleEnrollNow(ongoingCourses[0])}
+              />
             </div>
+            
+            {/* Other ongoing courses if any */}
+            {ongoingCourses.length > 1 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {ongoingCourses.slice(1).map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    currencyMode={currencyMode}
+                    isEnrollmentOpen={isEnrollmentOpen()}
+                    onEnrollNow={handleEnrollNow}
+                    onJoinWaitlist={handleJoinWaitlist}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
