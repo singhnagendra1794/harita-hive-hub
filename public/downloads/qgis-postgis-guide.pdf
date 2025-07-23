@@ -1,0 +1,241 @@
+# QGIS + PostGIS Urban Planning Guide
+## HaritaHive GeoProcessing Lab
+
+### Table of Contents
+1. Introduction to QGIS and PostGIS
+2. Setting up PostGIS Connection
+3. Urban Planning Workflows
+4. Spatial Analysis Techniques
+5. Data Visualization and Styling
+6. Export and Sharing Results
+
+---
+
+## 1. Introduction to QGIS and PostGIS
+
+### What is QGIS?
+- Free and Open Source Geographic Information System
+- Cross-platform desktop application
+- Supports reading/writing of vector and raster formats
+- Extensive plugin ecosystem
+
+### What is PostGIS?
+- Spatial database extender for PostgreSQL
+- Adds geographic objects and spatial functions
+- Industry-standard for spatial databases
+- Enables complex spatial queries and analysis
+
+### Why Use QGIS + PostGIS Together?
+- Powerful combination for large-scale projects
+- Efficient data management and analysis
+- Multi-user collaboration capabilities
+- Professional-grade spatial database operations
+
+---
+
+## 2. Setting up PostGIS Connection
+
+### Step 1: Connect to Database
+1. Open QGIS Desktop
+2. Go to Layer → Add Layer → Add PostGIS Layers
+3. Click "New" to create new connection
+4. Enter connection details:
+   - Name: HaritaHive_PostGIS
+   - Host: localhost (or your server)
+   - Port: 5432
+   - Database: spatial_db
+   - Username: your_username
+   - Password: your_password
+
+### Step 2: Test Connection
+1. Click "Test Connection"
+2. If successful, click "OK"
+3. Select your connection and click "Connect"
+
+---
+
+## 3. Urban Planning Workflows
+
+### A. Land Use Analysis
+1. **Import Zoning Data**
+   - Load zoning polygons from PostGIS
+   - Symbolize by zoning type
+   - Calculate area statistics
+
+2. **Density Analysis**
+   - Calculate population density
+   - Identify high-density areas
+   - Create buffer zones around transit
+
+3. **Accessibility Mapping**
+   - Map distance to amenities
+   - Create service area analysis
+   - Identify underserved areas
+
+### B. Infrastructure Planning
+1. **Road Network Analysis**
+   - Load road centerlines
+   - Calculate network distances
+   - Identify connectivity gaps
+
+2. **Utility Planning**
+   - Map existing infrastructure
+   - Plan new utility lines
+   - Calculate service coverage
+
+---
+
+## 4. Spatial Analysis Techniques
+
+### Spatial Queries in PostGIS
+```sql
+-- Find all buildings within 500m of schools
+SELECT b.* 
+FROM buildings b, schools s
+WHERE ST_DWithin(b.geom, s.geom, 500);
+
+-- Calculate total area by zoning type
+SELECT zone_type, SUM(ST_Area(geom)) as total_area
+FROM zoning_polygons
+GROUP BY zone_type;
+
+-- Find intersections between layers
+SELECT p1.name, p2.name
+FROM parcels p1, flood_zones p2
+WHERE ST_Intersects(p1.geom, p2.geom);
+```
+
+### QGIS Processing Tools
+1. **Buffer Analysis**
+   - Create buffers around features
+   - Analyze service areas
+   - Identify impact zones
+
+2. **Overlay Operations**
+   - Intersection analysis
+   - Union operations
+   - Difference calculations
+
+3. **Network Analysis**
+   - Shortest path analysis
+   - Service area calculation
+   - Route optimization
+
+---
+
+## 5. Data Visualization and Styling
+
+### Symbology Best Practices
+1. **Categorical Data**
+   - Use distinct colors for categories
+   - Ensure color accessibility
+   - Add clear legends
+
+2. **Continuous Data**
+   - Use graduated colors/symbols
+   - Choose appropriate classification methods
+   - Apply logical color ramps
+
+3. **Multi-scale Display**
+   - Set scale-dependent visibility
+   - Use rule-based styling
+   - Optimize for different zoom levels
+
+### Creating Professional Maps
+1. **Layout Design**
+   - Use Print Layout manager
+   - Add scale bar and north arrow
+   - Include proper attribution
+
+2. **Export Options**
+   - Export as PDF for printing
+   - Create web-ready images
+   - Generate interactive maps
+
+---
+
+## 6. Export and Sharing Results
+
+### Database Export
+```sql
+-- Export results to new table
+CREATE TABLE analysis_results AS
+SELECT *, ST_Area(geom) as area_sqm
+FROM processed_data;
+
+-- Export to shapefile format
+COPY (SELECT * FROM analysis_results) 
+TO '/path/to/output.csv' 
+WITH CSV HEADER;
+```
+
+### QGIS Export Options
+1. **Vector Formats**
+   - Shapefile (.shp)
+   - GeoPackage (.gpkg)
+   - GeoJSON (.geojson)
+   - KML (.kml)
+
+2. **Raster Formats**
+   - GeoTIFF (.tif)
+   - PNG with world file
+   - JPEG with georeferencing
+
+### Web Publishing
+1. **QGIS2Web Plugin**
+   - Create interactive web maps
+   - Export to Leaflet or OpenLayers
+   - Include popups and styling
+
+2. **QGIS Cloud**
+   - Upload projects to cloud
+   - Share with collaborators
+   - Embed in websites
+
+---
+
+## Quick Reference Commands
+
+### Essential PostGIS Functions
+- `ST_Area(geom)` - Calculate area
+- `ST_Length(geom)` - Calculate length
+- `ST_Buffer(geom, distance)` - Create buffer
+- `ST_Intersects(geom1, geom2)` - Test intersection
+- `ST_Distance(geom1, geom2)` - Calculate distance
+- `ST_Within(geom1, geom2)` - Test containment
+
+### QGIS Keyboard Shortcuts
+- `Ctrl + M` - Add new map layer
+- `Ctrl + Shift + A` - Add PostGIS layer
+- `F7` - Toggle editing mode
+- `Ctrl + Z` - Undo
+- `Ctrl + Y` - Redo
+- `Ctrl + P` - Print layout
+
+---
+
+## Troubleshooting
+
+### Common Issues
+1. **Connection Problems**
+   - Check PostGIS service status
+   - Verify connection parameters
+   - Check firewall settings
+
+2. **Performance Issues**
+   - Create spatial indexes
+   - Use appropriate geometry types
+   - Optimize query filters
+
+3. **Data Import Problems**
+   - Check coordinate reference systems
+   - Verify data formats
+   - Use QGIS data validation tools
+
+---
+
+**For more tutorials and resources, visit:**
+https://haritahive.com/labs
+
+**HaritaHive GeoProcessing Lab**
+World's Best Browser-Based Spatial Processing Platform

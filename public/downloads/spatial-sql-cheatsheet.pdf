@@ -1,0 +1,409 @@
+# Spatial SQL Quick Reference
+## HaritaHive GeoProcessing Lab
+
+---
+
+## Geometry Creation & Conversion
+
+### Creating Geometries
+```sql
+-- Point from coordinates
+SELECT ST_Point(longitude, latitude);
+
+-- Point with SRID
+SELECT ST_SetSRID(ST_Point(-122.4194, 37.7749), 4326);
+
+-- LineString from points
+SELECT ST_MakeLine(ARRAY[
+    ST_Point(-122.4194, 37.7749),
+    ST_Point(-122.4094, 37.7849)
+]);
+
+-- Polygon from text
+SELECT ST_GeomFromText('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))');
+```
+
+### Converting Between Formats
+```sql
+-- Geometry to Well-Known Text
+SELECT ST_AsText(geom) FROM my_table;
+
+-- Geometry to GeoJSON
+SELECT ST_AsGeoJSON(geom) FROM my_table;
+
+-- Geometry to KML
+SELECT ST_AsKML(geom) FROM my_table;
+
+-- Text to Geometry
+SELECT ST_GeomFromText('POINT(-122.4194 37.7749)', 4326);
+```
+
+---
+
+## Spatial Measurements
+
+### Distance & Area
+```sql
+-- Distance between geometries (in CRS units)
+SELECT ST_Distance(geom1, geom2) FROM table1, table2;
+
+-- Distance in meters (geography)
+SELECT ST_DWithin(geom1::geography, geom2::geography, 1000);
+
+-- Area calculation
+SELECT ST_Area(geom) FROM polygons;
+
+-- Area in square meters (geography)
+SELECT ST_Area(geom::geography) FROM polygons;
+
+-- Length of lines
+SELECT ST_Length(geom) FROM roads;
+
+-- Perimeter of polygons
+SELECT ST_Perimeter(geom) FROM parcels;
+```
+
+### Coordinate Reference Systems
+```sql
+-- Get SRID of geometry
+SELECT ST_SRID(geom) FROM my_table;
+
+-- Transform to different CRS
+SELECT ST_Transform(geom, 3857) FROM my_table;
+
+-- Set SRID (if missing)
+SELECT ST_SetSRID(geom, 4326) FROM my_table;
+```
+
+---
+
+## Spatial Relationships
+
+### Basic Relationships
+```sql
+-- Points within polygons
+SELECT * FROM points p, polygons poly
+WHERE ST_Within(p.geom, poly.geom);
+
+-- Geometries that intersect
+SELECT * FROM layer1 l1, layer2 l2
+WHERE ST_Intersects(l1.geom, l2.geom);
+
+-- Geometries that touch (share boundary)
+SELECT * FROM parcels p1, parcels p2
+WHERE ST_Touches(p1.geom, p2.geom);
+
+-- Contains relationship
+SELECT * FROM counties c, cities ci
+WHERE ST_Contains(c.geom, ci.geom);
+
+-- Overlaps (partial overlap)
+SELECT * FROM zones z1, zones z2
+WHERE ST_Overlaps(z1.geom, z2.geom);
+```
+
+### Distance-Based Queries
+```sql
+-- Features within distance
+SELECT * FROM schools s, houses h
+WHERE ST_DWithin(s.geom, h.geom, 500);
+
+-- Nearest neighbor
+SELECT h.*, 
+       ST_Distance(h.geom, s.geom) as distance
+FROM houses h
+CROSS JOIN LATERAL (
+    SELECT geom FROM schools
+    ORDER BY h.geom <-> geom
+    LIMIT 1
+) s;
+
+-- K-nearest neighbors
+SELECT h.id, s.id, ST_Distance(h.geom, s.geom) as dist
+FROM houses h, schools s
+ORDER BY h.geom <-> s.geom
+LIMIT 5;
+```
+
+---
+
+## Spatial Analysis
+
+### Buffering
+```sql
+-- Simple buffer
+SELECT ST_Buffer(geom, 100) FROM points;
+
+-- Buffer with specific segments
+SELECT ST_Buffer(geom, 100, 8) FROM points;
+
+-- Variable buffer by attribute
+SELECT ST_Buffer(geom, radius_column) FROM features;
+
+-- Negative buffer (shrink polygon)
+SELECT ST_Buffer(geom, -10) FROM polygons;
+```
+
+### Overlay Operations
+```sql
+-- Intersection
+SELECT ST_Intersection(a.geom, b.geom) as geom
+FROM layer_a a, layer_b b
+WHERE ST_Intersects(a.geom, b.geom);
+
+-- Union of geometries
+SELECT ST_Union(geom) FROM polygons
+GROUP BY category;
+
+-- Difference (A - B)
+SELECT ST_Difference(a.geom, b.geom)
+FROM parcels a, flood_zones b
+WHERE ST_Intersects(a.geom, b.geom);
+
+-- Symmetric difference
+SELECT ST_SymDifference(a.geom, b.geom)
+FROM layer_a a, layer_b b;
+```
+
+### Geometric Operations
+```sql
+-- Centroid
+SELECT ST_Centroid(geom) FROM polygons;
+
+-- Bounding box
+SELECT ST_Envelope(geom) FROM features;
+
+-- Convex hull
+SELECT ST_ConvexHull(geom) FROM point_clouds;
+
+-- Simplify geometry
+SELECT ST_Simplify(geom, 0.01) FROM complex_polygons;
+
+-- Valid geometry check
+SELECT ST_IsValid(geom) FROM my_geometries;
+
+-- Fix invalid geometries
+SELECT ST_MakeValid(geom) FROM broken_geometries;
+```
+
+---
+
+## Indexing & Performance
+
+### Creating Spatial Indexes
+```sql
+-- Create spatial index
+CREATE INDEX idx_geom_spatial 
+ON my_table USING GIST (geom);
+
+-- Partial spatial index
+CREATE INDEX idx_geom_large 
+ON my_table USING GIST (geom)
+WHERE area > 1000;
+
+-- Multi-column index
+CREATE INDEX idx_geom_type 
+ON my_table USING GIST (geom, type);
+```
+
+### Query Optimization
+```sql
+-- Use && operator for bounding box queries
+SELECT * FROM features
+WHERE geom && ST_MakeEnvelope(-122.5, 37.7, -122.3, 37.8, 4326);
+
+-- Combine bounding box with exact spatial predicate
+SELECT * FROM buildings b, flood_zones f
+WHERE b.geom && f.geom  -- Fast bounding box check
+  AND ST_Intersects(b.geom, f.geom);  -- Exact check
+
+-- Use geography for long-distance queries
+SELECT * FROM cities c1, cities c2
+WHERE ST_DWithin(c1.geom::geography, c2.geom::geography, 1000000);
+```
+
+---
+
+## Advanced Spatial Functions
+
+### Clustering & Aggregation
+```sql
+-- Cluster nearby points
+SELECT unnest(ST_ClusterKMeans(geom, 5) OVER ()) as cluster,
+       ST_Centroid(ST_Collect(geom)) as cluster_center
+FROM points
+GROUP BY cluster;
+
+-- Dissolve by attribute
+SELECT type, ST_Union(geom) as geom
+FROM land_use
+GROUP BY type;
+
+-- Aggregate to multi-geometry
+SELECT ST_Collect(geom) as multipoint
+FROM points
+WHERE category = 'retail';
+```
+
+### Line Processing
+```sql
+-- Split line at point
+SELECT ST_Split(line_geom, point_geom)
+FROM roads, intersections
+WHERE ST_DWithin(line_geom, point_geom, 1);
+
+-- Line substring
+SELECT ST_LineSubstring(geom, 0.25, 0.75)
+FROM roads;
+
+-- Point along line
+SELECT ST_LineInterpolatePoint(geom, 0.5)
+FROM roads;
+
+-- Closest point on line
+SELECT ST_ClosestPoint(road.geom, house.geom)
+FROM roads road, buildings house;
+```
+
+### Grid Generation
+```sql
+-- Create rectangular grid
+SELECT ST_SquareGrid(1000, geom) as grid_geom
+FROM study_area;
+
+-- Create hexagonal grid
+SELECT ST_HexagonGrid(1000, geom) as hex_geom
+FROM study_area;
+
+-- Point grid
+WITH grid AS (
+    SELECT generate_series(-180, 180, 1) as x,
+           generate_series(-90, 90, 1) as y
+)
+SELECT ST_Point(x, y) as geom FROM grid;
+```
+
+---
+
+## Common Spatial Patterns
+
+### Zonal Statistics
+```sql
+-- Calculate stats by zone
+SELECT z.zone_id,
+       COUNT(*) as point_count,
+       AVG(p.value) as avg_value,
+       SUM(p.value) as total_value
+FROM zones z
+LEFT JOIN points p ON ST_Within(p.geom, z.geom)
+GROUP BY z.zone_id;
+
+-- Area-weighted statistics
+SELECT z.zone_id,
+       SUM(ST_Area(ST_Intersection(z.geom, p.geom)) / ST_Area(p.geom) * p.population) as weighted_pop
+FROM zones z, parcels p
+WHERE ST_Intersects(z.geom, p.geom)
+GROUP BY z.zone_id;
+```
+
+### Network Analysis Prep
+```sql
+-- Create network topology
+SELECT topology.ST_ModEdgeSplit('network', edge_id, point_geom)
+FROM network_edges, intersection_points
+WHERE ST_DWithin(geom, point_geom, 0.1);
+
+-- Find connected components
+WITH RECURSIVE connected AS (
+    SELECT node_id, 1 as component
+    FROM network_nodes
+    WHERE node_id = 1
+    
+    UNION
+    
+    SELECT n.node_id, c.component
+    FROM network_nodes n
+    JOIN network_edges e ON (e.start_node = n.node_id OR e.end_node = n.node_id)
+    JOIN connected c ON (e.start_node = c.node_id OR e.end_node = c.node_id)
+    WHERE n.node_id NOT IN (SELECT node_id FROM connected)
+)
+SELECT * FROM connected;
+```
+
+---
+
+## Data Quality & Validation
+
+### Geometry Validation
+```sql
+-- Find invalid geometries
+SELECT id, ST_IsValidReason(geom) as issue
+FROM my_table
+WHERE NOT ST_IsValid(geom);
+
+-- Fix common issues
+UPDATE my_table 
+SET geom = ST_MakeValid(geom)
+WHERE NOT ST_IsValid(geom);
+
+-- Remove duplicate vertices
+UPDATE roads
+SET geom = ST_RemoveRepeatedPoints(geom, 0.01);
+
+-- Snap to grid
+UPDATE parcels
+SET geom = ST_SnapToGrid(geom, 0.01);
+```
+
+### Topology Checks
+```sql
+-- Find overlapping polygons
+SELECT a.id, b.id, ST_Area(ST_Intersection(a.geom, b.geom)) as overlap_area
+FROM parcels a, parcels b
+WHERE a.id < b.id
+  AND ST_Overlaps(a.geom, b.geom);
+
+-- Find gaps between polygons
+SELECT ST_Difference(
+    (SELECT ST_ConvexHull(ST_Collect(geom)) FROM parcels),
+    (SELECT ST_Union(geom) FROM parcels)
+) as gaps;
+
+-- Check for dangles in line network
+SELECT road_id, ST_StartPoint(geom) as dangle_point
+FROM roads r1
+WHERE NOT EXISTS (
+    SELECT 1 FROM roads r2 
+    WHERE r1.id != r2.id 
+    AND (ST_DWithin(ST_StartPoint(r1.geom), r2.geom, 0.01)
+         OR ST_DWithin(ST_StartPoint(r1.geom), ST_StartPoint(r2.geom), 0.01)
+         OR ST_DWithin(ST_StartPoint(r1.geom), ST_EndPoint(r2.geom), 0.01))
+);
+```
+
+---
+
+## Tips & Best Practices
+
+### Performance Tips
+1. **Always use spatial indexes** on geometry columns
+2. **Use bounding box (&&) operator** before expensive spatial functions
+3. **Choose appropriate SRID** for your analysis
+4. **Use geography type** for global datasets
+5. **Simplify geometries** when precision isn't critical
+
+### Common Gotchas
+1. **SRID mismatches** - always check coordinate systems
+2. **Invalid geometries** - validate and fix before analysis
+3. **Precision issues** - use appropriate tolerance values
+4. **Large geometries** - consider simplification for performance
+5. **NULL geometries** - handle with COALESCE or WHERE clauses
+
+---
+
+**For more spatial SQL resources:**
+- PostGIS Documentation: https://postgis.net/docs/
+- HaritaHive Labs: https://haritahive.com/labs
+
+**HaritaHive GeoProcessing Lab**
+World's Best Browser-Based Spatial Processing Platform
