@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Calendar, Clock, Users, Play, Eye, BookOpen } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, Eye, BookOpen, Bot, Radio } from "lucide-react";
 import LazyWrapper from '@/components/ui/lazy-wrapper';
 import LiveClassCard from '@/components/cards/LiveClassCard';
 import { useLazyLoad } from '@/hooks/useIntersectionObserver';
@@ -15,6 +15,7 @@ import UpcomingEventsSection from '@/components/live-classes/UpcomingEventsSecti
 import GeoTalkReplaysSection from '@/components/live-classes/GeoTalkReplaysSection';
 import FeaturedExpertsSection from '@/components/live-classes/FeaturedExpertsSection';
 import GeoLeaderboardSection from '@/components/live-classes/GeoLeaderboardSection';
+import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 
 interface LiveClass {
   id: string;
@@ -75,15 +76,37 @@ const LiveClasses = () => {
   const [pastClasses, setPastClasses] = useState<LiveClass[]>([]);
   const [scheduledClasses, setScheduledClasses] = useState<LiveClass[]>([]);
   const [nextGeospatialClass, setNextGeospatialClass] = useState<LiveClass | null>(null);
+  const [geovaSession, setGeovaSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLiveClasses(0);
+    checkGEOVASession();
     // Auto-refresh every 30 seconds to check for new live sessions
-    const interval = setInterval(() => fetchLiveClasses(0), 30000);
+    const interval = setInterval(() => {
+      fetchLiveClasses(0);
+      checkGEOVASession();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const checkGEOVASession = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('geova-session-manager', {
+        body: { action: 'status' }
+      });
+
+      if (error) {
+        console.error('Error checking GEOVA session:', error);
+        return;
+      }
+
+      setGeovaSession(data);
+    } catch (error) {
+      console.error('Failed to check GEOVA session:', error);
+    }
+  };
 
   const fetchLiveClasses = async (retryCount = 0) => {
     const maxRetries = 3;
@@ -161,6 +184,7 @@ const LiveClasses = () => {
   const handleRefresh = () => {
     setLoading(true);
     fetchLiveClasses(0);
+    checkGEOVASession();
   };
 
   const handleVideoError = (error: any) => {
@@ -214,6 +238,67 @@ const LiveClasses = () => {
           <Badge variant="outline" className="text-sm">📚 Premium Recordings</Badge>
         </div>
       </div>
+
+      {/* GEOVA Live Teaching Section */}
+      {geovaSession && (geovaSession.isLive || geovaSession.todaySchedule) && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Bot className="h-6 w-6 text-primary" />
+            🤖 GEOVA AI Live Teaching Session
+            {geovaSession.isLive && (
+              <Badge variant="destructive" className="animate-pulse ml-2">
+                <Radio className="h-3 w-3 mr-1" />
+                LIVE NOW
+              </Badge>
+            )}
+          </h2>
+          
+          {geovaSession.isLive ? (
+            <GEOVALiveClassroom 
+              sessionId={geovaSession.activeSession?.id}
+              onSessionEnd={() => {
+                setGeovaSession(null);
+                checkGEOVASession();
+              }}
+            />
+          ) : geovaSession.todaySchedule && (
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      Daily GEOVA Session - Day {geovaSession.todaySchedule.day_number}
+                    </CardTitle>
+                    <CardDescription className="mt-2">
+                      {geovaSession.todaySchedule.topic_title}
+                    </CardDescription>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-muted-foreground">Scheduled at</div>
+                    <div className="text-lg font-semibold">
+                      {formatTime(`${geovaSession.todaySchedule.scheduled_date}T${geovaSession.todaySchedule.scheduled_time}`)}
+                    </div>
+                    <Badge variant="outline" className="mt-1">
+                      {geovaSession.todaySchedule.duration_minutes} minutes
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  {geovaSession.todaySchedule.topic_description}
+                </p>
+                <div className="flex items-center gap-4 text-sm">
+                  <Badge variant="secondary">AI-Powered Teaching</Badge>
+                  <Badge variant="secondary">Real-time Q&A</Badge>
+                  <Badge variant="secondary">Interactive Learning</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       <NowStreamingSection
         currentLive={currentLive}
