@@ -80,6 +80,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_portfolio_enhancements: {
+        Row: {
+          applied: boolean | null
+          created_at: string | null
+          enhanced_content: string
+          enhancement_type: string
+          id: string
+          original_content: string | null
+          portfolio_id: string | null
+          user_id: string
+        }
+        Insert: {
+          applied?: boolean | null
+          created_at?: string | null
+          enhanced_content: string
+          enhancement_type: string
+          id?: string
+          original_content?: string | null
+          portfolio_id?: string | null
+          user_id: string
+        }
+        Update: {
+          applied?: boolean | null
+          created_at?: string | null
+          enhanced_content?: string
+          enhancement_type?: string
+          id?: string
+          original_content?: string | null
+          portfolio_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_portfolio_enhancements_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "user_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_tracking: {
         Row: {
           application_method: string | null
@@ -318,6 +359,47 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_match_scores: {
+        Row: {
+          calculated_at: string | null
+          id: string
+          job_role: string
+          match_percentage: number
+          missing_skills: Json | null
+          portfolio_id: string | null
+          recommendations: Json | null
+          user_id: string
+        }
+        Insert: {
+          calculated_at?: string | null
+          id?: string
+          job_role: string
+          match_percentage: number
+          missing_skills?: Json | null
+          portfolio_id?: string | null
+          recommendations?: Json | null
+          user_id: string
+        }
+        Update: {
+          calculated_at?: string | null
+          id?: string
+          job_role?: string
+          match_percentage?: number
+          missing_skills?: Json | null
+          portfolio_id?: string | null
+          recommendations?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_match_scores_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "user_portfolios"
             referencedColumns: ["id"]
           },
         ]
@@ -4104,6 +4186,133 @@ export type Database = {
           },
         ]
       }
+      portfolio_analytics: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          portfolio_id: string
+          referrer: string | null
+          user_agent: string | null
+          user_id: string
+          visitor_country: string | null
+          visitor_ip: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          portfolio_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id: string
+          visitor_country?: string | null
+          visitor_ip?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          portfolio_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string
+          visitor_country?: string | null
+          visitor_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_analytics_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "user_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_sections: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          order_index: number
+          portfolio_id: string
+          section_data: Json
+          section_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          order_index?: number
+          portfolio_id: string
+          section_data?: Json
+          section_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          order_index?: number
+          portfolio_id?: string
+          section_data?: Json
+          section_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_sections_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "user_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_templates: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          download_count: number | null
+          id: string
+          is_premium: boolean | null
+          name: string
+          preview_image_url: string | null
+          template_config: Json
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          preview_image_url?: string | null
+          template_config?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          preview_image_url?: string | null
+          template_config?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       premium_content: {
         Row: {
           content_id: string
@@ -4757,6 +4966,56 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      resume_generations: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          file_size: number | null
+          file_url: string | null
+          format: string
+          generation_status: string | null
+          id: string
+          portfolio_id: string | null
+          template_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          format: string
+          generation_status?: string | null
+          id?: string
+          portfolio_id?: string | null
+          template_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          format?: string
+          generation_status?: string | null
+          id?: string
+          portfolio_id?: string | null
+          template_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_generations_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "user_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sandbox_sessions: {
         Row: {
@@ -6626,6 +6885,57 @@ export type Database = {
         }
         Relationships: []
       }
+      user_portfolios: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          download_count: number | null
+          id: string
+          is_public: boolean | null
+          last_exported_at: string | null
+          layout_config: Json | null
+          public_url: string | null
+          template_id: string | null
+          theme_config: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_exported_at?: string | null
+          layout_config?: Json | null
+          public_url?: string | null
+          template_id?: string | null
+          theme_config?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_exported_at?: string | null
+          layout_config?: Json | null
+          public_url?: string | null
+          template_id?: string | null
+          theme_config?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           created_at: string | null
@@ -7329,6 +7639,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_portfolio_url: {
+        Args: { p_user_id: string; p_portfolio_title: string }
+        Returns: string
+      }
       generate_referral_code: {
         Args: { user_id: string }
         Returns: string
@@ -7519,6 +7833,14 @@ export type Database = {
       track_missing_search_query: {
         Args: { p_user_id: string; p_query: string; p_filters?: Json }
         Returns: string
+      }
+      track_portfolio_view: {
+        Args: {
+          p_portfolio_id: string
+          p_visitor_ip?: string
+          p_user_agent?: string
+        }
+        Returns: undefined
       }
       track_recording_view: {
         Args: {
