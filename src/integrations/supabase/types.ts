@@ -7882,6 +7882,15 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      check_rate_limit_secure: {
+        Args: {
+          identifier: string
+          action_type: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       create_geova_daily_class: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -7922,6 +7931,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_unsubscribe_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_auth_users_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -7930,6 +7943,10 @@ export type Database = {
           last_sign_in_at: string
           created_at: string
         }[]
+      }
+      get_email_template: {
+        Args: { template_name: string }
+        Returns: Json
       }
       get_ga_tracking_id: {
         Args: Record<PropertyKey, never>
@@ -8063,6 +8080,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_audit_event: {
+        Args: {
+          event_type: string
+          table_name: string
+          record_id: string
+          old_values?: Json
+          new_values?: Json
+        }
+        Returns: undefined
+      }
       log_project_activity: {
         Args: {
           p_project_id: string
@@ -8171,6 +8198,10 @@ export type Database = {
       user_has_premium_access: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      validate_and_sanitize_input: {
+        Args: { input_text: string; max_length?: number; allow_html?: boolean }
+        Returns: string
       }
     }
     Enums: {

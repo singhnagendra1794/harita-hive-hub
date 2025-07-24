@@ -122,14 +122,11 @@ export async function logSecurityEvent(
       p_user_id: userId
     });
   } catch (error) {
-    // Fallback to console logging if database logging fails
-    console.error('Failed to log security event to database:', error);
-    console.log('Security Event:', {
-      type: eventType,
-      details: sanitizeError(details),
-      userId,
-      timestamp: new Date().toISOString()
-    });
+    // Silent fallback - do not expose sensitive information
+    // Log to secure channel only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Security event logging failed');
+    }
   }
 }
 
