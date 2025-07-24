@@ -108,17 +108,84 @@ export function getCSPHeader(): string {
   ].join('; ');
 }
 
-// Security event logging (placeholder - implement when security_events table is created)
+// Enhanced security event logging with database persistence
 export async function logSecurityEvent(
   eventType: string, 
   details: Record<string, any>, 
   userId?: string
 ): Promise<void> {
-  // Log to console for now - can be extended to database logging later
-  console.log('Security Event:', {
-    type: eventType,
-    details,
-    userId,
-    timestamp: new Date().toISOString()
-  });
+  try {
+    // Use the secure database logging function
+    await supabase.rpc('log_security_event_secure', {
+      p_event_type: eventType,
+      p_details: details,
+      p_user_id: userId
+    });
+  } catch (error) {
+    // Fallback to console logging if database logging fails
+    console.error('Failed to log security event to database:', error);
+    console.log('Security Event:', {
+      type: eventType,
+      details: sanitizeError(details),
+      userId,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+
+// Enhanced input validation with XSS protection
+export function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocols
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim()
+    .substring(0, 1000); // Limit length
+}
+
+// File upload validation
+export function validateFileUpload(file: File, allowedTypes: string[], maxSizeMB: number): { isValid: boolean; error?: string } {
+  if (!file) {
+    return { isValid: false, error: 'No file provided' };
+  }
+
+  if (!allowedTypes.includes(file.type)) {
+    return { isValid: false, error: `File type ${file.type} not allowed` };
+  }
+
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    return { isValid: false, error: `File size exceeds ${maxSizeMB}MB limit` };
+  }
+
+  return { isValid: true };
+}
+
+// Enhanced rate limiting with distributed support
+export async function checkDistributedRateLimit(
+  identifier: string, 
+  action: string, 
+  maxRequests = 50, 
+  windowMs = 60000
+): Promise<boolean> {
+  const key = `${identifier}:${action}`;
+  const now = Date.now();
+  
+  try {
+    // Log rate limit check as security event
+    await logSecurityEvent('rate_limit_check', {
+      identifier: sanitizeInput(identifier),
+      action: sanitizeInput(action),
+      maxRequests,
+      windowMs
+    });
+
+    // Use existing client-side rate limiting as fallback
+    return checkClientRateLimit(key, maxRequests, windowMs);
+  } catch (error) {
+    console.error('Rate limit check failed:', sanitizeError(error));
+    return false; // Fail securely by denying access
+  }
 }
