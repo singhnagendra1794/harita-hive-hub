@@ -8,6 +8,7 @@ import ErrorBoundary from './ErrorBoundary';
 import NotificationWrapper from './NotificationWrapper';
 import MobileOptimizations from './mobile/MobileOptimizations';
 import EnhancedAnalytics from './analytics/EnhancedAnalytics';
+import GoogleAds from './analytics/GoogleAds';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
 import HeaderTest from './layout/HeaderTest';
@@ -26,6 +27,7 @@ const Layout = ({ children }: LayoutProps) => {
       <HeaderOptimizer />
       <MobileOptimizations />
       <EnhancedAnalytics />
+      <GoogleAds />
       <Navbar />
       <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {children}
