@@ -5262,6 +5262,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sharing_analytics: {
         Row: {
           content_id: string
@@ -8041,6 +8071,10 @@ export type Database = {
           p_description: string
           p_activity_data?: Json
         }
+        Returns: undefined
+      }
+      log_security_event_secure: {
+        Args: { p_event_type: string; p_details?: Json; p_user_id?: string }
         Returns: undefined
       }
       reset_monthly_points: {

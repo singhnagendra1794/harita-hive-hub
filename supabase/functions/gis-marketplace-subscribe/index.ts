@@ -36,7 +36,46 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const { fullName, email, occupation, intendedUse, amount, currency }: SubscribeRequest = await req.json();
+    const body = await req.json();
+    
+    // Input validation
+    if (!body || typeof body !== 'object') {
+      return new Response(JSON.stringify({ error: "Invalid request body" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    const { fullName, email, occupation, intendedUse, amount, currency }: SubscribeRequest = body;
+
+    // Validate required fields
+    if (!fullName || fullName.length > 100) {
+      return new Response(JSON.stringify({ error: "Valid full name is required (max 100 chars)" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(JSON.stringify({ error: "Valid email is required" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    if (!amount || amount <= 0 || amount > 100000) {
+      return new Response(JSON.stringify({ error: "Valid amount is required (1-100000)" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    if (!currency || !/^[A-Z]{3}$/.test(currency)) {
+      return new Response(JSON.stringify({ error: "Valid currency code is required" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
 
     // Store user info
     const supabaseService = createClient(
@@ -55,11 +94,15 @@ serve(async (req) => {
       });
 
     // Create Razorpay order
-    const razorpayKeyId = 'rzp_live_brnHWpkHS6YtlJ';
+    const razorpayKeyId = Deno.env.get("RAZORPAY_KEY_ID");
     const razorpayKeySecret = Deno.env.get("RAZORPAY_SECRET_KEY");
 
     if (!razorpayKeyId || !razorpayKeySecret) {
-      throw new Error("Razorpay keys not configured");
+      console.error("Razorpay API keys not configured");
+      return new Response(JSON.stringify({ error: "Payment service configuration error" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
     const auth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);

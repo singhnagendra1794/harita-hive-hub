@@ -31,7 +31,24 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const { toolId }: DownloadRequest = await req.json();
+    const body = await req.json();
+    
+    // Input validation
+    if (!body || typeof body !== 'object') {
+      return new Response(JSON.stringify({ error: "Invalid request body" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    const { toolId }: DownloadRequest = body;
+
+    if (!toolId || typeof toolId !== 'string' || !/^[0-9a-f-]{36}$/.test(toolId)) {
+      return new Response(JSON.stringify({ error: "Valid tool ID is required" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
 
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
