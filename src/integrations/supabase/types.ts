@@ -7903,6 +7903,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_user_subscription: {
+        Args: { p_user_id: string; p_tier?: string }
+        Returns: undefined
+      }
       debug_storage_path: {
         Args: { file_path: string; user_id: string }
         Returns: Json
