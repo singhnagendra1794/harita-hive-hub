@@ -74,6 +74,8 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
         });
         
         console.log('Signup attempt result:', result);
+        console.log('Signup data:', result.data);
+        console.log('Signup error:', result.error);
         
       } else {
         // Clear any existing auth state first for fresh login
