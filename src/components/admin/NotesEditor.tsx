@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Save, Eye, FileText, Bold, Italic, List, Link, Image, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { htmlSanitizer } from '@/lib/htmlSanitizer';
 
 interface NotesData {
   title: string;
@@ -259,7 +260,9 @@ export const NotesEditor = () => {
                 <div
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: previewMarkdown(notesData.markdown_content || notesData.content)
+                    __html: htmlSanitizer.sanitizeMarkdownHTML(
+                      previewMarkdown(notesData.markdown_content || notesData.content)
+                    )
                   }}
                 />
               </div>

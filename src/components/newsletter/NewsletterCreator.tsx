@@ -24,6 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { htmlSanitizer } from '@/lib/htmlSanitizer';
 
 interface Article {
   id: string;
@@ -299,7 +300,9 @@ export const NewsletterCreator = () => {
                   </DialogHeader>
                   <div 
                     className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: generateNewsletterHTML() }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: htmlSanitizer.sanitizeNewsletterHTML(generateNewsletterHTML()) 
+                    }}
                   />
                 </DialogContent>
               </Dialog>

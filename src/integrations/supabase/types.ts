@@ -7874,6 +7874,10 @@ export type Database = {
         Args: { p_user_id: string; p_tool_id: string }
         Returns: boolean
       }
+      check_admin_rate_limit: {
+        Args: { p_action: string }
+        Returns: boolean
+      }
       check_geo_processing_limits: {
         Args: { p_user_id: string; p_job_type: string }
         Returns: Json
@@ -8072,6 +8076,15 @@ export type Database = {
         Returns: boolean
       }
       log_admin_action: {
+        Args: {
+          p_target_user_id: string
+          p_action: string
+          p_old_value?: Json
+          p_new_value?: Json
+        }
+        Returns: undefined
+      }
+      log_admin_action_secure: {
         Args: {
           p_target_user_id: string
           p_action: string

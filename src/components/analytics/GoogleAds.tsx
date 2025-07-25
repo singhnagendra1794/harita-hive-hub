@@ -3,15 +3,15 @@ import React, { useEffect } from 'react';
 const GoogleAds: React.FC = () => {
   useEffect(() => {
     // Check if gtag is already initialized to avoid duplicates
-    if (window.gtag || document.querySelector('script[src*="gtag/js?id=AW-17391286626"]')) {
+    if ((window as any).gtag || document.querySelector('script[src*="gtag/js?id=AW-17391286626"]')) {
       return;
     }
 
     // Initialize dataLayer immediately
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function() { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
-    window.gtag('config', 'AW-17391286626');
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).gtag = function() { (window as any).dataLayer.push(arguments); };
+    (window as any).gtag('js', new Date().toISOString());
+    (window as any).gtag('config', 'AW-17391286626');
 
     // Load Google Tag script
     const gtagScript = document.createElement('script');
