@@ -121,6 +121,7 @@ const Mentorship = lazy(() => import("./pages/Mentorship"));
 const GoLive = lazy(() => import("./pages/GoLive"));
 const WatchLive = lazy(() => import("./pages/WatchLive"));
 const WatchRecording = lazy(() => import("./pages/WatchRecording"));
+const TestSignup = lazy(() => import("./pages/TestSignup"));
 const CourseRedirectHandler = lazy(() => import("./components/course-access/CourseRedirectHandler"));
 
 function App() {
@@ -141,9 +142,10 @@ function App() {
                   <Routes>
                   <Route path="/" element={<Layout><Index /></Layout>} />
                   <Route path="/home" element={<Layout><Home /></Layout>} />
-                  <Route path="/auth" element={<Layout><Auth /></Layout>} />
-                  <Route path="/login" element={<Layout><Login /></Layout>} />
-                  <Route path="/signup" element={<Layout><Signup /></Layout>} />
+                   <Route path="/auth" element={<Layout><Auth /></Layout>} />
+                   <Route path="/login" element={<Layout><Login /></Layout>} />
+                   <Route path="/signup" element={<Layout><Signup /></Layout>} />
+                   <Route path="/test-signup" element={<Layout><Suspense fallback={<PageLoader />}><TestSignup /></Suspense></Layout>} />
                    <Route path="/beta" element={<Layout><RouteWrapper><Beta /></RouteWrapper></Layout>} />
                    <Route path="/investors" element={<Layout><RouteWrapper><Investors /></RouteWrapper></Layout>} />
                    <Route path="/pricing" element={<Layout><RouteWrapper><Pricing /></RouteWrapper></Layout>} />
