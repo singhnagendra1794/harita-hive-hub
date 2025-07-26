@@ -8224,7 +8224,7 @@ export type Database = {
         Returns: boolean
       }
       is_professional_email: {
-        Args: { email_to_check: string }
+        Args: { email_input: string }
         Returns: boolean
       }
       is_session_valid: {
