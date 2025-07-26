@@ -27,6 +27,8 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [activeTab, setActiveTab] = useState('email');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [userLocation, setUserLocation] = useState<{country?: string; city?: string}>({});
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -37,6 +39,73 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
+
+  // Detect user location on component mount
+  useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        // Try to get user's location using IP geolocation
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.ok) {
+          const locationData = await response.json();
+          setUserLocation({
+            country: locationData.country_name,
+            city: locationData.city
+          });
+          console.log('User location detected:', locationData.country_name, locationData.city);
+        }
+      } catch (error) {
+        console.log('Location detection failed, user can still use the app normally');
+        setUserLocation({ country: 'Unknown', city: 'Unknown' });
+      }
+    };
+
+    detectLocation();
+  }, []);
+
+  // Password validation
+  const validatePassword = async (password: string) => {
+    if (!password || password.length < 6) {
+      setPasswordErrors([]);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('validate_password', { 
+        password_input: password 
+      });
+      
+      if (error) {
+        console.error('Password validation error:', error);
+        setPasswordErrors([]);
+        return;
+      }
+
+      if (data && typeof data === 'object' && 'valid' in data) {
+        const validationResult = data as { valid: boolean; errors?: string[] };
+        if (!validationResult.valid) {
+          setPasswordErrors(validationResult.errors || []);
+        } else {
+          setPasswordErrors([]);
+        }
+      } else {
+        setPasswordErrors([]);
+      }
+    } catch (error) {
+      console.error('Password validation failed:', error);
+      setPasswordErrors([]);
+    }
+  };
+
+  // Update password validation when password changes
+  useEffect(() => {
+    if (mode === 'signup' && password) {
+      const timeoutId = setTimeout(() => validatePassword(password), 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setPasswordErrors([]);
+    }
+  }, [password, mode]);
 
   // Handle post-auth success
   const handleAuthSuccess = (user: any, isSignup: boolean = false) => {
@@ -68,7 +137,9 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              full_name: fullName.trim()
+              full_name: fullName.trim(),
+              location_country: userLocation.country,
+              location_city: userLocation.city
             }
           }
         });
@@ -319,7 +390,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                   required
                 />
               </div>
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
@@ -328,15 +399,31 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={mode === 'signup' ? 8 : 6}
+                  className={mode === 'signup' && passwordErrors.length > 0 ? 'border-destructive' : ''}
                 />
                 {mode === 'signup' && (
-                  <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters long
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      Password must contain at least 8 characters, including uppercase, lowercase, number, and special character
+                    </p>
+                    {passwordErrors.length > 0 && (
+                      <div className="space-y-1">
+                        {passwordErrors.map((error, index) => (
+                          <p key={index} className="text-xs text-destructive flex items-center gap-1">
+                            <span>•</span> {error}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading || (mode === 'signup' && passwordErrors.length > 0)}
+              >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
               </Button>
             </form>

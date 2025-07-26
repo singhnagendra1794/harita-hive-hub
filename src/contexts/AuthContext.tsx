@@ -129,6 +129,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in successfully');
 
+          // Save location data if available in user metadata
+          if (session.user.user_metadata?.location_country) {
+            setTimeout(async () => {
+              try {
+                await supabase
+                  .from('profiles')
+                  .update({
+                    location_country: session.user.user_metadata.location_country,
+                    location_city: session.user.user_metadata.location_city,
+                    location_detected_at: new Date().toISOString()
+                  })
+                  .eq('id', session.user.id);
+              } catch (error) {
+                console.error('Failed to save location data:', error);
+              }
+            }, 1000);
+          }
+
           // Check if this is a new user signup by checking if user was just created
           const isNewUser = session.user.created_at && 
             new Date(session.user.created_at).getTime() > (Date.now() - 60000); // Within last minute
