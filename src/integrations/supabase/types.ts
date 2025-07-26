@@ -3571,6 +3571,7 @@ export type Database = {
           is_ai_generated: boolean | null
           recording_s3_key: string | null
           recording_url: string | null
+          rtmp_endpoint: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["stream_status"]
           stream_key: string
@@ -3592,6 +3593,7 @@ export type Database = {
           is_ai_generated?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
+          rtmp_endpoint?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key: string
@@ -3613,6 +3615,7 @@ export type Database = {
           is_ai_generated?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
+          rtmp_endpoint?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key?: string
@@ -3627,6 +3630,68 @@ export type Database = {
             columns: ["aws_stream_id"]
             isOneToOne: false
             referencedRelation: "aws_streaming_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_recordings: {
+        Row: {
+          class_id: string | null
+          cloudfront_url: string | null
+          created_at: string | null
+          description: string | null
+          duration_seconds: number | null
+          end_time: string | null
+          file_size_bytes: number | null
+          id: string
+          recording_status: string | null
+          s3_url: string | null
+          speaker: string | null
+          start_time: string
+          stream_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          cloudfront_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          end_time?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          recording_status?: string | null
+          s3_url?: string | null
+          speaker?: string | null
+          start_time: string
+          stream_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          cloudfront_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          end_time?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          recording_status?: string | null
+          s3_url?: string | null
+          speaker?: string | null
+          start_time?: string
+          stream_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_recordings_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
             referencedColumns: ["id"]
           },
         ]
@@ -4456,6 +4521,9 @@ export type Database = {
           full_name: string | null
           id: string
           last_name: string | null
+          location_city: string | null
+          location_country: string | null
+          location_detected_at: string | null
           plan: string | null
           projects_completed: number | null
           spatial_analyses: number | null
@@ -4472,6 +4540,9 @@ export type Database = {
           full_name?: string | null
           id: string
           last_name?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_detected_at?: string | null
           plan?: string | null
           projects_completed?: number | null
           spatial_analyses?: number | null
@@ -4488,6 +4559,9 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_name?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_detected_at?: string | null
           plan?: string | null
           projects_completed?: number | null
           spatial_analyses?: number | null
@@ -5566,6 +5640,8 @@ export type Database = {
           ended_at: string | null
           hls_endpoint: string | null
           id: string
+          recording_cloudfront_url: string | null
+          recording_s3_key: string | null
           recording_url: string | null
           rtmp_endpoint: string | null
           started_at: string | null
@@ -5574,6 +5650,7 @@ export type Database = {
           title: string | null
           updated_at: string | null
           user_id: string
+          viewer_analytics: Json | null
           viewer_count: number | null
         }
         Insert: {
@@ -5582,6 +5659,8 @@ export type Database = {
           ended_at?: string | null
           hls_endpoint?: string | null
           id?: string
+          recording_cloudfront_url?: string | null
+          recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
           started_at?: string | null
@@ -5590,6 +5669,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id: string
+          viewer_analytics?: Json | null
           viewer_count?: number | null
         }
         Update: {
@@ -5598,6 +5678,8 @@ export type Database = {
           ended_at?: string | null
           hls_endpoint?: string | null
           id?: string
+          recording_cloudfront_url?: string | null
+          recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
           started_at?: string | null
@@ -5606,6 +5688,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string
+          viewer_analytics?: Json | null
           viewer_count?: number | null
         }
         Relationships: [
@@ -7964,6 +8047,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_daily_live_class: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       create_geova_daily_class: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -8152,6 +8239,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      is_valid_email_domain: {
+        Args: { email_input: string }
+        Returns: boolean
+      }
       log_admin_action: {
         Args: {
           p_target_user_id: string
@@ -8292,6 +8383,10 @@ export type Database = {
       validate_and_sanitize_input: {
         Args: { input_text: string; max_length?: number; allow_html?: boolean }
         Returns: string
+      }
+      validate_password: {
+        Args: { password_input: string }
+        Returns: Json
       }
     }
     Enums: {
