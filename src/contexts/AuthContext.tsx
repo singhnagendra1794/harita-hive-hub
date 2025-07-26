@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               try {
                 // Check if user email is in premium list
                 const { data: isPremium, error } = await supabase
-                  .rpc('is_professional_email', { email_to_check: session.user.email });
+                  .rpc('is_professional_email', { email_input: session.user.email });
                 
                 if (error) {
                   console.error('Error checking premium email:', error);

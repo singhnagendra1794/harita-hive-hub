@@ -1,6 +1,9 @@
 
 project_id = "uphgdwrwaizomnyuwfwr"
 
+[functions.geova-mentor]
+verify_jwt = true
+
 [functions.send-email]
 verify_jwt = false
 
