@@ -43,6 +43,8 @@ import { useToast } from '@/hooks/use-toast';
 import { NewsletterCreator } from '@/components/newsletter/NewsletterCreator';
 import { CuratedContent } from '@/components/newsletter/CuratedContent';
 import { AINewsletterSuggestions } from '@/components/newsletter/AINewsletterSuggestions';
+import { NewsletterFeed } from '@/components/newsletter/NewsletterFeed';
+import { Link } from 'react-router-dom';
 
 const Newsletter = () => {
   const { user } = useAuth();
@@ -52,7 +54,7 @@ const Newsletter = () => {
   const [fullName, setFullName] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [activeTab, setActiveTab] = useState('discover');
+  const [activeTab, setActiveTab] = useState('feed');
 
   useEffect(() => {
     // Update SEO for newsletter page
@@ -249,9 +251,25 @@ const Newsletter = () => {
         )}
       </div>
 
+      {/* Create Post Button for Authenticated Users */}
+      {user && (
+        <div className="text-center mb-8">
+          <Link to="/newsletter/new">
+            <Button size="lg" className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Write a Newsletter Post
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="feed" className="flex items-center gap-2">
+            <Newspaper className="h-4 w-4" />
+            Community Feed
+          </TabsTrigger>
           <TabsTrigger value="discover" className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             Discover
@@ -269,6 +287,10 @@ const Newsletter = () => {
             AI Suggestions
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="feed" className="space-y-8">
+          <NewsletterFeed />
+        </TabsContent>
 
         <TabsContent value="discover" className="space-y-8">
           {/* Featured Newsletters Section */}

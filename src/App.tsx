@@ -53,6 +53,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const PremiumUpgrade = lazy(() => import("./pages/PremiumUpgrade"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Newsletter = lazy(() => import("./pages/Newsletter"));
+const NewsletterNew = lazy(() => import("./pages/NewsletterNew"));
 const Blog = lazy(() => import("./pages/Blog"));
 const EnhancedPluginMarketplace = lazy(() => import("./pages/EnhancedPluginMarketplace"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -149,7 +150,8 @@ function App() {
                    <Route path="/beta" element={<Layout><RouteWrapper><Beta /></RouteWrapper></Layout>} />
                    <Route path="/investors" element={<Layout><RouteWrapper><Investors /></RouteWrapper></Layout>} />
                    <Route path="/pricing" element={<Layout><RouteWrapper><Pricing /></RouteWrapper></Layout>} />
-            <Route path="/newsletter" element={<Layout><RouteWrapper><Newsletter /></RouteWrapper></Layout>} />
+             <Route path="/newsletter" element={<Layout><RouteWrapper><Newsletter /></RouteWrapper></Layout>} />
+             <Route path="/newsletter/new" element={<Layout><ProtectedRoute><RouteWrapper><NewsletterNew /></RouteWrapper></ProtectedRoute></Layout>} />
             <Route path="/blog" element={<Layout><RouteWrapper><Blog /></RouteWrapper></Layout>} />
                    <Route path="/challenge" element={<Layout><RouteWrapper><Challenge /></RouteWrapper></Layout>} />
            <Route path="/upcoming-course" element={<Navigate to="/browse-courses" replace />} />

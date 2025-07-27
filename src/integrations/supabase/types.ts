@@ -3996,47 +3996,133 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_posts: {
         Row: {
+          comments_count: number
           content: string | null
+          cover_image_url: string | null
           created_at: string
-          featured_image_url: string | null
           id: string
+          is_deleted: boolean
           is_featured: boolean | null
+          likes_count: number
           linkedin_url: string | null
           published_date: string
           summary: string | null
           tags: string[] | null
           title: string
           updated_at: string
+          user_id: string | null
           view_count: number | null
         }
         Insert: {
+          comments_count?: number
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
-          featured_image_url?: string | null
           id?: string
+          is_deleted?: boolean
           is_featured?: boolean | null
+          likes_count?: number
           linkedin_url?: string | null
           published_date: string
           summary?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
+          user_id?: string | null
           view_count?: number | null
         }
         Update: {
+          comments_count?: number
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
-          featured_image_url?: string | null
           id?: string
+          is_deleted?: boolean
           is_featured?: boolean | null
+          likes_count?: number
           linkedin_url?: string | null
           published_date?: string
           summary?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
+          user_id?: string | null
           view_count?: number | null
         }
         Relationships: []

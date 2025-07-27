@@ -28,13 +28,17 @@ interface NewsletterPost {
   summary: string | null;
   content: string | null;
   linkedin_url: string | null;
-  featured_image_url: string | null;
+  cover_image_url: string | null;
   published_date: string;
   tags: string[];
   view_count: number;
   is_featured: boolean | null;
   created_at: string;
   updated_at: string;
+  user_id?: string;
+  is_deleted?: boolean;
+  likes_count?: number;
+  comments_count?: number;
 }
 
 export const NewsletterAdmin = () => {
@@ -100,7 +104,7 @@ export const NewsletterAdmin = () => {
       summary: post.summary || '',
       content: post.content || '',
       linkedin_url: post.linkedin_url || '',
-      featured_image_url: post.featured_image_url || '',
+      featured_image_url: post.cover_image_url || '',
       published_date: post.published_date.split('T')[0],
       tags: post.tags.join(', '),
       is_featured: post.is_featured || false
@@ -127,7 +131,7 @@ export const NewsletterAdmin = () => {
       summary: formData.summary || null,
       content: formData.content || null,
       linkedin_url: formData.linkedin_url || null,
-      featured_image_url: formData.featured_image_url || null,
+      cover_image_url: formData.featured_image_url || null,
       published_date: formData.published_date,
       tags: tagsArray,
       is_featured: formData.is_featured
