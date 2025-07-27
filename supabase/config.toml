@@ -39,3 +39,12 @@ verify_jwt = true
 
 [functions.tool-purchase-webhook]
 verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.geova-session-manager]
+verify_jwt = false
+
+[functions.hls-streaming-server]
+verify_jwt = false

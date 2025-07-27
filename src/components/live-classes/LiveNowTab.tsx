@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Video, Users, Radio, Bot, RefreshCw } from "lucide-react";
-import { LiveVideoPlayer } from '@/components/LiveVideoPlayer';
+
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
+import { ScreenProtection } from '@/components/security/ScreenProtection';
+import { UserWatermark } from '@/components/security/UserWatermark';
 import { supabase } from '@/integrations/supabase/client';
 
 interface LiveStream {
@@ -187,41 +189,52 @@ const LiveNowTab = () => {
           </CardHeader>
           
           <CardContent>
-            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-              {currentStream.is_geova && geovaSession?.activeSession ? (
-                <GEOVALiveClassroom 
-                  sessionId={geovaSession.activeSession.id}
-                  onSessionEnd={() => {
-                    setCurrentStream(null);
-                    setGeovaSession(null);
-                    checkForLiveStreams();
-                  }}
-                />
-              ) : playerError ? (
-                <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
-                  <div className="text-center">
-                    <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg mb-2">Connection Issue</p>
-                    <p className="text-sm text-gray-400 mb-4">{playerError}</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleRefresh}
-                    >
-                      Retry Connection
-                    </Button>
+            <ScreenProtection enabled={true}>
+              <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                <UserWatermark />
+                {currentStream.is_geova && geovaSession?.activeSession ? (
+                  <GEOVALiveClassroom 
+                    sessionId={geovaSession.activeSession.id}
+                    onSessionEnd={() => {
+                      setCurrentStream(null);
+                      setGeovaSession(null);
+                      checkForLiveStreams();
+                    }}
+                  />
+                ) : playerError ? (
+                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                    <div className="text-center">
+                      <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">Connection Issue</p>
+                      <p className="text-sm text-gray-400 mb-4">{playerError}</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleRefresh}
+                      >
+                        Retry Connection
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <LiveVideoPlayer
-                  src={currentStream.hls_url || 'https://d3k8h9k5j2l1m9.cloudfront.net/live/index.m3u8'}
-                  title={currentStream.title}
-                  className="w-full h-full"
-                  onError={handleVideoError}
-                  onLoad={handleVideoLoad}
-                />
-              )}
-            </div>
+                ) : (
+                  <video
+                    src={currentStream.hls_url || 'https://d3k8h9k5j2l1m9.cloudfront.net/live/index.m3u8'}
+                    autoPlay
+                    controls
+                    muted
+                    playsInline
+                    controlsList="nodownload"
+                    className="w-full h-full object-cover"
+                    onError={handleVideoError}
+                    onLoadedMetadata={handleVideoLoad}
+                    style={{ 
+                      pointerEvents: 'auto',
+                      userSelect: 'none'
+                    }}
+                  />
+                )}
+              </div>
+            </ScreenProtection>
           </CardContent>
         </Card>
       ) : (

@@ -11,7 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Phone, Github } from 'lucide-react';
+import { Mail, Phone, Github, AlertCircle } from 'lucide-react';
+import { validateEmailComplete } from '@/utils/emailValidation';
 
 interface MultiAuthFormProps {
   mode: 'signin' | 'signup';
@@ -28,6 +29,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [otp, setOtp] = useState('');
   const [activeTab, setActiveTab] = useState('email');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [emailError, setEmailError] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{country?: string; city?: string}>({});
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -107,6 +109,20 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
     }
   }, [password, mode]);
 
+  // Email validation
+  useEffect(() => {
+    if (email && mode === 'signup') {
+      const validation = validateEmailComplete(email);
+      if (!validation.isValid) {
+        setEmailError(validation.error || '');
+      } else {
+        setEmailError('');
+      }
+    } else {
+      setEmailError('');
+    }
+  }, [email, mode]);
+
   // Handle post-auth success
   const handleAuthSuccess = (user: any, isSignup: boolean = false) => {
     toast({
@@ -119,6 +135,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
     e.preventDefault();
     if (!email || !password) return;
     if (mode === 'signup' && !fullName.trim()) return;
+    if (mode === 'signup' && emailError) return;
 
     setLoading(true);
     try {
@@ -167,10 +184,23 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
 
       if (result.data.user) {
         if (mode === 'signup') {
+          // Send welcome email
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                userId: result.data.user.id,
+                email: result.data.user.email,
+                fullName: fullName.trim()
+              }
+            });
+          } catch (welcomeError) {
+            console.error('Welcome email failed:', welcomeError);
+          }
+
           // For signup, show email confirmation message
           toast({
             title: "Registration Successful!",
-            description: "Please check your email for a confirmation link to complete your registration.",
+            description: "Welcome to Harita Hive! Please check your email for a confirmation link to complete your registration.",
           });
           
           // If user needs email confirmation, don't redirect yet
@@ -388,7 +418,14 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className={mode === 'signup' && emailError ? 'border-destructive' : ''}
                 />
+                {mode === 'signup' && emailError && (
+                  <div className="flex items-center gap-2 text-xs text-destructive">
+                    <AlertCircle className="h-3 w-3" />
+                    {emailError}
+                  </div>
+                )}
               </div>
                 <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -422,7 +459,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || (mode === 'signup' && passwordErrors.length > 0)}
+                disabled={loading || (mode === 'signup' && (passwordErrors.length > 0 || !!emailError))}
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
               </Button>
