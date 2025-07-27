@@ -76,6 +76,8 @@ const Beta = lazy(() => import("./pages/Beta"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const MapPlayground = lazy(() => import("./pages/MapPlayground"));
 const ProjectTemplates = lazy(() => import("./pages/ProjectTemplates"));
+const ResumeRoadmap = lazy(() => import("./pages/ResumeRoadmap"));
+const AIMentor = lazy(() => import("./pages/AIMentor"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
@@ -288,16 +290,39 @@ function App() {
                         </RouteWrapper>
                       </ProtectedRoute>
                     </Layout>
-                   } />
-                    <Route path="/project-templates" element={
-                      <Layout>
-                        <RouteWrapper>
-                          <Suspense fallback={<PageLoader />}>
-                            <ProjectTemplates />
-                          </Suspense>
-                        </RouteWrapper>
-                      </Layout>
-                    } />
+                     } />
+                     <Route path="/project-templates" element={
+                       <Layout>
+                         <RouteWrapper>
+                           <Suspense fallback={<PageLoader />}>
+                             <ProjectTemplates />
+                           </Suspense>
+                         </RouteWrapper>
+                       </Layout>
+                     } />
+                     <Route path="/templates" element={<Navigate to="/project-templates" replace />} />
+                     <Route path="/resume-roadmap" element={
+                       <Layout>
+                         <ProtectedRoute>
+                           <RouteWrapper>
+                             <Suspense fallback={<PageLoader />}>
+                               <ResumeRoadmap />
+                             </Suspense>
+                           </RouteWrapper>
+                         </ProtectedRoute>
+                       </Layout>
+                     } />
+                     <Route path="/ai-mentor" element={
+                       <Layout>
+                         <ProtectedRoute>
+                           <RouteWrapper>
+                             <Suspense fallback={<PageLoader />}>
+                               <AIMentor />
+                             </Suspense>
+                           </RouteWrapper>
+                         </ProtectedRoute>
+                       </Layout>
+                     } />
                    <Route path="/map-playground" element={
                      <Layout>
                        <SubscriptionRoute requiredTier="pro">
