@@ -3559,7 +3559,9 @@ export type Database = {
       }
       live_classes: {
         Row: {
+          auto_start: boolean | null
           aws_stream_id: string | null
+          cloudfront_url: string | null
           course_title: string | null
           created_at: string
           created_by: string
@@ -3581,7 +3583,9 @@ export type Database = {
           viewer_count: number | null
         }
         Insert: {
+          auto_start?: boolean | null
           aws_stream_id?: string | null
+          cloudfront_url?: string | null
           course_title?: string | null
           created_at?: string
           created_by: string
@@ -3603,7 +3607,9 @@ export type Database = {
           viewer_count?: number | null
         }
         Update: {
+          auto_start?: boolean | null
           aws_stream_id?: string | null
+          cloudfront_url?: string | null
           course_title?: string | null
           created_at?: string
           created_by?: string

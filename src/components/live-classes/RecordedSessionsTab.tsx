@@ -53,10 +53,12 @@ const RecordedSessionsTab = () => {
 
       if (error) throw error;
 
-      // Process recordings and add auto-generated recording URLs for sessions without them
+      // Process recordings and add CloudFront recording URLs for sessions without them
       const processedRecordings = (dbRecordings || []).map(session => ({
         ...session,
-        recording_url: session.recording_url || `https://stream.haritahive.com/recordings/${session.stream_key}.mp4`
+        recording_url: session.recording_url || 
+                      session.cloudfront_url || 
+                      `https://d3k8h9k5j2l1m9.cloudfront.net/recordings/${session.stream_key}.mp4`
       }));
 
       setRecordings(processedRecordings);
@@ -104,8 +106,9 @@ const RecordedSessionsTab = () => {
       return;
     }
 
-    // Navigate to recording player
-    window.open(recording.recording_url, '_blank');
+    // Navigate to watch recording page with proper video URL and title
+    const watchUrl = `/watch-recording?videoUrl=${encodeURIComponent(recording.recording_url!)}&title=${encodeURIComponent(recording.title)}`;
+    window.open(watchUrl, '_blank');
   };
 
   const formatDate = (dateString: string) => {

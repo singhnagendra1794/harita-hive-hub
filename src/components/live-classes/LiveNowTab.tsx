@@ -87,7 +87,7 @@ const LiveNowTab = () => {
           stream_key: stream.stream_key,
           status: 'live',
           start_time: stream.start_time,
-          hls_url: `https://stream.haritahive.com/hls/${stream.stream_key}.m3u8`,
+          hls_url: stream.cloudfront_url || `https://d3k8h9k5j2l1m9.cloudfront.net/live/${stream.stream_key}.m3u8`,
           viewer_count: stream.viewer_count || Math.floor(Math.random() * 100) + 30,
           is_geova: false
         });
@@ -214,7 +214,7 @@ const LiveNowTab = () => {
                 </div>
               ) : (
                 <LiveVideoPlayer
-                  src={currentStream.hls_url || `https://stream.haritahive.com/hls/${currentStream.stream_key}.m3u8`}
+                  src={currentStream.hls_url || `https://d3k8h9k5j2l1m9.cloudfront.net/live/${currentStream.stream_key}.m3u8`}
                   title={currentStream.title}
                   className="w-full h-full"
                   onError={handleVideoError}
