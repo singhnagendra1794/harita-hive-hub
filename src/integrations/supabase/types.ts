@@ -4607,6 +4607,7 @@ export type Database = {
           community_posts: number | null
           course_count: number | null
           created_at: string
+          email: string | null
           enrolled_courses: string[] | null
           enrolled_courses_count: number | null
           first_name: string | null
@@ -4626,6 +4627,7 @@ export type Database = {
           community_posts?: number | null
           course_count?: number | null
           created_at?: string
+          email?: string | null
           enrolled_courses?: string[] | null
           enrolled_courses_count?: number | null
           first_name?: string | null
@@ -4645,6 +4647,7 @@ export type Database = {
           community_posts?: number | null
           course_count?: number | null
           created_at?: string
+          email?: string | null
           enrolled_courses?: string[] | null
           enrolled_courses_count?: number | null
           first_name?: string | null
