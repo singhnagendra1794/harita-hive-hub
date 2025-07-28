@@ -8355,6 +8355,60 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_sessions: {
+        Row: {
+          access_tier: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean
+          order_index: number | null
+          scheduled_date: string | null
+          session_type: string
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          youtube_embed_url: string
+        }
+        Insert: {
+          access_tier?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number | null
+          scheduled_date?: string | null
+          session_type: string
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          youtube_embed_url: string
+        }
+        Update: {
+          access_tier?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number | null
+          scheduled_date?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          youtube_embed_url?: string
+        }
+        Relationships: []
+      }
       youtube_stream_config: {
         Row: {
           created_at: string | null
