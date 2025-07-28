@@ -8592,35 +8592,29 @@ export type Database = {
         Row: {
           access_token: string
           created_at: string | null
-          expires_at: string
+          expires_at: string | null
           id: string
           refresh_token: string | null
-          scope: string | null
-          token_type: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           access_token: string
           created_at?: string | null
-          expires_at: string
+          expires_at?: string | null
           id?: string
           refresh_token?: string | null
-          scope?: string | null
-          token_type?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           access_token?: string
           created_at?: string | null
-          expires_at?: string
+          expires_at?: string | null
           id?: string
           refresh_token?: string | null
-          scope?: string | null
-          token_type?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

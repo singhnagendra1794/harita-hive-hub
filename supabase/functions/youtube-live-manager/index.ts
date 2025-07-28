@@ -74,23 +74,24 @@ async function syncUpcomingStreams(supabase: any) {
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token, refresh_token')
-    .eq('user_id', 'admin')
-    .single()
+    .eq('user_id', (await supabase.auth.getUser()).data.user?.id || 'admin')
+    .maybeSingle()
 
-  if (tokenError || !tokenData?.access_token) {
-    console.log('No YouTube OAuth token found for admin, creating placeholder entries...')
+  if (tokenError || !tokenData?.access_token || tokenData.access_token === 'placeholder_access_token') {
+    console.log('No valid YouTube OAuth token found, creating placeholder entries...')
     
-    // Create placeholder upcoming stream for demo
+    // Create placeholder upcoming stream for demo with the current video ID
     await supabase
       .from('youtube_live_schedule')
       .upsert({
-        youtube_broadcast_id: 'demo_stream_' + Date.now(),
+        youtube_broadcast_id: '94NaFHNEi9k',
         title: 'Geospatial Technology Unlocked - Live Session',
         description: 'Interactive AI-powered learning session covering geospatial concepts and tools',
-        scheduled_start_time: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-        thumbnail_url: 'https://via.placeholder.com/1280x720?text=Geospatial+Technology+Unlocked',
-        status: 'scheduled',
+        scheduled_start_time: new Date().toISOString(), // Current time so it shows as live
+        thumbnail_url: 'https://img.youtube.com/vi/94NaFHNEi9k/maxresdefault.jpg',
+        status: 'live',
         created_by: 'admin',
+        is_override: true
       }, {
         onConflict: 'youtube_broadcast_id'
       })
