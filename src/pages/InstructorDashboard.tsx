@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 
 interface YouTubeClass {
   id: string;
@@ -28,14 +29,15 @@ interface YouTubeClass {
 const InstructorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isSuperAdmin, loading: adminLoading } = useSuperAdminAccess();
 
   // Check if user is super admin
   useEffect(() => {
-    if (user && user.email !== 'contact@haritahive.com') {
+    if (!adminLoading && user && !isSuperAdmin) {
       navigate('/dashboard');
       return;
     }
-  }, [user, navigate]);
+  }, [user, navigate, isSuperAdmin, adminLoading]);
 
   const [classes, setClasses] = useState<YouTubeClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +169,7 @@ const InstructorDashboard = () => {
     });
   };
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <div className="container py-12">
         <div className="flex items-center justify-center py-12">
