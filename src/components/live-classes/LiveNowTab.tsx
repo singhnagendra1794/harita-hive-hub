@@ -167,20 +167,27 @@ const LiveNowTab = () => {
       if (activeStreams && activeStreams.length > 0) {
         const stream = activeStreams[0];
         console.log('Found active live stream:', stream);
-        setCurrentStream({
+        const streamData = {
           id: stream.id,
           title: stream.title,
           description: stream.description,
           stream_key: stream.stream_key,
-          status: 'live',
+          status: 'live' as const,
           start_time: stream.start_time,
           hls_url: stream.hls_manifest_url || `https://uphgdwrwaizomnyuwfwr.supabase.co/storage/v1/object/public/live-streams/${stream.stream_key}/index.m3u8`,
-          viewer_count: stream.viewer_count || Math.floor(Math.random() * 100) + 50,
+          viewer_count: stream.viewer_count || 0,
           is_geova: stream.is_ai_generated || false,
           is_free_access: true
-        });
+        };
+        setCurrentStream(streamData);
         setPlayerError(null);
         setLoading(false);
+        
+        // Start tracking viewer for this stream
+        if (!isViewing) {
+          incrementViewerCount(stream.id);
+          setIsViewing(true);
+        }
         return;
       }
 
@@ -199,17 +206,18 @@ const LiveNowTab = () => {
       if (geovaData) {
         setGeovaSession(geovaData);
         if (geovaData.isLive) {
-          setCurrentStream({
+          const geovaStreamData = {
             id: 'geova-live',
             title: `GEOVA AI Teaching - Day ${geovaData.activeSession?.day_number || 'N/A'}`,
             description: geovaData.activeSession?.topic_title || 'Live AI-powered geospatial education',
             stream_key: 'default_stream_key',
-            status: 'live',
+            status: 'live' as const,
             start_time: geovaData.activeSession?.started_at || new Date().toISOString(),
-            viewer_count: Math.floor(Math.random() * 50) + 20,
+            viewer_count: geovaData.activeSession?.viewer_count || 0,
             is_geova: true,
             is_free_access: true
-          });
+          };
+          setCurrentStream(geovaStreamData);
           setLoading(false);
           return;
         }
@@ -275,7 +283,7 @@ const LiveNowTab = () => {
               end_time: stream.end_time,
               duration_minutes: stream.duration_minutes,
               youtube_url: stream.youtube_url,
-              viewer_count: Math.floor(Math.random() * 100) + 30,
+              viewer_count: stream.viewer_count || 0,
               is_geova: false,
               is_free_access: stream.is_free_access,
               day_number: stream.day_number,

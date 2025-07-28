@@ -8459,6 +8459,10 @@ export type Database = {
         Args: { file_path: string; user_id: string }
         Returns: Json
       }
+      decrement_viewer_count: {
+        Args: { stream_id: string }
+        Returns: undefined
+      }
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -8605,6 +8609,10 @@ export type Database = {
       }
       increment_template_download_count: {
         Args: { template_id: string }
+        Returns: undefined
+      }
+      increment_viewer_count: {
+        Args: { stream_id: string }
         Returns: undefined
       }
       invalidate_previous_sessions: {
