@@ -433,8 +433,8 @@ async function manualRefresh(supabase: any) {
 
 async function refreshAccessToken(supabase: any, refreshToken: string) {
   try {
-    const clientId = Deno.env.get('YOUTUBE_CLIENT_ID')
-    const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET')
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID')
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
 
     if (!clientId || !clientSecret) return false
 
