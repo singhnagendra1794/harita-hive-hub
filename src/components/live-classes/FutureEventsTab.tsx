@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, ExternalLink, Users, Video } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UpcomingEvent {
   id: string;
