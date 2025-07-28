@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Users, Radio, Bot, RefreshCw } from "lucide-react";
+import { Video, Users, Radio, Bot, RefreshCw, Lock } from "lucide-react";
 
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 import { ScreenProtection } from '@/components/security/ScreenProtection';
 import { UserWatermark } from '@/components/security/UserWatermark';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePremiumAccess } from '@/hooks/usePremiumAccess';
 
 interface LiveStream {
   id: string;
@@ -16,7 +18,10 @@ interface LiveStream {
   stream_key: string;
   status: 'live' | 'scheduled';
   start_time: string;
+  end_time?: string;
+  duration_minutes?: number;
   hls_url?: string;
+  youtube_url?: string;
   viewer_count: number;
   is_geova?: boolean;
 }
@@ -28,22 +33,29 @@ interface GEOVASession {
 }
 
 const LiveNowTab = () => {
+  const { user } = useAuth();
+  const { hasAccess, loading: premiumLoading } = usePremiumAccess();
   const [currentStream, setCurrentStream] = useState<LiveStream | null>(null);
   const [geovaSession, setGeovaSession] = useState<GEOVASession | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [hasEnrollment, setHasEnrollment] = useState(false);
 
   useEffect(() => {
-    checkForLiveStreams();
+    if (!premiumLoading) {
+      checkForLiveStreams();
+    }
     
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      checkForLiveStreams();
+      if (!premiumLoading) {
+        checkForLiveStreams();
+      }
     }, 30000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [premiumLoading]);
 
   const checkForLiveStreams = async () => {
     try {
@@ -72,31 +84,56 @@ const LiveNowTab = () => {
         }
       }
 
-      // Check for live OBS streams
+      // Check for scheduled live YouTube streams (for professional users)
+      const now = new Date();
       const { data: liveStreams } = await supabase
         .from('live_classes')
         .select('*')
-        .eq('status', 'live')
+        .eq('status', 'scheduled')
+        .not('youtube_url', 'is', null)
+        .lte('start_time', now.toISOString())
         .order('start_time', { ascending: false })
         .limit(1);
 
       if (liveStreams && liveStreams.length > 0) {
         const stream = liveStreams[0];
-        setCurrentStream({
-          id: stream.id,
-          title: stream.title,
-          description: stream.description,
-          stream_key: stream.stream_key,
-          status: 'live',
-          start_time: stream.start_time,
-          hls_url: stream.cloudfront_url || 'https://d3k8h9k5j2l1m9.cloudfront.net/live/index.m3u8',
-          viewer_count: stream.viewer_count || Math.floor(Math.random() * 100) + 30,
-          is_geova: false
-        });
-      } else {
-        setCurrentStream(null);
+        const startTime = new Date(stream.start_time);
+        const endTime = stream.end_time ? new Date(stream.end_time) : 
+          new Date(startTime.getTime() + (stream.duration_minutes || 90) * 60000);
+        
+        // Check if stream is currently active
+        if (now >= startTime && now <= endTime) {
+          // Check if user has enrollment for this class
+          if (user) {
+            const { data: enrollment } = await supabase
+              .from('class_enrollments')
+              .select('*')
+              .eq('user_id', user.id)
+              .eq('class_id', stream.id)
+              .single();
+            
+            setHasEnrollment(!!enrollment);
+          }
+
+          setCurrentStream({
+            id: stream.id,
+            title: stream.title,
+            description: stream.description,
+            stream_key: stream.stream_key,
+            status: 'live',
+            start_time: stream.start_time,
+            end_time: stream.end_time,
+            duration_minutes: stream.duration_minutes,
+            youtube_url: stream.youtube_url,
+            viewer_count: Math.floor(Math.random() * 100) + 30,
+            is_geova: false
+          });
+          setLoading(false);
+          return;
+        }
       }
       
+      setCurrentStream(null);
       setLastRefresh(Date.now());
     } catch (error) {
       console.error('Error checking live streams:', error);
@@ -192,13 +229,73 @@ const LiveNowTab = () => {
             <ScreenProtection enabled={true}>
               <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
                 <UserWatermark />
-                {currentStream.is_geova && geovaSession?.activeSession ? (
+{currentStream.is_geova && geovaSession?.activeSession ? (
                   <GEOVALiveClassroom 
                     sessionId={geovaSession.activeSession.id}
                     onSessionEnd={() => {
                       setCurrentStream(null);
                       setGeovaSession(null);
                       checkForLiveStreams();
+                    }}
+                  />
+                ) : !user ? (
+                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                    <div className="text-center">
+                      <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">Login Required</p>
+                      <p className="text-sm text-gray-400 mb-4">Please log in to watch live classes</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = '/auth'}
+                      >
+                        Login
+                      </Button>
+                    </div>
+                  </div>
+                ) : !hasAccess('pro') ? (
+                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                    <div className="text-center">
+                      <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">Professional Access Required</p>
+                      <p className="text-sm text-gray-400 mb-4">Live classes are available for Professional plan users</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = '/pricing'}
+                      >
+                        Upgrade to Professional
+                      </Button>
+                    </div>
+                  </div>
+                ) : !hasEnrollment ? (
+                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                    <div className="text-center">
+                      <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">Enrollment Required</p>
+                      <p className="text-sm text-gray-400 mb-4">You need to be enrolled in this course to watch</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleRefresh}
+                      >
+                        Check Enrollment
+                      </Button>
+                    </div>
+                  </div>
+                ) : currentStream.youtube_url ? (
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={currentStream.youtube_url}
+                    title="Harita Hive Live Class"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full rounded-lg"
+                    style={{ 
+                      pointerEvents: 'auto',
+                      userSelect: 'none'
                     }}
                   />
                 ) : playerError ? (
