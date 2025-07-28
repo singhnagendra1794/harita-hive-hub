@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/Layout';
 import QATestResults from '@/components/admin/QATestResults';
 import YouTubeSessionManager from '@/components/admin/YouTubeSessionManager';
+import YouTubeLiveScheduler from '@/components/admin/YouTubeLiveScheduler';
 
 const SuperAdminDashboard = () => {
   const { isSuperAdmin, loading } = useSuperAdminAccess();
@@ -129,7 +130,7 @@ const SuperAdminDashboard = () => {
 
         {/* Tabs for Different Admin Functions */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
@@ -137,6 +138,10 @@ const SuperAdminDashboard = () => {
             <TabsTrigger value="youtube" className="flex items-center gap-2">
               <Video className="h-4 w-4" />
               YouTube Manager
+            </TabsTrigger>
+            <TabsTrigger value="youtube-live" className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              YouTube Live
             </TabsTrigger>
             <TabsTrigger value="qa" className="flex items-center gap-2">
               <TestTube2 className="h-4 w-4" />
@@ -148,6 +153,10 @@ const SuperAdminDashboard = () => {
           </TabsContent>
           <TabsContent value="youtube" className="space-y-4">
             <YouTubeSessionManager />
+          </TabsContent>
+          
+          <TabsContent value="youtube-live" className="space-y-6">
+            <YouTubeLiveScheduler />
           </TabsContent>
           <TabsContent value="qa" className="space-y-4">
             <QATestResults />
