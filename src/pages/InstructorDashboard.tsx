@@ -148,7 +148,8 @@ const InstructorDashboard = () => {
     }
   };
 
-  const extractVideoId = (url: string) => {
+  const extractVideoId = (url: string | null) => {
+    if (!url) return null;
     const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
     return match ? match[1] : null;
   };
