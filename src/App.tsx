@@ -110,6 +110,7 @@ const GeospatialTechnologyUnlocked = lazy(() => import("./pages/courses/Geospati
 const GeospatialFullstackDeveloper = lazy(() => import("./pages/courses/GeospatialFullstackDeveloper"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const AdminUserManagement = lazy(() => import("./pages/AdminUserManagement"));
+const AccessManagement = lazy(() => import("./pages/AccessManagement"));
 const UploadCenter = lazy(() => import("./pages/UploadCenter"));
 const SkillCopilot = lazy(() => import("./pages/SkillCopilot"));
 const SpatialAnalysisLab = lazy(() => import("./pages/SpatialAnalysisLab"));
@@ -541,6 +542,17 @@ function App() {
                       <ProtectedRoute>
                         <RouteWrapper>
                           <AdminUserManagement />
+                        </RouteWrapper>
+                      </ProtectedRoute>
+                    </Layout>
+                  } />
+                  <Route path="/admin/access-management" element={
+                    <Layout>
+                      <ProtectedRoute>
+                        <RouteWrapper>
+                          <Suspense fallback={<PageLoader />}>
+                            <AccessManagement />
+                          </Suspense>
                         </RouteWrapper>
                       </ProtectedRoute>
                     </Layout>

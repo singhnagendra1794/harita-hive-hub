@@ -5521,6 +5521,39 @@ export type Database = {
           },
         ]
       }
+      role_change_audit: {
+        Row: {
+          change_reason: string | null
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          id: string
+          new_role: string
+          old_role: string | null
+          user_email: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_role: string
+          old_role?: string | null
+          user_email: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_role?: string
+          old_role?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
       sandbox_sessions: {
         Row: {
           code_content: string | null
@@ -8360,9 +8393,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bulk_assign_professional_access: {
+        Args: { email_list: string[] }
+        Returns: Json
+      }
       can_download_premium_plugin: {
         Args: { p_user_id: string; p_tool_id: string }
         Returns: boolean
+      }
+      change_user_role_with_notification: {
+        Args: {
+          target_email: string
+          new_role_name: string
+          change_reason?: string
+        }
+        Returns: Json
       }
       check_admin_rate_limit: {
         Args: { p_action: string }

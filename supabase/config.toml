@@ -48,3 +48,9 @@ verify_jwt = false
 
 [functions.hls-streaming-server]
 verify_jwt = false
+
+[functions.manage-user-roles]
+verify_jwt = true
+
+[functions.bulk-assign-professional-users]
+verify_jwt = true
