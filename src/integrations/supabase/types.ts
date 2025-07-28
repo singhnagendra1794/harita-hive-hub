@@ -821,6 +821,63 @@ export type Database = {
         }
         Relationships: []
       }
+      class_recordings: {
+        Row: {
+          aws_url: string | null
+          cloudfront_url: string | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          download_count: number | null
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          is_public: boolean | null
+          s3_key: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+          youtube_url: string | null
+        }
+        Insert: {
+          aws_url?: string | null
+          cloudfront_url?: string | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          is_public?: boolean | null
+          s3_key?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+          youtube_url?: string | null
+        }
+        Update: {
+          aws_url?: string | null
+          cloudfront_url?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          is_public?: boolean | null
+          s3_key?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       class_registrations: {
         Row: {
           attendance_status: string | null
@@ -3716,6 +3773,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      live_streams: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          duration_minutes: number | null
+          embed_url: string
+          end_time: string | null
+          id: string
+          is_free: boolean | null
+          is_home_featured: boolean | null
+          platform: string | null
+          start_time: string
+          status: string | null
+          stream_key: string | null
+          stream_server_url: string | null
+          title: string
+          updated_at: string | null
+          viewer_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          duration_minutes?: number | null
+          embed_url: string
+          end_time?: string | null
+          id?: string
+          is_free?: boolean | null
+          is_home_featured?: boolean | null
+          platform?: string | null
+          start_time: string
+          status?: string | null
+          stream_key?: string | null
+          stream_server_url?: string | null
+          title: string
+          updated_at?: string | null
+          viewer_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number | null
+          embed_url?: string
+          end_time?: string | null
+          id?: string
+          is_free?: boolean | null
+          is_home_featured?: boolean | null
+          platform?: string | null
+          start_time?: string
+          status?: string | null
+          stream_key?: string | null
+          stream_server_url?: string | null
+          title?: string
+          updated_at?: string | null
+          viewer_count?: number | null
+        }
+        Relationships: []
       }
       map_projects: {
         Row: {
@@ -8157,6 +8274,39 @@ export type Database = {
           start_date?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      youtube_stream_config: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          is_active: boolean | null
+          stream_name: string
+          updated_at: string | null
+          youtube_stream_key: string
+          youtube_stream_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          stream_name: string
+          updated_at?: string | null
+          youtube_stream_key: string
+          youtube_stream_url: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          stream_name?: string
+          updated_at?: string | null
+          youtube_stream_key?: string
+          youtube_stream_url?: string
         }
         Relationships: []
       }

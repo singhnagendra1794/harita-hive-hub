@@ -5,7 +5,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CreatorConsole } from '@/components/admin/CreatorConsole';
 import { BetaAnalyticsDashboard } from '@/components/beta/BetaAnalyticsDashboard';
 import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDashboard';
-import YouTubeLiveManager from '@/components/admin/YouTubeLiveManager';
+import SuperAdminVideoManager from '@/components/admin/SuperAdminVideoManager';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -68,7 +68,7 @@ const AdminDashboardPage = () => {
           <TabsList>
             {isSuperAdmin() && <TabsTrigger value="super-admin">Super Admin</TabsTrigger>}
             <TabsTrigger value="creator">Creator Console</TabsTrigger>
-            <TabsTrigger value="live-classes">Live Classes</TabsTrigger>
+            <TabsTrigger value="videos">Video Manager</TabsTrigger>
             <TabsTrigger value="general">General Admin</TabsTrigger>
             <TabsTrigger value="beta">Beta Analytics</TabsTrigger>
             <TabsTrigger value="payments">Payment Approvals</TabsTrigger>
@@ -99,24 +99,9 @@ const AdminDashboardPage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="live-classes">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Video className="h-5 w-5" />
-                    YouTube Live Class Manager
-                  </CardTitle>
-                  <CardDescription>
-                    Schedule and manage YouTube Live streaming sessions for professional students
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <YouTubeLiveManager />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+        <TabsContent value="videos">
+          <SuperAdminVideoManager />
+        </TabsContent>
 
           <TabsContent value="general">
             <AdminDashboard />
