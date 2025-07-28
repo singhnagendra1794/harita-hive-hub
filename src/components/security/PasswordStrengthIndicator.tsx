@@ -1,8 +1,8 @@
-import React from 'react';
-import { PasswordSecurity } from '@/lib/passwordSecurity';
+import React, { useState, useEffect } from 'react';
+import { PasswordSecurity, PasswordValidationResult } from '@/lib/passwordSecurity';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield, AlertTriangle, Loader2 } from 'lucide-react';
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -13,11 +13,45 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
   password,
   showErrors = true
 }) => {
-  const validation = PasswordSecurity.validatePassword(password);
-  const strength = PasswordSecurity.getStrengthDescription(validation.score);
+  const [validation, setValidation] = useState<PasswordValidationResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  useEffect(() => {
+    if (!password) {
+      setValidation(null);
+      return;
+    }
+    
+    const validatePassword = async () => {
+      setIsLoading(true);
+      try {
+        const result = await PasswordSecurity.validatePassword(password);
+        setValidation(result);
+      } catch (error) {
+        console.error('Password validation error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    validatePassword();
+  }, [password]);
+  
+  const strength = validation ? PasswordSecurity.getStrengthDescription(validation.score) : null;
   const isLikelyLeaked = PasswordSecurity.isLikelyLeaked(password);
 
   if (!password) return null;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Checking password security...
+      </div>
+    );
+  }
+
+  if (!validation) return null;
 
   return (
     <div className="space-y-3">
@@ -25,9 +59,11 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Password Strength</span>
-          <span className={`text-sm font-medium ${strength.color}`}>
-            {strength.text}
-          </span>
+          {strength && (
+            <span className={`text-sm font-medium ${strength.color}`}>
+              {strength.text}
+            </span>
+          )}
         </div>
         <Progress value={validation.score} className="h-2" />
       </div>

@@ -1,13 +1,14 @@
 import { sanitizeInput } from './security';
+import { supabase } from '@/integrations/supabase/client';
 
-interface PasswordValidationResult {
+export interface PasswordValidationResult {
   isValid: boolean;
   errors: string[];
   score: number;
 }
 
 export class PasswordSecurity {
-  private static readonly MIN_LENGTH = 10;
+  private static readonly MIN_LENGTH = 12;
   private static readonly REQUIRED_PATTERNS = [
     { pattern: /[a-z]/, message: 'Must contain at least one lowercase letter' },
     { pattern: /[A-Z]/, message: 'Must contain at least one uppercase letter' },
@@ -21,9 +22,9 @@ export class PasswordSecurity {
   ];
 
   /**
-   * Validate password strength and security
+   * Validate password strength and security with enhanced checks
    */
-  public static validatePassword(password: string): PasswordValidationResult {
+  public static async validatePassword(password: string): Promise<PasswordValidationResult> {
     const errors: string[] = [];
     let score = 0;
 
@@ -58,8 +59,26 @@ export class PasswordSecurity {
       score += 10;
     }
 
+    // Enhanced validation using Supabase function
+    try {
+      const { data, error } = await supabase.rpc('validate_password', { 
+        password_input: password 
+      });
+      
+      if (error) {
+        console.warn('Enhanced password validation unavailable:', error);
+      } else if (data && typeof data === 'object' && 'valid' in data && !data.valid) {
+        const dataObj = data as { valid: boolean; errors: string[] };
+        errors.push(...dataObj.errors);
+        score = Math.max(0, score - 20);
+      }
+    } catch (error) {
+      console.warn('Password validation check failed:', error);
+    }
+
     // Additional scoring for complexity
     if (password.length >= 15) score += 10;
+    if (password.length >= 20) score += 5;
     if (/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 5;
 
     const isValid = errors.length === 0;

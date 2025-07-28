@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Phone, Github, AlertCircle } from 'lucide-react';
 import { validateEmailComplete } from '@/utils/emailValidation';
+import { EnhancedSecureInput } from '@/components/security/EnhancedSecureInput';
+import { PasswordValidationResult } from '@/lib/passwordSecurity';
 
 interface MultiAuthFormProps {
   mode: 'signin' | 'signup';
@@ -30,6 +32,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const [activeTab, setActiveTab] = useState('email');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [emailError, setEmailError] = useState<string>('');
+  const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [userLocation, setUserLocation] = useState<{country?: string; city?: string}>({});
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -427,39 +430,27 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
                   </div>
                 )}
               </div>
-                <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
+                <EnhancedSecureInput
+                  label="Password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={mode === 'signup' ? 8 : 6}
-                  className={mode === 'signup' && passwordErrors.length > 0 ? 'border-destructive' : ''}
+                  validation={{
+                    required: true,
+                    type: 'password',
+                    maxLength: 128
+                  }}
+                  showPasswordStrength={mode === 'signup'}
+                  onSecureChange={(value, isValid, validationResult) => {
+                    setPassword(value);
+                    setPasswordValidation(validationResult || null);
+                  }}
+                  sanitize={false}
                 />
-                {mode === 'signup' && (
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">
-                      Password must contain at least 8 characters, including uppercase, lowercase, number, and special character
-                    </p>
-                    {passwordErrors.length > 0 && (
-                      <div className="space-y-1">
-                        {passwordErrors.map((error, index) => (
-                          <p key={index} className="text-xs text-destructive flex items-center gap-1">
-                            <span>•</span> {error}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || (mode === 'signup' && (passwordErrors.length > 0 || !!emailError))}
+                disabled={loading || (mode === 'signup' && ((passwordValidation && !passwordValidation.isValid) || !!emailError))}
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
               </Button>

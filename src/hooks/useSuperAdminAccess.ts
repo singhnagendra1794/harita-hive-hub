@@ -16,7 +16,7 @@ export const useSuperAdminAccess = () => {
       }
 
       try {
-        const { data, error } = await supabase.rpc('is_super_admin');
+        const { data, error } = await supabase.rpc('is_super_admin_secure');
         if (error) throw error;
         setIsSuperAdmin(data || false);
       } catch (error) {
