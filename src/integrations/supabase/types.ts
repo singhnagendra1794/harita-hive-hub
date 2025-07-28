@@ -8557,6 +8557,10 @@ export type Database = {
         Args: { p_user_id: string; p_new_session_token: string }
         Returns: undefined
       }
+      is_admin_secure: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -8575,6 +8579,10 @@ export type Database = {
       }
       is_super_admin_bypass_rls: {
         Args: { p_user_id: string }
+        Returns: boolean
+      }
+      is_super_admin_secure: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_valid_email_domain: {
