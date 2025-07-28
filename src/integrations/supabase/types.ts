@@ -110,6 +110,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_errors: {
+        Row: {
+          context_data: Json | null
+          created_at: string | null
+          error_message: string
+          error_type: string
+          id: string
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          context_data?: Json | null
+          created_at?: string | null
+          error_message: string
+          error_type: string
+          id?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          context_data?: Json | null
+          created_at?: string | null
+          error_message?: string
+          error_type?: string
+          id?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: []
+      }
       admin_uploads: {
         Row: {
           assigned_page: string
@@ -8958,6 +8991,14 @@ export type Database = {
           p_new_value?: Json
         }
         Returns: undefined
+      }
+      log_admin_error: {
+        Args: {
+          p_error_type: string
+          p_error_message: string
+          p_context_data?: Json
+        }
+        Returns: string
       }
       log_audit_event: {
         Args: {

@@ -129,8 +129,6 @@ const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
           {/* User watermark for premium content */}
           {isPremium && user && (
             <UserWatermark 
-              userId={user.id} 
-              userEmail={user.email || ''}
               className="absolute top-4 right-4 z-10 text-white/70 text-xs"
             />
           )}
