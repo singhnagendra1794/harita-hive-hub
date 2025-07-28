@@ -80,6 +80,51 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_uploads: {
+        Row: {
+          assigned_page: string
+          created_at: string
+          created_by: string
+          description: string | null
+          download_count: number | null
+          file_url: string
+          id: string
+          is_featured: boolean | null
+          metadata: Json | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          assigned_page: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          download_count?: number | null
+          file_url: string
+          id?: string
+          is_featured?: boolean | null
+          metadata?: Json | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          assigned_page?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          download_count?: number | null
+          file_url?: string
+          id?: string
+          is_featured?: boolean | null
+          metadata?: Json | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       ai_portfolio_enhancements: {
         Row: {
           applied: boolean | null

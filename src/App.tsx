@@ -110,6 +110,7 @@ const GeospatialTechnologyUnlocked = lazy(() => import("./pages/courses/Geospati
 const GeospatialFullstackDeveloper = lazy(() => import("./pages/courses/GeospatialFullstackDeveloper"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const AdminUserManagement = lazy(() => import("./pages/AdminUserManagement"));
+const UploadCenter = lazy(() => import("./pages/UploadCenter"));
 const SkillCopilot = lazy(() => import("./pages/SkillCopilot"));
 const SpatialAnalysisLab = lazy(() => import("./pages/SpatialAnalysisLab"));
 const Toolkits = lazy(() => import("./pages/Toolkits"));
