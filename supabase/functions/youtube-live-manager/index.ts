@@ -83,52 +83,97 @@ async function syncUpcomingStreams(supabase: any) {
   if (tokenError || !tokenData?.access_token || tokenData.access_token === 'placeholder_access_token') {
     console.log('No valid YouTube OAuth token found, trying to find live stream directly...')
     
-    // Try to find the actual live stream using YouTube API key
+    // Try to find live streams using YouTube API key
     const apiKey = Deno.env.get('YOUTUBE_API_KEY')
     if (apiKey) {
       try {
-        // Search for live streams with our keywords
-        const searchResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&q=geospatial+technology+unlocked&eventType=live&type=video&key=${apiKey}`
-        )
+        console.log('Searching for live streams with YouTube Data API...')
         
-        if (searchResponse.ok) {
-          const searchData = await searchResponse.json()
-          console.log('YouTube search results:', searchData)
+        // Search for any live broadcasts with multiple search terms
+        const searchQueries = [
+          'gis live',
+          'geospatial live', 
+          'mapping live',
+          'remote sensing live',
+          'qgis live',
+          'arcgis live'
+        ]
+        
+        for (const query of searchQueries) {
+          const searchResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&eventType=live&type=video&key=${apiKey}&maxResults=10`
+          )
           
-          if (searchData.items?.length > 0) {
-            const liveStream = searchData.items[0]
-            console.log('Found live stream:', liveStream.id.videoId)
+          if (searchResponse.ok) {
+            const searchData = await searchResponse.json()
+            console.log(`Search "${query}" found ${searchData.items?.length || 0} live videos`)
             
-            // Create entry for actual live stream
-            await supabase
-              .from('youtube_live_schedule')
-              .upsert({
-                youtube_broadcast_id: liveStream.id.videoId,
-                title: liveStream.snippet.title,
-                description: liveStream.snippet.description?.substring(0, 200),
-                scheduled_start_time: new Date().toISOString(),
-                thumbnail_url: liveStream.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${liveStream.id.videoId}/maxresdefault.jpg`,
-                status: 'live',
-                created_by: superAdminUser?.id || '00000000-0000-0000-0000-000000000000'
-              }, {
-                onConflict: 'youtube_broadcast_id'
-              })
-
-            return new Response(
-              JSON.stringify({ 
-                success: true, 
-                streamsFound: 1,
-                message: `Found live stream: ${liveStream.snippet.title}`,
-                videoId: liveStream.id.videoId
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            )
+            if (searchData.items?.length > 0) {
+              for (const liveVideo of searchData.items) {
+                console.log('Found live video:', liveVideo.snippet.title)
+                
+                // Get detailed video information
+                const videoDetailsResponse = await fetch(
+                  `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails,statistics&id=${liveVideo.id.videoId}&key=${apiKey}`
+                )
+                
+                if (videoDetailsResponse.ok) {
+                  const videoDetails = await videoDetailsResponse.json()
+                  const video = videoDetails.items?.[0]
+                  
+                  if (video && video.liveStreamingDetails) {
+                    console.log('Live stream details retrieved for:', video.snippet.title)
+                    
+                    // Store this stream in our database
+                    const { error: insertError } = await supabase
+                      .from('youtube_live_schedule')
+                      .upsert({
+                        youtube_broadcast_id: video.id,
+                        title: video.snippet.title,
+                        description: video.snippet.description?.substring(0, 200),
+                        thumbnail_url: video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url || `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`,
+                        status: 'live',
+                        scheduled_start_time: video.liveStreamingDetails.scheduledStartTime || new Date().toISOString(),
+                        actual_start_time: video.liveStreamingDetails.actualStartTime || new Date().toISOString(),
+                        actual_end_time: video.liveStreamingDetails.actualEndTime,
+                        created_by: superAdminUser?.id || '00000000-0000-0000-0000-000000000000',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      }, {
+                        onConflict: 'youtube_broadcast_id'
+                      })
+                    
+                    if (insertError) {
+                      console.error('Error storing live stream:', insertError)
+                    } else {
+                      console.log('Successfully stored live stream:', video.snippet.title)
+                      
+                      return new Response(
+                        JSON.stringify({ 
+                          success: true, 
+                          streamsFound: 1,
+                          message: `Found and stored live stream: ${video.snippet.title}`,
+                          videoId: video.id,
+                          youtubeUrl: `https://www.youtube.com/watch?v=${video.id}`
+                        }),
+                        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                      )
+                    }
+                  }
+                }
+              }
+            }
+          } else {
+            console.error(`YouTube search for "${query}" failed:`, await searchResponse.text())
           }
         }
+        
+        console.log('No live streams found with API key search')
       } catch (error) {
         console.error('YouTube API search failed:', error)
       }
+    } else {
+      console.log('No YouTube API key configured')
     }
     
     // Fallback to placeholder if API key search fails

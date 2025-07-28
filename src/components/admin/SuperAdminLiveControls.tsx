@@ -204,18 +204,27 @@ export function SuperAdminLiveControls() {
   const forceSync = async () => {
     try {
       setLoading(true)
+      console.log('Triggering YouTube sync...')
       
-      const { error } = await supabase.functions.invoke('youtube-live-manager', {
-        body: { action: 'manual_refresh' }
+      const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
+        body: { action: 'sync_upcoming_streams' }
       })
       
-      if (error) throw error
+      if (error) {
+        console.error('Sync error:', error)
+        throw error
+      }
       
-      toast.success('YouTube sync completed!')
-      await fetchActiveStream()
+      console.log('Sync response:', response)
+      toast.success(response?.message || 'YouTube sync completed!')
+      
+      // Wait a moment then fetch active stream
+      setTimeout(async () => {
+        await fetchActiveStream()
+      }, 1000)
     } catch (error) {
       console.error('Error syncing:', error)
-      toast.error('Failed to sync with YouTube')
+      toast.error('Failed to sync with YouTube: ' + (error?.message || 'Unknown error'))
     } finally {
       setLoading(false)
     }
