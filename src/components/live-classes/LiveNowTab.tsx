@@ -66,27 +66,11 @@ const LiveNowTab = () => {
     try {
       setLoading(true);
       
-      // Get today's GEOVA lesson for dynamic title/description
-      const today = new Date();
-      const startDate = new Date('2025-07-22'); // Course start date
-      const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const currentDay = Math.max(1, (daysDiff % 30) + 1); // Cycle through 30 days
-      
-      // Fetch today's lesson from GEOVA schedule
-      const { data: scheduleData } = await supabase
-        .from('geova_teaching_schedule')
-        .select('topic_title, topic_description, day_number')
-        .eq('day_number', currentDay)
-        .single();
-      
-      const lessonTitle = scheduleData?.topic_title || `Geospatial Technology Unlocked - Day ${currentDay}`;
-      const lessonDescription = scheduleData?.topic_description || 'Interactive learning session covering essential geospatial concepts and tools';
-      
-      // Dynamic live stream based on current day's lesson
+      // Static live stream using YouTube title and description
       setCurrentStream({
         id: 'current-live-session',
-        title: lessonTitle,
-        description: lessonDescription,
+        title: 'Geospatial Technology Unlocked - Day 1 Intro to Geospatial Tech',
+        description: 'Introduction to Geospatial Technology - Learn the fundamentals of GIS, mapping, and spatial analysis',
         stream_key: 'live-session',
         status: 'live',
         start_time: new Date().toISOString(),
