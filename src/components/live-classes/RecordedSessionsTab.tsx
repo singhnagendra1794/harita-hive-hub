@@ -42,28 +42,25 @@ const RecordedSessionsTab = () => {
     try {
       setLoading(true);
       
-      // Fetch recorded sessions from database
-      const { data: dbRecordings, error } = await supabase
-        .from('live_classes')
-        .select('*')
-        .eq('status', 'ended')
-        .not('recording_url', 'is', null)
-        .order('start_time', { ascending: false })
-        .limit(50);
+      // Static recorded session data
+      const staticRecordings = [
+        {
+          id: '1',
+          title: 'GeoAI Fundamentals - Introduction to Spatial Data Science',
+          description: 'A comprehensive introduction to GeoAI and spatial data science fundamentals.',
+          stream_key: 'geoai-fundamentals',
+          start_time: '2024-07-23T20:00:00Z',
+          end_time: '2024-07-23T21:30:00Z',
+          recording_url: 'https://www.youtube.com/embed/bYKq_fsgYPo?si=7dWVWNRwG8K7z5pB',
+          course_title: 'GeoAI Fundamentals',
+          duration_minutes: 90,
+          viewer_count: 245
+        }
+      ];
 
-      if (error) throw error;
-
-      // Process recordings and add CloudFront recording URLs for sessions without them
-      const processedRecordings = (dbRecordings || []).map(session => ({
-        ...session,
-        recording_url: session.recording_url || 
-                      session.cloudfront_url || 
-                      `https://d3k8h9k5j2l1m9.cloudfront.net/recordings/${session.stream_key}.mp4`
-      }));
-
-      setRecordings(processedRecordings);
+      setRecordings(staticRecordings);
     } catch (error) {
-      console.error('Error fetching recordings:', error);
+      console.error('Error loading recordings:', error);
       toast({
         title: "Loading Error",
         description: "Failed to load recordings. Please try again.",
@@ -106,9 +103,8 @@ const RecordedSessionsTab = () => {
       return;
     }
 
-    // Navigate to watch recording page with proper video URL and title
-    const watchUrl = `/watch-recording?videoUrl=${encodeURIComponent(recording.recording_url!)}&title=${encodeURIComponent(recording.title)}`;
-    window.open(watchUrl, '_blank');
+    // Open YouTube video directly
+    window.open(recording.recording_url!, '_blank');
   };
 
   const formatDate = (dateString: string) => {
@@ -116,6 +112,9 @@ const RecordedSessionsTab = () => {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   };
 
