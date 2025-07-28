@@ -140,19 +140,98 @@ const LiveNowTab = () => {
   }, [currentStream?.id]);
 
   useEffect(() => {
+    const fetchLiveClass = async () => {
+      try {
+        setLoading(true)
+        
+        // First sync with YouTube API
+        const { error: syncError } = await supabase.functions.invoke('youtube-live-manager', {
+          body: { action: 'sync_upcoming_streams' }
+        })
+        
+        if (syncError) {
+          console.error('Error syncing with YouTube:', syncError)
+        }
+        
+        // Then get the active stream
+        const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
+          body: { action: 'get_active_stream' }
+        })
+        
+        if (error) {
+          throw error
+        }
+        
+        if (response?.stream) {
+          setCurrentStream({
+            id: response.stream.id,
+            title: response.stream.title,
+            description: response.stream.description || '',
+            stream_key: response.stream.youtube_stream_key || '',
+            start_time: response.stream.scheduled_start_time,
+            status: response.stream.status as 'scheduled' | 'live',
+            youtube_url: response.stream.youtube_broadcast_id ? 
+              `https://www.youtube-nocookie.com/embed/${response.stream.youtube_broadcast_id}?autoplay=${response.stream.status === 'live' ? 1 : 0}&modestbranding=1&rel=0&disablekb=1&iv_load_policy=3&showinfo=0` : 
+              undefined,
+            thumbnail_url: response.stream.thumbnail_url,
+            viewer_count: 0,
+            is_geova: false,
+            is_free_access: true
+          })
+          
+          // Check if stream is scheduled to start within 10 minutes
+          const startTime = new Date(response.stream.scheduled_start_time)
+          const now = new Date()
+          const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000)
+          
+          // If stream starts within 10 minutes or is live, check status more frequently
+          if (startTime <= tenMinutesFromNow || response.stream.status === 'live') {
+            // Check stream status for real-time updates
+            const { data: statusResponse } = await supabase.functions.invoke('youtube-live-manager', {
+              body: { action: 'check_stream_status', schedule_id: response.stream.id }
+            })
+            
+            if (statusResponse?.live && response.stream.status !== 'live') {
+              // Update local state if stream went live
+              setCurrentStream(prev => prev ? { ...prev, status: 'live' } : null)
+            }
+          }
+        } else {
+          // Fallback to existing logic if no YouTube stream found
+          checkForLiveStreams()
+        }
+      } catch (error) {
+        console.error('Error fetching live class:', error)
+        // Fallback to existing logic
+        checkForLiveStreams()
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (!premiumLoading) {
-      checkForLiveStreams();
+      fetchLiveClass()
     }
     
-    // Auto-refresh every 15 seconds for real-time updates
+    // Dynamic polling: every 15 seconds when stream is imminent/live, every 30 seconds otherwise
+    const getPollingInterval = () => {
+      if (!currentStream) return 30000
+      
+      const startTime = new Date(currentStream.start_time)
+      const now = new Date()
+      const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000)
+      
+      return (startTime <= tenMinutesFromNow || currentStream.status === 'live') ? 15000 : 30000
+    }
+    
     const interval = setInterval(() => {
       if (!premiumLoading) {
-        checkForLiveStreams();
+        fetchLiveClass()
       }
-    }, 15000);
+    }, getPollingInterval())
     
-    return () => clearInterval(interval);
-  }, [premiumLoading]);
+    return () => clearInterval(interval)
+  }, [premiumLoading, currentStream?.status])
 
   // Auto-sync with YouTube API every 2 minutes
   useEffect(() => {

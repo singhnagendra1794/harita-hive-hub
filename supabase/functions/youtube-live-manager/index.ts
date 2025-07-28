@@ -49,6 +49,12 @@ Deno.serve(async (req) => {
         return await endLiveStream(supabase, body)
       case 'manual_refresh':
         return await manualRefresh(supabase)
+      case 'update_stream_details':
+        return await updateStreamDetails(supabase, body)
+      case 'override_stream':
+        return await overrideStream(supabase, body)
+      case 'check_stream_status':
+        return await checkStreamStatus(supabase, body)
       default:
         throw new Error(`Unknown action: ${action}`)
     }
@@ -180,7 +186,7 @@ async function getActiveStream(supabase: any) {
 }
 
 async function createLiveStream(supabase: any, body: any) {
-  const { title, description, scheduled_start_time } = body
+  const { title, description, scheduled_start_time, privacy_status = 'unlisted' } = body
 
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
@@ -193,38 +199,9 @@ async function createLiveStream(supabase: any, body: any) {
     throw new Error('YouTube OAuth not configured')
   }
 
-  // Create YouTube Live Broadcast
-  const broadcastResponse = await fetch(
-    'https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status',
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        snippet: {
-          title,
-          description,
-          scheduledStartTime: scheduled_start_time,
-        },
-        status: {
-          privacyStatus: 'public',
-          lifeCycleStatus: 'ready',
-        },
-      }),
-    }
-  )
-
-  if (!broadcastResponse.ok) {
-    throw new Error(`Failed to create YouTube broadcast: ${broadcastResponse.statusText}`)
-  }
-
-  const broadcast = await broadcastResponse.json()
-
-  // Create YouTube Live Stream
+  // Create YouTube Live Stream with Ultra Low Latency
   const streamResponse = await fetch(
-    'https://www.googleapis.com/youtube/v3/liveStreams?part=snippet,cdn',
+    'https://www.googleapis.com/youtube/v3/liveStreams?part=snippet,cdn,status',
     {
       method: 'POST',
       headers: {
@@ -238,6 +215,11 @@ async function createLiveStream(supabase: any, body: any) {
         cdn: {
           format: '1080p',
           ingestionType: 'rtmp',
+          frameRate: 'variable',
+          resolution: 'variable',
+        },
+        status: {
+          streamStatus: 'active',
         },
       }),
     }
@@ -249,9 +231,47 @@ async function createLiveStream(supabase: any, body: any) {
 
   const stream = await streamResponse.json()
 
+  // Create YouTube Live Broadcast with Ultra Low Latency
+  const broadcastResponse = await fetch(
+    'https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        snippet: {
+          title,
+          description,
+          scheduledStartTime: scheduled_start_time,
+        },
+        status: {
+          privacyStatus: privacy_status,
+          lifeCycleStatus: 'ready',
+          selfDeclaredMadeForKids: false,
+        },
+        contentDetails: {
+          enableDvr: true,
+          enableContentEncryption: false,
+          enableEmbed: true,
+          recordFromStart: true,
+          startWithSlate: false,
+          latencyPreference: 'ultraLow',
+        },
+      }),
+    }
+  )
+
+  if (!broadcastResponse.ok) {
+    throw new Error(`Failed to create YouTube broadcast: ${broadcastResponse.statusText}`)
+  }
+
+  const broadcast = await broadcastResponse.json()
+
   // Bind broadcast to stream
-  await fetch(
-    `https://www.googleapis.com/youtube/v3/liveBroadcasts/bind?id=${broadcast.id}&streamId=${stream.id}&part=id`,
+  const bindResponse = await fetch(
+    `https://www.googleapis.com/youtube/v3/liveBroadcasts/bind?id=${broadcast.id}&streamId=${stream.id}&part=id,status`,
     {
       method: 'POST',
       headers: {
@@ -259,6 +279,10 @@ async function createLiveStream(supabase: any, body: any) {
       },
     }
   )
+
+  if (!bindResponse.ok) {
+    throw new Error(`Failed to bind stream to broadcast: ${bindResponse.statusText}`)
+  }
 
   // Save to database
   const { error: dbError } = await supabase
@@ -273,6 +297,7 @@ async function createLiveStream(supabase: any, body: any) {
       rtmp_url: stream.cdn.ingestionInfo.ingestionAddress,
       stream_key: stream.cdn.ingestionInfo.streamName,
       created_by: 'admin',
+      thumbnail_url: `https://img.youtube.com/vi/${broadcast.id}/maxresdefault.jpg`,
     })
 
   if (dbError) throw dbError
@@ -283,6 +308,7 @@ async function createLiveStream(supabase: any, body: any) {
       broadcast_id: broadcast.id,
       stream_key: stream.cdn.ingestionInfo.streamName,
       rtmp_url: stream.cdn.ingestionInfo.ingestionAddress,
+      message: 'Ultra Low Latency stream created successfully'
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
@@ -445,6 +471,216 @@ async function refreshAccessToken(supabase: any, refreshToken: string) {
   }
 }
 
+async function updateStreamDetails(supabase: any, body: any) {
+  const { schedule_id, title, description, scheduled_start_time } = body
+
+  // Get stream details
+  const { data: stream, error } = await supabase
+    .from('youtube_live_schedule')
+    .select('*')
+    .eq('id', schedule_id)
+    .single()
+
+  if (error || !stream) throw new Error('Stream not found')
+
+  // Get YouTube OAuth token
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token')
+    .eq('user_id', 'admin')
+    .single()
+
+  if (tokenError || !tokenData?.access_token) {
+    throw new Error('YouTube OAuth not configured')
+  }
+
+  // Update YouTube broadcast
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet&id=${stream.youtube_broadcast_id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: stream.youtube_broadcast_id,
+        snippet: {
+          title,
+          description,
+          scheduledStartTime: scheduled_start_time,
+          categoryId: '27', // Education category
+        },
+      }),
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(`Failed to update YouTube broadcast: ${response.statusText}`)
+  }
+
+  // Update database
+  await supabase
+    .from('youtube_live_schedule')
+    .update({
+      title,
+      description,
+      scheduled_start_time,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', schedule_id)
+
+  return new Response(
+    JSON.stringify({ success: true, message: 'Stream details updated successfully' }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+}
+
+async function overrideStream(supabase: any, body: any) {
+  const { youtube_video_id, title, description } = body
+
+  // Verify the YouTube video exists and get details
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token')
+    .eq('user_id', 'admin')
+    .single()
+
+  if (tokenError || !tokenData?.access_token) {
+    throw new Error('YouTube OAuth not configured')
+  }
+
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${youtube_video_id}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+      },
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch YouTube video details')
+  }
+
+  const data = await response.json()
+  const video = data.items?.[0]
+
+  if (!video) {
+    throw new Error('YouTube video not found')
+  }
+
+  // Override current active stream
+  await supabase
+    .from('youtube_live_schedule')
+    .update({ status: 'overridden' })
+    .in('status', ['scheduled', 'live'])
+    .ilike('title', '%geospatial technology unlocked%')
+
+  // Create new override entry
+  const { error: dbError } = await supabase
+    .from('youtube_live_schedule')
+    .insert({
+      youtube_broadcast_id: youtube_video_id,
+      title: title || video.snippet.title,
+      description: description || video.snippet.description?.substring(0, 200),
+      scheduled_start_time: video.liveStreamingDetails?.scheduledStartTime || new Date().toISOString(),
+      thumbnail_url: video.snippet.thumbnails?.high?.url,
+      status: 'live',
+      created_by: 'admin',
+      is_override: true,
+    })
+
+  if (dbError) throw dbError
+
+  return new Response(
+    JSON.stringify({ success: true, message: 'Stream override successful' }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+}
+
+async function checkStreamStatus(supabase: any, body: any) {
+  const { schedule_id } = body
+
+  // Get stream details
+  const { data: stream, error } = await supabase
+    .from('youtube_live_schedule')
+    .select('*')
+    .eq('id', schedule_id)
+    .single()
+
+  if (error || !stream) throw new Error('Stream not found')
+
+  // Get YouTube OAuth token
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token')
+    .eq('user_id', 'admin')
+    .single()
+
+  if (tokenError || !tokenData?.access_token) {
+    return new Response(
+      JSON.stringify({ success: true, status: stream.status, live: false }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Check YouTube Live status
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=status&id=${stream.youtube_broadcast_id}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+      },
+    }
+  )
+
+  if (!response.ok) {
+    return new Response(
+      JSON.stringify({ success: true, status: stream.status, live: false }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  const data = await response.json()
+  const broadcast = data.items?.[0]
+  const isLive = broadcast?.status?.lifeCycleStatus === 'live'
+
+  // Update database if status changed
+  if (isLive && stream.status !== 'live') {
+    await supabase
+      .from('youtube_live_schedule')
+      .update({
+        status: 'live',
+        actual_start_time: new Date().toISOString(),
+      })
+      .eq('id', schedule_id)
+  } else if (!isLive && stream.status === 'live') {
+    await supabase
+      .from('youtube_live_schedule')
+      .update({
+        status: 'ended',
+        actual_end_time: new Date().toISOString(),
+      })
+      .eq('id', schedule_id)
+
+    // Check for recording after stream ends
+    setTimeout(async () => {
+      await checkForRecording(supabase, stream, tokenData.access_token)
+    }, 120000)
+  }
+
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      status: isLive ? 'live' : stream.status,
+      live: isLive,
+      lifecycle_status: broadcast?.status?.lifeCycleStatus 
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+}
+
 async function checkForRecording(supabase: any, stream: any, accessToken: string) {
   try {
     console.log(`Checking for recording: ${stream.youtube_broadcast_id}`)
@@ -473,7 +709,7 @@ async function checkForRecording(supabase: any, stream: any, accessToken: string
         })
         .eq('id', stream.id)
 
-      // Add to class recordings
+      // Add to class recordings with unlisted privacy for Professional Plan only
       await supabase
         .from('class_recordings')
         .insert({
@@ -481,7 +717,7 @@ async function checkForRecording(supabase: any, stream: any, accessToken: string
           description: video.snippet?.description || stream.description,
           youtube_url: `https://www.youtube.com/watch?v=${stream.youtube_broadcast_id}`,
           thumbnail_url: video.snippet?.thumbnails?.high?.url || stream.thumbnail_url,
-          is_public: true,
+          is_public: false, // Keep unlisted but embedded for Professional Plan
           created_by: 'admin',
         })
         
