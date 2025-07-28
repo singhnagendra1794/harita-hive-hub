@@ -16,9 +16,16 @@ export const useSuperAdminAccess = () => {
       }
 
       try {
+        // Add a small delay to ensure user is fully loaded
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const { data, error } = await supabase.rpc('is_super_admin_secure');
-        if (error) throw error;
-        setIsSuperAdmin(data || false);
+        if (error) {
+          console.error('RPC error:', error);
+          throw error;
+        }
+        console.log('Super admin check result:', data);
+        setIsSuperAdmin(data === true);
       } catch (error) {
         console.error('Error checking super admin access:', error);
         setIsSuperAdmin(false);
