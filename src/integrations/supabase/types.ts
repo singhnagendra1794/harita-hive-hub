@@ -3565,6 +3565,8 @@ export type Database = {
           course_title: string | null
           created_at: string
           created_by: string
+          custom_day_label: string | null
+          day_number: number | null
           description: string | null
           duration_minutes: number | null
           end_time: string | null
@@ -3572,6 +3574,7 @@ export type Database = {
           hls_manifest_url: string | null
           id: string
           is_ai_generated: boolean | null
+          is_free_access: boolean | null
           recording_s3_key: string | null
           recording_url: string | null
           rtmp_endpoint: string | null
@@ -3591,6 +3594,8 @@ export type Database = {
           course_title?: string | null
           created_at?: string
           created_by: string
+          custom_day_label?: string | null
+          day_number?: number | null
           description?: string | null
           duration_minutes?: number | null
           end_time?: string | null
@@ -3598,6 +3603,7 @@ export type Database = {
           hls_manifest_url?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_free_access?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
@@ -3617,6 +3623,8 @@ export type Database = {
           course_title?: string | null
           created_at?: string
           created_by?: string
+          custom_day_label?: string | null
+          day_number?: number | null
           description?: string | null
           duration_minutes?: number | null
           end_time?: string | null
@@ -3624,6 +3632,7 @@ export type Database = {
           hls_manifest_url?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_free_access?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null

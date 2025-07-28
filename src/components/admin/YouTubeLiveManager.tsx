@@ -5,8 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Youtube, Save, Plus, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Clock, Youtube, Save, Plus, Pencil, Trash2, Unlock, Lock } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -33,7 +34,10 @@ const YouTubeLiveManager = () => {
     description: '',
     start_time: '',
     duration_minutes: 90,
-    youtube_url: ''
+    youtube_url: '',
+    is_free_access: false,
+    day_number: null as number | null,
+    custom_day_label: ''
   });
 
   useEffect(() => {
@@ -100,7 +104,10 @@ const YouTubeLiveManager = () => {
         description: '',
         start_time: '',
         duration_minutes: 90,
-        youtube_url: ''
+        youtube_url: '',
+        is_free_access: false,
+        day_number: null,
+        custom_day_label: ''
       });
       setEditingClass(null);
       fetchLiveClasses();
@@ -117,7 +124,10 @@ const YouTubeLiveManager = () => {
       description: liveClass.description || '',
       start_time: new Date(liveClass.start_time).toISOString().slice(0, 16),
       duration_minutes: liveClass.duration_minutes || 90,
-      youtube_url: liveClass.youtube_url || ''
+      youtube_url: liveClass.youtube_url || '',
+      is_free_access: (liveClass as any).is_free_access || false,
+      day_number: (liveClass as any).day_number || null,
+      custom_day_label: (liveClass as any).custom_day_label || ''
     });
   };
 
@@ -145,7 +155,10 @@ const YouTubeLiveManager = () => {
       description: '',
       start_time: '',
       duration_minutes: 90,
-      youtube_url: ''
+      youtube_url: '',
+      is_free_access: false,
+      day_number: null,
+      custom_day_label: ''
     });
     setEditingClass(null);
   };
@@ -213,7 +226,7 @@ const YouTubeLiveManager = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="duration">Duration (minutes)</Label>
                 <Input
@@ -228,14 +241,35 @@ const YouTubeLiveManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="youtube_url">YouTube Live Embed URL</Label>
+                <Label htmlFor="day_number">Day Number</Label>
                 <Input
-                  id="youtube_url"
-                  value={formData.youtube_url}
-                  onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                  placeholder="https://www.youtube.com/embed/VIDEO_ID?autoplay=1&modestbranding=1&controls=1"
+                  id="day_number"
+                  type="number"
+                  value={formData.day_number || ''}
+                  onChange={(e) => setFormData({ ...formData, day_number: e.target.value ? parseInt(e.target.value) : null })}
+                  placeholder="e.g., 1, 2, 3..."
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="custom_day_label">Custom Day Label</Label>
+                <Input
+                  id="custom_day_label"
+                  value={formData.custom_day_label}
+                  onChange={(e) => setFormData({ ...formData, custom_day_label: e.target.value })}
+                  placeholder="e.g., Day -1, Day 1, Week 1"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="youtube_url">YouTube Live Embed URL</Label>
+              <Input
+                id="youtube_url"
+                value={formData.youtube_url}
+                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                placeholder="https://www.youtube.com/embed/VIDEO_ID?autoplay=1&modestbranding=1&controls=1"
+              />
             </div>
 
             <div className="space-y-2">
@@ -247,6 +281,18 @@ const YouTubeLiveManager = () => {
                 placeholder="Describe what will be covered in this live class..."
                 rows={3}
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_free_access"
+                checked={formData.is_free_access}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_free_access: !!checked })}
+              />
+              <Label htmlFor="is_free_access" className="flex items-center gap-2">
+                {formData.is_free_access ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                Free Access (No enrollment required)
+              </Label>
             </div>
 
             <div className="flex gap-2">
@@ -289,6 +335,17 @@ const YouTubeLiveManager = () => {
                           <Badge variant="outline" className="text-red-600">
                             <Youtube className="h-3 w-3 mr-1" />
                             YouTube Live
+                          </Badge>
+                        )}
+                        {(liveClass as any).is_free_access && (
+                          <Badge variant="outline" className="text-green-600">
+                            <Unlock className="h-3 w-3 mr-1" />
+                            Free Access
+                          </Badge>
+                        )}
+                        {(liveClass as any).custom_day_label && (
+                          <Badge variant="secondary">
+                            {(liveClass as any).custom_day_label}
                           </Badge>
                         )}
                       </div>
