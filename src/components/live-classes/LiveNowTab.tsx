@@ -7,6 +7,7 @@ import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock } from "lucide-react";
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 import { ScreenProtection } from '@/components/security/ScreenProtection';
 import { UserWatermark } from '@/components/security/UserWatermark';
+import SecureYouTubePlayer from '@/components/youtube/SecureYouTubePlayer';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -27,6 +28,8 @@ interface LiveStream {
   is_free_access?: boolean;
   day_number?: number;
   custom_day_label?: string;
+  is_youtube_session?: boolean;
+  access_tier?: 'free' | 'professional' | 'enterprise';
 }
 
 interface GEOVASession {
@@ -191,8 +194,41 @@ const LiveNowTab = () => {
         return;
       }
 
-      console.log('No live streams currently active');
+      console.log('No OBS live streams currently active, checking YouTube sessions...');
       
+      // Check for active YouTube live sessions
+      const { data: youtubeSessions, error: youtubeError } = await supabase
+        .from('youtube_sessions')
+        .select('*')
+        .eq('session_type', 'live')
+        .eq('status', 'live')
+        .eq('is_active', true)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      if (youtubeSessions && youtubeSessions.length > 0) {
+        const session = youtubeSessions[0];
+        console.log('Found active YouTube session:', session);
+        
+        setCurrentStream({
+          id: session.id,
+          title: session.title,
+          description: session.description,
+          stream_key: session.id,
+          status: 'live' as const,
+          start_time: session.started_at || session.created_at,
+          youtube_url: session.youtube_embed_url,
+          viewer_count: 0,
+          is_geova: false,
+          is_free_access: session.access_tier === 'free',
+          is_youtube_session: true,
+          access_tier: session.access_tier as 'free' | 'professional' | 'enterprise'
+        });
+        setPlayerError(null);
+        setLoading(false);
+        return;
+      }
+
       // No live streams found - show no stream message
       setCurrentStream(null);
       setPlayerError(null);
@@ -467,6 +503,13 @@ const LiveNowTab = () => {
                       </Button>
                     </div>
                   </div>
+                ) : currentStream.is_youtube_session && currentStream.youtube_url ? (
+                  <SecureYouTubePlayer
+                    embedUrl={currentStream.youtube_url}
+                    title={currentStream.title}
+                    description={currentStream.description}
+                    accessTier={currentStream.access_tier || 'professional'}
+                  />
                 ) : currentStream.youtube_url ? (
                   <iframe
                     width="100%"

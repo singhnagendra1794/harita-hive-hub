@@ -8583,6 +8583,10 @@ export type Database = {
           tax_rate: number
         }[]
       }
+      get_secure_embed_url: {
+        Args: { p_youtube_url: string }
+        Returns: string
+      }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
@@ -8747,6 +8751,10 @@ export type Database = {
         Args: { p_event_type: string; p_details?: Json; p_user_id?: string }
         Returns: undefined
       }
+      move_live_to_recording: {
+        Args: { p_session_id: string }
+        Returns: undefined
+      }
       reset_monthly_points: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -8820,6 +8828,10 @@ export type Database = {
       }
       update_geova_student_progress: {
         Args: { p_user_id: string; p_day_number: number }
+        Returns: undefined
+      }
+      update_session_order: {
+        Args: { p_session_id: string; p_new_order: number }
         Returns: undefined
       }
       update_stream_status: {

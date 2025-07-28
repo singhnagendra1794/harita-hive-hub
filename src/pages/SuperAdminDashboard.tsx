@@ -4,10 +4,11 @@ import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { SuperAdminUserManagement } from '@/components/admin/SuperAdminUserManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Users, AlertTriangle, TestTube2 } from 'lucide-react';
+import { Shield, Users, AlertTriangle, TestTube2, Video } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/Layout';
 import QATestResults from '@/components/admin/QATestResults';
+import YouTubeSessionManager from '@/components/admin/YouTubeSessionManager';
 
 const SuperAdminDashboard = () => {
   const { isSuperAdmin, loading } = useSuperAdminAccess();
@@ -128,10 +129,14 @@ const SuperAdminDashboard = () => {
 
         {/* Tabs for Different Admin Functions */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
+            </TabsTrigger>
+            <TabsTrigger value="youtube" className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              YouTube Manager
             </TabsTrigger>
             <TabsTrigger value="qa" className="flex items-center gap-2">
               <TestTube2 className="h-4 w-4" />
@@ -140,6 +145,9 @@ const SuperAdminDashboard = () => {
           </TabsList>
           <TabsContent value="users" className="space-y-4">
             <SuperAdminUserManagement />
+          </TabsContent>
+          <TabsContent value="youtube" className="space-y-4">
+            <YouTubeSessionManager />
           </TabsContent>
           <TabsContent value="qa" className="space-y-4">
             <QATestResults />
