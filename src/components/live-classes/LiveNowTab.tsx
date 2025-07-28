@@ -35,6 +35,29 @@ interface GEOVASession {
   todaySchedule?: any;
 }
 
+// Helper functions for viewer count management
+const incrementViewerCount = async (streamId: string) => {
+  try {
+    const { error } = await supabase.rpc('increment_viewer_count', { 
+      stream_id: streamId 
+    });
+    if (error) console.error('Error incrementing viewer count:', error);
+  } catch (error) {
+    console.error('Error incrementing viewer count:', error);
+  }
+};
+
+const decrementViewerCount = async (streamId: string) => {
+  try {
+    const { error } = await supabase.rpc('decrement_viewer_count', { 
+      stream_id: streamId 
+    });
+    if (error) console.error('Error decrementing viewer count:', error);
+  } catch (error) {
+    console.error('Error decrementing viewer count:', error);
+  }
+};
+
 const LiveNowTab = () => {
   const { user } = useAuth();
   const { hasAccess, loading: premiumLoading } = usePremiumAccess();
@@ -46,6 +69,69 @@ const LiveNowTab = () => {
   const [hasEnrollment, setHasEnrollment] = useState(false);
   const [timeUntilStart, setTimeUntilStart] = useState<number | null>(null);
   const [countdownText, setCountdownText] = useState<string>('');
+  const [isViewing, setIsViewing] = useState(false);
+
+  // Track when user starts/stops viewing
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isViewing && currentStream) {
+        decrementViewerCount(currentStream.id);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (currentStream) {
+        if (document.hidden && isViewing) {
+          decrementViewerCount(currentStream.id);
+          setIsViewing(false);
+        } else if (!document.hidden && !isViewing) {
+          incrementViewerCount(currentStream.id);
+          setIsViewing(true);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (isViewing && currentStream) {
+        decrementViewerCount(currentStream.id);
+      }
+    };
+  }, [isViewing, currentStream]);
+
+  // Real-time viewer count updates
+  useEffect(() => {
+    if (!currentStream) return;
+
+    const channel = supabase
+      .channel('viewer-count-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'live_classes',
+          filter: `id=eq.${currentStream.id}`
+        },
+        (payload) => {
+          if (payload.new.viewer_count !== undefined) {
+            setCurrentStream(prev => prev ? {
+              ...prev,
+              viewer_count: payload.new.viewer_count
+            } : null);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentStream?.id]);
 
   useEffect(() => {
     if (!premiumLoading) {
