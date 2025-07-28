@@ -163,8 +163,9 @@ export function SuperAdminLiveControls() {
     }
   }
 
-  const overrideStream = async () => {
-    if (!overrideId.trim()) {
+  const overrideStream = async (videoId?: string) => {
+    const targetVideoId = videoId || overrideId.trim()
+    if (!targetVideoId) {
       toast.error('Please enter a YouTube video ID')
       return
     }
@@ -175,7 +176,7 @@ export function SuperAdminLiveControls() {
       const { error } = await supabase.functions.invoke('youtube-live-manager', {
         body: {
           action: 'override_stream',
-          youtube_video_id: overrideId.trim()
+          youtube_video_id: targetVideoId
         }
       })
       
@@ -191,6 +192,14 @@ export function SuperAdminLiveControls() {
       setLoading(false)
     }
   }
+
+  // Auto-override with the new video ID
+  React.useEffect(() => {
+    const autoOverride = async () => {
+      await overrideStream('eE9MxOxLn80')
+    }
+    autoOverride()
+  }, [])
 
   const forceSync = async () => {
     try {
@@ -335,7 +344,7 @@ export function SuperAdminLiveControls() {
               onChange={(e) => setOverrideId(e.target.value)}
               placeholder="YouTube Video ID (e.g., dQw4w9WgXcQ)"
             />
-            <Button onClick={overrideStream} disabled={loading}>
+            <Button onClick={() => overrideStream()} disabled={loading}>
               <Link className="h-4 w-4 mr-2" />
               Override
             </Button>
