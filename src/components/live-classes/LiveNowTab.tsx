@@ -66,16 +66,21 @@ const LiveNowTab = () => {
     try {
       setLoading(true);
       
+      console.log('Checking for live streams...');
+      
       // Check for active OBS live stream first
-      const { data: activeStreams } = await supabase
+      const { data: activeStreams, error: streamsError } = await supabase
         .from('live_classes')
         .select('*')
         .eq('status', 'live')
         .order('start_time', { ascending: false })
         .limit(1);
 
+      console.log('Active streams from DB:', activeStreams, 'Error:', streamsError);
+
       if (activeStreams && activeStreams.length > 0) {
         const stream = activeStreams[0];
+        console.log('Found active stream:', stream);
         setCurrentStream({
           id: stream.id,
           title: stream.title,
@@ -88,10 +93,13 @@ const LiveNowTab = () => {
           is_geova: stream.is_ai_generated || false,
           is_free_access: true // Default to free access for OBS streams
         });
+        setPlayerError(null);
         setLoading(false);
         return;
       }
 
+      console.log('No active OBS streams found, using YouTube fallback');
+      
       // Fallback to default YouTube stream if no OBS stream active
       setCurrentStream({
         id: 'current-live-session',
@@ -100,11 +108,12 @@ const LiveNowTab = () => {
         stream_key: 'live-session',
         status: 'live',
         start_time: new Date().toISOString(),
-        youtube_url: 'https://www.youtube.com/embed/v7NtlDXzki8?si=8dX6B8WjZQhQkOaI',
+        youtube_url: 'https://www.youtube.com/embed/v7NtlDXzki8?si=8dX6B8WjZQhQkOaI&autoplay=1&mute=1',
         viewer_count: Math.floor(Math.random() * 100) + 50,
         is_geova: true,
         is_free_access: true
       });
+      setPlayerError(null);
       setLoading(false);
       return;
       
