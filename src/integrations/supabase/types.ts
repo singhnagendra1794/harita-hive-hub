@@ -4421,6 +4421,42 @@ export type Database = {
         }
         Relationships: []
       }
+      obs_configurations: {
+        Row: {
+          created_at: string
+          default_scene: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          recording_settings: Json | null
+          updated_at: string
+          websocket_password: string | null
+          websocket_url: string
+        }
+        Insert: {
+          created_at?: string
+          default_scene?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          recording_settings?: Json | null
+          updated_at?: string
+          websocket_password?: string | null
+          websocket_url?: string
+        }
+        Update: {
+          created_at?: string
+          default_scene?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          recording_settings?: Json | null
+          updated_at?: string
+          websocket_password?: string | null
+          websocket_url?: string
+        }
+        Relationships: []
+      }
       payment_proofs: {
         Row: {
           admin_notes: string | null
@@ -8352,6 +8388,119 @@ export type Database = {
           start_date?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      youtube_api_operations: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          operation_type: string
+          schedule_id: string | null
+          success: boolean
+          youtube_response: Json | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          operation_type: string
+          schedule_id?: string | null
+          success: boolean
+          youtube_response?: Json | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          operation_type?: string
+          schedule_id?: string | null
+          success?: boolean
+          youtube_response?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_api_operations_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "youtube_live_schedule"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      youtube_live_schedule: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          obs_auto_start: boolean | null
+          obs_configured: boolean | null
+          obs_scene_name: string | null
+          privacy_status: string
+          recording_url: string | null
+          recording_youtube_id: string | null
+          scheduled_end_time: string | null
+          scheduled_start_time: string
+          status: string
+          stream_key: string | null
+          stream_url: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          youtube_broadcast_id: string | null
+          youtube_stream_id: string | null
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          obs_auto_start?: boolean | null
+          obs_configured?: boolean | null
+          obs_scene_name?: string | null
+          privacy_status?: string
+          recording_url?: string | null
+          recording_youtube_id?: string | null
+          scheduled_end_time?: string | null
+          scheduled_start_time: string
+          status?: string
+          stream_key?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          youtube_broadcast_id?: string | null
+          youtube_stream_id?: string | null
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          obs_auto_start?: boolean | null
+          obs_configured?: boolean | null
+          obs_scene_name?: string | null
+          privacy_status?: string
+          recording_url?: string | null
+          recording_youtube_id?: string | null
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string
+          status?: string
+          stream_key?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          youtube_broadcast_id?: string | null
+          youtube_stream_id?: string | null
         }
         Relationships: []
       }
