@@ -8604,6 +8604,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      bulk_assign_professional_and_enroll_updated: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       can_download_premium_plugin: {
         Args: { p_user_id: string; p_tool_id: string }
         Returns: boolean
@@ -8839,7 +8843,7 @@ export type Database = {
         Returns: boolean
       }
       is_professional_email: {
-        Args: { email_input: string }
+        Args: { p_email: string }
         Returns: boolean
       }
       is_session_valid: {
