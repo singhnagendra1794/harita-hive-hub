@@ -196,7 +196,7 @@ export function SuperAdminLiveControls() {
   // Auto-override with the new video ID
   React.useEffect(() => {
     const autoOverride = async () => {
-      await overrideStream('eE9MxOxLn80')
+      await overrideStream('94NaFHNEi9k')
     }
     autoOverride()
   }, [])
