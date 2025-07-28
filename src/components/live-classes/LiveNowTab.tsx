@@ -66,6 +66,22 @@ const LiveNowTab = () => {
     try {
       setLoading(true);
       
+      // Static live stream - your current live session
+      setCurrentStream({
+        id: 'current-live-session',
+        title: 'Live GeoAI Session - Interactive Learning',
+        description: 'Join our live interactive GeoAI learning session with expert instructors',
+        stream_key: 'live-session',
+        status: 'live',
+        start_time: new Date().toISOString(),
+        youtube_url: 'https://www.youtube.com/embed/gIIceNdMWnc?si=PuD8uLV-vjarEIo9',
+        viewer_count: Math.floor(Math.random() * 100) + 50,
+        is_geova: false,
+        is_free_access: true
+      });
+      setLoading(false);
+      return;
+      
       // Check GEOVA AI session
       const { data: geovaData } = await supabase.functions.invoke('geova-session-manager', {
         body: { action: 'status' }
