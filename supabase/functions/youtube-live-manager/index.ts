@@ -68,11 +68,13 @@ Deno.serve(async (req) => {
 })
 
 async function createLiveStream(supabase: any, payload: any) {
-  const { title, description, scheduledTime, thumbnailUrl, userId } = payload
+  const { title, description, scheduledTime, thumbnailUrl, userId, accessToken } = payload
   const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
+  const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID')
+  const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET')
 
-  if (!YOUTUBE_API_KEY) {
-    throw new Error('YouTube API key not configured')
+  if (!YOUTUBE_API_KEY || !accessToken) {
+    throw new Error('YouTube API key and access token required')
   }
 
   // Convert IST to UTC
@@ -85,7 +87,7 @@ async function createLiveStream(supabase: any, payload: any) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${YOUTUBE_API_KEY}`, // Note: This should be OAuth token, not API key
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         snippet: {
@@ -116,7 +118,7 @@ async function createLiveStream(supabase: any, payload: any) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${YOUTUBE_API_KEY}`,
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         snippet: {
@@ -144,7 +146,7 @@ async function createLiveStream(supabase: any, payload: any) {
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${YOUTUBE_API_KEY}`,
+        'Authorization': `Bearer ${accessToken}`,
       },
     }
   )
