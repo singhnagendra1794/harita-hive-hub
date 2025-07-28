@@ -3724,6 +3724,7 @@ export type Database = {
       }
       live_classes: {
         Row: {
+          access_tier: string | null
           actual_end_time: string | null
           actual_start_time: string | null
           auto_start: boolean | null
@@ -3737,16 +3738,19 @@ export type Database = {
           day_number: number | null
           description: string | null
           duration_minutes: number | null
+          embed_url: string | null
           end_time: string | null
           geova_session_data: Json | null
           hls_manifest_url: string | null
           id: string
+          instructor: string | null
           is_ai_generated: boolean | null
           is_free_access: boolean | null
           recording_s3_key: string | null
           recording_url: string | null
           rtmp_endpoint: string | null
           start_time: string | null
+          starts_at: string | null
           status: Database["public"]["Enums"]["stream_status"]
           stream_key: string
           thumbnail_url: string | null
@@ -3759,6 +3763,7 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
+          access_tier?: string | null
           actual_end_time?: string | null
           actual_start_time?: string | null
           auto_start?: boolean | null
@@ -3772,16 +3777,19 @@ export type Database = {
           day_number?: number | null
           description?: string | null
           duration_minutes?: number | null
+          embed_url?: string | null
           end_time?: string | null
           geova_session_data?: Json | null
           hls_manifest_url?: string | null
           id?: string
+          instructor?: string | null
           is_ai_generated?: boolean | null
           is_free_access?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
           start_time?: string | null
+          starts_at?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key: string
           thumbnail_url?: string | null
@@ -3794,6 +3802,7 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
+          access_tier?: string | null
           actual_end_time?: string | null
           actual_start_time?: string | null
           auto_start?: boolean | null
@@ -3807,16 +3816,19 @@ export type Database = {
           day_number?: number | null
           description?: string | null
           duration_minutes?: number | null
+          embed_url?: string | null
           end_time?: string | null
           geova_session_data?: Json | null
           hls_manifest_url?: string | null
           id?: string
+          instructor?: string | null
           is_ai_generated?: boolean | null
           is_free_access?: boolean | null
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
           start_time?: string | null
+          starts_at?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
           stream_key?: string
           thumbnail_url?: string | null
