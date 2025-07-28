@@ -5,6 +5,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CreatorConsole } from '@/components/admin/CreatorConsole';
 import { BetaAnalyticsDashboard } from '@/components/beta/BetaAnalyticsDashboard';
 import { PaymentApprovalDashboard } from '@/components/admin/PaymentApprovalDashboard';
+import YouTubeLiveManager from '@/components/admin/YouTubeLiveManager';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -107,11 +108,11 @@ const AdminDashboardPage = () => {
                     YouTube Live Class Manager
                   </CardTitle>
                   <CardDescription>
-                    Manage YouTube Live streaming sessions for students
+                    Schedule and manage YouTube Live streaming sessions for professional students
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Live class management features have been moved to the new Live Classes page at /live-classes</p>
+                  <YouTubeLiveManager />
                 </CardContent>
               </Card>
             </div>
