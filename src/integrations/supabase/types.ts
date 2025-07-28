@@ -3566,6 +3566,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string | null
+          duration_minutes: number | null
           end_time: string | null
           geova_session_data: Json | null
           hls_manifest_url: string | null
@@ -3581,6 +3582,7 @@ export type Database = {
           title: string
           updated_at: string
           viewer_count: number | null
+          youtube_url: string | null
         }
         Insert: {
           auto_start?: boolean | null
@@ -3590,6 +3592,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string | null
+          duration_minutes?: number | null
           end_time?: string | null
           geova_session_data?: Json | null
           hls_manifest_url?: string | null
@@ -3605,6 +3608,7 @@ export type Database = {
           title: string
           updated_at?: string
           viewer_count?: number | null
+          youtube_url?: string | null
         }
         Update: {
           auto_start?: boolean | null
@@ -3614,6 +3618,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          duration_minutes?: number | null
           end_time?: string | null
           geova_session_data?: Json | null
           hls_manifest_url?: string | null
@@ -3629,6 +3634,7 @@ export type Database = {
           title?: string
           updated_at?: string
           viewer_count?: number | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
