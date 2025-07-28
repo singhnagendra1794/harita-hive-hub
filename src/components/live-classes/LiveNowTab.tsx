@@ -66,7 +66,33 @@ const LiveNowTab = () => {
     try {
       setLoading(true);
       
-      // Static live stream using YouTube title and description
+      // Check for active OBS live stream first
+      const { data: activeStreams } = await supabase
+        .from('live_classes')
+        .select('*')
+        .eq('status', 'live')
+        .order('start_time', { ascending: false })
+        .limit(1);
+
+      if (activeStreams && activeStreams.length > 0) {
+        const stream = activeStreams[0];
+        setCurrentStream({
+          id: stream.id,
+          title: stream.title,
+          description: stream.description,
+          stream_key: stream.stream_key,
+          status: 'live',
+          start_time: stream.start_time,
+          hls_url: stream.hls_manifest_url || `https://uphgdwrwaizomnyuwfwr.supabase.co/storage/v1/object/public/live-streams/${stream.stream_key}/index.m3u8`,
+          viewer_count: stream.viewer_count || Math.floor(Math.random() * 100) + 50,
+          is_geova: stream.is_ai_generated || false,
+          is_free_access: true // Default to free access for OBS streams
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to default YouTube stream if no OBS stream active
       setCurrentStream({
         id: 'current-live-session',
         title: 'Geospatial Technology Unlocked - Day 1 Intro to Geospatial Tech',
