@@ -11,6 +11,7 @@ import SecureYouTubePlayer from '@/components/youtube/SecureYouTubePlayer';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
+import { useLiveClassAccess } from '@/hooks/useLiveClassAccess';
 
 interface LiveStream {
   id: string;
@@ -64,6 +65,7 @@ const decrementViewerCount = async (streamId: string) => {
 const LiveNowTab = () => {
   const { user } = useAuth();
   const { hasAccess, loading: premiumLoading } = usePremiumAccess();
+  const { hasLiveClassAccess, enrollmentCount } = useLiveClassAccess();
   const [currentStream, setCurrentStream] = useState<LiveStream | null>(null);
   const [geovaSession, setGeovaSession] = useState<GEOVASession | null>(null);
   const [loading, setLoading] = useState(true);
@@ -468,39 +470,35 @@ const LiveNowTab = () => {
                       </Button>
                     </div>
                   </div>
-                ) : !currentStream.is_free_access && user && !hasAccess('pro') && !hasEnrollment ? (
-                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
-                    <div className="text-center">
-                      <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg mb-2">Professional Access Required</p>
-                      <p className="text-sm text-gray-400 mb-4">
-                        {currentStream.day_number && currentStream.day_number > 1 ? 
-                          'Access from Day 2 requires enrollment or Professional plan' : 
-                          'Live classes are available for Professional plan users'
-                        }
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.location.href = '/pricing'}
-                      >
-                        Upgrade to Professional
-                      </Button>
-                    </div>
-                  </div>
-                ) : !currentStream.is_free_access && user && !hasEnrollment ? (
+                ) : !currentStream.is_free_access && user && !hasLiveClassAccess ? (
                   <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
                     <div className="text-center">
                       <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg mb-2">Enrollment Required</p>
-                      <p className="text-sm text-gray-400 mb-4">You need to be enrolled in this course to watch</p>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleRefresh}
-                      >
-                        Check Enrollment
-                      </Button>
+                      <p className="text-sm text-gray-400 mb-4">
+                        You need to be enrolled in this course to watch. Professional Plan users are automatically enrolled.
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.location.href = '/pricing'}
+                        >
+                          Upgrade to Professional
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleRefresh}
+                        >
+                          Refresh
+                        </Button>
+                      </div>
+                      {enrollmentCount > 0 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          You have {enrollmentCount} enrollment{enrollmentCount !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : currentStream.is_youtube_session && currentStream.youtube_url ? (

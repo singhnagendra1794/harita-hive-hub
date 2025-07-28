@@ -1,190 +1,203 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useAuth } from '@/contexts/AuthContext';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Youtube, Save, Plus, Pencil, Trash2, Unlock, Lock } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Youtube, 
+  Plus, 
+  Play, 
+  Square, 
+  Trash2, 
+  RefreshCw, 
+  Calendar,
+  Clock,
+  Users,
+  Link
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
-interface LiveClass {
+interface YouTubeLiveStream {
   id: string;
   title: string;
   description?: string;
-  start_time: string;
-  end_time?: string;
-  duration_minutes?: number;
-  youtube_url?: string;
+  scheduled_start_time: string;
   status: 'scheduled' | 'live' | 'ended';
-  stream_key: string;
-  viewer_count: number;
+  youtube_broadcast_id?: string;
+  youtube_stream_key?: string;
+  rtmp_url?: string;
+  ingestion_url?: string;
+  viewer_count?: number;
+  actual_start_time?: string;
+  actual_end_time?: string;
+  recording_available?: boolean;
+  thumbnail_url?: string;
 }
 
-const YouTubeLiveManager = () => {
-  const { user } = useAuth();
-  const [classes, setClasses] = useState<LiveClass[]>([]);
+export const YouTubeLiveManager = () => {
+  const [streams, setStreams] = useState<YouTubeLiveStream[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingClass, setEditingClass] = useState<LiveClass | null>(null);
-  const [formData, setFormData] = useState({
+  const [creating, setCreating] = useState(false);
+  const [newStream, setNewStream] = useState({
     title: '',
     description: '',
-    start_time: '',
-    duration_minutes: 90,
-    youtube_url: '',
-    is_free_access: false,
-    day_number: null as number | null,
-    custom_day_label: ''
+    scheduled_start_time: ''
   });
 
   useEffect(() => {
-    fetchLiveClasses();
+    fetchStreams();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchStreams, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchLiveClasses = async () => {
+  const fetchStreams = async () => {
     try {
       const { data, error } = await supabase
-        .from('live_classes')
+        .from('youtube_live_schedule')
         .select('*')
-        .order('start_time', { ascending: false })
-        .limit(10);
+        .order('scheduled_start_time', { ascending: false })
+        .limit(20);
 
       if (error) throw error;
-      setClasses(data || []);
+      
+      // Map the data to ensure proper types
+      const mappedStreams: YouTubeLiveStream[] = (data || []).map(stream => ({
+        id: stream.id,
+        title: stream.title,
+        description: stream.description,
+        scheduled_start_time: stream.scheduled_start_time,
+        status: stream.status as 'scheduled' | 'live' | 'ended',
+        youtube_broadcast_id: stream.youtube_broadcast_id,
+        youtube_stream_key: stream.youtube_stream_id, // Note: using youtube_stream_id from DB
+        rtmp_url: 'rtmp://a.rtmp.youtube.com/live2',
+        ingestion_url: 'rtmp://a.rtmp.youtube.com/live2',
+        viewer_count: 0, // This would be fetched from YouTube API
+        actual_start_time: stream.actual_start_time,
+        actual_end_time: stream.actual_end_time,
+        recording_available: stream.recording_available,
+        thumbnail_url: stream.thumbnail_url
+      }));
+      
+      setStreams(mappedStreams);
     } catch (error) {
-      console.error('Error fetching live classes:', error);
-      toast.error('Failed to fetch live classes');
+      console.error('Error fetching streams:', error);
+      toast.error('Failed to fetch YouTube streams');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error('User not authenticated');
+  const createLiveStream = async () => {
+    if (!newStream.title || !newStream.scheduled_start_time) {
+      toast.error('Title and scheduled time are required');
       return;
     }
-    
+
+    setCreating(true);
     try {
-      const classData = {
-        ...formData,
-        start_time: new Date(formData.start_time).toISOString(),
-        end_time: formData.start_time ? 
-          new Date(new Date(formData.start_time).getTime() + formData.duration_minutes * 60000).toISOString() : 
-          null,
-        status: 'scheduled' as const,
-        created_by: user.id,
-        stream_key: Math.random().toString(36).substring(2, 18)
-      };
-
-      if (editingClass) {
-        const { error } = await supabase
-          .from('live_classes')
-          .update(classData)
-          .eq('id', editingClass.id);
-
-        if (error) throw error;
-        toast.success('Live class updated successfully!');
-      } else {
-        const { error } = await supabase
-          .from('live_classes')
-          .insert([classData]);
-
-        if (error) throw error;
-        toast.success('Live class created successfully!');
-      }
-
-      setFormData({
-        title: '',
-        description: '',
-        start_time: '',
-        duration_minutes: 90,
-        youtube_url: '',
-        is_free_access: false,
-        day_number: null,
-        custom_day_label: ''
+      const { data, error } = await supabase.functions.invoke('youtube-live-manager', {
+        body: {
+          action: 'create_live_stream',
+          title: newStream.title,
+          description: newStream.description,
+          scheduled_start_time: newStream.scheduled_start_time
+        }
       });
-      setEditingClass(null);
-      fetchLiveClasses();
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success('YouTube Live stream created successfully');
+      setNewStream({ title: '', description: '', scheduled_start_time: '' });
+      fetchStreams();
     } catch (error) {
-      console.error('Error saving live class:', error);
-      toast.error('Failed to save live class');
+      console.error('Error creating stream:', error);
+      toast.error('Failed to create YouTube Live stream');
+    } finally {
+      setCreating(false);
     }
   };
 
-  const handleEdit = (liveClass: LiveClass) => {
-    setEditingClass(liveClass);
-    setFormData({
-      title: liveClass.title,
-      description: liveClass.description || '',
-      start_time: new Date(liveClass.start_time).toISOString().slice(0, 16),
-      duration_minutes: liveClass.duration_minutes || 90,
-      youtube_url: liveClass.youtube_url || '',
-      is_free_access: (liveClass as any).is_free_access || false,
-      day_number: (liveClass as any).day_number || null,
-      custom_day_label: (liveClass as any).custom_day_label || ''
-    });
+  const startLiveStream = async (streamId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-live-manager', {
+        body: {
+          action: 'start_live_stream',
+          schedule_id: streamId
+        }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success('YouTube Live stream started');
+      fetchStreams();
+    } catch (error) {
+      console.error('Error starting stream:', error);
+      toast.error('Failed to start YouTube Live stream');
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this live class?')) return;
+  const endLiveStream = async (streamId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-live-manager', {
+        body: {
+          action: 'end_live_stream',
+          schedule_id: streamId
+        }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success('YouTube Live stream ended');
+      fetchStreams();
+    } catch (error) {
+      console.error('Error ending stream:', error);
+      toast.error('Failed to end YouTube Live stream');
+    }
+  };
+
+  const deleteStream = async (streamId: string) => {
+    if (!confirm('Are you sure you want to delete this stream?')) return;
 
     try {
       const { error } = await supabase
-        .from('live_classes')
+        .from('youtube_live_schedule')
         .delete()
-        .eq('id', id);
+        .eq('id', streamId);
 
       if (error) throw error;
-      toast.success('Live class deleted successfully!');
-      fetchLiveClasses();
+
+      toast.success('Stream deleted successfully');
+      fetchStreams();
     } catch (error) {
-      console.error('Error deleting live class:', error);
-      toast.error('Failed to delete live class');
+      console.error('Error deleting stream:', error);
+      toast.error('Failed to delete stream');
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      start_time: '',
-      duration_minutes: 90,
-      youtube_url: '',
-      is_free_access: false,
-      day_number: null,
-      custom_day_label: ''
-    });
-    setEditingClass(null);
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'live': return 'destructive';
-      case 'scheduled': return 'default';
-      case 'ended': return 'secondary';
-      default: return 'default';
+      case 'scheduled': return 'secondary';
+      case 'ended': return 'outline';
+      default: return 'outline';
     }
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return format(new Date(dateString), 'MMM dd, yyyy - hh:mm a');
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -192,207 +205,161 @@ const YouTubeLiveManager = () => {
 
   return (
     <div className="space-y-6">
-      {/* Create/Edit Form */}
+      {/* Create New Stream */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {editingClass ? <Pencil className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            {editingClass ? 'Edit Live Class' : 'Schedule New Live Class'}
+            <Youtube className="h-5 w-5" />
+            Create YouTube Live Stream
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Class Title</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Advanced GIS Analysis"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="start_time">Start Time</Label>
-                <Input
-                  id="start_time"
-                  type="datetime-local"
-                  value={formData.start_time}
-                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })}
-                  min="30"
-                  max="300"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="day_number">Day Number</Label>
-                <Input
-                  id="day_number"
-                  type="number"
-                  value={formData.day_number || ''}
-                  onChange={(e) => setFormData({ ...formData, day_number: e.target.value ? parseInt(e.target.value) : null })}
-                  placeholder="e.g., 1, 2, 3..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="custom_day_label">Custom Day Label</Label>
-                <Input
-                  id="custom_day_label"
-                  value={formData.custom_day_label}
-                  onChange={(e) => setFormData({ ...formData, custom_day_label: e.target.value })}
-                  placeholder="e.g., Day -1, Day 1, Week 1"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="youtube_url">YouTube Live Embed URL</Label>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Title</label>
               <Input
-                id="youtube_url"
-                value={formData.youtube_url}
-                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                placeholder="https://www.youtube.com/embed/VIDEO_ID?autoplay=1&modestbranding=1&controls=1"
+                value={newStream.title}
+                onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Live GEOVA Session - Day 1"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe what will be covered in this live class..."
-                rows={3}
+            <div>
+              <label className="text-sm font-medium">Scheduled Start Time</label>
+              <Input
+                type="datetime-local"
+                value={newStream.scheduled_start_time}
+                onChange={(e) => setNewStream(prev => ({ ...prev, scheduled_start_time: e.target.value }))}
               />
             </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_free_access"
-                checked={formData.is_free_access}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_free_access: !!checked })}
-              />
-              <Label htmlFor="is_free_access" className="flex items-center gap-2">
-                {formData.is_free_access ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                Free Access (No enrollment required)
-              </Label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button type="submit">
-                <Save className="h-4 w-4 mr-2" />
-                {editingClass ? 'Update Class' : 'Schedule Class'}
-              </Button>
-              {editingClass && (
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-          </form>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Description</label>
+            <Textarea
+              value={newStream.description}
+              onChange={(e) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Interactive AI-powered learning session covering geospatial concepts and tools"
+              rows={3}
+            />
+          </div>
+          <Button 
+            onClick={createLiveStream} 
+            disabled={creating || !newStream.title || !newStream.scheduled_start_time}
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {creating ? 'Creating...' : 'Create YouTube Live Stream'}
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Live Classes List */}
+      {/* Existing Streams */}
       <Card>
-        <CardHeader>
-          <CardTitle>Scheduled Live Classes</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>YouTube Live Streams</CardTitle>
+          <Button variant="outline" size="sm" onClick={fetchStreams}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {classes.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No live classes scheduled yet. Create your first one above!
-              </p>
-            ) : (
-              classes.map((liveClass) => (
-                <div key={liveClass.id} className="border rounded-lg p-4 space-y-3">
+          {streams.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No YouTube Live streams found
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {streams.map((stream) => (
+                <div key={stream.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">{liveClass.title}</h3>
-                        <Badge variant={getStatusColor(liveClass.status)}>
-                          {liveClass.status.toUpperCase()}
+                        <h3 className="font-semibold">{stream.title}</h3>
+                        <Badge variant={getStatusColor(stream.status)}>
+                          {stream.status.toUpperCase()}
                         </Badge>
-                        {liveClass.youtube_url && (
-                          <Badge variant="outline" className="text-red-600">
-                            <Youtube className="h-3 w-3 mr-1" />
-                            YouTube Live
-                          </Badge>
-                        )}
-                        {(liveClass as any).is_free_access && (
-                          <Badge variant="outline" className="text-green-600">
-                            <Unlock className="h-3 w-3 mr-1" />
-                            Free Access
-                          </Badge>
-                        )}
-                        {(liveClass as any).custom_day_label && (
-                          <Badge variant="secondary">
-                            {(liveClass as any).custom_day_label}
-                          </Badge>
-                        )}
                       </div>
-                      
-                      {liveClass.description && (
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {liveClass.description}
-                        </p>
+                      {stream.description && (
+                        <p className="text-sm text-muted-foreground mb-2">{stream.description}</p>
                       )}
-                      
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {formatDateTime(liveClass.start_time)}
+                          {formatDateTime(stream.scheduled_start_time)}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {liveClass.duration_minutes || 90} minutes
-                        </div>
+                        {stream.viewer_count !== undefined && (
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {stream.viewer_count} viewers
+                          </div>
+                        )}
+                        {stream.actual_start_time && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            Started: {format(new Date(stream.actual_start_time), 'hh:mm a')}
+                          </div>
+                        )}
                       </div>
+                      {stream.youtube_stream_key && (
+                        <div className="mt-2 p-2 bg-muted rounded text-xs font-mono">
+                          <strong>RTMP URL:</strong> {stream.rtmp_url}<br/>
+                          <strong>Stream Key:</strong> {stream.youtube_stream_key}
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                      {stream.status === 'scheduled' && (
+                        <Button
+                          size="sm"
+                          onClick={() => startLiveStream(stream.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          <Play className="h-4 w-4 mr-1" />
+                          Go Live
+                        </Button>
+                      )}
+                      
+                      {stream.status === 'live' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => endLiveStream(stream.id)}
+                        >
+                          <Square className="h-4 w-4 mr-1" />
+                          End Stream
+                        </Button>
+                      )}
+                      
                       <Button
-                        variant="outline"
                         size="sm"
-                        onClick={() => handleEdit(liveClass)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
                         variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(liveClass.id)}
+                        onClick={() => deleteStream(stream.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
+                  
+                  {stream.thumbnail_url && (
+                    <img 
+                      src={stream.thumbnail_url} 
+                      alt="Stream thumbnail"
+                      className="w-32 h-18 object-cover rounded"
+                    />
+                  )}
+                  
+                  {stream.recording_available && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Link className="h-4 w-4" />
+                      Recording available
+                    </div>
+                  )}
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 };
-
-export default YouTubeLiveManager;

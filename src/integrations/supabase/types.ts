@@ -3724,7 +3724,10 @@ export type Database = {
       }
       live_classes: {
         Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
           auto_start: boolean | null
+          auto_start_enabled: boolean | null
           aws_stream_id: string | null
           cloudfront_url: string | null
           course_title: string | null
@@ -3752,10 +3755,14 @@ export type Database = {
           viewer_count: number | null
           youtube_broadcast_id: string | null
           youtube_stream_id: string | null
+          youtube_stream_key: string | null
           youtube_url: string | null
         }
         Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
           auto_start?: boolean | null
+          auto_start_enabled?: boolean | null
           aws_stream_id?: string | null
           cloudfront_url?: string | null
           course_title?: string | null
@@ -3783,10 +3790,14 @@ export type Database = {
           viewer_count?: number | null
           youtube_broadcast_id?: string | null
           youtube_stream_id?: string | null
+          youtube_stream_key?: string | null
           youtube_url?: string | null
         }
         Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
           auto_start?: boolean | null
+          auto_start_enabled?: boolean | null
           aws_stream_id?: string | null
           cloudfront_url?: string | null
           course_title?: string | null
@@ -3814,6 +3825,7 @@ export type Database = {
           viewer_count?: number | null
           youtube_broadcast_id?: string | null
           youtube_stream_id?: string | null
+          youtube_stream_key?: string | null
           youtube_url?: string | null
         }
         Relationships: [
@@ -8704,6 +8716,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_enroll_professional_users: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       bulk_assign_professional_access: {
         Args: { email_list: string[] }
         Returns: Json
@@ -8863,6 +8879,10 @@ export type Database = {
           updated_at: string
           days_old: number
         }[]
+      }
+      get_user_enrollment_count: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       get_user_profile_for_stream: {
         Args: { p_user_id: string }
@@ -9122,6 +9142,10 @@ export type Database = {
       update_user_stats: {
         Args: { p_user_id: string; p_stat_type: string; p_increment?: number }
         Returns: undefined
+      }
+      user_has_live_class_access: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       user_has_premium_access: {
         Args: { p_user_id: string }
