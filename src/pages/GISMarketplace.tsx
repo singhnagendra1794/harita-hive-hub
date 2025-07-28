@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import GISToolCard from "../components/marketplace/GISToolCard";
 import GISMarketplaceSubscriptionForm from "../components/marketplace/GISMarketplaceSubscriptionForm";
 import { Plus, Search, Filter, TrendingUp, Package, Users, CheckCircle, WifiOff, FileText, Database, Lock, Calendar, CreditCard } from "lucide-react";
+import { AdminDeleteButton } from '@/components/admin/AdminDeleteButton';
 import { useUserStats } from "@/hooks/useUserStats";
 import { useGISMarketplaceAccess } from "@/hooks/useGISMarketplaceAccess";
 import { supabase } from "@/integrations/supabase/client";
