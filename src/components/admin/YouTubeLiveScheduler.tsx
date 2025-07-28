@@ -41,6 +41,8 @@ const YouTubeLiveScheduler = () => {
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
+  const [connectingOAuth, setConnectingOAuth] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -51,6 +53,7 @@ const YouTubeLiveScheduler = () => {
 
   useEffect(() => {
     fetchSchedules();
+    checkOAuthStatus();
   }, []);
 
   const fetchSchedules = async () => {
@@ -74,6 +77,82 @@ const YouTubeLiveScheduler = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkOAuthStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('youtube_oauth_tokens')
+        .select('access_token, expires_at')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data && data.access_token) {
+        // Check if token is still valid
+        const expiresAt = new Date(data.expires_at);
+        const now = new Date();
+        
+        if (expiresAt > now) {
+          setIsOAuthConnected(true);
+        } else {
+          // Token expired, try to refresh
+          await refreshYouTubeToken();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking OAuth status:', error);
+      setIsOAuthConnected(false);
+    }
+  };
+
+  const connectYouTubeAccount = async () => {
+    setConnectingOAuth(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-oauth', {
+        body: { action: 'get_auth_url' }
+      });
+
+      if (error) throw error;
+
+      // Open OAuth URL in new window
+      const authWindow = window.open(data.data.authUrl, '_blank', 'width=500,height=600');
+      
+      // Listen for OAuth completion
+      const checkClosed = setInterval(() => {
+        if (authWindow?.closed) {
+          clearInterval(checkClosed);
+          checkOAuthStatus();
+          setConnectingOAuth(false);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Error connecting YouTube account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to connect YouTube account',
+        variant: 'destructive',
+      });
+      setConnectingOAuth(false);
+    }
+  };
+
+  const refreshYouTubeToken = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('youtube-oauth', {
+        body: {
+          action: 'refresh_token',
+          userId: (await supabase.auth.getUser()).data.user?.id
+        }
+      });
+
+      if (error) throw error;
+      setIsOAuthConnected(true);
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      setIsOAuthConnected(false);
     }
   };
 
@@ -113,6 +192,18 @@ const YouTubeLiveScheduler = () => {
         thumbnailUrl = publicUrl;
       }
 
+      // Get access token
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const { data: tokenData, error: tokenError } = await supabase
+        .from('youtube_oauth_tokens')
+        .select('access_token')
+        .eq('user_id', userId)
+        .single();
+
+      if (tokenError || !tokenData?.access_token) {
+        throw new Error('YouTube account not connected');
+      }
+
       // Call YouTube Live Manager edge function
       const { data, error } = await supabase.functions.invoke('youtube-live-manager', {
         body: {
@@ -121,7 +212,8 @@ const YouTubeLiveScheduler = () => {
           description: formData.description,
           scheduledTime: scheduledDateTime.toISOString(),
           thumbnailUrl,
-          userId: (await supabase.auth.getUser()).data.user?.id,
+          userId,
+          accessToken: tokenData.access_token,
         },
       });
 
@@ -260,13 +352,32 @@ const YouTubeLiveScheduler = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             YouTube Live Scheduler
-            <Button onClick={() => setShowForm(!showForm)}>
+            <Button 
+              onClick={() => setShowForm(!showForm)}
+              disabled={!isOAuthConnected}
+            >
               {showForm ? 'Cancel' : 'Schedule New Live'}
             </Button>
           </CardTitle>
         </CardHeader>
+        {!isOAuthConnected && (
+          <CardContent className="bg-muted/50 border rounded-lg mb-4">
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground mb-3">
+                Connect your YouTube account to schedule live streams
+              </p>
+              <Button 
+                onClick={connectYouTubeAccount} 
+                disabled={connectingOAuth}
+                variant="default"
+              >
+                {connectingOAuth ? 'Connecting...' : 'Connect YouTube Account'}
+              </Button>
+            </div>
+          </CardContent>
+        )}
         
-        {showForm && (
+        {showForm && isOAuthConnected && (
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -341,7 +452,7 @@ const YouTubeLiveScheduler = () => {
 
             <Button 
               onClick={handleCreateSchedule} 
-              disabled={creating}
+              disabled={creating || !isOAuthConnected}
               className="w-full"
             >
               {creating ? 'Creating...' : 'Schedule Live Stream'}
