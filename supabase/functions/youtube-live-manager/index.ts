@@ -201,9 +201,8 @@ async function createLiveStream(supabase: any, payload: any) {
 
 async function startLiveStream(supabase: any, payload: any) {
   const { scheduleId, userId } = payload
-  const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
 
-  // Get schedule data
+  // Get schedule data and OAuth token
   const { data: schedule, error: scheduleError } = await supabase
     .from('youtube_live_schedule')
     .select('*')
@@ -214,19 +213,32 @@ async function startLiveStream(supabase: any, payload: any) {
     throw new Error('Schedule not found')
   }
 
+  // Get access token for the user
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token')
+    .eq('user_id', userId)
+    .single()
+
+  if (tokenError || !tokenData?.access_token) {
+    throw new Error('YouTube account not connected')
+  }
+
   // Transition broadcast to live
   const response = await fetch(
-    `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?part=status&id=${schedule.youtube_broadcast_id}&broadcastStatus=live&key=${YOUTUBE_API_KEY}`,
+    `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?part=status&id=${schedule.youtube_broadcast_id}&broadcastStatus=live`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${YOUTUBE_API_KEY}`,
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json',
       },
     }
   )
 
   if (!response.ok) {
     const error = await response.text()
+    console.error('YouTube API Error:', error)
     throw new Error(`Failed to start live stream: ${error}`)
   }
 
@@ -244,6 +256,7 @@ async function startLiveStream(supabase: any, payload: any) {
     operation_type: 'start_broadcast',
     youtube_broadcast_id: schedule.youtube_broadcast_id,
     performed_by: userId,
+    response_data: { success: true },
   })
 
   return new Response(
@@ -254,9 +267,8 @@ async function startLiveStream(supabase: any, payload: any) {
 
 async function endLiveStream(supabase: any, payload: any) {
   const { scheduleId, userId } = payload
-  const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
 
-  // Get schedule data
+  // Get schedule data and OAuth token
   const { data: schedule, error: scheduleError } = await supabase
     .from('youtube_live_schedule')
     .select('*')
@@ -267,21 +279,43 @@ async function endLiveStream(supabase: any, payload: any) {
     throw new Error('Schedule not found')
   }
 
+  // Get access token for the user
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token')
+    .eq('user_id', userId)
+    .single()
+
+  if (tokenError || !tokenData?.access_token) {
+    throw new Error('YouTube account not connected')
+  }
+
   // End broadcast
   const response = await fetch(
-    `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?part=status&id=${schedule.youtube_broadcast_id}&broadcastStatus=complete&key=${YOUTUBE_API_KEY}`,
+    `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?part=status&id=${schedule.youtube_broadcast_id}&broadcastStatus=complete`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${YOUTUBE_API_KEY}`,
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json',
       },
     }
   )
 
   if (!response.ok) {
     const error = await response.text()
+    console.error('YouTube API Error:', error)
     throw new Error(`Failed to end live stream: ${error}`)
   }
+
+  // Check for recording availability after 30 seconds delay
+  setTimeout(async () => {
+    try {
+      await checkAndFetchRecording(supabase, schedule.youtube_broadcast_id, tokenData.access_token)
+    } catch (error) {
+      console.error('Recording fetch error:', error)
+    }
+  }, 30000)
 
   // Update database
   await supabase
@@ -297,12 +331,53 @@ async function endLiveStream(supabase: any, payload: any) {
     operation_type: 'end_broadcast',
     youtube_broadcast_id: schedule.youtube_broadcast_id,
     performed_by: userId,
+    response_data: { success: true },
   })
 
   return new Response(
-    JSON.stringify({ success: true, message: 'Live stream ended' }),
+    JSON.stringify({ success: true, message: 'Live stream ended, checking for recording...' }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
+}
+
+async function checkAndFetchRecording(supabase: any, broadcastId: string, accessToken: string) {
+  // Check if recording is available
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=status,recordingDetails&id=${broadcastId}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    }
+  )
+
+  if (response.ok) {
+    const data = await response.json()
+    const video = data.items?.[0]
+    
+    if (video && video.status.uploadStatus === 'processed') {
+      // Recording is available, update database
+      await supabase
+        .from('youtube_live_schedule')
+        .update({
+          recording_available: true,
+          recording_url: `https://www.youtube.com/watch?v=${broadcastId}`,
+        })
+        .eq('youtube_broadcast_id', broadcastId)
+        
+      // Move to class recordings
+      await supabase
+        .from('class_recordings')
+        .insert({
+          title: video.snippet?.title || 'Live Stream Recording',
+          description: video.snippet?.description,
+          youtube_url: `https://www.youtube.com/watch?v=${broadcastId}`,
+          thumbnail_url: video.snippet?.thumbnails?.high?.url,
+          is_public: true,
+          created_by: (await supabase.auth.getUser()).data?.user?.id,
+        })
+    }
+  }
 }
 
 async function getStreamStatus(supabase: any, payload: any) {

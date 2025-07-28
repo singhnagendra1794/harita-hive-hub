@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_actions: {
+        Row: {
+          action_data: Json | null
+          action_type: string
+          admin_user_id: string | null
+          created_at: string | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action_data?: Json | null
+          action_type: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action_data?: Json | null
+          action_type?: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -3687,6 +3717,8 @@ export type Database = {
           title: string
           updated_at: string
           viewer_count: number | null
+          youtube_broadcast_id: string | null
+          youtube_stream_id: string | null
           youtube_url: string | null
         }
         Insert: {
@@ -3716,6 +3748,8 @@ export type Database = {
           title: string
           updated_at?: string
           viewer_count?: number | null
+          youtube_broadcast_id?: string | null
+          youtube_stream_id?: string | null
           youtube_url?: string | null
         }
         Update: {
@@ -3745,6 +3779,8 @@ export type Database = {
           title?: string
           updated_at?: string
           viewer_count?: number | null
+          youtube_broadcast_id?: string | null
+          youtube_stream_id?: string | null
           youtube_url?: string | null
         }
         Relationships: [
@@ -8441,6 +8477,7 @@ export type Database = {
           obs_configured: boolean | null
           obs_scene_name: string | null
           privacy_status: string
+          recording_available: boolean | null
           recording_url: string | null
           recording_youtube_id: string | null
           scheduled_end_time: string | null
@@ -8465,6 +8502,7 @@ export type Database = {
           obs_configured?: boolean | null
           obs_scene_name?: string | null
           privacy_status?: string
+          recording_available?: boolean | null
           recording_url?: string | null
           recording_youtube_id?: string | null
           scheduled_end_time?: string | null
@@ -8489,6 +8527,7 @@ export type Database = {
           obs_configured?: boolean | null
           obs_scene_name?: string | null
           privacy_status?: string
+          recording_available?: boolean | null
           recording_url?: string | null
           recording_youtube_id?: string | null
           scheduled_end_time?: string | null
@@ -8501,6 +8540,42 @@ export type Database = {
           updated_at?: string
           youtube_broadcast_id?: string | null
           youtube_stream_id?: string | null
+        }
+        Relationships: []
+      }
+      youtube_oauth_tokens: {
+        Row: {
+          access_token: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          refresh_token: string | null
+          scope: string | null
+          token_type: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          access_token: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          refresh_token?: string | null
+          scope?: string | null
+          token_type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          refresh_token?: string | null
+          scope?: string | null
+          token_type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
