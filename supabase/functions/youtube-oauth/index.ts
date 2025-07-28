@@ -20,9 +20,9 @@ Deno.serve(async (req) => {
     
     console.log(`YouTube OAuth: ${action}`, body)
 
-    const clientId = Deno.env.get('YOUTUBE_CLIENT_ID')
-    const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET')
-    const redirectUri = Deno.env.get('YOUTUBE_REDIRECT_URI') || 'http://localhost:3000/auth/youtube/callback'
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID')
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
+    const redirectUri = 'https://haritahive.com/auth/callback'
 
     if (!clientId || !clientSecret) {
       throw new Error('YouTube OAuth credentials not configured')

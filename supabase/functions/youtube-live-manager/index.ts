@@ -70,28 +70,78 @@ Deno.serve(async (req) => {
 async function syncUpcomingStreams(supabase: any) {
   console.log('Syncing upcoming YouTube streams...')
   
-  // Get YouTube OAuth token for admin (Super Admin)
+  // Get YouTube OAuth token for super admin (contact@haritahive.com)
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+  
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token, refresh_token')
-    .eq('user_id', (await supabase.auth.getUser()).data.user?.id || 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .maybeSingle()
 
   if (tokenError || !tokenData?.access_token || tokenData.access_token === 'placeholder_access_token') {
-    console.log('No valid YouTube OAuth token found, creating placeholder entries...')
+    console.log('No valid YouTube OAuth token found, trying to find live stream directly...')
     
-    // Create placeholder upcoming stream for demo with the current video ID
+    // Try to find the actual live stream using YouTube API key
+    const apiKey = Deno.env.get('YOUTUBE_API_KEY')
+    if (apiKey) {
+      try {
+        // Search for live streams with our keywords
+        const searchResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&q=geospatial+technology+unlocked&eventType=live&type=video&key=${apiKey}`
+        )
+        
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json()
+          console.log('YouTube search results:', searchData)
+          
+          if (searchData.items?.length > 0) {
+            const liveStream = searchData.items[0]
+            console.log('Found live stream:', liveStream.id.videoId)
+            
+            // Create entry for actual live stream
+            await supabase
+              .from('youtube_live_schedule')
+              .upsert({
+                youtube_broadcast_id: liveStream.id.videoId,
+                title: liveStream.snippet.title,
+                description: liveStream.snippet.description?.substring(0, 200),
+                scheduled_start_time: new Date().toISOString(),
+                thumbnail_url: liveStream.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${liveStream.id.videoId}/maxresdefault.jpg`,
+                status: 'live',
+                created_by: superAdminUser?.id || '00000000-0000-0000-0000-000000000000'
+              }, {
+                onConflict: 'youtube_broadcast_id'
+              })
+
+            return new Response(
+              JSON.stringify({ 
+                success: true, 
+                streamsFound: 1,
+                message: `Found live stream: ${liveStream.snippet.title}`,
+                videoId: liveStream.id.videoId
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+        }
+      } catch (error) {
+        console.error('YouTube API search failed:', error)
+      }
+    }
+    
+    // Fallback to placeholder if API key search fails
     await supabase
       .from('youtube_live_schedule')
       .upsert({
         youtube_broadcast_id: '94NaFHNEi9k',
         title: 'Geospatial Technology Unlocked - Live Session',
         description: 'Interactive AI-powered learning session covering geospatial concepts and tools',
-        scheduled_start_time: new Date().toISOString(), // Current time so it shows as live
+        scheduled_start_time: new Date().toISOString(),
         thumbnail_url: 'https://img.youtube.com/vi/94NaFHNEi9k/maxresdefault.jpg',
         status: 'live',
-        created_by: 'admin',
-        is_override: true
+        created_by: superAdminUser?.id || '00000000-0000-0000-0000-000000000000'
       }, {
         onConflict: 'youtube_broadcast_id'
       })
@@ -189,11 +239,15 @@ async function getActiveStream(supabase: any) {
 async function createLiveStream(supabase: any, body: any) {
   const { title, description, scheduled_start_time, privacy_status = 'unlisted' } = body
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
@@ -327,11 +381,15 @@ async function startLiveStream(supabase: any, body: any) {
 
   if (error || !stream) throw new Error('Stream not found')
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
@@ -380,11 +438,15 @@ async function endLiveStream(supabase: any, body: any) {
 
   if (error || !stream) throw new Error('Stream not found')
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
@@ -463,7 +525,7 @@ async function refreshAccessToken(supabase: any, refreshToken: string) {
         expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', 'admin')
+      .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
 
     return true
   } catch (error) {
@@ -484,11 +546,15 @@ async function updateStreamDetails(supabase: any, body: any) {
 
   if (error || !stream) throw new Error('Stream not found')
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
@@ -540,11 +606,15 @@ async function updateStreamDetails(supabase: any, body: any) {
 async function overrideStream(supabase: any, body: any) {
   const { youtube_video_id, title, description } = body
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Verify the YouTube video exists and get details
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
@@ -612,11 +682,15 @@ async function checkStreamStatus(supabase: any, body: any) {
 
   if (error || !stream) throw new Error('Stream not found')
 
+  // Get super admin UUID
+  const { data: superAdmin } = await supabase.auth.admin.listUsers()
+  const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+
   // Get YouTube OAuth token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('access_token')
-    .eq('user_id', 'admin')
+    .eq('user_id', superAdminUser?.id || '00000000-0000-0000-0000-000000000000')
     .single()
 
   if (tokenError || !tokenData?.access_token) {
