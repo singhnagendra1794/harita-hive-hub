@@ -8600,6 +8600,10 @@ export type Database = {
         Args: { email_list: string[] }
         Returns: Json
       }
+      bulk_assign_professional_and_enroll: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       can_download_premium_plugin: {
         Args: { p_user_id: string; p_tool_id: string }
         Returns: boolean
