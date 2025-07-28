@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock } from "lucide-react";
+import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play } from "lucide-react";
 
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 import { ScreenProtection } from '@/components/security/ScreenProtection';
@@ -24,6 +24,7 @@ interface LiveStream {
   duration_minutes?: number;
   hls_url?: string;
   youtube_url?: string;
+  thumbnail_url?: string;
   viewer_count: number;
   is_geova?: boolean;
   is_free_access?: boolean;
@@ -143,15 +144,31 @@ const LiveNowTab = () => {
       checkForLiveStreams();
     }
     
-    // Auto-refresh every 30 seconds
+    // Auto-refresh every 15 seconds for real-time updates
     const interval = setInterval(() => {
       if (!premiumLoading) {
         checkForLiveStreams();
       }
-    }, 30000);
+    }, 15000);
     
     return () => clearInterval(interval);
   }, [premiumLoading]);
+
+  // Auto-sync with YouTube API every 2 minutes
+  useEffect(() => {
+    const syncInterval = setInterval(async () => {
+      try {
+        await supabase.functions.invoke('youtube-live-manager', {
+          body: { action: 'sync_upcoming_streams' }
+        });
+        console.log('Auto-synced with YouTube API');
+      } catch (error) {
+        console.error('Auto-sync failed:', error);
+      }
+    }, 120000); // 2 minutes
+
+    return () => clearInterval(syncInterval);
+  }, []);
 
   const checkForLiveStreams = async () => {
     try {
@@ -159,7 +176,42 @@ const LiveNowTab = () => {
       
       console.log('Checking for live streams...');
       
-      // Check for active OBS live stream first
+      // First check YouTube automated streams via edge function
+      const { data: streamResponse, error: streamError } = await supabase.functions.invoke('youtube-live-manager', {
+        body: { action: 'get_active_stream' }
+      });
+
+      if (!streamError && streamResponse?.stream) {
+        const youtubeStream = streamResponse.stream;
+        console.log('Found YouTube automated stream:', youtubeStream);
+        
+        // Check if stream should be live (within 5 minutes of start time)
+        const startTime = new Date(youtubeStream.scheduled_start_time);
+        const now = new Date();
+        const timeDiff = now.getTime() - startTime.getTime();
+        const isWithinLiveWindow = timeDiff >= -300000 && timeDiff <= 3600000; // -5 min to +1 hour
+
+        setCurrentStream({
+          id: youtubeStream.id,
+          title: youtubeStream.title,
+          description: youtubeStream.description || '',
+          stream_key: youtubeStream.youtube_stream_key || '',
+          start_time: youtubeStream.scheduled_start_time,
+          status: youtubeStream.status as 'scheduled' | 'live',
+          youtube_url: youtubeStream.youtube_broadcast_id ? 
+            `https://www.youtube-nocookie.com/embed/${youtubeStream.youtube_broadcast_id}?autoplay=${youtubeStream.status === 'live' ? 1 : 0}&modestbranding=1&rel=0&disablekb=1&controls=1` : 
+            undefined,
+          thumbnail_url: youtubeStream.thumbnail_url,
+          viewer_count: 0,
+          is_geova: false,
+          is_free_access: true
+        });
+        setPlayerError(null);
+        setLoading(false);
+        return;
+      }
+      
+      // Check for active OBS live stream
       const { data: activeStreams, error: streamsError } = await supabase
         .from('live_classes')
         .select('*')
@@ -167,11 +219,11 @@ const LiveNowTab = () => {
         .order('start_time', { ascending: false })
         .limit(1);
 
-      console.log('Active streams from DB:', activeStreams, 'Error:', streamsError);
+      console.log('Active OBS streams from DB:', activeStreams, 'Error:', streamsError);
 
       if (activeStreams && activeStreams.length > 0) {
         const stream = activeStreams[0];
-        console.log('Found active live stream:', stream);
+        console.log('Found active OBS live stream:', stream);
         const streamData = {
           id: stream.id,
           title: stream.title,
@@ -352,9 +404,21 @@ const LiveNowTab = () => {
     setPlayerError(null);
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setPlayerError(null);
-    checkForLiveStreams();
+    setLastRefresh(Date.now());
+    
+    // Trigger manual sync with YouTube API
+    try {
+      await supabase.functions.invoke('youtube-live-manager', {
+        body: { action: 'manual_refresh' }
+      });
+      console.log('Manual YouTube sync completed');
+    } catch (error) {
+      console.error('Manual sync failed:', error);
+    }
+    
+    await checkForLiveStreams();
   };
 
   const formatTime = (dateString: string) => {

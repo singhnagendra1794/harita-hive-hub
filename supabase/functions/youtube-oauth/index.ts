@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -17,23 +16,32 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { action, ...payload } = await req.json()
+    const { action, ...body } = await req.json()
+    
+    console.log(`YouTube OAuth: ${action}`, body)
+
+    const clientId = Deno.env.get('YOUTUBE_CLIENT_ID')
+    const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET')
+    const redirectUri = Deno.env.get('YOUTUBE_REDIRECT_URI') || 'http://localhost:3000/auth/youtube/callback'
+
+    if (!clientId || !clientSecret) {
+      throw new Error('YouTube OAuth credentials not configured')
+    }
 
     switch (action) {
       case 'get_auth_url':
-        return await getAuthUrl(payload)
+        return await getAuthUrl(clientId, redirectUri)
       case 'exchange_code':
-        return await exchangeCode(supabase, payload)
+        return await exchangeCode(supabase, body, clientId, clientSecret, redirectUri)
       case 'refresh_token':
-        return await refreshToken(supabase, payload)
+        return await refreshToken(supabase, body, clientId, clientSecret)
+      case 'check_status':
+        return await checkOAuthStatus(supabase, body)
       default:
-        return new Response(
-          JSON.stringify({ error: 'Invalid action' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        throw new Error(`Unknown action: ${action}`)
     }
   } catch (error) {
-    console.error('YouTube OAuth Error:', error)
+    console.error('YouTube OAuth error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -41,108 +49,87 @@ Deno.serve(async (req) => {
   }
 })
 
-async function getAuthUrl(payload: any) {
-  const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID')
-  const YOUTUBE_REDIRECT_URI = Deno.env.get('YOUTUBE_REDIRECT_URI')
-
-  if (!YOUTUBE_CLIENT_ID || !YOUTUBE_REDIRECT_URI) {
-    throw new Error('YouTube OAuth credentials not configured')
-  }
-
+async function getAuthUrl(clientId: string, redirectUri: string) {
   const scopes = [
     'https://www.googleapis.com/auth/youtube',
-    'https://www.googleapis.com/auth/youtube.force-ssl'
+    'https://www.googleapis.com/auth/youtube.force-ssl',
+    'https://www.googleapis.com/auth/youtube.readonly'
   ].join(' ')
 
-  const params = new URLSearchParams({
-    client_id: YOUTUBE_CLIENT_ID,
-    redirect_uri: YOUTUBE_REDIRECT_URI,
-    scope: scopes,
-    response_type: 'code',
-    access_type: 'offline',
-    prompt: 'consent'
-  })
-
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
+  authUrl.searchParams.set('client_id', clientId)
+  authUrl.searchParams.set('redirect_uri', redirectUri)
+  authUrl.searchParams.set('response_type', 'code')
+  authUrl.searchParams.set('scope', scopes)
+  authUrl.searchParams.set('access_type', 'offline')
+  authUrl.searchParams.set('prompt', 'consent')
 
   return new Response(
-    JSON.stringify({
-      success: true,
-      data: { authUrl }
+    JSON.stringify({ 
+      success: true, 
+      data: { authUrl: authUrl.toString() } 
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
 
-async function exchangeCode(supabase: any, payload: any) {
-  const { code, userId } = payload
-  const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID')
-  const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET')
-  const YOUTUBE_REDIRECT_URI = Deno.env.get('YOUTUBE_REDIRECT_URI')
+async function exchangeCode(supabase: any, body: any, clientId: string, clientSecret: string, redirectUri: string) {
+  const { code, userId } = body
 
-  if (!YOUTUBE_CLIENT_ID || !YOUTUBE_CLIENT_SECRET || !YOUTUBE_REDIRECT_URI) {
-    throw new Error('YouTube OAuth credentials not configured')
+  if (!code || !userId) {
+    throw new Error('Code and userId are required')
   }
 
+  // Exchange authorization code for tokens
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      client_id: YOUTUBE_CLIENT_ID,
-      client_secret: YOUTUBE_CLIENT_SECRET,
-      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
       grant_type: 'authorization_code',
-      redirect_uri: YOUTUBE_REDIRECT_URI,
+      redirect_uri: redirectUri,
     }),
   })
 
   if (!tokenResponse.ok) {
-    const error = await tokenResponse.text()
-    console.error('Token exchange error:', error)
-    throw new Error(`Failed to exchange code: ${error}`)
+    throw new Error('Failed to exchange authorization code')
   }
 
   const tokens = await tokenResponse.json()
 
-  // Store tokens in database
-  const { error: dbError } = await supabase
+  // Save tokens to database
+  const { error } = await supabase
     .from('youtube_oauth_tokens')
     .upsert({
       user_id: userId,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      expires_at: new Date(Date.now() + (tokens.expires_in * 1000)).toISOString(),
-      token_type: tokens.token_type,
-      scope: tokens.scope,
+      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }, {
       onConflict: 'user_id'
     })
 
-  if (dbError) {
-    console.error('Database error:', dbError)
-    throw new Error(`Failed to store tokens: ${dbError.message}`)
-  }
+  if (error) throw error
 
   return new Response(
-    JSON.stringify({
-      success: true,
-      data: {
-        access_token: tokens.access_token,
-        expires_in: tokens.expires_in
-      }
+    JSON.stringify({ 
+      success: true, 
+      message: 'YouTube account connected successfully' 
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
 
-async function refreshToken(supabase: any, payload: any) {
-  const { userId } = payload
-  const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID')
-  const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET')
+async function refreshToken(supabase: any, body: any, clientId: string, clientSecret: string) {
+  const { userId } = body
 
-  // Get stored refresh token
+  // Get current refresh token
   const { data: tokenData, error: tokenError } = await supabase
     .from('youtube_oauth_tokens')
     .select('refresh_token')
@@ -153,46 +140,73 @@ async function refreshToken(supabase: any, payload: any) {
     throw new Error('No refresh token found')
   }
 
-  const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
+  // Refresh the access token
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      client_id: YOUTUBE_CLIENT_ID!,
-      client_secret: YOUTUBE_CLIENT_SECRET!,
+      client_id: clientId,
+      client_secret: clientSecret,
       refresh_token: tokenData.refresh_token,
       grant_type: 'refresh_token',
     }),
   })
 
-  if (!refreshResponse.ok) {
-    const error = await refreshResponse.text()
-    throw new Error(`Failed to refresh token: ${error}`)
+  if (!tokenResponse.ok) {
+    throw new Error('Failed to refresh access token')
   }
 
-  const tokens = await refreshResponse.json()
+  const tokens = await tokenResponse.json()
 
-  // Update stored tokens
-  const { error: updateError } = await supabase
+  // Update tokens in database
+  const { error } = await supabase
     .from('youtube_oauth_tokens')
     .update({
       access_token: tokens.access_token,
-      expires_at: new Date(Date.now() + (tokens.expires_in * 1000)).toISOString(),
+      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
 
-  if (updateError) {
-    throw new Error(`Failed to update tokens: ${updateError.message}`)
-  }
+  if (error) throw error
 
   return new Response(
-    JSON.stringify({
-      success: true,
-      data: {
-        access_token: tokens.access_token,
-        expires_in: tokens.expires_in
-      }
+    JSON.stringify({ 
+      success: true, 
+      message: 'Token refreshed successfully' 
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+}
+
+async function checkOAuthStatus(supabase: any, body: any) {
+  const { userId } = body
+
+  const { data: tokenData, error } = await supabase
+    .from('youtube_oauth_tokens')
+    .select('access_token, expires_at')
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !tokenData) {
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        connected: false 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  const isExpired = new Date(tokenData.expires_at) < new Date()
+
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      connected: true,
+      expired: isExpired
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
