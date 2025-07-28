@@ -80,7 +80,7 @@ const LiveNowTab = () => {
 
       if (activeStreams && activeStreams.length > 0) {
         const stream = activeStreams[0];
-        console.log('Found active stream:', stream);
+        console.log('Found active live stream:', stream);
         setCurrentStream({
           id: stream.id,
           title: stream.title,
@@ -91,33 +91,21 @@ const LiveNowTab = () => {
           hls_url: stream.hls_manifest_url || `https://uphgdwrwaizomnyuwfwr.supabase.co/storage/v1/object/public/live-streams/${stream.stream_key}/index.m3u8`,
           viewer_count: stream.viewer_count || Math.floor(Math.random() * 100) + 50,
           is_geova: stream.is_ai_generated || false,
-          is_free_access: true // Default to free access for OBS streams
+          is_free_access: true
         });
         setPlayerError(null);
         setLoading(false);
         return;
       }
 
-      console.log('No active OBS streams found, using YouTube fallback');
+      console.log('No live streams currently active');
       
-      // Fallback to default YouTube stream if no OBS stream active
-      setCurrentStream({
-        id: 'current-live-session',
-        title: 'Geospatial Technology Unlocked - Day 1 Intro to Geospatial Tech',
-        description: 'Introduction to Geospatial Technology - Learn the fundamentals of GIS, mapping, and spatial analysis',
-        stream_key: 'live-session',
-        status: 'live',
-        start_time: new Date().toISOString(),
-        youtube_url: 'https://www.youtube.com/embed/v7NtlDXzki8?si=8dX6B8WjZQhQkOaI&autoplay=1&mute=1',
-        viewer_count: Math.floor(Math.random() * 100) + 50,
-        is_geova: true,
-        is_free_access: true
-      });
+      // No live streams found - show no stream message
+      setCurrentStream(null);
       setPlayerError(null);
       setLoading(false);
-      return;
       
-      // Check GEOVA AI session
+      // Check GEOVA AI session only if no live streams found
       const { data: geovaData } = await supabase.functions.invoke('geova-session-manager', {
         body: { action: 'status' }
       });
@@ -133,7 +121,8 @@ const LiveNowTab = () => {
             status: 'live',
             start_time: geovaData.activeSession?.started_at || new Date().toISOString(),
             viewer_count: Math.floor(Math.random() * 50) + 20,
-            is_geova: true
+            is_geova: true,
+            is_free_access: true
           });
           setLoading(false);
           return;
@@ -212,6 +201,7 @@ const LiveNowTab = () => {
         }
       }
       
+      // No streams found
       setCurrentStream(null);
       setLastRefresh(Date.now());
     } catch (error) {
