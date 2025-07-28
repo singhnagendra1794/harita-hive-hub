@@ -32,25 +32,34 @@ const FutureEventsTab = () => {
     try {
       setLoading(true);
       
-      // Show only the specific "How to Become an Earth Coder" event
-      const staticEvents: UpcomingEvent[] = [
-        {
-          id: '1',
-          title: 'How to Become an Earth Coder – Free Webinar',
-          description: 'Discover the intersection of coding and geospatial technology. Learn about career paths, essential skills, and real-world applications in environmental monitoring, urban planning, and climate science.',
-          date: '2025-07-27',
-          time: '18:30',
-          duration: 60,
-          meetingLink: 'https://meet.google.com/tjj-ozqq-ozi',
-          type: 'webinar',
-          instructor: 'Nagendra Singh',
-          capacity: 200,
-          registered: 108,
-          timezone: 'IST'
-        }
-      ];
+      // Get upcoming course sessions from database
+      const { data: upcomingSessions, error } = await supabase
+        .from('geova_teaching_schedule')
+        .select('*')
+        .gte('scheduled_date', new Date().toISOString().split('T')[0])
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_time', { ascending: true })
+        .limit(5);
 
-      setEvents(staticEvents);
+      const events: UpcomingEvent[] = [];
+      
+      if (upcomingSessions && !error) {
+        upcomingSessions.forEach(session => {
+          events.push({
+            id: session.id,
+            title: `Day ${session.day_number} – ${session.topic_title}`,
+            description: session.topic_description || 'Geospatial Technology Unlocked course session',
+            date: session.scheduled_date,
+            time: session.scheduled_time || '05:00',
+            duration: session.duration_minutes || 90,
+            type: 'course',
+            instructor: 'GEOVA AI',
+            timezone: 'IST'
+          });
+        });
+      }
+
+      setEvents(events);
     } catch (error) {
       console.error('Error loading events:', error);
     } finally {

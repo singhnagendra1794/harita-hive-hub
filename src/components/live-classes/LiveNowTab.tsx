@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play } from "lucide-react";
+import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play, BookOpen } from "lucide-react";
 
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 import { ScreenProtection } from '@/components/security/ScreenProtection';
 import { UserWatermark } from '@/components/security/UserWatermark';
 import SecureYouTubePlayer from '@/components/youtube/SecureYouTubePlayer';
+import { LiveClassCard } from './LiveClassCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -32,6 +33,8 @@ interface LiveStream {
   custom_day_label?: string;
   is_youtube_session?: boolean;
   access_tier?: 'free' | 'professional' | 'enterprise';
+  course_name?: string;
+  course_day?: number;
 }
 
 interface GEOVASession {
@@ -144,62 +147,83 @@ const LiveNowTab = () => {
       try {
         setLoading(true)
         
-        // First sync with YouTube API
-        const { error: syncError } = await supabase.functions.invoke('youtube-live-manager', {
-          body: { action: 'sync_upcoming_streams' }
-        })
-        
-        if (syncError) {
-          console.error('Error syncing with YouTube:', syncError)
-        }
-        
-        // Then get the active stream
-        const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
-          body: { action: 'get_active_stream' }
-        })
+        // Get live classes from database - prioritize course-based automation
+        const { data: liveClasses, error } = await supabase
+          .from('live_classes')
+          .select('*')
+          .in('status', ['live', 'scheduled'])
+          .order('starts_at', { ascending: true })
         
         if (error) {
+          console.error('Error fetching live classes:', error)
           throw error
         }
         
-        if (response?.stream) {
-          setCurrentStream({
-            id: response.stream.id,
-            title: response.stream.title,
-            description: response.stream.description || '',
-            stream_key: response.stream.youtube_stream_key || '',
-            start_time: response.stream.scheduled_start_time,
-            status: response.stream.status as 'scheduled' | 'live',
-            youtube_url: response.stream.youtube_broadcast_id ? 
-              `https://www.youtube-nocookie.com/embed/${response.stream.youtube_broadcast_id}?autoplay=${response.stream.status === 'live' ? 1 : 0}&modestbranding=1&rel=0&disablekb=1&iv_load_policy=3&showinfo=0` : 
-              undefined,
-            thumbnail_url: response.stream.thumbnail_url,
-            viewer_count: 0,
-            is_geova: false,
-            is_free_access: true
-          })
-          
-          // Check if stream is scheduled to start within 10 minutes
-          const startTime = new Date(response.stream.scheduled_start_time)
+        if (liveClasses && liveClasses.length > 0) {
           const now = new Date()
-          const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000)
           
-          // If stream starts within 10 minutes or is live, check status more frequently
-          if (startTime <= tenMinutesFromNow || response.stream.status === 'live') {
-            // Check stream status for real-time updates
-            const { data: statusResponse } = await supabase.functions.invoke('youtube-live-manager', {
-              body: { action: 'check_stream_status', schedule_id: response.stream.id }
-            })
+          // Find the most relevant stream to show
+          let bestStream = null
+          
+          for (const stream of liveClasses) {
+            const startTime = new Date(stream.starts_at)
+            const endTime = stream.end_time ? new Date(stream.end_time) : new Date(startTime.getTime() + 90 * 60 * 1000)
+            const timeDiff = startTime.getTime() - now.getTime()
             
-            if (statusResponse?.live && response.stream.status !== 'live') {
-              // Update local state if stream went live
-              setCurrentStream(prev => prev ? { ...prev, status: 'live' } : null)
+            // Show if currently live
+            if (stream.status === 'live' && now >= startTime && now <= endTime) {
+              bestStream = stream
+              break
+            }
+            
+            // Show if starting within 30 minutes
+            if (stream.status === 'scheduled' && timeDiff <= 30 * 60 * 1000 && timeDiff >= -5 * 60 * 1000) {
+              bestStream = stream
+              break
             }
           }
-        } else {
-          // Fallback to existing logic if no YouTube stream found
-          checkForLiveStreams()
+          
+          if (bestStream) {
+            const startTime = new Date(bestStream.starts_at)
+            const now = new Date()
+            const isCurrentlyLive = bestStream.status === 'live' || 
+              (now >= startTime && now <= new Date(startTime.getTime() + 90 * 60 * 1000))
+            
+            setCurrentStream({
+              id: bestStream.id,
+              title: bestStream.title,
+              description: bestStream.description || '',
+              stream_key: bestStream.stream_key || '',
+              start_time: bestStream.starts_at,
+              status: isCurrentlyLive ? 'live' : 'scheduled',
+              youtube_url: bestStream.embed_url || bestStream.youtube_url,
+              thumbnail_url: bestStream.thumbnail_url,
+              viewer_count: bestStream.viewer_count || 0,
+              is_geova: bestStream.instructor === 'GEOVA AI',
+              is_free_access: bestStream.access_tier !== 'professional',
+              course_name: bestStream.course_name,
+              course_day: bestStream.course_day,
+              access_tier: bestStream.access_tier as 'free' | 'professional' | 'enterprise'
+            })
+            
+            // Set countdown if not yet started
+            if (!isCurrentlyLive) {
+              const timeDiff = startTime.getTime() - now.getTime()
+              setTimeUntilStart(timeDiff)
+              const minutes = Math.ceil(timeDiff / (1000 * 60))
+              setCountdownText(`Live class starts in ${minutes} minute${minutes !== 1 ? 's' : ''}`)
+            } else {
+              setTimeUntilStart(null)
+              setCountdownText('')
+            }
+            
+            setLoading(false)
+            return
+          }
         }
+        
+        // Fallback to existing logic if no database streams found
+        checkForLiveStreams()
       } catch (error) {
         console.error('Error fetching live class:', error)
         // Fallback to existing logic
