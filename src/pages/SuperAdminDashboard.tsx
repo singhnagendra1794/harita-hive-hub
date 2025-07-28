@@ -10,6 +10,7 @@ import Layout from '@/components/Layout';
 import QATestResults from '@/components/admin/QATestResults';
 import YouTubeSessionManager from '@/components/admin/YouTubeSessionManager';
 import YouTubeLiveScheduler from '@/components/admin/YouTubeLiveScheduler';
+import { YouTubeLiveManager } from '@/components/admin/YouTubeLiveManager';
 import AdminErrorHandler from '@/components/admin/AdminErrorHandler';
 
 const SuperAdminDashboard = () => {
@@ -161,6 +162,7 @@ const SuperAdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="youtube-live" className="space-y-6">
+            <YouTubeLiveManager />
             <YouTubeLiveScheduler />
           </TabsContent>
           
