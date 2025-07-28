@@ -213,22 +213,12 @@ const LiveNowTab = () => {
       fetchLiveClass()
     }
     
-    // Dynamic polling: every 15 seconds when stream is imminent/live, every 30 seconds otherwise
-    const getPollingInterval = () => {
-      if (!currentStream) return 30000
-      
-      const startTime = new Date(currentStream.start_time)
-      const now = new Date()
-      const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000)
-      
-      return (startTime <= tenMinutesFromNow || currentStream.status === 'live') ? 15000 : 30000
-    }
-    
+    // Reduced polling interval - check every 30 seconds instead of rapid refresh
     const interval = setInterval(() => {
       if (!premiumLoading) {
         fetchLiveClass()
       }
-    }, getPollingInterval())
+    }, 30000) // 30 seconds fixed interval
     
     return () => clearInterval(interval)
   }, [premiumLoading, currentStream?.status])
