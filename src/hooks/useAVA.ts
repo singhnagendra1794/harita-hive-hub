@@ -104,28 +104,41 @@ export const useAVA = (options: UseAVAOptions = {}) => {
     } catch (error) {
       console.error('AVA Error:', error);
       
-      // Retry logic for mild failures
-      if (retryCount < 2 && !isRetry) {
+      let errorContent = "I'm experiencing a temporary issue. Please try again in a few seconds.";
+      let shouldRetry = true;
+      
+      // Check for specific error types
+      const errorMessage = error?.message || error?.toString() || '';
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        errorContent = "I'm currently experiencing high demand due to API limits. Our team has been notified. Please try again later or contact support@haritahive.com for assistance. 💸";
+        shouldRetry = false;
+      } else if (errorMessage.includes('timeout')) {
+        errorContent = "My response took too long. Please try asking a simpler question or try again. ⏱️";
+      } else if (errorMessage.includes('API key')) {
+        errorContent = "I'm having configuration issues. Please contact support@haritahive.com. 🔧";
+        shouldRetry = false;
+      }
+      
+      // Retry logic for retryable failures only
+      if (retryCount < 2 && !isRetry && shouldRetry) {
         console.log(`Retrying AVA request... Attempt ${retryCount + 1}`);
         setRetryCount(prev => prev + 1);
-        setTimeout(() => sendMessage(messageText, true), 1000);
+        setTimeout(() => sendMessage(messageText, true), 2000);
         return;
       }
 
       setIsHealthy(false);
-      const errorMessage: ChatMessage = {
+      const assistantErrorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: retryCount >= 2 
-          ? "I'm temporarily unavailable after multiple attempts. Please check your connection and try again later, or email support@haritahive.com for assistance. 🚧"
-          : "I'm having trouble right now. Could you try rephrasing your question or being more specific about what you're trying to accomplish? 🔧",
+        content: errorContent,
         timestamp: new Date().toISOString()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, assistantErrorMessage]);
       
       toast({
-        title: "Connection Issue",
-        description: "AVA is having trouble connecting. Please try again.",
+        title: "Service Issue",
+        description: shouldRetry ? "Connection problem detected" : "Service temporarily unavailable",
         variant: "destructive"
       });
     } finally {

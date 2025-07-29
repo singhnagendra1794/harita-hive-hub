@@ -90,21 +90,34 @@ export const useGEOVA = (options: UseGEOVAOptions = {}) => {
 
     } catch (error) {
       console.error('GEOVA Error:', error);
-      const errorMessage: ChatMessage = {
+      
+      let errorContent = "I'm experiencing a temporary issue. Please try again in a few seconds.";
+      
+      // Check for specific error types
+      const errorMessage = error?.message || error?.toString() || '';
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        errorContent = "I'm currently experiencing high demand due to API limits. Our team has been notified. Please try again later or contact support@haritahive.com for assistance. 💸";
+      } else if (errorMessage.includes('timeout')) {
+        errorContent = "My response took too long. Please try asking a simpler question or try again. ⏱️";
+      } else if (errorMessage.includes('API key')) {
+        errorContent = "I'm having configuration issues. Please contact support@haritahive.com. 🔧";
+      }
+      
+      const assistantErrorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "I'm having some technical difficulties right now! 🔧 Could you try rephrasing your question? I'm eager to help you learn! 📚",
+        content: errorContent,
         timestamp: new Date().toISOString()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, assistantErrorMessage]);
       
       toast({
-        title: "Connection Issue",
-        description: "GEOVA is having trouble connecting. Please try again.",
+        title: "Service Issue", 
+        description: "GEOVA is temporarily unavailable",
         variant: "destructive"
       });
 
-      return errorMessage;
+      return assistantErrorMessage;
     } finally {
       setIsLoading(false);
     }
