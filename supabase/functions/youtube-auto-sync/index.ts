@@ -1,334 +1,214 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    );
 
-    console.log('Starting YouTube auto-sync...')
+    const youtubeApiKey = Deno.env.get('YOUTUBE_API_KEY');
+    const channelId = Deno.env.get('YOUTUBE_CHANNEL_ID');
 
-    // Get super admin for OAuth token
-    const { data: superAdmin } = await supabase.auth.admin.listUsers()
-    const superAdminUser = superAdmin?.users?.find(user => user.email === 'contact@haritahive.com')
+    if (!youtubeApiKey || !channelId) {
+      throw new Error('YouTube API credentials not configured');
+    }
+
+    await syncUpcomingStreams(youtubeApiKey, channelId, supabase);
+    await checkLiveStatus(youtubeApiKey, channelId, supabase);
     
-    if (!superAdminUser) {
-      throw new Error('Super admin user not found')
-    }
-
-    // Get OAuth token
-    const { data: tokenData, error: tokenError } = await supabase
-      .from('youtube_oauth_tokens')
-      .select('access_token, refresh_token, expires_at')
-      .eq('user_id', superAdminUser.id)
-      .single()
-
-    let accessToken = tokenData?.access_token
-    
-    // If no OAuth token, try using API key for public live streams
-    if (tokenError || !tokenData?.access_token || tokenData.access_token === 'placeholder_access_token') {
-      console.log('No OAuth token, using API key for public stream detection...')
-      return await syncWithApiKey(supabase)
-    }
-
-    // Check if token needs refresh
-    const now = new Date()
-    const expiresAt = new Date(tokenData.expires_at)
-    
-    if (now >= expiresAt) {
-      console.log('Refreshing expired token...')
-      accessToken = await refreshAccessToken(supabase, tokenData.refresh_token, superAdminUser.id)
-    }
-
-    // Step 1: Get all active/scheduled broadcasts
-    const broadcastsResponse = await fetch(
-      'https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,liveStreamingDetails&broadcastStatus=all&maxResults=50',
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        }
-      }
-    )
-
-    if (!broadcastsResponse.ok) {
-      console.error('Failed to fetch broadcasts, falling back to API key method')
-      return await syncWithApiKey(supabase)
-    }
-
-    const broadcastsData = await broadcastsResponse.json()
-    const broadcasts = broadcastsData.items || []
-    
-    console.log(`Found ${broadcasts.length} broadcasts`)
-
-    let syncedCount = 0
-    let liveCount = 0
-
-    // Step 2: Process each broadcast
-    for (const broadcast of broadcasts) {
-      try {
-        const broadcastId = broadcast.id
-        const status = broadcast.status.lifeCycleStatus
-        const broadcastStatus = broadcast.status.broadcastStatus || 'unknown'
-        
-        console.log(`Processing broadcast ${broadcastId}: ${status}/${broadcastStatus}`)
-
-        // Update youtube_live_schedule
-        const { error: scheduleError } = await supabase
-          .from('youtube_live_schedule')
-          .upsert({
-            youtube_broadcast_id: broadcastId,
-            title: broadcast.snippet.title,
-            description: broadcast.snippet.description?.substring(0, 500),
-            scheduled_start_time: broadcast.snippet.scheduledStartTime || new Date().toISOString(),
-            actual_start_time: broadcast.liveStreamingDetails?.actualStartTime,
-            actual_end_time: broadcast.liveStreamingDetails?.actualEndTime,
-            status: status === 'live' ? 'live' : status === 'complete' ? 'ended' : 'scheduled',
-            thumbnail_url: broadcast.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${broadcastId}/maxresdefault.jpg`,
-            created_by: superAdminUser.id,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'youtube_broadcast_id'
-          })
-
-        if (scheduleError) {
-          console.error('Schedule update error:', scheduleError)
-          continue
-        }
-
-        // Update or create live_classes entry
-        if (status === 'live' || status === 'liveStarting') {
-          liveCount++
-          
-          const { error: liveClassError } = await supabase
-            .from('live_classes')
-            .upsert({
-              youtube_broadcast_id: broadcastId,
-              title: broadcast.snippet.title,
-              description: broadcast.snippet.description?.substring(0, 500),
-              starts_at: broadcast.liveStreamingDetails?.actualStartTime || broadcast.snippet.scheduledStartTime,
-              status: 'live',
-              youtube_url: `https://www.youtube.com/watch?v=${broadcastId}`,
-              embed_url: `https://www.youtube-nocookie.com/embed/${broadcastId}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1`,
-              thumbnail_url: broadcast.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${broadcastId}/maxresdefault.jpg`,
-              instructor: 'Live Session',
-              access_tier: 'professional',
-              viewer_count: broadcast.liveStreamingDetails?.concurrentViewers ? parseInt(broadcast.liveStreamingDetails.concurrentViewers) : 0,
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'youtube_broadcast_id'
-            })
-
-          if (liveClassError) {
-            console.error('Live class update error:', liveClassError)
-          }
-        } 
-        // Handle completed streams - move to recordings
-        else if (status === 'complete') {
-          // Check if recording is available
-          const videoResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/videos?part=status,snippet&id=${broadcastId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${accessToken}`,
-              }
-            }
-          )
-
-          if (videoResponse.ok) {
-            const videoData = await videoResponse.json()
-            const video = videoData.items?.[0]
-
-            if (video && video.status.uploadStatus === 'processed') {
-              // Add to recordings table
-              const { error: recordingError } = await supabase
-                .from('live_recordings')
-                .upsert({
-                  youtube_broadcast_id: broadcastId,
-                  title: video.snippet.title,
-                  description: video.snippet.description?.substring(0, 500),
-                  youtube_url: `https://www.youtube.com/watch?v=${broadcastId}`,
-                  embed_url: `https://www.youtube-nocookie.com/embed/${broadcastId}?controls=1&rel=0&modestbranding=1`,
-                  thumbnail_url: video.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${broadcastId}/maxresdefault.jpg`,
-                  duration_seconds: null, // Could parse from video if needed
-                  recorded_at: broadcast.liveStreamingDetails?.actualEndTime || new Date().toISOString(),
-                  access_tier: 'professional',
-                  is_public: false,
-                  updated_at: new Date().toISOString()
-                }, {
-                  onConflict: 'youtube_broadcast_id'
-                })
-
-              if (recordingError) {
-                console.error('Recording creation error:', recordingError)
-              }
-
-              // Update live_classes status to ended
-              await supabase
-                .from('live_classes')
-                .update({ 
-                  status: 'ended',
-                  updated_at: new Date().toISOString()
-                })
-                .eq('youtube_broadcast_id', broadcastId)
-            }
-          }
-        }
-
-        syncedCount++
-      } catch (error) {
-        console.error(`Error processing broadcast ${broadcast.id}:`, error)
-      }
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        synced: syncedCount,
-        live: liveCount,
-        message: `Synced ${syncedCount} broadcasts, ${liveCount} currently live`
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'YouTube sync completed',
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
   } catch (error) {
-    console.error('Auto-sync error:', error)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    console.error('YouTube Auto Sync Error:', error);
+    
+    // Failover mode - try direct embed detection
+    await failoverLiveDetection();
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      failover: true
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-})
+});
 
-async function syncWithApiKey(supabase: any) {
-  const apiKey = Deno.env.get('YOUTUBE_API_KEY')
-  
-  if (!apiKey) {
-    throw new Error('No YouTube API access available')
-  }
+async function syncUpcomingStreams(apiKey: string, channelId: string, supabase: any) {
+  try {
+    // Fetch upcoming live broadcasts
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=upcoming&channelId=${channelId}&key=${apiKey}`
+    );
 
-  console.log('Syncing with API key...')
+    if (!response.ok) throw new Error('Failed to fetch upcoming streams');
 
-  // Search for live streams with relevant keywords
-  const searchQueries = [
-    'gis live',
-    'geospatial live',
-    'mapping live',
-    'remote sensing live',
-    'qgis live',
-    'arcgis live'
-  ]
+    const data = await response.json();
+    
+    for (const broadcast of data.items) {
+      const streamData = {
+        youtube_id: broadcast.id,
+        title: broadcast.snippet.title,
+        description: broadcast.snippet.description,
+        thumbnail_url: broadcast.snippet.thumbnails?.maxres?.url || broadcast.snippet.thumbnails?.high?.url,
+        scheduled_start_time: broadcast.snippet.scheduledStartTime,
+        status: 'scheduled',
+        youtube_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
+        embed_url: `https://www.youtube-nocookie.com/embed/${broadcast.id}?modestbranding=1&rel=0`,
+        auto_imported: true,
+        updated_at: new Date().toISOString()
+      };
 
-  let foundStreams = 0
+      // Insert or update stream
+      const { error } = await supabase
+        .from('live_classes')
+        .upsert(streamData, { 
+          onConflict: 'youtube_id',
+          ignoreDuplicates: false 
+        });
 
-  for (const query of searchQueries) {
-    try {
-      const searchResponse = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&eventType=live&type=video&key=${apiKey}&maxResults=10`
-      )
-
-      if (searchResponse.ok) {
-        const searchData = await searchResponse.json()
-        
-        if (searchData.items?.length > 0) {
-          for (const item of searchData.items) {
-            // Get detailed video info
-            const videoResponse = await fetch(
-              `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails,statistics&id=${item.id.videoId}&key=${apiKey}`
-            )
-
-            if (videoResponse.ok) {
-              const videoData = await videoResponse.json()
-              const video = videoData.items?.[0]
-
-              if (video && video.liveStreamingDetails) {
-                // Store in live_classes
-                await supabase
-                  .from('live_classes')
-                  .upsert({
-                    youtube_broadcast_id: video.id,
-                    title: video.snippet.title,
-                    description: video.snippet.description?.substring(0, 500),
-                    starts_at: video.liveStreamingDetails.actualStartTime || new Date().toISOString(),
-                    status: 'live',
-                    youtube_url: `https://www.youtube.com/watch?v=${video.id}`,
-                    embed_url: `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1`,
-                    thumbnail_url: video.snippet.thumbnails?.high?.url || `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`,
-                    instructor: 'Live Session',
-                    access_tier: 'professional',
-                    viewer_count: video.liveStreamingDetails.concurrentViewers ? parseInt(video.liveStreamingDetails.concurrentViewers) : 0,
-                    updated_at: new Date().toISOString()
-                  }, {
-                    onConflict: 'youtube_broadcast_id'
-                  })
-
-                foundStreams++
-                console.log(`Found and synced live stream: ${video.snippet.title}`)
-              }
-            }
-          }
-        }
+      if (error) {
+        console.error('Error upserting stream:', error);
+      } else {
+        console.log(`Synced upcoming stream: ${broadcast.snippet.title}`);
       }
-    } catch (error) {
-      console.error(`Error searching for "${query}":`, error)
     }
-  }
 
-  return new Response(
-    JSON.stringify({
-      success: true,
-      synced: foundStreams,
-      live: foundStreams,
-      message: `Found and synced ${foundStreams} live streams using API key`
-    }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+  } catch (error) {
+    console.error('Error syncing upcoming streams:', error);
+    throw error;
+  }
 }
 
-async function refreshAccessToken(supabase: any, refreshToken: string, userId: string): Promise<string> {
-  const clientId = Deno.env.get('GOOGLE_CLIENT_ID')
-  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
+async function checkLiveStatus(apiKey: string, channelId: string, supabase: any) {
+  try {
+    // Check for currently live broadcasts
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=live&channelId=${channelId}&key=${apiKey}`
+    );
 
-  if (!clientId || !clientSecret) {
-    throw new Error('Google OAuth credentials not configured')
+    if (!response.ok) throw new Error('Failed to check live status');
+
+    const data = await response.json();
+    
+    // Update database for live streams
+    for (const broadcast of data.items) {
+      const { error } = await supabase
+        .from('live_classes')
+        .update({
+          status: 'live',
+          actual_start_time: new Date().toISOString(),
+          viewer_count: broadcast.statistics?.concurrentViewers || 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('youtube_id', broadcast.id);
+
+      if (error) {
+        console.error('Error updating live status:', error);
+      } else {
+        console.log(`Updated live status for: ${broadcast.snippet.title}`);
+      }
+    }
+
+    // Check for completed broadcasts
+    const completedResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=complete&channelId=${channelId}&key=${apiKey}&maxResults=5`
+    );
+
+    if (completedResponse.ok) {
+      const completedData = await completedResponse.json();
+      
+      for (const broadcast of completedData.items) {
+        const { error } = await supabase
+          .from('live_classes')
+          .update({
+            status: 'completed',
+            ended_at: new Date().toISOString(),
+            recording_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
+            updated_at: new Date().toISOString()
+          })
+          .eq('youtube_id', broadcast.id);
+
+        if (!error) {
+          console.log(`Marked as completed: ${broadcast.snippet.title}`);
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error('Error checking live status:', error);
+    throw error;
   }
+}
 
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  })
+async function failoverLiveDetection() {
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-  if (!response.ok) {
-    throw new Error('Failed to refresh access token')
+    // Get current scheduled streams
+    const { data: scheduledStreams } = await supabase
+      .from('live_classes')
+      .select('*')
+      .eq('status', 'scheduled')
+      .gte('scheduled_start_time', new Date(Date.now() - 3600000).toISOString()) // Within last hour
+      .lte('scheduled_start_time', new Date(Date.now() + 1800000).toISOString()); // Within next 30 minutes
+
+    if (scheduledStreams && scheduledStreams.length > 0) {
+      for (const stream of scheduledStreams) {
+        // Try to detect if embed is live by checking availability
+        try {
+          const embedCheck = await fetch(stream.embed_url, { 
+            method: 'HEAD'
+          });
+          
+          if (embedCheck.ok) {
+            // Assume it's live if we're close to scheduled time
+            const now = new Date();
+            const scheduledTime = new Date(stream.scheduled_start_time);
+            const timeDiff = Math.abs(now.getTime() - scheduledTime.getTime());
+            
+            if (timeDiff < 1800000) { // Within 30 minutes
+              await supabase
+                .from('live_classes')
+                .update({
+                  status: 'live',
+                  actual_start_time: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', stream.id);
+              
+              console.log(`Failover: Marked as live - ${stream.title}`);
+            }
+          }
+        } catch (embedError) {
+          console.log('Embed check failed, stream likely not live yet');
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error('Failover detection error:', error);
   }
-
-  const tokens = await response.json()
-
-  await supabase
-    .from('youtube_oauth_tokens')
-    .update({
-      access_token: tokens.access_token,
-      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', userId)
-
-  return tokens.access_token
 }
