@@ -1,323 +1,338 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GEOVAChatInterface } from '@/components/geova/GEOVAChatInterface';
-import { useGEOVA } from '@/hooks/useGEOVA';
+import { useChatbotIntegration } from '@/hooks/useChatbotIntegration';
 import { useAuth } from '@/contexts/AuthContext';
-import { Brain, BookOpen, Target, Code, Map, Rocket, Trophy, Clock, TrendingUp } from 'lucide-react';
+import { 
+  Brain, BookOpen, Target, Code, Map, Rocket, Trophy, Clock, 
+  CheckCircle, Star, Play, ArrowRight, MessageCircle, Users,
+  Zap, Globe, Award, TrendingUp, Quote, ExternalLink
+} from 'lucide-react';
 
 const GEOVAAssistant = () => {
   const { user } = useAuth();
-  const { learningProgress, getLearningProgress, askQuickQuestion } = useGEOVA();
-  const [currentTab, setCurrentTab] = useState('chat');
+  const { askQuestion } = useChatbotIntegration();
+  const [showChatInterface, setShowChatInterface] = useState(false);
 
-  useEffect(() => {
+  const features = [
+    {
+      icon: <BookOpen className="w-8 h-8" />,
+      title: "Course Assistance",
+      description: "Explains concepts from HaritaHive courses in detail with step-by-step guidance and interactive examples"
+    },
+    {
+      icon: <Code className="w-8 h-8" />,
+      title: "Code & Tool Support", 
+      description: "Generates Python, R, SQL, and GIS automation scripts tailored to your specific project needs"
+    },
+    {
+      icon: <Target className="w-8 h-8" />,
+      title: "Project Guidance",
+      description: "Helps in using templates, tools, and datasets from HaritaHive to complete real-world projects"
+    },
+    {
+      icon: <Trophy className="w-8 h-8" />,
+      title: "Exam & Job Prep",
+      description: "Quizzes, interview prep, and mock project simulations to ensure career readiness"
+    }
+  ];
+
+  const benefits = [
+    {
+      icon: <Target className="w-6 h-6" />,
+      title: "Personalized Study Plans",
+      description: "Custom learning paths based on your profile, goals, and current skill level"
+    },
+    {
+      icon: <MessageCircle className="w-6 h-6" />,
+      title: "Instant Expert Answers",
+      description: "24/7 support for GIS, Remote Sensing, GeoAI, automation, coding, and data science questions"
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Live Class Integration",
+      description: "Real-time support during HaritaHive live classes with contextual assistance"
+    },
+    {
+      icon: <Rocket className="w-6 h-6" />,
+      title: "Career Roadmap Guidance",
+      description: "Professional development aligned with your resume and integrated with Skill Copilot"
+    }
+  ];
+
+  const successStories = [
+    {
+      name: "Sarah M.",
+      role: "GIS Analyst at Urban Planning Firm",
+      story: "GEOVA helped me master QGIS and Python automation in just 3 months. I landed my dream job with confidence in spatial analysis and project management.",
+      achievement: "Certification + Job Placement"
+    },
+    {
+      name: "David K.",
+      role: "Freelance Remote Sensing Specialist", 
+      story: "With GEOVA's guidance on satellite imagery analysis and machine learning, I started my own geospatial consulting business serving environmental organizations.",
+      achievement: "Freelance Success"
+    },
+    {
+      name: "Maria L.",
+      role: "Environmental Data Scientist",
+      story: "GEOVA's personalized learning path helped me transition from biology to geospatial data science. The career guidance was invaluable for my professional growth.",
+      achievement: "Career Transition"
+    }
+  ];
+
+  const handleStartLearning = () => {
     if (user) {
-      getLearningProgress();
+      setShowChatInterface(true);
+    } else {
+      askQuestion("I want to start learning with GEOVA. How do I begin my geospatial journey?");
     }
-  }, [user, getLearningProgress]);
+  };
 
-  const quickStartOptions = [
-    {
-      id: 'getting-started',
-      title: 'Getting Started with GIS',
-      description: 'Perfect for complete beginners',
-      icon: <Rocket className="w-5 h-5" />,
-      color: 'bg-blue-500'
-    },
-    {
-      id: 'qgis-help',
-      title: 'QGIS Workflow Help',
-      description: 'Learn QGIS tools and techniques',
-      icon: <Map className="w-5 h-5" />,
-      color: 'bg-green-500'
-    },
-    {
-      id: 'python-gis',
-      title: 'Python for GIS',
-      description: 'Automate with Python & GeoPandas',
-      icon: <Code className="w-5 h-5" />,
-      color: 'bg-purple-500'
-    },
-    {
-      id: 'career-advice',
-      title: 'Career Guidance',
-      description: 'Plan your geospatial career path',
-      icon: <Target className="w-5 h-5" />,
-      color: 'bg-orange-500'
-    },
-    {
-      id: 'project-help',
-      title: 'Project Assistance',
-      description: 'Get help with current projects',
-      icon: <BookOpen className="w-5 h-5" />,
-      color: 'bg-pink-500'
-    },
-    {
-      id: 'tools-comparison',
-      title: 'Tools & Technologies',
-      description: 'Compare GIS tools and platforms',
-      icon: <Trophy className="w-5 h-5" />,
-      color: 'bg-cyan-500'
-    }
-  ];
-
-  const learningStats = [
-    {
-      label: 'Progress to Professional',
-      value: learningProgress?.progress_percentage || 0,
-      max: 100,
-      unit: '%',
-      icon: <TrendingUp className="w-4 h-4" />,
-      color: 'text-green-600'
-    },
-    {
-      label: 'Lessons Completed',
-      value: learningProgress?.completed_lessons || 0,
-      max: learningProgress?.total_lessons || 1,
-      unit: 'lessons',
-      icon: <BookOpen className="w-4 h-4" />,
-      color: 'text-blue-600'
-    },
-    {
-      label: 'Days Learning',
-      value: learningProgress?.days_learning || 0,
-      max: 120,
-      unit: 'days',
-      icon: <Clock className="w-4 h-4" />,
-      color: 'text-purple-600'
-    }
-  ];
+  if (showChatInterface) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowChatInterface(false)}
+            className="mb-4"
+          >
+            ← Back to GEOVA Overview
+          </Button>
+        </div>
+        <GEOVAChatInterface 
+          contextType="assistant"
+          showVoiceControls={true}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center mb-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
-            <Brain className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold">Meet GEOVA</h1>
-            <p className="text-xl text-muted-foreground">Your AI Geospatial Mentor</p>
-          </div>
-        </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Your personal AI mentor designed to guide you from beginner to geospatial professional in 120 days. 
-          Ask anything about GIS, get personalized learning paths, and master spatial technology with confidence.
-        </p>
-      </div>
-
-      {/* Learning Progress Dashboard */}
-      {user && (
-        <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5" />
-              Your Learning Journey
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {learningStats.map((stat, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={stat.color}>{stat.icon}</span>
-                      <span className="font-medium">{stat.label}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {stat.value}/{stat.max} {stat.unit}
-                    </span>
-                  </div>
-                  <Progress value={(stat.value / stat.max) * 100} className="h-2" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Main Content */}
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="chat">Chat with GEOVA</TabsTrigger>
-          <TabsTrigger value="quick-start">Quick Start</TabsTrigger>
-          <TabsTrigger value="learning-path">Learning Path</TabsTrigger>
-        </TabsList>
-
-        {/* Chat Interface */}
-        <TabsContent value="chat">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              <GEOVAChatInterface 
-                contextType="assistant"
-                showVoiceControls={true}
-              />
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+        <div className="relative container mx-auto px-4 py-16 lg:py-24">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center shadow-lg">
+                <Brain className="w-10 h-10 text-white" />
+              </div>
             </div>
             
-            {/* Sidebar */}
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">🎯 Learning Goals</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Badge variant="outline" className="w-full justify-start">
-                    <BookOpen className="w-3 h-3 mr-1" />
-                    Master QGIS
-                  </Badge>
-                  <Badge variant="outline" className="w-full justify-start">
-                    <Code className="w-3 h-3 mr-1" />
-                    Python for GIS
-                  </Badge>
-                  <Badge variant="outline" className="w-full justify-start">
-                    <Map className="w-3 h-3 mr-1" />
-                    Spatial Analysis
-                  </Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">💡 Tips</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2">
-                  <p>• Be specific about your goals</p>
-                  <p>• Ask for step-by-step guidance</p>
-                  <p>• Request code examples</p>
-                  <p>• Share your current skill level</p>
-                </CardContent>
-              </Card>
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              GEOVA – Your AI Mentor for Geospatial Mastery
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-muted-foreground mb-8 leading-relaxed">
+              Learn smarter, faster, and more effectively with a 24/7 AI-powered mentor that guides you through the 
+              <span className="font-semibold text-primary"> Geospatial Technology Unlocked</span> course and beyond.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                onClick={handleStartLearning}
+                className="text-lg px-8 py-4 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+              >
+                <Rocket className="w-5 h-5 mr-2" />
+                Start Learning with GEOVA
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-lg px-8 py-4"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch How It Works
+              </Button>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      </section>
 
-        {/* Quick Start */}
-        <TabsContent value="quick-start">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>🚀 Start Learning with GEOVA</CardTitle>
-                <p className="text-muted-foreground">
-                  Choose a topic below to begin an interactive learning session with your AI mentor.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {quickStartOptions.map((option) => (
-                    <Card key={option.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <Button
-                          variant="ghost"
-                          className="w-full h-auto flex-col items-start gap-3 p-0"
-                          onClick={() => {
-                            askQuickQuestion(option.id);
-                            setCurrentTab('chat');
-                          }}
-                        >
-                          <div className="flex items-center gap-3 w-full">
-                            <div className={`w-10 h-10 ${option.color} rounded-lg flex items-center justify-center text-white`}>
-                              {option.icon}
-                            </div>
-                            <div className="text-left flex-1">
-                              <h3 className="font-semibold">{option.title}</h3>
-                              <p className="text-sm text-muted-foreground">{option.description}</p>
-                            </div>
-                          </div>
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Featured Topics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>🌟 Popular Learning Topics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    'QGIS Basics', 'PostGIS Setup', 'Python GeoPandas', 'Remote Sensing',
-                    'Web Mapping', 'Spatial Analysis', 'Data Processing', 'Career Path'
-                  ].map((topic) => (
-                    <Badge key={topic} variant="secondary" className="justify-center py-2">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      {/* How GEOVA Helps Students */}
+      <section id="how-it-works" className="py-16 lg:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">How GEOVA Helps Students</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Accelerate your learning journey with personalized AI mentorship designed for geospatial professionals
+            </p>
           </div>
-        </TabsContent>
-
-        {/* Learning Path */}
-        <TabsContent value="learning-path">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>📚 Your 120-Day Learning Path</CardTitle>
-                <p className="text-muted-foreground">
-                  Structured curriculum designed to take you from beginner to professional.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {[
-                    {
-                      phase: 'Foundation (Days 1-30)',
-                      description: 'GIS fundamentals, QGIS basics, and spatial thinking',
-                      progress: 75,
-                      status: 'In Progress'
-                    },
-                    {
-                      phase: 'Intermediate (Days 31-60)',
-                      description: 'Advanced QGIS, PostGIS, and spatial analysis',
-                      progress: 25,
-                      status: 'Upcoming'
-                    },
-                    {
-                      phase: 'Advanced (Days 61-90)',
-                      description: 'Python automation, web mapping, and specialized tools',
-                      progress: 0,
-                      status: 'Locked'
-                    },
-                    {
-                      phase: 'Professional (Days 91-120)',
-                      description: 'Portfolio projects, career preparation, and specialization',
-                      progress: 0,
-                      status: 'Locked'
-                    }
-                  ].map((phase, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold">{phase.phase}</h3>
-                        <Badge variant={phase.status === 'In Progress' ? 'default' : 'secondary'}>
-                          {phase.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{phase.description}</p>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress</span>
-                          <span>{phase.progress}%</span>
-                        </div>
-                        <Progress value={phase.progress} className="h-2" />
-                      </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {benefits.map((benefit, index) => (
+              <Card key={index} className="h-full hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center">
+                      <span className="text-primary">{benefit.icon}</span>
                     </div>
-                  ))}
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
+                  <p className="text-muted-foreground">{benefit.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Key Features Visual Grid */}
+      <section className="py-16 lg:py-24 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Key Features</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive AI-powered tools to support every aspect of your geospatial learning journey
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </div>
                 </div>
-              </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-16 lg:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Success Stories</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Real results from learners who achieved their geospatial career goals with GEOVA
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {successStories.map((story, index) => (
+              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="mb-4">
+                  <Quote className="w-8 h-8 text-primary/30" />
+                </div>
+                <p className="text-muted-foreground mb-4 italic">"{story.story}"</p>
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{story.name}</p>
+                      <p className="text-sm text-muted-foreground">{story.role}</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      <Award className="w-3 h-3 mr-1" />
+                      {story.achievement}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Introduction Video Section */}
+      <section className="py-16 lg:py-24 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Meet Your AI Mentor</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Watch GEOVA in action and discover how AI mentorship can transform your learning experience
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <Card className="overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Play className="w-10 h-10 text-white ml-1" />
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-2">GEOVA Introduction Video</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Coming Soon: Interactive demo showing GEOVA's capabilities
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleStartLearning}
+                  >
+                    Try GEOVA Now Instead
+                  </Button>
+                </div>
+              </div>
             </Card>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="py-16 lg:py-24 bg-gradient-to-r from-primary to-secondary text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+            Ready to Achieve Your Geospatial Goals?
+          </h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+            Join thousands of students who are accelerating their careers with AI-powered mentorship. 
+            Start your journey to becoming a geospatial professional today.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              variant="secondary"
+              onClick={handleStartLearning}
+              className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90"
+            >
+              <MessageCircle className="w-5 h-5 mr-2" />
+              Try GEOVA Now – Free with Professional Plan
+            </Button>
+            
+            {!user && (
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="text-lg px-8 py-4 border-white text-white hover:bg-white/10"
+                onClick={() => window.location.href = '/auth'}
+              >
+                <ArrowRight className="w-5 h-5 mr-2" />
+                Get Professional Access
+              </Button>
+            )}
+          </div>
+          
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm opacity-75">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>24/7 Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Personalized Learning</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Career Focused</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
