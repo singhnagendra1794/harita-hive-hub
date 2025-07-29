@@ -2847,6 +2847,57 @@ export type Database = {
         }
         Relationships: []
       }
+      geova_avatar_settings: {
+        Row: {
+          accent: string
+          avatar_id: string | null
+          avatar_name: string
+          avatar_provider: string
+          avatar_video_url: string | null
+          created_at: string
+          created_by: string | null
+          gender: string
+          id: string
+          is_active: boolean | null
+          personality_traits: Json | null
+          updated_at: string
+          voice_id: string | null
+          voice_provider: string
+        }
+        Insert: {
+          accent?: string
+          avatar_id?: string | null
+          avatar_name?: string
+          avatar_provider?: string
+          avatar_video_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          gender?: string
+          id?: string
+          is_active?: boolean | null
+          personality_traits?: Json | null
+          updated_at?: string
+          voice_id?: string | null
+          voice_provider?: string
+        }
+        Update: {
+          accent?: string
+          avatar_id?: string | null
+          avatar_name?: string
+          avatar_provider?: string
+          avatar_video_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          gender?: string
+          id?: string
+          is_active?: boolean | null
+          personality_traits?: Json | null
+          updated_at?: string
+          voice_id?: string | null
+          voice_provider?: string
+        }
+        Relationships: []
+      }
       geova_class_schedule: {
         Row: {
           class_description: string | null
@@ -2880,6 +2931,84 @@ export type Database = {
           scheduled_time?: string
           timezone?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      geova_live_sessions: {
+        Row: {
+          avatar_config: Json | null
+          chat_messages: Json | null
+          created_at: string
+          created_by: string | null
+          current_participants: number | null
+          description: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          hls_endpoint: string | null
+          id: string
+          instructor_name: string | null
+          max_participants: number | null
+          recording_duration: number | null
+          recording_url: string | null
+          rtmp_endpoint: string | null
+          session_type: string
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          whiteboard_data: Json | null
+          youtube_stream_key: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_config?: Json | null
+          chat_messages?: Json | null
+          created_at?: string
+          created_by?: string | null
+          current_participants?: number | null
+          description?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          hls_endpoint?: string | null
+          id?: string
+          instructor_name?: string | null
+          max_participants?: number | null
+          recording_duration?: number | null
+          recording_url?: string | null
+          rtmp_endpoint?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          whiteboard_data?: Json | null
+          youtube_stream_key?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_config?: Json | null
+          chat_messages?: Json | null
+          created_at?: string
+          created_by?: string | null
+          current_participants?: number | null
+          description?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          hls_endpoint?: string | null
+          id?: string
+          instructor_name?: string | null
+          max_participants?: number | null
+          recording_duration?: number | null
+          recording_url?: string | null
+          rtmp_endpoint?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          whiteboard_data?: Json | null
+          youtube_stream_key?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
@@ -2990,6 +3119,50 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geova_session_participants: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_count: number | null
+          joined_at: string | null
+          left_at: string | null
+          participation_duration: number | null
+          questions_asked: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_count?: number | null
+          joined_at?: string | null
+          left_at?: string | null
+          participation_duration?: number | null
+          questions_asked?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_count?: number | null
+          joined_at?: string | null
+          left_at?: string | null
+          participation_duration?: number | null
+          questions_asked?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geova_session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "geova_live_sessions"
             referencedColumns: ["id"]
           },
         ]
