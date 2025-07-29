@@ -201,8 +201,8 @@ const LiveNowTab = () => {
               viewer_count: bestStream.viewer_count || 0,
               is_geova: bestStream.instructor === 'GEOVA AI',
               is_free_access: bestStream.access_tier !== 'professional',
-              course_name: bestStream.course_name,
-              course_day: bestStream.course_day,
+               course_name: bestStream.course_title,
+               course_day: bestStream.day_number,
               access_tier: bestStream.access_tier as 'free' | 'professional' | 'enterprise'
             })
             
@@ -251,14 +251,22 @@ const LiveNowTab = () => {
   useEffect(() => {
     const syncInterval = setInterval(async () => {
       try {
-        await supabase.functions.invoke('youtube-live-manager', {
-          body: { action: 'sync_upcoming_streams' }
-        });
-        console.log('Auto-synced with YouTube API');
+        // Try both sync functions as failover
+        await supabase.functions.invoke('youtube-auto-sync');
+        console.log('Auto-synced with YouTube API via youtube-auto-sync');
       } catch (error) {
         console.error('Auto-sync failed:', error);
+        // Fallback to youtube-live-manager
+        try {
+          await supabase.functions.invoke('youtube-live-manager', {
+            body: { action: 'sync_upcoming_streams' }
+          });
+          console.log('Fallback sync via youtube-live-manager successful');
+        } catch (fallbackError) {
+          console.error('Fallback sync also failed:', fallbackError);
+        }
       }
-    }, 120000); // 2 minutes
+    }, 30000); // Check every 30 seconds when user is on Live Now tab
 
     return () => clearInterval(syncInterval);
   }, []);
@@ -269,7 +277,51 @@ const LiveNowTab = () => {
       
       console.log('Checking for live streams...');
       
-      // First check YouTube automated streams via edge function
+      // First try youtube-auto-sync for better reliability
+      const { data: autoSyncResponse, error: autoSyncError } = await supabase.functions.invoke('youtube-auto-sync');
+      
+      if (!autoSyncError) {
+        console.log('YouTube auto-sync successful');
+        // Refresh live classes after sync
+        const { data: freshClasses } = await supabase
+          .from('live_classes')
+          .select('*')
+          .in('status', ['live', 'scheduled'])
+          .order('starts_at', { ascending: true });
+          
+        if (freshClasses && freshClasses.length > 0) {
+          const now = new Date();
+          const liveStream = freshClasses.find(stream => {
+            const startTime = new Date(stream.starts_at);
+            return stream.status === 'live' || 
+              (now >= startTime && now <= new Date(startTime.getTime() + 90 * 60 * 1000));
+          });
+          
+          if (liveStream) {
+            setCurrentStream({
+              id: liveStream.id,
+              title: liveStream.title,
+              description: liveStream.description || '',
+              stream_key: liveStream.stream_key || '',
+              start_time: liveStream.starts_at,
+              status: 'live',
+              youtube_url: liveStream.embed_url || liveStream.youtube_url,
+              thumbnail_url: liveStream.thumbnail_url,
+              viewer_count: liveStream.viewer_count || 0,
+              is_geova: liveStream.instructor === 'GEOVA AI',
+              is_free_access: liveStream.access_tier !== 'professional',
+              course_name: liveStream.course_title,
+              course_day: liveStream.day_number,
+              access_tier: liveStream.access_tier as 'free' | 'professional' | 'enterprise'
+            });
+            setPlayerError(null);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      // Fallback to youtube-live-manager
       const { data: streamResponse, error: streamError } = await supabase.functions.invoke('youtube-live-manager', {
         body: { action: 'get_active_stream' }
       });
