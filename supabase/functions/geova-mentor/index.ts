@@ -34,6 +34,19 @@ interface LearningContext {
 }
 
 serve(async (req) => {
+  const startTime = Date.now();
+  let logData = {
+    user_id: '',
+    ai_system: 'geova',
+    message_text: '',
+    response_text: '',
+    error_message: '',
+    retry_count: 0,
+    response_time_ms: 0,
+    status: 'success',
+    context_type: 'learning'
+  };
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -45,10 +58,23 @@ serve(async (req) => {
       user_id, 
       context_type = 'learning',
       mode = 'chat',
-      voice_enabled = false
+      voice_enabled = false,
+      retry_count = 0
     } = await req.json();
 
-    console.log('GEOVA Request:', { message: message?.slice(0, 100), user_id, context_type, mode });
+    // Update log data
+    logData.user_id = user_id;
+    logData.message_text = message;
+    logData.context_type = context_type;
+    logData.retry_count = retry_count;
+
+    console.log('GEOVA Request:', { 
+      message: message?.slice(0, 100), 
+      user_id, 
+      context_type, 
+      mode, 
+      retry: retry_count 
+    });
 
     if (!message) {
       throw new Error('Message is required');
@@ -56,13 +82,7 @@ serve(async (req) => {
 
     if (!openAIApiKey) {
       console.error('OpenAI API key not configured');
-      return new Response(JSON.stringify({
-        response: "I'm experiencing some technical difficulties with my AI processing right now. The OpenAI API key needs to be configured. Please contact support@haritahive.com for assistance. 🤔",
-        error_type: 'api_key_missing',
-        conversation_id
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      throw new Error('OpenAI API key not configured - please check Supabase secrets');
     }
 
     // Get user learning profile and context
@@ -84,7 +104,8 @@ serve(async (req) => {
     console.log('Calling OpenAI for GEOVA response:', {
       contentItems: relevantContent.length,
       conversationLength: conversationHistory.length,
-      userProgress: learningProfile.progress_percentage
+      userProgress: learningProfile.progress_percentage,
+      retry: retry_count
     });
 
     // Call OpenAI with timeout and better error handling
@@ -124,10 +145,22 @@ serve(async (req) => {
 
       const assistantResponse = data.choices[0].message.content;
 
+      logData.response_text = assistantResponse;
+      logData.response_time_ms = Date.now() - startTime;
+      logData.status = 'success';
+
+      console.log(`GEOVA Response: ${assistantResponse.substring(0, 100)}... (${logData.response_time_ms}ms)`);
+
       // Process learning elements from response
       const learningContext = extractLearningContext(assistantResponse);
       const recommendations = extractRecommendations(assistantResponse);
       const progressUpdate = calculateProgressUpdate(user_id, message, assistantResponse);
+
+      // Update health status to healthy
+      await updateHealthStatus(supabase, 'geova', 'healthy', 0);
+
+      // Log successful interaction
+      await logInteraction(supabase, logData);
 
       // Save conversation to database
       await saveGEOVAConversation({
@@ -151,7 +184,9 @@ serve(async (req) => {
         recommendations,
         progress_update: progressUpdate,
         next_lesson_suggestions: generateNextLessonSuggestions(learningProfile, message),
-        context_used: relevantContent.map(c => ({ type: c.type, title: c.title }))
+        context_used: relevantContent.map(c => ({ type: c.type, title: c.title })),
+        status: 'success',
+        retry_count
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -159,42 +194,54 @@ serve(async (req) => {
     } catch (openaiError) {
       console.error('OpenAI Error:', openaiError);
       clearTimeout(timeoutId);
-      
-      // Return fallback response for OpenAI-specific errors
-      return new Response(JSON.stringify({
-        response: null,
-        fallback_response: "I'm experiencing some technical difficulties with my AI processing right now. This might be due to high demand or connectivity issues. Could you try again in a moment? 🤔",
-        error_type: 'openai_error',
-        conversation_id,
-        retry_suggested: true
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      throw openaiError; // Re-throw to be handled by outer catch
     }
   } catch (error) {
-    console.error('GEOVA General Error:', error);
+    console.error('GEOVA Error:', error);
     
-    // Provide different error responses based on error type
-    let fallbackMessage = "I'm having trouble processing your question right now. As your GEOVA mentor, I want to make sure I give you the best guidance possible. Could you try rephrasing your question or let me know what specific geospatial topic you'd like to learn about?";
-    
-    if (error.message?.includes('timeout') || error.message?.includes('fetch')) {
-      fallbackMessage = "I'm experiencing connection issues right now. Please try asking your question again in a moment. I'm here to help you master geospatial technology! 🔄";
-    } else if (error.message?.includes('API key')) {
-      fallbackMessage = "I'm having authentication issues with my AI systems. Please contact support@haritahive.com for assistance. Don't worry - we'll get this sorted out quickly! 🔑";
+    // Update log data with error
+    logData.error_message = error.message || 'Unknown error';
+    logData.response_time_ms = Date.now() - startTime;
+    logData.status = error.name === 'AbortError' ? 'timeout' : 'error';
+
+    // Log the error
+    await logInteraction(supabase, logData);
+
+    // Update health status and check for repeated failures
+    await handleAIFailure(supabase, 'geova', error.message);
+
+    // Determine response based on error type
+    let fallbackResponse = "I'm experiencing a temporary issue. Please try again in a few seconds.";
+    let status = 500;
+
+    if (error.message.includes('quota') || error.message.includes('429')) {
+      fallbackResponse = "I'm currently experiencing high demand. Please try again in a few minutes. 🔄";
+      await createAlert(supabase, 'geova', 'api_quota_exceeded', error.message, 'high');
+    } else if (error.name === 'AbortError' || error.message.includes('timeout')) {
+      fallbackResponse = "My response took too long. Let me try to help differently - could you ask a more specific question? ⏱️";
+      await createAlert(supabase, 'geova', 'timeout', error.message, 'medium');
+    } else if (error.message.includes('API key')) {
+      fallbackResponse = "I'm having configuration issues. Please contact support@haritahive.com. 🔧";
+      await createAlert(supabase, 'geova', 'connection_failure', error.message, 'critical');
+    } else {
+      fallbackResponse = "I'm having some technical difficulties right now. Let me try to help you in a different way! Could you please rephrase your question or be more specific about what you're trying to learn? 🤔";
     }
 
     return new Response(JSON.stringify({ 
       error: error.message,
-      fallback_response: fallbackMessage,
-      error_type: 'general_error',
+      fallback_response: fallbackResponse,
+      status: 'error',
+      can_retry: logData.retry_count < 3 && !error.message.includes('API key'),
+      retry_count: logData.retry_count,
       support_contact: 'support@haritahive.com'
     }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
+// Helper function to fetch user learning profile
 async function getUserLearningProfile(userId: string) {
   try {
     const { data: profile } = await supabase
@@ -471,56 +518,138 @@ function generateNextLessonSuggestions(learningProfile: any, currentMessage: str
   const suggestions = [];
   
   if (currentDay <= 30) {
-    suggestions.push("Practice creating your first map in QGIS");
-    suggestions.push("Learn about coordinate reference systems");
-    suggestions.push("Explore different data formats (Shapefile, GeoJSON)");
+    suggestions.push(
+      "Let's explore basic GIS concepts",
+      "Practice with QGIS fundamentals",
+      "Learn about coordinate systems"
+    );
   } else if (currentDay <= 60) {
-    suggestions.push("Try buffer and overlay analysis");
-    suggestions.push("Practice with raster calculations");
-    suggestions.push("Learn PostGIS database basics");
+    suggestions.push(
+      "Try advanced spatial analysis",
+      "Explore remote sensing techniques",
+      "Practice with spatial databases"
+    );
   } else if (currentDay <= 90) {
-    suggestions.push("Start Python scripting for GIS");
-    suggestions.push("Create an interactive web map");
-    suggestions.push("Automate repetitive GIS tasks");
+    suggestions.push(
+      "Learn Python for GIS automation",
+      "Build web mapping applications",
+      "Master professional workflows"
+    );
   } else {
-    suggestions.push("Build your professional portfolio");
-    suggestions.push("Practice interview scenarios");
-    suggestions.push("Apply for geospatial positions");
+    suggestions.push(
+      "Create portfolio projects",
+      "Practice job interview skills",
+      "Network with GIS professionals"
+    );
   }
   
-  return suggestions.slice(0, 2);
+  return suggestions.slice(0, 3);
 }
 
 function extractMainTopic(message: string): string {
-  const gisTopics = [
-    'qgis', 'arcgis', 'postgis', 'python', 'raster', 'vector', 'projection',
-    'buffer', 'overlay', 'spatial analysis', 'remote sensing', 'web mapping',
-    'cartography', 'gps', 'coordinate system', 'database', 'automation'
-  ];
+  const topics = ['qgis', 'arcgis', 'python', 'postgis', 'remote sensing', 'web mapping', 'spatial analysis'];
+  const messageLower = message.toLowerCase();
   
-  const lowerMessage = message.toLowerCase();
-  const foundTopic = gisTopics.find(topic => lowerMessage.includes(topic));
-  return foundTopic || 'general';
+  for (const topic of topics) {
+    if (messageLower.includes(topic)) {
+      return topic;
+    }
+  }
+  
+  return 'general geospatial';
 }
 
 function extractSkillPracticed(userMessage: string, assistantResponse: string): string {
-  const skills = ['analysis', 'mapping', 'programming', 'database', 'visualization', 'problem-solving'];
+  const skills = ['analysis', 'programming', 'visualization', 'data management', 'problem solving'];
   const combined = (userMessage + ' ' + assistantResponse).toLowerCase();
   
-  return skills.find(skill => combined.includes(skill)) || 'general';
+  for (const skill of skills) {
+    if (combined.includes(skill)) {
+      return skill;
+    }
+  }
+  
+  return 'general learning';
 }
 
 function calculateProgressMade(userMessage: string, assistantResponse: string): number {
-  // Simple heuristic: longer, more detailed responses indicate more learning
-  const responseQuality = assistantResponse.length > 500 ? 3 : assistantResponse.length > 200 ? 2 : 1;
-  const questionComplexity = userMessage.length > 100 ? 2 : 1;
-  
-  return Math.min(responseQuality + questionComplexity, 5);
+  // Simple calculation based on interaction depth
+  const totalLength = userMessage.length + assistantResponse.length;
+  return Math.min(Math.floor(totalLength / 200), 5);
 }
 
-function calculateEngagement(userMessage: string, assistantResponse: string): 'high' | 'medium' | 'low' {
-  const totalLength = userMessage.length + assistantResponse.length;
-  if (totalLength > 1000) return 'high';
-  if (totalLength > 500) return 'medium';
+function calculateEngagement(userMessage: string, assistantResponse: string): string {
+  const questionMarks = (userMessage.match(/\?/g) || []).length;
+  const responseLength = assistantResponse.length;
+  
+  if (questionMarks > 2 && responseLength > 500) return 'high';
+  if (questionMarks > 0 || responseLength > 200) return 'medium';
   return 'low';
+}
+
+// Helper functions for logging and health monitoring
+async function logInteraction(supabase: any, logData: any) {
+  try {
+    await supabase.from('ai_interaction_logs').insert(logData);
+  } catch (error) {
+    console.error('Failed to log interaction:', error);
+  }
+}
+
+async function updateHealthStatus(supabase: any, aiSystem: string, status: string, consecutiveFailures: number) {
+  try {
+    await supabase
+      .from('ai_health_status')
+      .upsert({
+        ai_system: aiSystem,
+        status,
+        consecutive_failures: consecutiveFailures,
+        last_successful_response: status === 'healthy' ? new Date().toISOString() : undefined,
+        last_health_check: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'ai_system' });
+  } catch (error) {
+    console.error('Failed to update health status:', error);
+  }
+}
+
+async function handleAIFailure(supabase: any, aiSystem: string, errorMessage: string) {
+  try {
+    // Get current health status
+    const { data: currentStatus } = await supabase
+      .from('ai_health_status')
+      .select('consecutive_failures')
+      .eq('ai_system', aiSystem)
+      .single();
+
+    const failures = (currentStatus?.consecutive_failures || 0) + 1;
+    const status = failures >= 5 ? 'down' : failures >= 3 ? 'degraded' : 'healthy';
+
+    await updateHealthStatus(supabase, aiSystem, status, failures);
+
+    // Create alert for repeated failures
+    if (failures >= 3) {
+      await createAlert(supabase, aiSystem, 'repeated_failures', 
+        `${aiSystem} has failed ${failures} consecutive times. Latest error: ${errorMessage}`,
+        failures >= 5 ? 'critical' : 'high'
+      );
+    }
+  } catch (error) {
+    console.error('Failed to handle AI failure:', error);
+  }
+}
+
+async function createAlert(supabase: any, aiSystem: string, alertType: string, message: string, severity: string) {
+  try {
+    await supabase.from('ai_alerts').insert({
+      ai_system: aiSystem,
+      alert_type: alertType,
+      message,
+      severity,
+      notified_admin: false,
+      resolved: false
+    });
+  } catch (error) {
+    console.error('Failed to create alert:', error);
+  }
 }

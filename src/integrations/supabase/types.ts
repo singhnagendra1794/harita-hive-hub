@@ -188,6 +188,117 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_alerts: {
+        Row: {
+          ai_system: string
+          alert_type: string
+          created_at: string
+          id: string
+          message: string
+          notified_admin: boolean | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+        }
+        Insert: {
+          ai_system: string
+          alert_type: string
+          created_at?: string
+          id?: string
+          message: string
+          notified_admin?: boolean | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity: string
+        }
+        Update: {
+          ai_system?: string
+          alert_type?: string
+          created_at?: string
+          id?: string
+          message?: string
+          notified_admin?: boolean | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+        }
+        Relationships: []
+      }
+      ai_health_status: {
+        Row: {
+          ai_system: string
+          consecutive_failures: number | null
+          created_at: string
+          id: string
+          last_health_check: string
+          last_successful_response: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ai_system: string
+          consecutive_failures?: number | null
+          created_at?: string
+          id?: string
+          last_health_check?: string
+          last_successful_response?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          ai_system?: string
+          consecutive_failures?: number | null
+          created_at?: string
+          id?: string
+          last_health_check?: string
+          last_successful_response?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_interaction_logs: {
+        Row: {
+          ai_system: string
+          context_type: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          message_text: string
+          response_text: string | null
+          response_time_ms: number | null
+          retry_count: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          ai_system: string
+          context_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_text: string
+          response_text?: string | null
+          response_time_ms?: number | null
+          retry_count?: number | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          ai_system?: string
+          context_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_text?: string
+          response_text?: string | null
+          response_time_ms?: number | null
+          retry_count?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_portfolio_enhancements: {
         Row: {
           applied: boolean | null
@@ -8627,6 +8738,57 @@ export type Database = {
           refresh_token?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      youtube_recordings: {
+        Row: {
+          access_tier: string | null
+          created_at: string | null
+          description: string | null
+          download_count: number | null
+          duration_seconds: number | null
+          embed_url: string | null
+          id: string
+          recorded_at: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+          youtube_broadcast_id: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          access_tier?: string | null
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          embed_url?: string | null
+          id?: string
+          recorded_at?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+          youtube_broadcast_id?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          access_tier?: string | null
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          embed_url?: string | null
+          id?: string
+          recorded_at?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+          youtube_broadcast_id?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }

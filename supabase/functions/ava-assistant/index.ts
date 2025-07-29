@@ -23,6 +23,19 @@ interface RequestBody {
 }
 
 serve(async (req) => {
+  const startTime = Date.now();
+  let logData = {
+    user_id: '',
+    ai_system: 'ava',
+    message_text: '',
+    response_text: '',
+    error_message: '',
+    retry_count: 0,
+    response_time_ms: 0,
+    status: 'success',
+    context_type: 'general'
+  };
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -30,16 +43,22 @@ serve(async (req) => {
 
   try {
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured - please check Supabase secrets');
     }
 
-    const { message, conversation_id, user_id, context_type, previous_messages }: RequestBody = await req.json();
+    const { message, conversation_id, user_id, context_type, previous_messages, retry_count = 0 }: RequestBody & { retry_count?: number } = await req.json();
 
     if (!message?.trim()) {
       throw new Error('Message is required');
     }
 
-    console.log(`AVA request from user ${user_id}: ${message.substring(0, 100)}...`);
+    // Update log data
+    logData.user_id = user_id;
+    logData.message_text = message;
+    logData.context_type = context_type || 'general';
+    logData.retry_count = retry_count;
+
+    console.log(`AVA request from user ${user_id}: ${message.substring(0, 100)}... (Retry: ${retry_count})`);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -94,7 +113,11 @@ serve(async (req) => {
         throw new Error('No response from OpenAI');
       }
 
-      console.log(`OpenAI response received: ${aiResponse.substring(0, 100)}...`);
+      logData.response_text = aiResponse;
+      logData.response_time_ms = Date.now() - startTime;
+      logData.status = 'success';
+
+      console.log(`OpenAI response received: ${aiResponse.substring(0, 100)}... (${logData.response_time_ms}ms)`);
 
       // Save conversation to database
       try {
@@ -117,6 +140,12 @@ serve(async (req) => {
         // Don't fail the request if database save fails
       }
 
+      // Update health status to healthy
+      await updateHealthStatus(supabase, 'ava', 'healthy', 0);
+
+      // Log successful interaction
+      await logInteraction(supabase, logData);
+
       // Generate follow-up suggestions
       const followUpSuggestions = generateFollowUpSuggestions(message, context_type);
 
@@ -125,7 +154,8 @@ serve(async (req) => {
         conversation_id,
         context_used: [],
         follow_up_suggestions: followUpSuggestions,
-        status: 'success'
+        status: 'success',
+        retry_count
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -141,12 +171,45 @@ serve(async (req) => {
   } catch (error) {
     console.error('AVA Error:', error);
     
+    // Update log data with error
+    logData.error_message = error.message || 'Unknown error';
+    logData.response_time_ms = Date.now() - startTime;
+    logData.status = error.name === 'AbortError' ? 'timeout' : 'error';
+
+    // Initialize Supabase for error logging
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Log the error
+    await logInteraction(supabase, logData);
+
+    // Update health status and check for repeated failures
+    await handleAIFailure(supabase, 'ava', error.message);
+
+    // Determine response based on error type
+    let fallbackResponse = "I'm experiencing a temporary issue. Please try again in a few seconds.";
+    let status = 500;
+
+    if (error.message.includes('quota') || error.message.includes('429')) {
+      fallbackResponse = "I'm currently experiencing high demand. Please try again in a few minutes. 🔄";
+      await createAlert(supabase, 'ava', 'api_quota_exceeded', error.message, 'high');
+    } else if (error.name === 'AbortError' || error.message.includes('timeout')) {
+      fallbackResponse = "My response took too long. Please try a simpler question or try again. ⏱️";
+      await createAlert(supabase, 'ava', 'timeout', error.message, 'medium');
+    } else if (error.message.includes('API key')) {
+      fallbackResponse = "I'm having configuration issues. Please contact support@haritahive.com. 🔧";
+      await createAlert(supabase, 'ava', 'connection_failure', error.message, 'critical');
+    }
+    
     return new Response(JSON.stringify({
       error: error.message || 'Internal server error',
-      fallback_response: "I'm experiencing some technical difficulties with my AI processing right now. Please try rephrasing your question or contact support@haritahive.com if this persists. 🔧",
-      status: 'error'
+      fallback_response: fallbackResponse,
+      status: 'error',
+      can_retry: logData.retry_count < 3 && !error.message.includes('API key'),
+      retry_count: logData.retry_count
     }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
@@ -209,4 +272,71 @@ function generateFollowUpSuggestions(message: string, contextType?: string): str
   }
 
   return suggestions.slice(0, 3); // Limit to 3 suggestions
+}
+
+// Helper functions for logging and health monitoring
+async function logInteraction(supabase: any, logData: any) {
+  try {
+    await supabase.from('ai_interaction_logs').insert(logData);
+  } catch (error) {
+    console.error('Failed to log interaction:', error);
+  }
+}
+
+async function updateHealthStatus(supabase: any, aiSystem: string, status: string, consecutiveFailures: number) {
+  try {
+    await supabase
+      .from('ai_health_status')
+      .upsert({
+        ai_system: aiSystem,
+        status,
+        consecutive_failures: consecutiveFailures,
+        last_successful_response: status === 'healthy' ? new Date().toISOString() : undefined,
+        last_health_check: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'ai_system' });
+  } catch (error) {
+    console.error('Failed to update health status:', error);
+  }
+}
+
+async function handleAIFailure(supabase: any, aiSystem: string, errorMessage: string) {
+  try {
+    // Get current health status
+    const { data: currentStatus } = await supabase
+      .from('ai_health_status')
+      .select('consecutive_failures')
+      .eq('ai_system', aiSystem)
+      .single();
+
+    const failures = (currentStatus?.consecutive_failures || 0) + 1;
+    const status = failures >= 5 ? 'down' : failures >= 3 ? 'degraded' : 'healthy';
+
+    await updateHealthStatus(supabase, aiSystem, status, failures);
+
+    // Create alert for repeated failures
+    if (failures >= 3) {
+      await createAlert(supabase, aiSystem, 'repeated_failures', 
+        `${aiSystem} has failed ${failures} consecutive times. Latest error: ${errorMessage}`,
+        failures >= 5 ? 'critical' : 'high'
+      );
+    }
+  } catch (error) {
+    console.error('Failed to handle AI failure:', error);
+  }
+}
+
+async function createAlert(supabase: any, aiSystem: string, alertType: string, message: string, severity: string) {
+  try {
+    await supabase.from('ai_alerts').insert({
+      ai_system: aiSystem,
+      alert_type: alertType,
+      message,
+      severity,
+      notified_admin: false,
+      resolved: false
+    });
+  } catch (error) {
+    console.error('Failed to create alert:', error);
+  }
 }
