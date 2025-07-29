@@ -33,8 +33,17 @@ const FutureEventsTab = () => {
     try {
       setLoading(true);
       
-      // Get upcoming course sessions from database
-      const { data: upcomingSessions, error } = await supabase
+      // Get upcoming live classes from database
+      const { data: upcomingClasses, error: classError } = await supabase
+        .from('live_classes')
+        .select('*')
+        .in('status', ['scheduled'])
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true })
+        .limit(10);
+
+      // Get GEOVA teaching schedule
+      const { data: geovaSchedule, error: geovaError } = await supabase
         .from('geova_teaching_schedule')
         .select('*')
         .gte('scheduled_date', new Date().toISOString().split('T')[0])
@@ -44,17 +53,37 @@ const FutureEventsTab = () => {
 
       const events: UpcomingEvent[] = [];
       
-      if (upcomingSessions && !error) {
-        upcomingSessions.forEach(session => {
+      // Process live classes
+      if (upcomingClasses && !classError) {
+        upcomingClasses.forEach(liveClass => {
+          const startDate = new Date(liveClass.start_time);
           events.push({
-            id: session.id,
-            title: `Day ${session.day_number} – ${session.topic_title}`,
-            description: session.topic_description || 'Geospatial Technology Unlocked course session',
+            id: liveClass.id,
+            title: liveClass.title,
+            description: liveClass.description || 'Live interactive class from HaritaHive Studio',
+            date: startDate.toISOString().split('T')[0],
+            time: startDate.toTimeString().split(' ')[0].substring(0, 5),
+            duration: liveClass.duration_minutes || 90,
+            type: liveClass.instructor === 'GEOVA AI' ? 'course' : 'webinar',
+            instructor: liveClass.instructor || 'Expert Instructor',
+            meetingLink: liveClass.youtube_url || undefined,
+            timezone: 'IST'
+          });
+        });
+      }
+      
+      // Process GEOVA sessions
+      if (geovaSchedule && !geovaError) {
+        geovaSchedule.forEach(session => {
+          events.push({
+            id: `geova-${session.id}`,
+            title: `Day ${session.day_number}: ${session.topic_title}`,
+            description: session.topic_description || 'Interactive AI-powered learning session',
             date: session.scheduled_date,
             time: session.scheduled_time || '05:00',
             duration: session.duration_minutes || 90,
             type: 'course',
-            instructor: 'GEOVA AI',
+            instructor: 'GEOVA AI Mentor',
             timezone: 'IST'
           });
         });

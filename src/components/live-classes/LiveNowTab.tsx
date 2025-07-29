@@ -251,8 +251,8 @@ const LiveNowTab = () => {
         (payload) => {
           console.log('🔴 Live class update received:', payload)
           // Refresh current stream data immediately
-          if (payload.new && payload.new.status === 'live') {
-            const newStream = payload.new
+          if (payload.new && (payload.new as any).status === 'live') {
+            const newStream = payload.new as any
             setCurrentStream({
               id: newStream.id,
               title: newStream.title,
@@ -284,7 +284,7 @@ const LiveNowTab = () => {
         (payload) => {
           console.log('🔍 Stream detection update:', payload)
           // Auto-refresh when new detection occurs
-          if (payload.new && payload.new.is_live) {
+          if (payload.new && (payload.new as any).is_live) {
             // Trigger a refresh after brief delay to allow triggers to process
             setTimeout(() => {
               window.location.reload()
@@ -831,9 +831,9 @@ const LiveNowTab = () => {
                       </Button>
                     </div>
                   </div>
-                ) : (
+                ) : currentStream.hls_url ? (
                   <video
-                    src={currentStream.hls_url || 'https://d3k8h9k5j2l1m9.cloudfront.net/live/index.m3u8'}
+                    src={currentStream.hls_url}
                     autoPlay
                     controls
                     muted
@@ -847,6 +847,22 @@ const LiveNowTab = () => {
                       userSelect: 'none'
                     }}
                   />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white bg-gray-900">
+                    <div className="text-center">
+                      <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">Stream Loading...</p>
+                      <p className="text-sm text-gray-400 mb-4">Connecting to live stream</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleRefresh}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             </ScreenProtection>
@@ -858,7 +874,7 @@ const LiveNowTab = () => {
             <Video className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
             <h3 className="text-xl font-semibold mb-2">No Live Stream Active</h3>
             <p className="text-muted-foreground mb-4">
-              We automatically detect when instructors start streaming. Check back soon or view our scheduled events!
+              Real-time stream detection is active. Live classes will appear here automatically when instructors go live.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Button variant="outline" onClick={handleRefresh}>

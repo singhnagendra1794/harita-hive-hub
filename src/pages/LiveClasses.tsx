@@ -17,7 +17,7 @@ const LiveClasses = () => {
           Live Learning Hub
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Join live streams, explore recordings, and attend expert-led sessions from HaritaHive Studio
+          Real-time live classes, interactive recordings, and AI-powered learning sessions
         </p>
       </div>
 

@@ -42,23 +42,75 @@ const RecordedSessionsTab = () => {
     try {
       setLoading(true);
       
-      // Static recorded session data
-      const staticRecordings = [
-        {
-          id: '1',
-          title: 'GeoAI Fundamentals - Introduction to Spatial Data Science',
-          description: 'A comprehensive introduction to GeoAI and spatial data science fundamentals.',
-          stream_key: 'geoai-fundamentals',
-          start_time: '2024-07-23T20:00:00Z',
-          end_time: '2024-07-23T21:30:00Z',
-          recording_url: 'https://www.youtube.com/embed/bYKq_fsgYPo?si=7dWVWNRwG8K7z5pB',
-          course_title: 'GeoAI Fundamentals',
-          duration_minutes: 90,
-          viewer_count: 245
-        }
-      ];
+      // Fetch real class recordings from database
+      const { data: classRecordings, error: classError } = await supabase
+        .from('class_recordings')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      setRecordings(staticRecordings);
+      // Fetch YouTube recordings from live classes that ended
+      const { data: liveClassRecordings, error: liveError } = await supabase
+        .from('live_classes')
+        .select('*')
+        .eq('status', 'ended')
+        .not('recording_url', 'is', null)
+        .order('actual_end_time', { ascending: false });
+
+      let allRecordings: RecordedSession[] = [];
+
+      // Process class recordings
+      if (classRecordings && !classError) {
+        classRecordings.forEach(recording => {
+          allRecordings.push({
+            id: recording.id,
+            title: recording.title,
+            description: recording.description || '',
+            stream_key: recording.id,
+            start_time: recording.created_at,
+            end_time: recording.created_at,
+            recording_url: recording.youtube_url || recording.aws_url || recording.cloudfront_url,
+            course_title: 'HaritaHive Live Session',
+            duration_minutes: recording.duration_seconds ? Math.round(recording.duration_seconds / 60) : 90,
+            viewer_count: recording.view_count || 0
+          });
+        });
+      }
+
+      // Process live class recordings
+      if (liveClassRecordings && !liveError) {
+        liveClassRecordings.forEach(recording => {
+          allRecordings.push({
+            id: recording.id,
+            title: recording.title,
+            description: recording.description || '',
+            stream_key: recording.stream_key || '',
+            start_time: recording.actual_start_time || recording.start_time,
+            end_time: recording.actual_end_time || recording.end_time,
+            recording_url: recording.recording_url || recording.youtube_url,
+            course_title: recording.course_title || 'Live Class',
+            duration_minutes: recording.duration_minutes || 90,
+            viewer_count: recording.viewer_count || 0
+          });
+        });
+      }
+
+      // If no recordings found, show example from YouTube
+      if (allRecordings.length === 0) {
+        allRecordings = [{
+          id: 'sample-1',
+          title: 'Introduction to Geospatial Technology',
+          description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
+          stream_key: 'intro-geospatial',
+          start_time: '2024-07-25T05:00:00Z',
+          end_time: '2024-07-25T06:30:00Z',
+          recording_url: 'https://www.youtube.com/embed/bYKq_fsgYPo?si=7dWVWNRwG8K7z5pB',
+          course_title: 'Geospatial Technology Unlocked',
+          duration_minutes: 90,
+          viewer_count: 342
+        }];
+      }
+
+      setRecordings(allRecordings);
     } catch (error) {
       console.error('Error loading recordings:', error);
       toast({

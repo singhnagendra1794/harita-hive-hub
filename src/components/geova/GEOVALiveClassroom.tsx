@@ -390,9 +390,18 @@ export const GEOVALiveClassroom: React.FC<GEOVALiveClassroomProps> = ({
       <Card className="w-full max-w-4xl mx-auto">
         <CardContent className="flex items-center justify-center p-8">
           <div className="text-center">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Active Session</h3>
-            <p className="text-muted-foreground">GEOVA will start teaching when the scheduled time arrives.</p>
+            <Avatar className="h-16 w-16 mx-auto mb-4">
+              <AvatarImage src="/geova-avatar.png" alt="GEOVA" />
+              <AvatarFallback className="text-lg bg-primary text-primary-foreground">GV</AvatarFallback>
+            </Avatar>
+            <h3 className="text-lg font-semibold mb-2">GEOVA AI Mentor Ready</h3>
+            <p className="text-muted-foreground mb-4">
+              Your AI-powered geospatial learning companion is standing by. 
+              Live teaching sessions start at the scheduled times.
+            </p>
+            <div className="text-sm text-muted-foreground">
+              Next session: Check the schedule tab for upcoming live AI teaching sessions
+            </div>
           </div>
         </CardContent>
       </Card>
