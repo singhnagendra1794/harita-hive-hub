@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
 
     console.log('Starting YouTube status sync...')
     
-    // Get all active YouTube live streams
+    // Get all active YouTube live streams from both tables
     const { data: activeStreams, error } = await supabase
       .from('youtube_live_schedule')
       .select('*')
@@ -30,9 +30,20 @@ Deno.serve(async (req) => {
       throw error
     }
 
-    console.log(`Found ${activeStreams?.length || 0} active streams to check`)
+    const { data: liveClasses, error: liveError } = await supabase
+      .from('live_classes')
+      .select('*')
+      .not('youtube_id', 'is', null)
+      .in('status', ['scheduled', 'live'])
+
+    if (liveError) {
+      console.error('Error fetching live classes:', liveError)
+    }
+
+    const allStreams = [...(activeStreams || []), ...(liveClasses || [])]
+    console.log(`Found ${allStreams.length} active streams to check`)
     
-    for (const stream of activeStreams || []) {
+    for (const stream of allStreams) {
       try {
         await syncStreamStatus(supabase, stream)
       } catch (error) {

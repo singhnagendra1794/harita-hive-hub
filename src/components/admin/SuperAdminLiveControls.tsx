@@ -2,362 +2,327 @@ import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
-import { RefreshCw, Calendar, Play, Square, Edit, Link } from "lucide-react"
+import { RefreshCw, Calendar, Play, Square, Edit, Link, Youtube, Settings, Clock, CheckCircle } from "lucide-react"
 
 interface LiveStream {
   id: string
   title: string
   description: string
-  scheduled_start_time: string
+  starts_at?: string
+  scheduled_start_time?: string
   status: string
-  youtube_broadcast_id: string
+  youtube_id?: string
+  youtube_broadcast_id?: string
+  youtube_url?: string
+  embed_url?: string
   rtmp_url?: string
   stream_key?: string
   thumbnail_url?: string
+  course_day?: number
+  instructor?: string
+  access_tier?: string
 }
 
 export function SuperAdminLiveControls() {
-  const [activeStream, setActiveStream] = useState<LiveStream | null>(null)
+  const [streams, setStreams] = useState<LiveStream[]>([])
   const [loading, setLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [overrideId, setOverrideId] = useState('')
-  
-  const [editForm, setEditForm] = useState({
-    title: '',
-    description: '',
-    scheduled_start_time: '',
-  })
+  const [manualTitle, setManualTitle] = useState('')
+  const [manualDescription, setManualDescription] = useState('')
+  const [manualYouTubeUrl, setManualYouTubeUrl] = useState('')
 
   useEffect(() => {
-    fetchActiveStream()
+    fetchActiveStreams()
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchActiveStreams, 30000)
+    return () => clearInterval(interval)
   }, [])
 
-  const fetchActiveStream = async () => {
+  const fetchActiveStreams = async () => {
     try {
-      const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
-        body: { action: 'get_active_stream' }
-      })
-      
+      const { data: liveStreams, error } = await supabase
+        .from('live_classes')
+        .select('*')
+        .in('status', ['scheduled', 'live'])
+        .order('starts_at', { ascending: true })
+        .limit(10)
+
       if (error) throw error
-      
-      if (response?.stream) {
-        setActiveStream(response.stream)
-        setEditForm({
-          title: response.stream.title,
-          description: response.stream.description || '',
-          scheduled_start_time: new Date(response.stream.scheduled_start_time).toISOString().slice(0, 16),
-        })
-      }
+      setStreams(liveStreams || [])
     } catch (error) {
-      console.error('Error fetching active stream:', error)
+      console.error('Error fetching streams:', error)
       toast.error('Failed to fetch stream data')
     }
   }
 
-  const createLiveStream = async () => {
+  const createStreamFromSchedule = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
-      
-      const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
+      const { data, error } = await supabase.functions.invoke('youtube-course-automation', {
         body: {
-          action: 'create_live_stream',
-          title: 'Geospatial Technology Unlocked - Live Session',
-          description: 'Interactive AI-powered learning session covering geospatial concepts and tools',
-          scheduled_start_time: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-          privacy_status: 'unlisted'
+          action: 'create_from_schedule'
         }
       })
-      
+
       if (error) throw error
-      
-      toast.success('Ultra Low Latency stream created successfully!')
-      await fetchActiveStream()
-    } catch (error) {
-      console.error('Error creating stream:', error)
-      toast.error('Failed to create live stream')
+
+      toast.success('Stream created from schedule: ' + data.title)
+      fetchActiveStreams()
+    } catch (error: any) {
+      toast.error('Error creating stream: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  const startStream = async () => {
-    if (!activeStream) return
-    
+  const bulkCreateWeekSessions = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
-      
-      const { error } = await supabase.functions.invoke('youtube-live-manager', {
+      const { data, error } = await supabase.functions.invoke('youtube-course-automation', {
         body: {
-          action: 'start_live_stream',
-          schedule_id: activeStream.id
+          action: 'bulk_create_week'
         }
       })
-      
+
       if (error) throw error
-      
-      toast.success('Stream started successfully!')
-      await fetchActiveStream()
-    } catch (error) {
-      console.error('Error starting stream:', error)
-      toast.error('Failed to start stream')
+
+      toast.success(`Bulk creation complete: ${data.created_sessions} created, ${data.failed_sessions} failed`)
+      fetchActiveStreams()
+    } catch (error: any) {
+      toast.error('Error in bulk creation: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  const endStream = async () => {
-    if (!activeStream) return
-    
-    try {
-      setLoading(true)
-      
-      const { error } = await supabase.functions.invoke('youtube-live-manager', {
-        body: {
-          action: 'end_live_stream',
-          schedule_id: activeStream.id
-        }
-      })
-      
-      if (error) throw error
-      
-      toast.success('Stream ended successfully!')
-      await fetchActiveStream()
-    } catch (error) {
-      console.error('Error ending stream:', error)
-      toast.error('Failed to end stream')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateStreamDetails = async () => {
-    if (!activeStream) return
-    
-    try {
-      setLoading(true)
-      
-      const { error } = await supabase.functions.invoke('youtube-live-manager', {
-        body: {
-          action: 'update_stream_details',
-          schedule_id: activeStream.id,
-          title: editForm.title,
-          description: editForm.description,
-          scheduled_start_time: new Date(editForm.scheduled_start_time).toISOString()
-        }
-      })
-      
-      if (error) throw error
-      
-      toast.success('Stream details updated successfully!')
-      setIsEditing(false)
-      await fetchActiveStream()
-    } catch (error) {
-      console.error('Error updating stream:', error)
-      toast.error('Failed to update stream details')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const overrideStream = async (videoId?: string) => {
-    const targetVideoId = videoId || overrideId.trim()
-    if (!targetVideoId) {
-      toast.error('Please enter a YouTube video ID')
+  const manualCreateStream = async () => {
+    if (!manualTitle || !manualDescription) {
+      toast.error('Please provide both title and description')
       return
     }
-    
+
+    setLoading(true)
     try {
-      setLoading(true)
-      
-      const { error } = await supabase.functions.invoke('youtube-live-manager', {
+      const { data, error } = await supabase.functions.invoke('youtube-course-automation', {
         body: {
-          action: 'override_stream',
-          youtube_video_id: targetVideoId
+          action: 'create_from_schedule',
+          config: {
+            manualTitle,
+            manualDescription,
+            scheduledTime: new Date(Date.now() + 60000).toISOString() // Start in 1 minute
+          }
         }
       })
-      
+
       if (error) throw error
-      
-      toast.success('Stream override successful!')
-      setOverrideId('')
-      await fetchActiveStream()
-    } catch (error) {
-      console.error('Error overriding stream:', error)
-      toast.error('Failed to override stream')
+
+      toast.success('Manual stream created: ' + manualTitle)
+      setManualTitle('')
+      setManualDescription('')
+      fetchActiveStreams()
+    } catch (error: any) {
+      toast.error('Error creating manual stream: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // Auto-override with the new video ID
-  React.useEffect(() => {
-    const autoOverride = async () => {
-      await overrideStream('94NaFHNEi9k')
+  const linkExistingYouTubeStream = async () => {
+    if (!manualYouTubeUrl) {
+      toast.error('Please provide a YouTube URL')
+      return
     }
-    autoOverride()
-  }, [])
 
-  const forceSync = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
-      console.log('Triggering YouTube sync...')
+      // Extract video ID from YouTube URL
+      const videoId = manualYouTubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1]
       
-      const { data: response, error } = await supabase.functions.invoke('youtube-live-manager', {
-        body: { action: 'sync_upcoming_streams' }
-      })
-      
-      if (error) {
-        console.error('Sync error:', error)
-        throw error
+      if (!videoId) {
+        throw new Error('Invalid YouTube URL')
       }
-      
-      console.log('Sync response:', response)
-      toast.success(response?.message || 'YouTube sync completed!')
-      
-      // Wait a moment then fetch active stream
-      setTimeout(async () => {
-        await fetchActiveStream()
-      }, 1000)
-    } catch (error) {
-      console.error('Error syncing:', error)
-      toast.error('Failed to sync with YouTube: ' + (error?.message || 'Unknown error'))
+
+      const { error } = await supabase
+        .from('live_classes')
+        .insert({
+          title: `Manual Stream - ${new Date().toLocaleDateString()}`,
+          description: 'Manually linked YouTube stream',
+          youtube_url: manualYouTubeUrl,
+          starts_at: new Date().toISOString(),
+          status: 'live',
+          access_tier: 'professional',
+          instructor: 'Admin',
+          created_by: (await supabase.auth.getUser()).data.user?.id,
+          stream_key: 'manual-link'
+        })
+
+      if (error) throw error
+
+      toast.success('YouTube stream linked successfully')
+      setManualYouTubeUrl('')
+      fetchActiveStreams()
+    } catch (error: any) {
+      toast.error('Error linking stream: ' + error.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+
+  const forceSync = async () => {
+    setLoading(true)
+    try {
+      const { error } = await supabase.functions.invoke('youtube-auto-sync')
+      
+      if (error) throw error
+
+      toast.success('YouTube data synced successfully')
+      fetchActiveStreams()
+    } catch (error: any) {
+      toast.error('Sync error: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'live': return 'bg-red-500'
+      case 'scheduled': return 'bg-blue-500'
+      case 'completed': return 'bg-green-500'
+      default: return 'bg-gray-500'
     }
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">YouTube Live Controls</h2>
-        <Button 
-          onClick={forceSync} 
-          disabled={loading}
-          variant="outline"
-          size="sm"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Force Sync
-        </Button>
-      </div>
-
-      {/* Current Stream Status */}
-      {activeStream ? (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <span>{activeStream.title}</span>
-                <Badge variant={activeStream.status === 'live' ? 'destructive' : 'secondary'}>
-                  {activeStream.status.toUpperCase()}
-                </Badge>
-              </CardTitle>
-              <Button
-                onClick={() => setIsEditing(!isEditing)}
-                variant="outline"
-                size="sm"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isEditing ? (
-              <div className="space-y-4">
-                <Input
-                  value={editForm.title}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Stream Title"
-                />
-                <Textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Stream Description"
-                  rows={3}
-                />
-                <Input
-                  type="datetime-local"
-                  value={editForm.scheduled_start_time}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, scheduled_start_time: e.target.value }))}
-                />
-                <div className="flex gap-2">
-                  <Button onClick={updateStreamDetails} disabled={loading}>
-                    Save Changes
-                  </Button>
-                  <Button onClick={() => setIsEditing(false)} variant="outline">
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{activeStream.description}</p>
-                <p className="text-sm">
-                  <strong>Scheduled:</strong> {new Date(activeStream.scheduled_start_time).toLocaleString()}
-                </p>
-                {activeStream.rtmp_url && (
-                  <div className="space-y-1">
-                    <p className="text-sm"><strong>RTMP URL:</strong> {activeStream.rtmp_url}</p>
-                    <p className="text-sm"><strong>Stream Key:</strong> {activeStream.stream_key}</p>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Stream Controls */}
-            <div className="flex gap-2">
-              {activeStream.status === 'scheduled' && (
-                <Button onClick={startStream} disabled={loading}>
-                  <Play className="h-4 w-4 mr-2" />
-                  Start Stream
-                </Button>
-              )}
-              {activeStream.status === 'live' && (
-                <Button onClick={endStream} disabled={loading} variant="destructive">
-                  <Square className="h-4 w-4 mr-2" />
-                  End Stream
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No active stream found</p>
-            <Button onClick={createLiveStream} disabled={loading}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Create Ultra Low Latency Stream
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Stream Override */}
+      {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Manual Override</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            YouTube Live Stream Controls
+          </CardTitle>
+          <CardDescription>
+            Automated OBS integration with course scheduling and GEOVA AI mentor
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Override the current stream with a specific YouTube video ID
-          </p>
-          <div className="flex gap-2">
-            <Input
-              value={overrideId}
-              onChange={(e) => setOverrideId(e.target.value)}
-              placeholder="YouTube Video ID (e.g., dQw4w9WgXcQ)"
-            />
-            <Button onClick={() => overrideStream()} disabled={loading}>
-              <Link className="h-4 w-4 mr-2" />
-              Override
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={createStreamFromSchedule} disabled={loading}>
+              <Calendar className="h-4 w-4 mr-2" />
+              Create Next Scheduled Stream
+            </Button>
+            <Button onClick={bulkCreateWeekSessions} disabled={loading} variant="outline">
+              <Clock className="h-4 w-4 mr-2" />
+              Create Week Sessions
+            </Button>
+            <Button onClick={forceSync} disabled={loading} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Force Sync
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Manual Stream Creation */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Manual Stream Creation</CardTitle>
+          <CardDescription>
+            Create a custom YouTube live stream
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder="Stream Title"
+            value={manualTitle}
+            onChange={(e) => setManualTitle(e.target.value)}
+          />
+          <Textarea
+            placeholder="Stream Description"
+            value={manualDescription}
+            onChange={(e) => setManualDescription(e.target.value)}
+            rows={3}
+          />
+          <Button onClick={manualCreateStream} disabled={loading}>
+            <Play className="h-4 w-4 mr-2" />
+            Create Manual Stream
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Link Existing YouTube Stream */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Link Existing YouTube Stream</CardTitle>
+          <CardDescription>
+            Add an existing YouTube live stream to HaritaHive
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder="YouTube URL (e.g., https://www.youtube.com/watch?v=...)"
+            value={manualYouTubeUrl}
+            onChange={(e) => setManualYouTubeUrl(e.target.value)}
+          />
+          <Button onClick={linkExistingYouTubeStream} disabled={loading}>
+            <Youtube className="h-4 w-4 mr-2" />
+            Link YouTube Stream
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Active Streams */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Live Streams</CardTitle>
+          <CardDescription>
+            Current and upcoming YouTube live streams
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {streams.length === 0 ? (
+            <p className="text-muted-foreground">No active streams found</p>
+          ) : (
+            <div className="space-y-4">
+              {streams.map((stream) => (
+                <div key={stream.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold">{stream.title}</h3>
+                        <Badge className={getStatusColor(stream.status)}>
+                          {stream.status}
+                        </Badge>
+                        {stream.course_day && (
+                          <Badge variant="outline">Day {stream.course_day}</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {stream.description?.substring(0, 100)}...
+                      </p>
+                      <div className="text-xs text-muted-foreground">
+                        <p>Scheduled: {new Date(stream.starts_at || stream.scheduled_start_time || '').toLocaleString()}</p>
+                        {stream.youtube_url && (
+                          <p>YouTube: <a href={stream.youtube_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">View Stream</a></p>
+                        )}
+                        {stream.access_tier && (
+                          <p>Access: {stream.access_tier}</p>
+                        )}
+                        {stream.instructor && (
+                          <p>Instructor: {stream.instructor}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
