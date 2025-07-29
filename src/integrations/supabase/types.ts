@@ -1671,15 +1671,7 @@ export type Database = {
           progress_percentage?: number | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "course_enrollments_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       course_modules: {
         Row: {
