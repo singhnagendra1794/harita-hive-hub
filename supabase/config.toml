@@ -1,8 +1,11 @@
 
 project_id = "uphgdwrwaizomnyuwfwr"
 
+[functions.ava-assistant]
+verify_jwt = false
+
 [functions.geova-mentor]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-email]
 verify_jwt = false
@@ -54,3 +57,6 @@ verify_jwt = true
 
 [functions.bulk-assign-professional-users]
 verify_jwt = true
+
+[functions.test-ai-endpoints]
+verify_jwt = false
