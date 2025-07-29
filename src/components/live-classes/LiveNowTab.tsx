@@ -142,17 +142,18 @@ const LiveNowTab = () => {
     };
   }, [currentStream?.id]);
 
+  // Real-time live stream detection
   useEffect(() => {
     const fetchLiveClass = async () => {
       try {
         setLoading(true)
         
-        // Get live classes from database - prioritize course-based automation
+        // Get live classes from database with real-time priority
         const { data: liveClasses, error } = await supabase
           .from('live_classes')
           .select('*')
           .in('status', ['live', 'scheduled'])
-          .order('starts_at', { ascending: true })
+          .order('updated_at', { ascending: false }) // Most recently updated first
         
         if (error) {
           console.error('Error fetching live classes:', error)
@@ -162,24 +163,23 @@ const LiveNowTab = () => {
         if (liveClasses && liveClasses.length > 0) {
           const now = new Date()
           
-          // Find the most relevant stream to show
+          // Prioritize live streams, then scheduled streams starting soon
           let bestStream = null
           
           for (const stream of liveClasses) {
             const startTime = new Date(stream.starts_at)
-            const endTime = stream.end_time ? new Date(stream.end_time) : new Date(startTime.getTime() + 90 * 60 * 1000)
-            const timeDiff = startTime.getTime() - now.getTime()
+            const isCurrentlyLive = stream.status === 'live' || 
+              (now >= startTime && now <= new Date(startTime.getTime() + 180 * 60 * 1000)) // 3 hour window
             
-            // Show if currently live
-            if (stream.status === 'live' && now >= startTime && now <= endTime) {
+            if (isCurrentlyLive) {
               bestStream = stream
               break
             }
             
-            // Show if starting within 30 minutes
-            if (stream.status === 'scheduled' && timeDiff <= 30 * 60 * 1000 && timeDiff >= -5 * 60 * 1000) {
+            // Show upcoming streams within 15 minutes
+            const timeDiff = startTime.getTime() - now.getTime()
+            if (stream.status === 'scheduled' && timeDiff <= 15 * 60 * 1000 && timeDiff >= -5 * 60 * 1000) {
               bestStream = stream
-              break
             }
           }
           
@@ -187,7 +187,7 @@ const LiveNowTab = () => {
             const startTime = new Date(bestStream.starts_at)
             const now = new Date()
             const isCurrentlyLive = bestStream.status === 'live' || 
-              (now >= startTime && now <= new Date(startTime.getTime() + 90 * 60 * 1000))
+              (now >= startTime && now <= new Date(startTime.getTime() + 180 * 60 * 1000))
             
             setCurrentStream({
               id: bestStream.id,
@@ -201,8 +201,8 @@ const LiveNowTab = () => {
               viewer_count: bestStream.viewer_count || 0,
               is_geova: bestStream.instructor === 'GEOVA AI',
               is_free_access: bestStream.access_tier !== 'professional',
-               course_name: bestStream.course_title,
-               course_day: bestStream.day_number,
+              course_name: bestStream.course_title,
+              course_day: bestStream.day_number,
               access_tier: bestStream.access_tier as 'free' | 'professional' | 'enterprise'
             })
             
@@ -222,13 +222,12 @@ const LiveNowTab = () => {
           }
         }
         
-        // Fallback to existing logic if no database streams found
-        checkForLiveStreams()
+        // No active streams found
+        setCurrentStream(null)
+        setPlayerError(null)
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching live class:', error)
-        // Fallback to existing logic
-        checkForLiveStreams()
-      } finally {
         setLoading(false)
       }
     }
@@ -236,16 +235,89 @@ const LiveNowTab = () => {
     if (!premiumLoading) {
       fetchLiveClass()
     }
-    
-    // Reduced polling interval - check every 30 seconds instead of rapid refresh
-    const interval = setInterval(() => {
-      if (!premiumLoading) {
-        fetchLiveClass()
+  }, [premiumLoading])
+
+  // Real-time subscription for live updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('live-classes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'live_classes'
+        },
+        (payload) => {
+          console.log('🔴 Live class update received:', payload)
+          // Refresh current stream data immediately
+          if (payload.new && payload.new.status === 'live') {
+            const newStream = payload.new
+            setCurrentStream({
+              id: newStream.id,
+              title: newStream.title,
+              description: newStream.description || '',
+              stream_key: newStream.stream_key || '',
+              start_time: newStream.starts_at,
+              status: 'live',
+              youtube_url: newStream.embed_url || newStream.youtube_url,
+              thumbnail_url: newStream.thumbnail_url,
+              viewer_count: newStream.viewer_count || 0,
+              is_geova: newStream.instructor === 'GEOVA AI',
+              is_free_access: newStream.access_tier !== 'professional',
+              course_name: newStream.course_title,
+              course_day: newStream.day_number,
+              access_tier: newStream.access_tier as 'free' | 'professional' | 'enterprise'
+            })
+            setPlayerError(null)
+            setLoading(false)
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'live_stream_detection'
+        },
+        (payload) => {
+          console.log('🔍 Stream detection update:', payload)
+          // Auto-refresh when new detection occurs
+          if (payload.new && payload.new.is_live) {
+            // Trigger a refresh after brief delay to allow triggers to process
+            setTimeout(() => {
+              window.location.reload()
+            }, 1000)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  // Auto-trigger real-time detection every 10 seconds
+  useEffect(() => {
+    const triggerDetection = async () => {
+      try {
+        await supabase.functions.invoke('real-time-stream-detector')
+        console.log('🔍 Real-time detection triggered')
+      } catch (error) {
+        console.error('Detection trigger failed:', error)
       }
-    }, 30000) // 30 seconds fixed interval
+    }
+
+    // Immediate detection
+    triggerDetection()
     
-    return () => clearInterval(interval)
-  }, [premiumLoading, currentStream?.status])
+    // Continuous detection every 10 seconds
+    const detectionInterval = setInterval(triggerDetection, 10000)
+    
+    return () => clearInterval(detectionInterval)
+  }, [])
 
   // Auto-sync with YouTube API every 2 minutes
   useEffect(() => {

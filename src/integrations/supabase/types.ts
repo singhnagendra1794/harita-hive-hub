@@ -4188,6 +4188,45 @@ export type Database = {
           },
         ]
       }
+      live_stream_detection: {
+        Row: {
+          description: string | null
+          detected_at: string | null
+          embed_url: string
+          id: string
+          is_live: boolean | null
+          last_checked: string | null
+          thumbnail_url: string | null
+          title: string
+          viewer_count: number | null
+          youtube_id: string
+        }
+        Insert: {
+          description?: string | null
+          detected_at?: string | null
+          embed_url: string
+          id?: string
+          is_live?: boolean | null
+          last_checked?: string | null
+          thumbnail_url?: string | null
+          title: string
+          viewer_count?: number | null
+          youtube_id: string
+        }
+        Update: {
+          description?: string | null
+          detected_at?: string | null
+          embed_url?: string
+          id?: string
+          is_live?: boolean | null
+          last_checked?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          viewer_count?: number | null
+          youtube_id?: string
+        }
+        Relationships: []
+      }
       live_streams: {
         Row: {
           created_at: string | null
@@ -9380,6 +9419,10 @@ export type Database = {
       move_live_to_recording: {
         Args: { p_session_id: string }
         Returns: undefined
+      }
+      refresh_youtube_oauth_token: {
+        Args: { token_id: string }
+        Returns: boolean
       }
       reset_monthly_points: {
         Args: Record<PropertyKey, never>
