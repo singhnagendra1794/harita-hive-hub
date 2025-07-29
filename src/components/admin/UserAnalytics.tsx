@@ -40,7 +40,7 @@ export const UserAnalytics = () => {
       const mockUserData = enrollments?.map(enrollment => ({
         user_id: enrollment.user_id,
         course_id: enrollment.course_id,
-        course_title: enrollment.courses?.title || 'Unknown Course',
+        course_title: 'Course ' + enrollment.course_id.slice(-8),
         progress_percentage: enrollment.progress_percentage || 0,
         enrolled_at: enrollment.enrolled_at,
         completed_at: enrollment.completed_at,

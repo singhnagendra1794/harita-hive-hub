@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -290,7 +290,7 @@ export const usePremiumAccess = () => {
     
     // Super admin users (hardcoded email) have access to everything
     if (user.email === 'contact@haritahive.com') {
-      console.log('Super admin email detected - granting access');
+      
       return true;
     }
     

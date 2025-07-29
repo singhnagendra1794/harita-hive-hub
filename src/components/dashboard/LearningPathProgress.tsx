@@ -23,10 +23,13 @@ interface Course {
 interface Enrollment {
   id: string;
   course_id: string;
+  user_id: string;
   progress_percentage: number;
   enrolled_at: string;
   completed_at: string | null;
-  courses: Course;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const LearningPathProgress = () => {
@@ -49,19 +52,7 @@ export const LearningPathProgress = () => {
     try {
       const { data, error } = await supabase
         .from('course_enrollments')
-        .select(`
-          *,
-          courses (
-            id,
-            title,
-            description,
-            category,
-            difficulty_level,
-            thumbnail_url,
-            is_free,
-            price
-          )
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('enrolled_at', { ascending: false });
 
@@ -164,8 +155,8 @@ export const LearningPathProgress = () => {
                         <BookOpen className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{enrollment.courses.title}</h3>
-                        <p className="text-sm text-muted-foreground">{enrollment.courses.category}</p>
+                        <h3 className="font-semibold">Course {enrollment.course_id.slice(-8)}</h3>
+                        <p className="text-sm text-muted-foreground">GIS Learning</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Progress 
                             value={enrollment.progress_percentage} 
@@ -222,12 +213,12 @@ export const LearningPathProgress = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{enrollment.courses.title}</h3>
+                        <h3 className="font-semibold">Course {enrollment.course_id.slice(-8)}</h3>
                         {enrollment.completed_at && (
                           <Badge className="bg-green-100 text-green-800">Completed</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{enrollment.courses.category}</p>
+                      <p className="text-sm text-muted-foreground">GIS Learning</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Progress 
                           value={enrollment.progress_percentage}
