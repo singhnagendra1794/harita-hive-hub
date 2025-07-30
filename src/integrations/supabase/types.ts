@@ -9453,6 +9453,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_youtube_automation_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_youtube_credentials: {
         Args: Record<PropertyKey, never>
         Returns: Json
