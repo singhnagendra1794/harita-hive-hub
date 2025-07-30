@@ -1711,6 +1711,45 @@ export type Database = {
           },
         ]
       }
+      course_schedule: {
+        Row: {
+          course_module_title: string
+          course_summary: string | null
+          created_at: string | null
+          day_number: number
+          day_of_week: string
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          scheduled_time: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          course_module_title: string
+          course_summary?: string | null
+          created_at?: string | null
+          day_number: number
+          day_of_week: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          scheduled_time?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          course_module_title?: string
+          course_summary?: string | null
+          created_at?: string | null
+          day_number?: number
+          day_of_week?: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          scheduled_time?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       course_waitlist: {
         Row: {
           course_id: string
@@ -4010,6 +4049,7 @@ export type Database = {
           course_title: string | null
           created_at: string
           created_by: string | null
+          current_live_video_id: string | null
           custom_day_label: string | null
           day_number: number | null
           description: string | null
@@ -4049,6 +4089,7 @@ export type Database = {
           course_title?: string | null
           created_at?: string
           created_by?: string | null
+          current_live_video_id?: string | null
           custom_day_label?: string | null
           day_number?: number | null
           description?: string | null
@@ -4088,6 +4129,7 @@ export type Database = {
           course_title?: string | null
           created_at?: string
           created_by?: string | null
+          current_live_video_id?: string | null
           custom_day_label?: string | null
           day_number?: number | null
           description?: string | null
@@ -8799,6 +8841,39 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_api_logs: {
+        Row: {
+          api_endpoint: string
+          consecutive_failures: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          method: string
+          response_data: Json | null
+          status_code: number | null
+        }
+        Insert: {
+          api_endpoint: string
+          consecutive_failures?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          method: string
+          response_data?: Json | null
+          status_code?: number | null
+        }
+        Update: {
+          api_endpoint?: string
+          consecutive_failures?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          method?: string
+          response_data?: Json | null
+          status_code?: number | null
+        }
+        Relationships: []
+      }
       youtube_api_operations: {
         Row: {
           created_at: string
@@ -9083,6 +9158,59 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_stream_schedule: {
+        Row: {
+          course_schedule_id: string | null
+          created_at: string | null
+          day_of_week: string
+          id: string
+          scheduled_datetime: string
+          status: string | null
+          stream_description: string | null
+          stream_title: string
+          updated_at: string | null
+          week_starting: string
+          youtube_broadcast_id: string | null
+          youtube_stream_key: string | null
+        }
+        Insert: {
+          course_schedule_id?: string | null
+          created_at?: string | null
+          day_of_week: string
+          id?: string
+          scheduled_datetime: string
+          status?: string | null
+          stream_description?: string | null
+          stream_title: string
+          updated_at?: string | null
+          week_starting: string
+          youtube_broadcast_id?: string | null
+          youtube_stream_key?: string | null
+        }
+        Update: {
+          course_schedule_id?: string | null
+          created_at?: string | null
+          day_of_week?: string
+          id?: string
+          scheduled_datetime?: string
+          status?: string | null
+          stream_description?: string | null
+          stream_title?: string
+          updated_at?: string | null
+          week_starting?: string
+          youtube_broadcast_id?: string | null
+          youtube_stream_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_stream_schedule_course_schedule_id_fkey"
+            columns: ["course_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_schedule"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -9161,6 +9289,10 @@ export type Database = {
       create_user_subscription: {
         Args: { p_user_id: string; p_tier?: string }
         Returns: undefined
+      }
+      create_weekly_youtube_streams: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       debug_storage_path: {
         Args: { file_path: string; user_id: string }
@@ -9428,6 +9560,16 @@ export type Database = {
       }
       log_security_event_secure: {
         Args: { p_event_type: string; p_details?: Json; p_user_id?: string }
+        Returns: undefined
+      }
+      log_youtube_api_error: {
+        Args: {
+          p_endpoint: string
+          p_method: string
+          p_status_code: number
+          p_error_message: string
+          p_response_data?: Json
+        }
         Returns: undefined
       }
       mark_youtube_token_expired: {
