@@ -9315,6 +9315,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_youtube_credentials: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       has_role_bypass_rls: {
         Args: {
           p_user_id: string
@@ -9418,6 +9422,10 @@ export type Database = {
       }
       log_security_event_secure: {
         Args: { p_event_type: string; p_details?: Json; p_user_id?: string }
+        Returns: undefined
+      }
+      mark_youtube_token_expired: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       move_live_to_recording: {

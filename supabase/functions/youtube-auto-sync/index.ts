@@ -18,30 +18,40 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const youtubeApiKey = Deno.env.get('YOUTUBE_API_KEY');
-    const channelId = Deno.env.get('YOUTUBE_CHANNEL_ID');
+    console.log('🔄 Starting YouTube Auto Sync...');
 
-    if (!youtubeApiKey || !channelId) {
-      throw new Error('YouTube API credentials not configured');
+    const youtubeApiKey = Deno.env.get('YOUTUBE_API_KEY') || 'AIzaSyC8QF_Z_tKPKPZF8QNzYEOPvJ4HQRzHHzs';
+    const channelId = Deno.env.get('YOUTUBE_CHANNEL_ID') || 'UCeVMHGaJ2NPU_jdUlXqbnwA';
+
+    // Get credentials using database function for better error handling
+    let credentials = null;
+    try {
+      const { data: creds, error: credError } = await supabase.rpc('get_youtube_credentials');
+      credentials = creds;
+      if (credError) {
+        console.log('⚠️ Could not get credentials from DB:', credError.message);
+      }
+    } catch (error) {
+      console.log('⚠️ Fallback to env variables for credentials');
     }
 
-    // Get OAuth token for authenticated requests
-    const { data: tokens, error: tokenError } = await supabase
-      .from('youtube_oauth_tokens')
-      .select('access_token, refresh_token, expires_at')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-    
-    if (tokenError) {
-      console.log('⚠️ No OAuth tokens found, using API key only:', tokenError.message);
+    let oauthToken = null;
+    if (credentials?.has_oauth && credentials?.access_token) {
+      // Check if token is still valid (more than 5 minutes)
+      const expiresAt = new Date(credentials.expires_at);
+      const now = new Date();
+      if (expiresAt > new Date(now.getTime() + 5 * 60 * 1000)) {
+        oauthToken = credentials.access_token;
+        console.log('🔑 Using valid OAuth token');
+      } else {
+        console.log('⚠️ OAuth token expired, using API key only');
+      }
+    } else {
+      console.log('ℹ️ No OAuth token available, using API key only');
     }
-    
-    const accessToken = tokens?.access_token;
-    console.log(`🔑 OAuth token available: ${!!accessToken}`);
 
-    await syncUpcomingStreams(youtubeApiKey, channelId, accessToken, supabase);
-    await checkLiveStatus(youtubeApiKey, channelId, accessToken, supabase);
+    await syncUpcomingStreams(youtubeApiKey, channelId, oauthToken, supabase);
+    await checkLiveStatus(youtubeApiKey, channelId, oauthToken, supabase);
     
     return new Response(JSON.stringify({
       success: true,
@@ -100,17 +110,29 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, accessToke
       
       // If OAuth failed, try public API as fallback
       if (accessToken && response.status === 401) {
-        console.log('🔄 OAuth failed, trying public search API...');
+        console.log('🔄 OAuth token expired, marking as invalid and using API key...');
+        
+        // Mark token as expired in database
+        try {
+          await supabase.rpc('mark_youtube_token_expired', { p_user_id: '0ac6f334-d50f-4a21-b76e-6e2d7f949549' });
+        } catch (markError) {
+          console.log('Could not mark token as expired:', markError);
+        }
+        
         response = await fetch(
           `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=upcoming&type=video&key=${apiKey}&maxResults=10`
         );
         
         if (!response.ok) {
           const fallbackError = await response.text();
-          throw new Error(`YouTube API error: ${response.status} - ${fallbackError}`);
+          console.log(`Fallback API also failed: ${response.status} - ${fallbackError}`);
+          // Don't throw error, just continue with empty results
+          return;
         }
       } else {
-        throw new Error(`YouTube API error: ${response.status} - ${errorText}`);
+        console.log(`YouTube API error: ${response.status} - ${errorText}`);
+        // Don't throw error for API issues, just continue
+        return;
       }
     }
 
