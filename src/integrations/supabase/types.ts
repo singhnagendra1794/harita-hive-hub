@@ -4065,6 +4065,7 @@ export type Database = {
           recording_s3_key: string | null
           recording_url: string | null
           rtmp_endpoint: string | null
+          scheduled_start_time: string | null
           start_time: string | null
           starts_at: string | null
           status: Database["public"]["Enums"]["stream_status"]
@@ -4105,6 +4106,7 @@ export type Database = {
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
+          scheduled_start_time?: string | null
           start_time?: string | null
           starts_at?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
@@ -4145,6 +4147,7 @@ export type Database = {
           recording_s3_key?: string | null
           recording_url?: string | null
           rtmp_endpoint?: string | null
+          scheduled_start_time?: string | null
           start_time?: string | null
           starts_at?: string | null
           status?: Database["public"]["Enums"]["stream_status"]
