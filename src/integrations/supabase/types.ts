@@ -9286,6 +9286,12 @@ export type Database = {
           granted_by: string
         }[]
       }
+      get_user_roles_safe: {
+        Args: { p_user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       get_user_stats_safe: {
         Args: { p_user_id: string }
         Returns: {
