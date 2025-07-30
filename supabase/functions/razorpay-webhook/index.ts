@@ -181,8 +181,11 @@ const handler = async (req: Request): Promise<Response> => {
         })
         .eq('id', transaction.user_id);
 
-      // If this is a course enrollment payment, update enrolled courses
-      if (transaction.subscription_type && transaction.subscription_type.includes('course')) {
+      // Auto-enroll professional and enterprise users into the current course
+      if (transaction.subscription_type === 'pro' || transaction.subscription_type === 'enterprise' || 
+          (transaction.subscription_type && transaction.subscription_type.includes('course'))) {
+        console.log(`Auto-enrolling ${transaction.subscription_type} user into current course`);
+        
         const { error: courseError } = await supabase
           .rpc('update_user_enrolled_courses', {
             p_user_id: transaction.user_id,
@@ -192,6 +195,8 @@ const handler = async (req: Request): Promise<Response> => {
         if (courseError) {
           console.error('Error updating enrolled courses:', courseError);
           // Don't fail the payment process if course update fails
+        } else {
+          console.log('Successfully enrolled user in current course');
         }
       }
 
