@@ -119,26 +119,51 @@ const LiveNowTab = () => {
     };
   }, [isViewing, currentStream]);
 
-  // Real-time viewer count updates
+  // Enhanced real-time updates for immediate YouTube sync
   useEffect(() => {
     if (!currentStream) return;
 
     const channel = supabase
-      .channel('viewer-count-updates')
+      .channel('enhanced-live-updates')
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'live_classes',
-          filter: `id=eq.${currentStream.id}`
+          table: 'live_classes'
         },
         (payload) => {
-          if (payload.new.viewer_count !== undefined) {
+          console.log('🔄 Real-time stream update:', payload.new);
+          
+          // Update current stream if it matches
+          if (payload.new.id === currentStream.id) {
             setCurrentStream(prev => prev ? {
               ...prev,
-              viewer_count: payload.new.viewer_count
+              ...payload.new,
+              viewer_count: payload.new.viewer_count || prev.viewer_count
             } : null);
+          }
+          
+          // If no current stream but new live stream detected, switch to it
+          if (payload.new.status === 'live' && payload.new.current_live_video_id) {
+            console.log('🔴 New live stream detected, switching...');
+            setCurrentStream(payload.new as LiveStream);
+            toast.success(`🔴 Live stream started: ${payload.new.title}`);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'live_classes'
+        },
+        (payload) => {
+          console.log('🆕 New stream inserted:', payload.new);
+          if (payload.new.status === 'live') {
+            setCurrentStream(payload.new as LiveStream);
+            toast.success(`🔴 Live stream started: ${payload.new.title}`);
           }
         }
       )

@@ -28,6 +28,10 @@ interface LiveStream {
 }
 
 export function SuperAdminLiveControls() {
+  const [isCreatingWeekly, setIsCreatingWeekly] = useState(false);
+  const [isManualSync, setIsManualSync] = useState(false);
+  const [weeklyResult, setWeeklyResult] = useState<any>(null);
+  const [syncResult, setSyncResult] = useState<any>(null);
   const [streams, setStreams] = useState<LiveStream[]>([])
   const [loading, setLoading] = useState(false)
   const [manualTitle, setManualTitle] = useState('')
@@ -78,23 +82,52 @@ export function SuperAdminLiveControls() {
     }
   }
 
-  const bulkCreateWeekSessions = async () => {
-    setLoading(true)
+  const createWeeklyStreams = async () => {
+    setIsCreatingWeekly(true);
     try {
-      const { data, error } = await supabase.functions.invoke('youtube-course-automation', {
+      const { data, error } = await supabase.functions.invoke('youtube-scheduler', {
         body: {
-          action: 'bulk_create_week'
+          action: 'create_weekly_streams'
         }
-      })
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
-      toast.success(`Bulk creation complete: ${data.created_sessions} created, ${data.failed_sessions} failed`)
-      fetchActiveStreams()
+      setWeeklyResult(data);
+      toast.success(`✅ Weekly streams created! ${data.createdStreams?.length || 0} streams ready`);
+      
+      if (data.persistentStreamKey) {
+        toast.success(`🔑 Your OBS Stream Key: ${data.persistentStreamKey}`, {
+          duration: 10000
+        });
+      }
+      
+      fetchActiveStreams();
     } catch (error: any) {
-      toast.error('Error in bulk creation: ' + error.message)
+      toast.error('Error creating weekly streams: ' + error.message);
     } finally {
-      setLoading(false)
+      setIsCreatingWeekly(false);
+    }
+  }
+
+  const enhancedManualSync = async () => {
+    setIsManualSync(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-scheduler', {
+        body: {
+          action: 'manual_sync'
+        }
+      });
+
+      if (error) throw error;
+
+      setSyncResult(data);
+      toast.success('✅ Manual sync completed successfully');
+      fetchActiveStreams();
+    } catch (error: any) {
+      toast.error('Manual sync failed: ' + error.message);
+    } finally {
+      setIsManualSync(false);
     }
   }
 
@@ -235,19 +268,43 @@ export function SuperAdminLiveControls() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Button onClick={createStreamFromSchedule} disabled={loading}>
+            <Button onClick={createWeeklyStreams} disabled={isCreatingWeekly || loading}>
               <Calendar className="h-4 w-4 mr-2" />
-              Create Next Scheduled Stream
+              {isCreatingWeekly ? 'Creating Weekly Streams...' : 'Create Weekly Streams'}
             </Button>
-            <Button onClick={bulkCreateWeekSessions} disabled={loading} variant="outline">
-              <Clock className="h-4 w-4 mr-2" />
-              Create Week Sessions
+            <Button onClick={enhancedManualSync} disabled={isManualSync || loading} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {isManualSync ? 'Syncing...' : 'Manual Sync'}
             </Button>
             <Button onClick={forceSync} disabled={loading} variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Force Sync
+              <Clock className="h-4 w-4 mr-2" />
+              Legacy Sync
             </Button>
           </div>
+          
+          {/* Results Display */}
+          {weeklyResult && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-semibold text-green-800">Weekly Streams Created Successfully!</h4>
+              <p className="text-sm text-green-700">
+                ✅ {weeklyResult.createdStreams?.length || 0} streams created
+              </p>
+              {weeklyResult.persistentStreamKey && (
+                <p className="text-sm font-mono bg-green-100 p-2 rounded mt-2">
+                  🔑 OBS Stream Key: {weeklyResult.persistentStreamKey}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {syncResult && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-blue-800">Sync Completed</h4>
+              <p className="text-sm text-blue-700">
+                ✅ Last sync: {new Date().toLocaleString()}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
