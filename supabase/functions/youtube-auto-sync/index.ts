@@ -160,7 +160,7 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, accessToke
             description: video.snippet.description || 'Live streaming session',
             thumbnail_url: video.snippet.thumbnails?.maxres?.url || video.snippet.thumbnails?.high?.url,
             starts_at: video.liveStreamingDetails.scheduledStartTime,
-            status: 'scheduled',
+            status: 'scheduled' as const,
             youtube_url: `https://www.youtube.com/watch?v=${videoId}`,
             embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&controls=1`,
             access_tier: 'professional',
@@ -233,7 +233,7 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
       
       if (videoId) {
         const updateData = {
-          status: 'live',
+          status: 'live' as const,
           started_at: new Date().toISOString(),
           viewer_count: broadcast.statistics?.concurrentViewers || 0,
           updated_at: new Date().toISOString()
@@ -277,7 +277,7 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
         const { error } = await supabase
           .from('live_classes')
           .update({
-            status: 'completed',
+            status: 'completed' as const,
             ended_at: new Date().toISOString(),
             youtube_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
             updated_at: new Date().toISOString()
