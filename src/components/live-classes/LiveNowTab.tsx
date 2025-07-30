@@ -155,11 +155,11 @@ const LiveNowTab = () => {
       try {
         setLoading(true)
         
-        // Get live classes from database with real-time priority
+        // Get only truly live classes (no scheduled unless starting very soon)
         const { data: liveClasses, error } = await supabase
           .from('live_classes')
           .select('*')
-          .in('status', ['live', 'scheduled'])
+          .eq('status', 'live') // Only truly live streams
           .order('updated_at', { ascending: false }) // Most recently updated first
         
         if (error) {
@@ -306,10 +306,10 @@ const LiveNowTab = () => {
     }
   }, [])
 
-  // Auto-trigger real-time detection (silent background process)
+  // Real-time detection every 20-30 seconds for OBS→YouTube→HaritaHive sync
   useEffect(() => {
     let lastDetectionTime = 0
-    const DETECTION_THROTTLE = 45000 // 45 seconds minimum between detections
+    const DETECTION_THROTTLE = 25000 // 25 seconds minimum between detections
     
     const triggerDetection = async () => {
       const now = Date.now()
@@ -320,6 +320,9 @@ const LiveNowTab = () => {
       try {
         lastDetectionTime = now
         await supabase.functions.invoke('real-time-stream-detector')
+        
+        // Immediately refresh live streams after detection
+        await checkForLiveStreams()
       } catch (error) {
         // Silent error handling - only log critical errors
         if (error?.message?.includes('500') || error?.message?.includes('network')) {
@@ -329,10 +332,10 @@ const LiveNowTab = () => {
     }
 
     // Initial detection after a short delay
-    const initialTimeout = setTimeout(triggerDetection, 5000)
+    const initialTimeout = setTimeout(triggerDetection, 3000)
     
-    // Throttled detection every 45 seconds
-    const detectionInterval = setInterval(triggerDetection, 45000)
+    // Real-time detection every 25 seconds
+    const detectionInterval = setInterval(triggerDetection, 25000)
     
     return () => {
       clearTimeout(initialTimeout)
@@ -407,12 +410,12 @@ const LiveNowTab = () => {
       
       if (!autoSyncError) {
         console.log('YouTube auto-sync successful');
-        // Refresh live classes after sync
+        // Refresh only truly live classes (no scheduled)
         const { data: freshClasses } = await supabase
           .from('live_classes')
           .select('*')
-          .in('status', ['live', 'scheduled'])
-          .order('starts_at', { ascending: true });
+          .eq('status', 'live')
+          .order('updated_at', { ascending: false });
           
         if (freshClasses && freshClasses.length > 0) {
           const now = new Date();

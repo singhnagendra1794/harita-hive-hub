@@ -223,9 +223,9 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
     
     if (accessToken) {
       console.log('🔑 Using OAuth for live broadcasts check');
-      // Check for currently live broadcasts using OAuth
+      // Use liveBroadcasts.list with broadcastStatus=active and broadcastType=all
       response = await fetch(
-        `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,statistics&broadcastStatus=active&maxResults=10`,
+        `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,statistics&broadcastStatus=active&broadcastType=all&maxResults=10`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -247,24 +247,114 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
     }
 
     const data = await response.json();
-    console.log(`🔴 Found ${data.items?.length || 0} live streams`);
+    console.log(`🔴 Found ${data.items?.length || 0} potential live streams`);
     
-    // Update database for live streams
-    for (const broadcast of data.items || []) {
+    // Filter for only truly live streams (status.lifeCycleStatus = live)
+    const trulyLiveStreams = data.items?.filter(broadcast => {
+      if (accessToken && broadcast.status) {
+        // For OAuth API: only show streams with lifeCycleStatus = 'live'
+        return broadcast.status.lifeCycleStatus === 'live';
+      } else {
+        // For search API: all results should be live already
+        return true;
+      }
+    }) || [];
+
+    console.log(`🔴 Filtered to ${trulyLiveStreams.length} truly live streams`);
+    
+    // First, mark all currently live streams as ended if they're not in the API results
+    const currentLiveStreams = await supabase
+      .from('live_classes')
+      .select('stream_key')
+      .eq('status', 'live');
+      
+    if (currentLiveStreams.data) {
+      const activeVideoIds = trulyLiveStreams.map(b => b.id?.videoId || b.id);
+      
+      for (const currentStream of currentLiveStreams.data) {
+        if (!activeVideoIds.includes(currentStream.stream_key)) {
+          // This stream is no longer live, move it to completed
+          await supabase
+            .from('live_classes')
+            .update({
+              status: 'completed' as const,
+              ended_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('stream_key', currentStream.stream_key);
+          
+          console.log(`✅ Moved to completed: ${currentStream.stream_key}`);
+        }
+      }
+    }
+    
+    // Update database for truly live streams
+    for (const broadcast of trulyLiveStreams) {
       const videoId = broadcast.id?.videoId || broadcast.id;
       
       if (videoId) {
+        // Get detailed video information to check for actualEndTime
+        let detailResponse;
+        
+        if (accessToken) {
+          detailResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'application/json'
+              }
+            }
+          );
+        } else {
+          detailResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`
+          );
+        }
+        
+        if (detailResponse.ok) {
+          const detailData = await detailResponse.json();
+          const video = detailData.items?.[0];
+          
+          // Check if video has actualEndTime (should be moved to recordings)
+          if (video?.liveStreamingDetails?.actualEndTime) {
+            console.log(`⏹️ Stream ${videoId} has ended, marking as completed`);
+            
+            await supabase
+              .from('live_classes')
+              .update({
+                status: 'completed' as const,
+                ended_at: video.liveStreamingDetails.actualEndTime,
+                updated_at: new Date().toISOString()
+              })
+              .eq('stream_key', videoId);
+              
+            continue; // Skip updating as live
+          }
+        }
+        
         const updateData = {
           status: 'live' as const,
-          started_at: new Date().toISOString(),
+          started_at: broadcast.snippet?.publishedAt || new Date().toISOString(),
           viewer_count: broadcast.statistics?.concurrentViewers || 0,
+          title: broadcast.snippet?.title || 'Live Stream',
+          description: broadcast.snippet?.description || 'Live streaming session',
+          thumbnail_url: broadcast.snippet?.thumbnails?.maxres?.url || broadcast.snippet?.thumbnails?.high?.url,
+          youtube_url: `https://www.youtube.com/watch?v=${videoId}`,
+          embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&controls=1`,
           updated_at: new Date().toISOString()
         };
 
         const { error } = await supabase
           .from('live_classes')
-          .update(updateData)
-          .eq('stream_key', videoId);
+          .upsert({
+            stream_key: videoId,
+            access_tier: 'professional',
+            instructor: 'HaritaHive Team',
+            ...updateData
+          }, { 
+            onConflict: 'stream_key'
+          });
 
         if (error) {
           console.error('Error updating live status:', error);
@@ -274,11 +364,9 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
       }
     }
 
-    // Check for completed broadcasts
-    let completedResponse;
-    
+    // Check for completed broadcasts to move to recordings
     if (accessToken) {
-      completedResponse = await fetch(
+      const completedResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=complete&maxResults=5`,
         {
           headers: {
@@ -287,26 +375,21 @@ async function checkLiveStatus(apiKey: string, channelId: string, accessToken: s
           }
         }
       );
-    } else {
-      // Can't check completed broadcasts without OAuth
-      return;
-    }
 
-    if (completedResponse.ok) {
-      const completedData = await completedResponse.json();
-      
-      for (const broadcast of completedData.items || []) {
-        const { error } = await supabase
-          .from('live_classes')
-          .update({
-            status: 'completed' as const,
-            ended_at: new Date().toISOString(),
-            youtube_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
-            updated_at: new Date().toISOString()
-          })
-          .eq('stream_key', broadcast.id);
+      if (completedResponse.ok) {
+        const completedData = await completedResponse.json();
+        
+        for (const broadcast of completedData.items || []) {
+          await supabase
+            .from('live_classes')
+            .update({
+              status: 'completed' as const,
+              ended_at: new Date().toISOString(),
+              youtube_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('stream_key', broadcast.id);
 
-        if (!error) {
           console.log(`✅ Marked as completed: ${broadcast.snippet?.title || broadcast.id}`);
         }
       }

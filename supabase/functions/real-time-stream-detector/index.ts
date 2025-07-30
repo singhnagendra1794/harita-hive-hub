@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   }
 })
 
-// Method 1: YouTube API detection (primary)
+// Method 1: YouTube API detection (primary) - Only truly live streams
 async function detectViaYouTubeAPI(supabase: any) {
   try {
     const apiKey = Deno.env.get('YOUTUBE_API_KEY')
@@ -52,47 +52,7 @@ async function detectViaYouTubeAPI(supabase: any) {
 
     console.log(`🔍 Checking YouTube API for channel: ${channelId}`)
 
-    // First check for scheduled upcoming streams  
-    const upcomingResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?` +
-      `part=snippet&channelId=${channelId}&eventType=upcoming&type=video&key=${apiKey}&maxResults=10`,
-      { headers: { 'Accept': 'application/json' } }
-    )
-
-    if (upcomingResponse.ok) {
-      const upcomingData = await upcomingResponse.json()
-      console.log(`📅 Found ${upcomingData.items?.length || 0} upcoming streams`)
-      
-      for (const item of upcomingData.items || []) {
-        const videoId = item.id.videoId
-        const title = item.snippet.title
-        const description = item.snippet.description
-        const thumbnail = item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url
-        const scheduledStart = item.snippet.publishedAt
-
-        // Check if stream should be starting soon (within 30 minutes)
-        const now = new Date()
-        const startTime = new Date(scheduledStart)
-        const timeDiff = startTime.getTime() - now.getTime()
-        
-        const status = (timeDiff <= 30 * 60 * 1000 && timeDiff >= -5 * 60 * 1000) ? 'live' : 'scheduled'
-
-        await upsertLiveStream(supabase, {
-          youtube_id: videoId,
-          title,
-          description,
-          thumbnail_url: thumbnail,
-          embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&controls=1`,
-          is_live: status === 'live',
-          scheduled_start: scheduledStart,
-          detection_method: 'youtube_api_upcoming'
-        })
-        
-        console.log(`📋 API found upcoming: ${title} (${status})`)
-      }
-    }
-
-    // Then check for currently live broadcasts
+    // Check for currently live broadcasts ONLY (no upcoming)
     const liveResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?` +
       `part=snippet&channelId=${channelId}&eventType=live&type=video&key=${apiKey}&maxResults=5`,
@@ -107,23 +67,65 @@ async function detectViaYouTubeAPI(supabase: any) {
     const liveData = await liveResponse.json()
     console.log(`🔴 Found ${liveData.items?.length || 0} live streams`)
     
+    // Get current live streams from database to compare
+    const { data: currentLiveStreams } = await supabase
+      .from('live_classes')
+      .select('stream_key')
+      .eq('status', 'live')
+    
+    const apiLiveVideoIds = liveData.items?.map(item => item.id.videoId) || []
+    
+    // Mark streams as ended if they're no longer live in API
+    if (currentLiveStreams) {
+      for (const currentStream of currentLiveStreams) {
+        if (!apiLiveVideoIds.includes(currentStream.stream_key)) {
+          await supabase
+            .from('live_classes')
+            .update({
+              status: 'completed',
+              ended_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('stream_key', currentStream.stream_key)
+          
+          console.log(`⏹️ Moved to completed: ${currentStream.stream_key}`)
+        }
+      }
+    }
+    
+    // Process truly live streams
     for (const item of liveData.items || []) {
       const videoId = item.id.videoId
       const title = item.snippet.title
       const description = item.snippet.description
       const thumbnail = item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url
 
-      await upsertLiveStream(supabase, {
-        youtube_id: videoId,
-        title,
-        description,
-        thumbnail_url: thumbnail,
-        embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&controls=1`,
-        is_live: true,
-        detection_method: 'youtube_api_live'
-      })
+      // Double-check stream is truly live by getting detailed info
+      const detailResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`
+      )
       
-      console.log(`✅ API detected LIVE stream: ${title}`)
+      if (detailResponse.ok) {
+        const detailData = await detailResponse.json()
+        const video = detailData.items?.[0]
+        
+        // Only add if no actualEndTime (truly live)
+        if (!video?.liveStreamingDetails?.actualEndTime) {
+          await upsertLiveStream(supabase, {
+            youtube_id: videoId,
+            title,
+            description,
+            thumbnail_url: thumbnail,
+            embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&controls=1`,
+            is_live: true,
+            detection_method: 'youtube_api_live'
+          })
+          
+          console.log(`✅ API detected LIVE stream: ${title}`)
+        } else {
+          console.log(`⏹️ Skipped ended stream: ${title}`)
+        }
+      }
     }
   } catch (error) {
     console.error('❌ YouTube API detection failed:', error)
