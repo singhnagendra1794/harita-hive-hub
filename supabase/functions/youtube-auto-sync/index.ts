@@ -151,6 +151,9 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, accessToke
         const video = detailData.items?.[0];
         
         if (video?.liveStreamingDetails?.scheduledStartTime) {
+          // Get super admin user ID for created_by field
+          const { data: adminUserId } = await supabase.rpc('get_super_admin_user_id');
+          
           const streamData = {
             stream_key: videoId,
             title: video.snippet.title,
@@ -164,7 +167,7 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, accessToke
             instructor: 'HaritaHive Team',
             viewer_count: 0,
             updated_at: new Date().toISOString(),
-            created_by: '00000000-0000-0000-0000-000000000000'
+            created_by: adminUserId || null
           };
 
           // Insert or update stream

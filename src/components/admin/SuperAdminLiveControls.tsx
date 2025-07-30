@@ -177,17 +177,27 @@ export function SuperAdminLiveControls() {
     try {
       console.log('🔄 Triggering comprehensive manual sync...');
       
+      // Test OAuth connectivity first
+      console.log('🔍 Testing YouTube OAuth connectivity...');
+      
       // Run all sync functions in parallel for maximum coverage
       const syncPromises = [
         supabase.functions.invoke('youtube-auto-sync'),
-        supabase.functions.invoke('real-time-stream-detector'),
-        supabase.functions.invoke('live-stream-poller')
+        supabase.functions.invoke('real-time-stream-detector')
       ];
 
       const results = await Promise.allSettled(syncPromises);
-      console.log('Sync results:', results);
+      console.log('📊 Sync results:', results);
       
-      toast.success('✅ Manual sync completed! Refreshing streams...');
+      // Check results and provide detailed feedback
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const errorCount = results.filter(r => r.status === 'rejected').length;
+      
+      if (successCount > 0) {
+        toast.success(`✅ Sync completed! ${successCount} functions succeeded, ${errorCount} failed`);
+      } else {
+        toast.error(`❌ All sync functions failed. Check YouTube OAuth setup.`);
+      }
       
       // Auto-refresh streams after sync
       setTimeout(() => {

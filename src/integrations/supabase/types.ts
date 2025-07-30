@@ -4009,7 +4009,7 @@ export type Database = {
           cloudfront_url: string | null
           course_title: string | null
           created_at: string
-          created_by: string
+          created_by: string | null
           custom_day_label: string | null
           day_number: number | null
           description: string | null
@@ -4048,7 +4048,7 @@ export type Database = {
           cloudfront_url?: string | null
           course_title?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string | null
           custom_day_label?: string | null
           day_number?: number | null
           description?: string | null
@@ -4087,7 +4087,7 @@ export type Database = {
           cloudfront_url?: string | null
           course_title?: string | null
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           custom_day_label?: string | null
           day_number?: number | null
           description?: string | null
@@ -9238,6 +9238,10 @@ export type Database = {
       }
       get_secure_embed_url: {
         Args: { p_youtube_url: string }
+        Returns: string
+      }
+      get_super_admin_user_id: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       get_top_missing_queries: {
