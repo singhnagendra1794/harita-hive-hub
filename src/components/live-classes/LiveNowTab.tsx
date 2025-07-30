@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play, BookOpen } from "lucide-react";
+import { toast } from "sonner";
 
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
 import { ScreenProtection } from '@/components/security/ScreenProtection';
@@ -647,14 +648,33 @@ const LiveNowTab = () => {
     setPlayerError(null);
     setLastRefresh(Date.now());
     
-    // Trigger manual sync with YouTube API
+    // Enhanced manual sync with YouTube API
     try {
-      await supabase.functions.invoke('youtube-live-manager', {
-        body: { action: 'manual_refresh' }
-      });
-      console.log('Manual YouTube sync completed');
+      console.log('🔄 Manual sync triggered...')
+      
+      // First try youtube-auto-sync
+      const { data, error } = await supabase.functions.invoke('youtube-auto-sync')
+      
+      if (error) {
+        console.error('YouTube auto-sync failed:', error)
+        toast.error('Sync failed: ' + error.message)
+      } else {
+        console.log('✅ YouTube auto-sync successful:', data)
+        toast.success('YouTube data synchronized')
+      }
+      
+      // Also trigger live-content-sync for comprehensive sync
+      const { data: contentSyncData, error: contentSyncError } = await supabase.functions.invoke('live-content-sync')
+      
+      if (contentSyncError) {
+        console.error('Content sync failed:', contentSyncError)
+      } else {
+        console.log('✅ Content sync successful:', contentSyncData)
+      }
+      
     } catch (error) {
-      console.error('Manual sync failed:', error);
+      console.error('Manual sync error:', error);
+      toast.error('Sync failed');
     }
     
     await checkForLiveStreams();

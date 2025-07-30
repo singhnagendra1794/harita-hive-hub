@@ -55,41 +55,80 @@ serve(async (req) => {
 
 async function syncUpcomingStreams(apiKey: string, channelId: string, supabase: any) {
   try {
-    // Fetch upcoming live broadcasts
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=upcoming&channelId=${channelId}&key=${apiKey}`
+    console.log(`🔍 Fetching upcoming streams for channel: ${channelId}`);
+    
+    // Try multiple YouTube API endpoints for scheduled streams
+    let response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=upcoming&type=video&key=${apiKey}&maxResults=10`
     );
 
-    if (!response.ok) throw new Error('Failed to fetch upcoming streams');
+    if (!response.ok) {
+      console.log(`❌ Search API failed with ${response.status}, trying liveBroadcasts API...`);
+      // Fallback to liveBroadcasts API
+      response = await fetch(
+        `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=upcoming&key=${apiKey}&maxResults=10`
+      );
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error ${response.status}: ${errorText}`);
+      throw new Error(`YouTube API error: ${response.status} - ${errorText}`);
+    }
 
     const data = await response.json();
+    console.log(`📊 Found ${data.items?.length || 0} upcoming streams`);
     
-    for (const broadcast of data.items) {
-      const streamData = {
-        youtube_id: broadcast.id,
-        title: broadcast.snippet.title,
-        description: broadcast.snippet.description,
-        thumbnail_url: broadcast.snippet.thumbnails?.maxres?.url || broadcast.snippet.thumbnails?.high?.url,
-        scheduled_start_time: broadcast.snippet.scheduledStartTime,
-        status: 'scheduled',
-        youtube_url: `https://www.youtube.com/watch?v=${broadcast.id}`,
-        embed_url: `https://www.youtube-nocookie.com/embed/${broadcast.id}?modestbranding=1&rel=0`,
-        auto_imported: true,
-        updated_at: new Date().toISOString()
-      };
+    for (const item of data.items || []) {
+      // Handle both search API and liveBroadcasts API response formats
+      const videoId = item.id?.videoId || item.id;
+      const snippet = item.snippet;
+      
+      if (!videoId) {
+        console.log('⚠️ Skipping item without video ID');
+        continue;
+      }
+      
+      // Get detailed video information including live streaming details
+      const detailResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`
+      );
+      
+      if (detailResponse.ok) {
+        const detailData = await detailResponse.json();
+        const video = detailData.items?.[0];
+        
+        if (video?.liveStreamingDetails?.scheduledStartTime) {
+          const streamData = {
+            stream_key: videoId,
+            title: video.snippet.title,
+            description: video.snippet.description || 'Live streaming session',
+            thumbnail_url: video.snippet.thumbnails?.maxres?.url || video.snippet.thumbnails?.high?.url,
+            starts_at: video.liveStreamingDetails.scheduledStartTime,
+            status: 'scheduled',
+            youtube_url: `https://www.youtube.com/watch?v=${videoId}`,
+            embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&controls=1`,
+            access_tier: 'professional',
+            instructor: 'HaritaHive Team',
+            viewer_count: 0,
+            updated_at: new Date().toISOString(),
+            created_by: '00000000-0000-0000-0000-000000000000'
+          };
 
-      // Insert or update stream
-      const { error } = await supabase
-        .from('live_classes')
-        .upsert(streamData, { 
-          onConflict: 'youtube_id',
-          ignoreDuplicates: false 
-        });
+          // Insert or update stream
+          const { error } = await supabase
+            .from('live_classes')
+            .upsert(streamData, { 
+              onConflict: 'stream_key',
+              ignoreDuplicates: false 
+            });
 
-      if (error) {
-        console.error('Error upserting stream:', error);
-      } else {
-        console.log(`Synced upcoming stream: ${broadcast.snippet.title}`);
+          if (error) {
+            console.error(`❌ Error upserting stream ${videoId}:`, error);
+          } else {
+            console.log(`✅ Synced upcoming stream: ${video.snippet.title}`);
+          }
+        }
       }
     }
 
