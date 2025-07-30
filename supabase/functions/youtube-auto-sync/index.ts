@@ -18,15 +18,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const youtubeApiKey = Deno.env.get('YOUTUBE_API_KEY');
-    const channelId = Deno.env.get('YOUTUBE_CHANNEL_ID');
+    // Get OAuth token for authenticated requests
+    const { data: tokens } = await supabase
+      .from('youtube_oauth_tokens')
+      .select('access_token, refresh_token, expires_at')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    const accessToken = tokens?.access_token;
+    console.log(`🔑 OAuth token available: ${!!accessToken}`);
 
-    if (!youtubeApiKey || !channelId) {
-      throw new Error('YouTube API credentials not configured');
-    }
-
-    await syncUpcomingStreams(youtubeApiKey, channelId, supabase);
-    await checkLiveStatus(youtubeApiKey, channelId, supabase);
+    await syncUpcomingStreams(accessToken, supabase);
+    await checkLiveStatus(accessToken, supabase);
     
     return new Response(JSON.stringify({
       success: true,
@@ -53,26 +57,29 @@ serve(async (req) => {
   }
 });
 
-async function syncUpcomingStreams(apiKey: string, channelId: string, supabase: any) {
+async function syncUpcomingStreams(accessToken: string | null, supabase: any) {
   try {
-    console.log(`🔍 Fetching upcoming streams for channel: ${channelId}`);
+    console.log(`🔍 Fetching upcoming streams with OAuth token`);
     
-    // Try multiple YouTube API endpoints for scheduled streams
-    let response = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=upcoming&type=video&key=${apiKey}&maxResults=10`
+    if (!accessToken) {
+      console.log('❌ No OAuth token available for authenticated requests');
+      return;
+    }
+    
+    // Use OAuth token for liveBroadcasts API (requires authentication)
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=upcoming&maxResults=10`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      }
     );
 
     if (!response.ok) {
-      console.log(`❌ Search API failed with ${response.status}, trying liveBroadcasts API...`);
-      // Fallback to liveBroadcasts API
-      response = await fetch(
-        `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=upcoming&key=${apiKey}&maxResults=10`
-      );
-    }
-
-    if (!response.ok) {
       const errorText = await response.text();
-      console.error(`API Error ${response.status}: ${errorText}`);
+      console.error(`liveBroadcasts API Error ${response.status}: ${errorText}`);
       throw new Error(`YouTube API error: ${response.status} - ${errorText}`);
     }
 
@@ -91,7 +98,13 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, supabase: 
       
       // Get detailed video information including live streaming details
       const detailResponse = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${videoId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
+        }
       );
       
       if (detailResponse.ok) {
@@ -138,11 +151,22 @@ async function syncUpcomingStreams(apiKey: string, channelId: string, supabase: 
   }
 }
 
-async function checkLiveStatus(apiKey: string, channelId: string, supabase: any) {
+async function checkLiveStatus(accessToken: string | null, supabase: any) {
   try {
+    if (!accessToken) {
+      console.log('❌ No OAuth token for live status check');
+      return;
+    }
+    
     // Check for currently live broadcasts
     const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=live&channelId=${channelId}&key=${apiKey}`
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=live`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      }
     );
 
     if (!response.ok) throw new Error('Failed to check live status');
@@ -170,7 +194,13 @@ async function checkLiveStatus(apiKey: string, channelId: string, supabase: any)
 
     // Check for completed broadcasts
     const completedResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=complete&channelId=${channelId}&key=${apiKey}&maxResults=5`
+      `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=snippet,status,contentDetails&broadcastStatus=complete&maxResults=5`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      }
     );
 
     if (completedResponse.ok) {
