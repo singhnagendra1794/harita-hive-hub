@@ -229,6 +229,9 @@ async function upsertLiveStream(supabase: any, streamData: any) {
         embed_url: streamData.embed_url,
         thumbnail_url: streamData.thumbnail_url,
         is_live: streamData.is_live,
+        status: (streamData.is_live ? 'live' : 'scheduled') as 'live' | 'ended' | 'scheduled' | 'error',
+        detection_method: streamData.detection_method,
+        detected_at: new Date().toISOString(),
         last_checked: new Date().toISOString()
       }, { 
         onConflict: 'youtube_id'

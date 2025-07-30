@@ -9604,7 +9604,7 @@ export type Database = {
         | "marine"
         | "energy"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
-      stream_status: "live" | "ended" | "scheduled"
+      stream_status: "live" | "ended" | "scheduled" | "error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9775,7 +9775,7 @@ export const Constants = {
         "energy",
       ],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
-      stream_status: ["live", "ended", "scheduled"],
+      stream_status: ["live", "ended", "scheduled", "error"],
     },
   },
 } as const
