@@ -306,29 +306,38 @@ const LiveNowTab = () => {
     }
   }, [])
 
-  // Auto-trigger real-time detection every 10 seconds
+  // Auto-trigger real-time detection (silent background process)
   useEffect(() => {
+    let lastDetectionTime = 0
+    const DETECTION_THROTTLE = 45000 // 45 seconds minimum between detections
+    
     const triggerDetection = async () => {
+      const now = Date.now()
+      if (now - lastDetectionTime < DETECTION_THROTTLE) {
+        return // Skip if too soon since last detection
+      }
+      
       try {
-        console.log('🔍 Triggering real-time stream detection...')
-        const { data, error } = await supabase.functions.invoke('real-time-stream-detector')
-        if (error) {
-          console.error('Detection error:', error)
-        } else {
-          console.log('✅ Real-time detection successful:', data)
-        }
+        lastDetectionTime = now
+        await supabase.functions.invoke('real-time-stream-detector')
       } catch (error) {
-        console.error('Detection trigger failed:', error)
+        // Silent error handling - only log critical errors
+        if (error?.message?.includes('500') || error?.message?.includes('network')) {
+          console.error('Stream detection service unavailable')
+        }
       }
     }
 
-    // Immediate detection on component mount
-    triggerDetection()
+    // Initial detection after a short delay
+    const initialTimeout = setTimeout(triggerDetection, 5000)
     
-    // Continuous detection every 30 seconds for real-time OBS→YouTube→HaritaHive sync
-    const detectionInterval = setInterval(triggerDetection, 30000)
+    // Throttled detection every 45 seconds
+    const detectionInterval = setInterval(triggerDetection, 45000)
     
-    return () => clearInterval(detectionInterval)
+    return () => {
+      clearTimeout(initialTimeout)
+      clearInterval(detectionInterval)
+    }
   }, [])
 
   // Pre-stream validation check on component mount
@@ -353,23 +362,38 @@ const LiveNowTab = () => {
     runPreStreamCheck()
   }, [])
 
-  // Auto-sync with YouTube API every minute for active monitoring
+  // Auto-sync with YouTube API (silent background process)
   useEffect(() => {
-    const syncInterval = setInterval(async () => {
-      try {
-        console.log('🔄 Auto-syncing with YouTube API...')
-        const { data, error } = await supabase.functions.invoke('youtube-auto-sync')
-        if (error) {
-          console.error('Auto-sync failed:', error)
-        } else {
-          console.log('✅ YouTube auto-sync successful')
-        }
-      } catch (error) {
-        console.error('Auto-sync failed:', error)
+    let lastSyncTime = 0
+    const SYNC_THROTTLE = 120000 // 2 minutes minimum between syncs
+    
+    const performSync = async () => {
+      const now = Date.now()
+      if (now - lastSyncTime < SYNC_THROTTLE) {
+        return // Skip if too soon since last sync
       }
-    }, 60000) // Check every minute for scheduled streams
+      
+      try {
+        lastSyncTime = now
+        await supabase.functions.invoke('youtube-auto-sync')
+      } catch (error) {
+        // Silent error handling - only log auth failures
+        if (error?.message?.includes('401') || error?.message?.includes('auth')) {
+          console.error('YouTube authentication required')
+        }
+      }
+    }
 
-    return () => clearInterval(syncInterval)
+    // Initial sync after 10 seconds
+    const initialTimeout = setTimeout(performSync, 10000)
+    
+    // Throttled sync every 2 minutes
+    const syncInterval = setInterval(performSync, 120000)
+
+    return () => {
+      clearTimeout(initialTimeout)
+      clearInterval(syncInterval)
+    }
   }, [])
 
   const checkForLiveStreams = async () => {
