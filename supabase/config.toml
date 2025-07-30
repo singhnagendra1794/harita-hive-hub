@@ -60,3 +60,6 @@ verify_jwt = true
 
 [functions.test-ai-endpoints]
 verify_jwt = false
+
+[functions.test-youtube-api]
+verify_jwt = false
