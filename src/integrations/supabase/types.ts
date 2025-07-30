@@ -9428,6 +9428,10 @@ export type Database = {
         Args: { token_id: string }
         Returns: boolean
       }
+      refresh_youtube_oauth_token_if_needed: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       reset_monthly_points: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -9494,6 +9498,10 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: undefined
+      }
+      trigger_youtube_detection: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       update_class_status: {
         Args: Record<PropertyKey, never>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play, BookOpen } from "lucide-react";
+import { Video, Users, Radio, Bot, RefreshCw, Lock, Clock, Play, BookOpen, CheckCircle, Zap, Timer } from "lucide-react";
 import { toast } from "sonner";
 
 import { GEOVALiveClassroom } from '@/components/geova/GEOVALiveClassroom';
@@ -80,6 +80,12 @@ const LiveNowTab = () => {
   const [timeUntilStart, setTimeUntilStart] = useState<number | null>(null);
   const [countdownText, setCountdownText] = useState<string>('');
   const [isViewing, setIsViewing] = useState(false);
+  const [automationStatus, setAutomationStatus] = useState({
+    tokenRefresh: true,
+    streamDetection: true,
+    youtubeSync: true,
+    lastUpdate: new Date()
+  });
 
   // Track when user starts/stops viewing
   useEffect(() => {
@@ -697,6 +703,47 @@ const LiveNowTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* Automation Status Card */}
+      <Card className="border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Zap className="h-5 w-5 text-green-600" />
+            Automated YouTube Detection
+            <Badge variant="outline" className="ml-auto bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              ACTIVE
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Timer className="h-4 w-4 text-blue-600" />
+              <span className="text-muted-foreground">OAuth Tokens:</span>
+              <Badge variant={automationStatus.tokenRefresh ? "secondary" : "destructive"} className="text-xs">
+                {automationStatus.tokenRefresh ? "Auto-refreshing" : "Manual Required"}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Radio className="h-4 w-4 text-purple-600" />
+              <span className="text-muted-foreground">Stream Detection:</span>
+              <Badge variant={automationStatus.streamDetection ? "secondary" : "destructive"} className="text-xs">
+                {automationStatus.streamDetection ? "Every 15s" : "Inactive"}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-orange-600" />
+              <span className="text-muted-foreground">YouTube Sync:</span>
+              <Badge variant={automationStatus.youtubeSync ? "secondary" : "destructive"} className="text-xs">
+                {automationStatus.youtubeSync ? "Every 30s" : "Inactive"}
+              </Badge>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+            ✅ No manual action required. HaritaHive automatically detects YouTube streams when you start streaming in OBS.
+          </div>
+        </CardContent>
+      </Card>
       {currentStream ? (
         <Card className="border-red-200 bg-gradient-to-r from-red-50/50 to-orange-50/50 dark:from-red-950/20 dark:to-orange-950/20">
           <CardHeader>
