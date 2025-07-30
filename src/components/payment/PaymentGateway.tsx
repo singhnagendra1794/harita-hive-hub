@@ -65,9 +65,35 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         order_id: data.order_id,
         prefill: { email: user.email },
         theme: { color: '#3B82F6' },
-        handler: () => {
-          toast({ title: "Payment Successful!" });
-          onSuccess?.();
+        handler: async (response: any) => {
+          try {
+            // Verify payment with backend
+            const { data: verificationData, error: verificationError } = await supabase.functions.invoke('verify-razorpay-payment', {
+              body: { 
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              }
+            });
+
+            if (verificationError) {
+              throw new Error(verificationError.message);
+            }
+
+            toast({ title: "Payment Successful!", description: "Your payment has been processed successfully." });
+            onSuccess?.();
+          } catch (error: any) {
+            console.error('Payment verification failed:', error);
+            toast({ title: "Payment Verification Failed", description: error.message, variant: "destructive" });
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            toast({ title: "Payment Cancelled", description: "Payment was cancelled by user." });
+            setLoading(false);
+          }
         }
       };
 
