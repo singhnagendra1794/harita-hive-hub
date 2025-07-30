@@ -319,8 +319,8 @@ const LiveNowTab = () => {
     // Immediate detection on component mount
     triggerDetection()
     
-    // Continuous detection every 15 seconds (reduced frequency for stability)
-    const detectionInterval = setInterval(triggerDetection, 15000)
+    // Continuous detection every 30 seconds for real-time OBS→YouTube→HaritaHive sync
+    const detectionInterval = setInterval(triggerDetection, 30000)
     
     return () => clearInterval(detectionInterval)
   }, [])

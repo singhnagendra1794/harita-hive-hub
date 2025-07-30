@@ -175,16 +175,29 @@ export function SuperAdminLiveControls() {
   const forceSync = async () => {
     setLoading(true)
     try {
-      const { error } = await supabase.functions.invoke('youtube-auto-sync')
+      console.log('🔄 Triggering comprehensive manual sync...');
       
-      if (error) throw error
+      // Run all sync functions in parallel for maximum coverage
+      const syncPromises = [
+        supabase.functions.invoke('youtube-auto-sync'),
+        supabase.functions.invoke('real-time-stream-detector'),
+        supabase.functions.invoke('live-stream-poller')
+      ];
 
-      toast.success('YouTube data synced successfully')
-      fetchActiveStreams()
+      const results = await Promise.allSettled(syncPromises);
+      console.log('Sync results:', results);
+      
+      toast.success('✅ Manual sync completed! Refreshing streams...');
+      
+      // Auto-refresh streams after sync
+      setTimeout(() => {
+        fetchActiveStreams();
+      }, 2000);
     } catch (error: any) {
-      toast.error('Sync error: ' + error.message)
+      console.error('Manual sync error:', error);
+      toast.error('Failed to trigger manual sync: ' + error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
