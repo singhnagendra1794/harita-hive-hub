@@ -685,7 +685,23 @@ const LiveNowTab = () => {
     try {
       console.log('🔄 Manual sync triggered...')
       
-      // First try youtube-auto-sync
+      // First run YouTube API test
+      console.log('🧪 Testing YouTube API credentials...')
+      const { data: testData, error: testError } = await supabase.functions.invoke('test-youtube-api')
+      
+      if (testError) {
+        console.error('YouTube API test failed:', testError)
+        toast.error('YouTube API test failed: ' + testError.message)
+      } else {
+        console.log('✅ YouTube API test results:', testData)
+        if (testData.success) {
+          toast.success(`YouTube API working! Channel: ${testData.channelInfo?.title}`)
+        } else {
+          toast.error('YouTube API test failed: ' + testData.error)
+        }
+      }
+      
+      // Then try youtube-auto-sync
       const { data, error } = await supabase.functions.invoke('youtube-auto-sync')
       
       if (error) {
@@ -710,7 +726,6 @@ const LiveNowTab = () => {
       toast.error('Sync failed');
     }
     
-    await checkForLiveStreams();
   };
 
   const formatTime = (dateString: string) => {
