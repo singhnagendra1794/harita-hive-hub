@@ -303,45 +303,67 @@ const LiveNowTab = () => {
   useEffect(() => {
     const triggerDetection = async () => {
       try {
-        await supabase.functions.invoke('real-time-stream-detector')
-        console.log('🔍 Real-time detection triggered')
+        console.log('🔍 Triggering real-time stream detection...')
+        const { data, error } = await supabase.functions.invoke('real-time-stream-detector')
+        if (error) {
+          console.error('Detection error:', error)
+        } else {
+          console.log('✅ Real-time detection successful:', data)
+        }
       } catch (error) {
         console.error('Detection trigger failed:', error)
       }
     }
 
-    // Immediate detection
+    // Immediate detection on component mount
     triggerDetection()
     
-    // Continuous detection every 10 seconds
-    const detectionInterval = setInterval(triggerDetection, 10000)
+    // Continuous detection every 15 seconds (reduced frequency for stability)
+    const detectionInterval = setInterval(triggerDetection, 15000)
     
     return () => clearInterval(detectionInterval)
   }, [])
 
-  // Auto-sync with YouTube API every 2 minutes
+  // Pre-stream validation check on component mount
+  useEffect(() => {
+    const runPreStreamCheck = async () => {
+      try {
+        console.log('🔍 Running pre-stream validation...')
+        const { data, error } = await supabase.functions.invoke('youtube-stream-checker')
+        if (error) {
+          console.error('❌ Pre-stream validation failed:', error)
+        } else {
+          console.log('✅ Pre-stream validation results:', data)
+          if (!data.readyForStream) {
+            console.warn('⚠️ System not ready for streaming:', data.results)
+          }
+        }
+      } catch (error) {
+        console.error('Pre-stream check failed:', error)
+      }
+    }
+
+    runPreStreamCheck()
+  }, [])
+
+  // Auto-sync with YouTube API every minute for active monitoring
   useEffect(() => {
     const syncInterval = setInterval(async () => {
       try {
-        // Try both sync functions as failover
-        await supabase.functions.invoke('youtube-auto-sync');
-        console.log('Auto-synced with YouTube API via youtube-auto-sync');
-      } catch (error) {
-        console.error('Auto-sync failed:', error);
-        // Fallback to youtube-live-manager
-        try {
-          await supabase.functions.invoke('youtube-live-manager', {
-            body: { action: 'sync_upcoming_streams' }
-          });
-          console.log('Fallback sync via youtube-live-manager successful');
-        } catch (fallbackError) {
-          console.error('Fallback sync also failed:', fallbackError);
+        console.log('🔄 Auto-syncing with YouTube API...')
+        const { data, error } = await supabase.functions.invoke('youtube-auto-sync')
+        if (error) {
+          console.error('Auto-sync failed:', error)
+        } else {
+          console.log('✅ YouTube auto-sync successful')
         }
+      } catch (error) {
+        console.error('Auto-sync failed:', error)
       }
-    }, 30000); // Check every 30 seconds when user is on Live Now tab
+    }, 60000) // Check every minute for scheduled streams
 
-    return () => clearInterval(syncInterval);
-  }, []);
+    return () => clearInterval(syncInterval)
+  }, [])
 
   const checkForLiveStreams = async () => {
     try {

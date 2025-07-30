@@ -50,24 +50,68 @@ async function detectViaYouTubeAPI(supabase: any) {
       return
     }
 
-    // Get live broadcasts
-    const response = await fetch(
+    console.log(`🔍 Checking YouTube API for channel: ${channelId}`)
+
+    // First check for scheduled upcoming streams  
+    const upcomingResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?` +
-      `part=snippet&channelId=${channelId}&eventType=live&type=video&key=${apiKey}`,
+      `part=snippet&channelId=${channelId}&eventType=upcoming&type=video&key=${apiKey}&maxResults=10`,
       { headers: { 'Accept': 'application/json' } }
     )
 
-    if (!response.ok) {
-      throw new Error(`YouTube API error: ${response.status}`)
+    if (upcomingResponse.ok) {
+      const upcomingData = await upcomingResponse.json()
+      console.log(`📅 Found ${upcomingData.items?.length || 0} upcoming streams`)
+      
+      for (const item of upcomingData.items || []) {
+        const videoId = item.id.videoId
+        const title = item.snippet.title
+        const description = item.snippet.description
+        const thumbnail = item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url
+        const scheduledStart = item.snippet.publishedAt
+
+        // Check if stream should be starting soon (within 30 minutes)
+        const now = new Date()
+        const startTime = new Date(scheduledStart)
+        const timeDiff = startTime.getTime() - now.getTime()
+        
+        const status = (timeDiff <= 30 * 60 * 1000 && timeDiff >= -5 * 60 * 1000) ? 'live' : 'scheduled'
+
+        await upsertLiveStream(supabase, {
+          youtube_id: videoId,
+          title,
+          description,
+          thumbnail_url: thumbnail,
+          embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&controls=1`,
+          is_live: status === 'live',
+          scheduled_start: scheduledStart,
+          detection_method: 'youtube_api_upcoming'
+        })
+        
+        console.log(`📋 API found upcoming: ${title} (${status})`)
+      }
     }
 
-    const data = await response.json()
+    // Then check for currently live broadcasts
+    const liveResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?` +
+      `part=snippet&channelId=${channelId}&eventType=live&type=video&key=${apiKey}&maxResults=5`,
+      { headers: { 'Accept': 'application/json' } }
+    )
+
+    if (!liveResponse.ok) {
+      console.error(`❌ YouTube live API error: ${liveResponse.status}`)
+      return
+    }
+
+    const liveData = await liveResponse.json()
+    console.log(`🔴 Found ${liveData.items?.length || 0} live streams`)
     
-    for (const item of data.items || []) {
+    for (const item of liveData.items || []) {
       const videoId = item.id.videoId
       const title = item.snippet.title
       const description = item.snippet.description
-      const thumbnail = item.snippet.thumbnails.high?.url
+      const thumbnail = item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url
 
       await upsertLiveStream(supabase, {
         youtube_id: videoId,
@@ -76,10 +120,10 @@ async function detectViaYouTubeAPI(supabase: any) {
         thumbnail_url: thumbnail,
         embed_url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&controls=1`,
         is_live: true,
-        detection_method: 'youtube_api'
+        detection_method: 'youtube_api_live'
       })
       
-      console.log(`✅ API detected live stream: ${title}`)
+      console.log(`✅ API detected LIVE stream: ${title}`)
     }
   } catch (error) {
     console.error('❌ YouTube API detection failed:', error)
@@ -193,6 +237,9 @@ async function upsertLiveStream(supabase: any, streamData: any) {
     }
 
     // Also directly update live_classes for immediate real-time effect
+    const currentTime = new Date().toISOString()
+    const scheduledTime = streamData.scheduled_start || currentTime
+    
     const { error: classError } = await supabase
       .from('live_classes')
       .upsert({
@@ -202,11 +249,13 @@ async function upsertLiveStream(supabase: any, streamData: any) {
         youtube_url: `https://www.youtube.com/watch?v=${streamData.youtube_id}`,
         embed_url: streamData.embed_url,
         thumbnail_url: streamData.thumbnail_url,
-        status: 'live',
-        starts_at: new Date().toISOString(),
+        status: streamData.is_live ? 'live' : 'scheduled',
+        starts_at: scheduledTime,
         access_tier: 'professional',
         viewer_count: 0,
-        updated_at: new Date().toISOString()
+        instructor: 'HaritaHive Team',
+        created_by: '00000000-0000-0000-0000-000000000000', // System user
+        updated_at: currentTime
       }, { 
         onConflict: 'stream_key'
       })
