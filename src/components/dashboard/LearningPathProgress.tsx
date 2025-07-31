@@ -89,10 +89,22 @@ export const LearningPathProgress = () => {
         .from('course_enrollments')
         .insert([{
           user_id: user.id,
-          course_id: courseId
+          course_id: courseId,
+          enrolled_at: new Date().toISOString(),
+          progress_percentage: 0,
+          completed: false
         }]);
 
       if (error) throw error;
+
+      // Update user's enrolled courses count
+      await supabase
+        .from('profiles')
+        .update({
+          enrolled_courses_count: enrollments.length + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
 
       toast({
         title: "Success",
