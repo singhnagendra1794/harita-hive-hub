@@ -178,6 +178,21 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
         });
         
         console.log('Signin attempt result:', result);
+        
+        // If sign-in successful, invalidate all previous sessions for this user
+        if (result.data.user && !result.error) {
+          try {
+            const sessionToken = crypto.randomUUID();
+            await supabase.rpc('invalidate_previous_sessions', {
+              p_user_id: result.data.user.id,
+              p_new_session_token: sessionToken
+            });
+            console.log('Previous sessions invalidated for user');
+          } catch (sessionError) {
+            console.error('Failed to invalidate previous sessions:', sessionError);
+            // Don't block login if session management fails
+          }
+        }
       }
 
       if (result.error) {

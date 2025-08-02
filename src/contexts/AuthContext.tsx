@@ -86,6 +86,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showPostSignupModal, setShowPostSignupModal] = useState(false);
   const [newUserName, setNewUserName] = useState<string>('');
 
+  const validateSession = async (): Promise<boolean> => {
+    try {
+      if (!user?.id) return false;
+      
+      // Check if user session is still valid
+      const { data, error } = await supabase
+        .from('user_sessions')
+        .select('is_active')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error validating session:', error);
+        return true; // Don't force logout on validation error
+      }
+      
+      // If no active session found, this user was logged out elsewhere
+      if (!data) {
+        console.log('Session invalidated - user logged in elsewhere');
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error in validateSession:', error);
+      return true; // Don't force logout on validation error
+    }
+  };
+
   const refreshSession = async (): Promise<boolean> => {
     try {
       const { data, error } = await supabase.auth.refreshSession();
@@ -98,6 +128,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.session) {
         setSession(data.session);
         setUser(data.session.user);
+        
+        // Validate session after refresh
+        const isValid = await validateSession();
+        if (!isValid) {
+          cleanupAuthState();
+          setSession(null);
+          setUser(null);
+          return false;
+        }
+        
         return true;
       }
       
@@ -110,6 +150,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let sessionTimer: NodeJS.Timeout;
+    let sessionValidationTimer: NodeJS.Timeout;
+    
+    // Set up periodic session validation
+    const setupSessionValidation = () => {
+      if (sessionValidationTimer) {
+        clearInterval(sessionValidationTimer);
+      }
+      
+      // Check session validity every 30 seconds
+      sessionValidationTimer = setInterval(async () => {
+        if (user?.id) {
+          const isValid = await validateSession();
+          if (!isValid) {
+            toast({
+              title: "Logged Out",
+              description: "You have been logged in from another device.",
+              variant: "destructive",
+            });
+            
+            setTimeout(() => {
+              cleanupAuthState();
+              setSession(null);
+              setUser(null);
+              window.location.href = '/auth';
+            }, 1000);
+          }
+        }
+      }, 30000); // 30 seconds
+    };
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -128,6 +197,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Handle different auth events
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in successfully');
+          
+          // Set up session validation for this user
+          setupSessionValidation();
 
           // Save location data if available in user metadata
           if (session.user.user_metadata?.location_country) {
@@ -282,6 +354,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
       if (sessionTimer) {
         clearTimeout(sessionTimer);
+      }
+      if (sessionValidationTimer) {
+        clearInterval(sessionValidationTimer);
       }
     };
   }, []);
