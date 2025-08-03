@@ -56,6 +56,14 @@ const RecordedSessionsTab = () => {
         .not('recording_url', 'is', null)
         .order('actual_end_time', { ascending: false });
 
+      // Fetch YouTube sessions that are recordings
+      const { data: youtubeRecordings, error: youtubeError } = await supabase
+        .from('youtube_sessions')
+        .select('*')
+        .eq('session_type', 'recording')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
       let allRecordings: RecordedSession[] = [];
 
       // Process class recordings
@@ -90,6 +98,24 @@ const RecordedSessionsTab = () => {
             course_title: recording.course_title || 'Live Class',
             duration_minutes: recording.duration_minutes || 90,
             viewer_count: recording.viewer_count || 0
+          });
+        });
+      }
+
+      // Process YouTube session recordings
+      if (youtubeRecordings && !youtubeError) {
+        youtubeRecordings.forEach(recording => {
+          allRecordings.push({
+            id: recording.id,
+            title: recording.title,
+            description: recording.description || '',
+            stream_key: recording.id,
+            start_time: recording.created_at,
+            end_time: recording.created_at,
+            recording_url: recording.youtube_embed_url,
+            course_title: 'YouTube Recording',
+            duration_minutes: 90, // Default duration for YouTube recordings
+            viewer_count: 0
           });
         });
       }
