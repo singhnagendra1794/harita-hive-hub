@@ -93,19 +93,19 @@ const ComprehensiveQAReport = () => {
     });
 
     try {
-      const { data: templates } = await supabase
-        .from('workflow_templates')
+      const { data: automationRules } = await supabase
+        .from('automated_decision_rules')
         .select('*')
         .limit(5);
 
-      const hasRealTemplates = templates && templates.length > 0 && 
-        !templates.some(t => t.name?.includes('placeholder') || t.name?.includes('demo'));
+      const hasRealRules = automationRules && automationRules.length > 0 && 
+        !automationRules.some(r => r.name?.includes('placeholder') || r.name?.includes('demo'));
       
-      testResults[testResults.length - 1].status = hasRealTemplates ? 'pass' : 'warning';
-      testResults[testResults.length - 1].details = `Found ${templates?.length || 0} templates`;
+      testResults[testResults.length - 1].status = hasRealRules ? 'pass' : 'warning';
+      testResults[testResults.length - 1].details = `Found ${automationRules?.length || 0} automation rules`;
     } catch (error) {
       testResults[testResults.length - 1].status = 'fail';
-      testResults[testResults.length - 1].details = 'Templates table not accessible';
+      testResults[testResults.length - 1].details = 'Automation rules table not accessible';
     }
 
     // Phase 3: Intelligence & Collaboration Tests
