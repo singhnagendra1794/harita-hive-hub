@@ -1,11 +1,11 @@
 
-import AdvancedGeoAILab from "../components/geoai/AdvancedGeoAILab";
+import GeoAIPhase3Main from "../components/geoai/GeoAIPhase3Main";
 import GeoAIUsageTracker from '../components/geoai/enhanced/GeoAIUsageTracker';
 
 const GeoAILab = () => {
   return (
     <GeoAIUsageTracker>
-      <AdvancedGeoAILab />
+      <GeoAIPhase3Main />
     </GeoAIUsageTracker>
   );
 };
