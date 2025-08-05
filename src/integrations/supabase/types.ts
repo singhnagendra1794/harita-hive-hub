@@ -340,6 +340,59 @@ export type Database = {
           },
         ]
       }
+      api_usage_analytics: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          method: string
+          request_size_bytes: number | null
+          response_size_bytes: number | null
+          response_time_ms: number | null
+          status_code: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          method: string
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code: number
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          method?: string
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_analytics_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "enterprise_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_tracking: {
         Row: {
           application_method: string | null
@@ -2518,6 +2571,48 @@ export type Database = {
         }
         Relationships: []
       }
+      enterprise_api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          id: string
+          is_active: boolean
+          key_name: string
+          last_used: string | null
+          permissions: string[]
+          rate_limit: number
+          updated_at: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_name: string
+          last_used?: string | null
+          permissions?: string[]
+          rate_limit?: number
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_name?: string
+          last_used?: string | null
+          permissions?: string[]
+          rate_limit?: number
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           attended: boolean | null
@@ -3200,43 +3295,55 @@ export type Database = {
       }
       geoai_usage_tracking: {
         Row: {
+          admin_notes: string | null
           api_calls_made: number | null
           compute_minutes_used: number | null
           created_at: string
           data_processed_gb: number | null
           id: string
           jobs_executed: number | null
+          last_admin_review: string | null
           limits: Json | null
           month_year: string
           plan_tier: string
+          priority_level: string | null
+          reviewed_by: string | null
           storage_used_gb: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           api_calls_made?: number | null
           compute_minutes_used?: number | null
           created_at?: string
           data_processed_gb?: number | null
           id?: string
           jobs_executed?: number | null
+          last_admin_review?: string | null
           limits?: Json | null
           month_year: string
           plan_tier?: string
+          priority_level?: string | null
+          reviewed_by?: string | null
           storage_used_gb?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           api_calls_made?: number | null
           compute_minutes_used?: number | null
           created_at?: string
           data_processed_gb?: number | null
           id?: string
           jobs_executed?: number | null
+          last_admin_review?: string | null
           limits?: Json | null
           month_year?: string
           plan_tier?: string
+          priority_level?: string | null
+          reviewed_by?: string | null
           storage_used_gb?: number | null
           updated_at?: string
           user_id?: string
@@ -9004,6 +9111,51 @@ export type Database = {
         }
         Relationships: []
       }
+      visualization_dashboards: {
+        Row: {
+          configuration: Json
+          created_at: string
+          dashboard_type: string
+          data_sources: Json
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          shared_url: string | null
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          dashboard_type: string
+          data_sources?: Json
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          shared_url?: string | null
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          dashboard_type?: string
+          data_sources?: Json
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          shared_url?: string | null
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       webgis_comments: {
         Row: {
           content: string
@@ -9224,6 +9376,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          delivery_count: number
+          events: string[]
+          id: string
+          is_active: boolean
+          last_delivery: string | null
+          secret: string
+          status: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_count?: number
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          last_delivery?: string | null
+          secret: string
+          status?: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_count?: number
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          last_delivery?: string | null
+          secret?: string
+          status?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       weekly_challenges: {
         Row: {
@@ -9916,7 +10110,7 @@ export type Database = {
         Returns: boolean
       }
       is_professional_email: {
-        Args: { p_email: string }
+        Args: { email_input: string }
         Returns: boolean
       }
       is_session_valid: {
