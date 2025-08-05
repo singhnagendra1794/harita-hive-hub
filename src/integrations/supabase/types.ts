@@ -2841,6 +2841,134 @@ export type Database = {
         }
         Relationships: []
       }
+      geoai_data_layers: {
+        Row: {
+          access_permissions: Json | null
+          bands_info: Json | null
+          bounding_box: Json | null
+          created_at: string
+          data_source_id: string | null
+          file_format: string | null
+          file_path: string | null
+          file_size_bytes: number | null
+          id: string
+          is_public: boolean | null
+          layer_name: string
+          layer_type: string
+          metadata: Json | null
+          processing_level: string | null
+          spatial_reference: string | null
+          temporal_info: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_permissions?: Json | null
+          bands_info?: Json | null
+          bounding_box?: Json | null
+          created_at?: string
+          data_source_id?: string | null
+          file_format?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          is_public?: boolean | null
+          layer_name: string
+          layer_type: string
+          metadata?: Json | null
+          processing_level?: string | null
+          spatial_reference?: string | null
+          temporal_info?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_permissions?: Json | null
+          bands_info?: Json | null
+          bounding_box?: Json | null
+          created_at?: string
+          data_source_id?: string | null
+          file_format?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          is_public?: boolean | null
+          layer_name?: string
+          layer_type?: string
+          metadata?: Json | null
+          processing_level?: string | null
+          spatial_reference?: string | null
+          temporal_info?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geoai_data_layers_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "geoai_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geoai_data_sources: {
+        Row: {
+          api_endpoint: string | null
+          authentication_config: Json | null
+          bands_available: Json | null
+          coverage_area: Json | null
+          created_at: string
+          data_formats: Json | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          resolution_meters: number | null
+          source_type: string
+          temporal_range: Json | null
+          update_frequency: string | null
+          updated_at: string
+          usage_limits: Json | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          authentication_config?: Json | null
+          bands_available?: Json | null
+          coverage_area?: Json | null
+          created_at?: string
+          data_formats?: Json | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          resolution_meters?: number | null
+          source_type: string
+          temporal_range?: Json | null
+          update_frequency?: string | null
+          updated_at?: string
+          usage_limits?: Json | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          authentication_config?: Json | null
+          bands_available?: Json | null
+          coverage_area?: Json | null
+          created_at?: string
+          data_formats?: Json | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          resolution_meters?: number | null
+          source_type?: string
+          temporal_range?: Json | null
+          update_frequency?: string | null
+          updated_at?: string
+          usage_limits?: Json | null
+        }
+        Relationships: []
+      }
       geoai_experiments: {
         Row: {
           completed_at: string | null
@@ -2883,6 +3011,298 @@ export type Database = {
           results?: Json | null
           status?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      geoai_jobs: {
+        Row: {
+          completed_at: string | null
+          computational_cost: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_data: Json | null
+          job_name: string
+          output_data: Json | null
+          processing_logs: Json | null
+          processing_time: number | null
+          progress: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          workflow_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          computational_cost?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          job_name: string
+          output_data?: Json | null
+          processing_logs?: Json | null
+          processing_time?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          workflow_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          computational_cost?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          job_name?: string
+          output_data?: Json | null
+          processing_logs?: Json | null
+          processing_time?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geoai_jobs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "geoai_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geoai_models: {
+        Row: {
+          accuracy_metrics: Json | null
+          category: string
+          computational_requirements: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          input_requirements: Json | null
+          is_active: boolean | null
+          is_gpu_required: boolean | null
+          model_config: Json | null
+          model_file_path: string | null
+          model_type: string
+          model_version: string | null
+          name: string
+          output_format: Json | null
+          processing_time_estimate: number | null
+          updated_at: string
+        }
+        Insert: {
+          accuracy_metrics?: Json | null
+          category: string
+          computational_requirements?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          input_requirements?: Json | null
+          is_active?: boolean | null
+          is_gpu_required?: boolean | null
+          model_config?: Json | null
+          model_file_path?: string | null
+          model_type: string
+          model_version?: string | null
+          name: string
+          output_format?: Json | null
+          processing_time_estimate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          accuracy_metrics?: Json | null
+          category?: string
+          computational_requirements?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          input_requirements?: Json | null
+          is_active?: boolean | null
+          is_gpu_required?: boolean | null
+          model_config?: Json | null
+          model_file_path?: string | null
+          model_type?: string
+          model_version?: string | null
+          name?: string
+          output_format?: Json | null
+          processing_time_estimate?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      geoai_results: {
+        Row: {
+          accuracy_metrics: Json | null
+          confidence_scores: Json | null
+          created_at: string
+          download_count: number | null
+          export_formats: Json | null
+          id: string
+          is_public: boolean | null
+          job_id: string | null
+          output_files: Json | null
+          result_data: Json
+          result_type: string
+          user_id: string
+          visualization_config: Json | null
+        }
+        Insert: {
+          accuracy_metrics?: Json | null
+          confidence_scores?: Json | null
+          created_at?: string
+          download_count?: number | null
+          export_formats?: Json | null
+          id?: string
+          is_public?: boolean | null
+          job_id?: string | null
+          output_files?: Json | null
+          result_data?: Json
+          result_type: string
+          user_id: string
+          visualization_config?: Json | null
+        }
+        Update: {
+          accuracy_metrics?: Json | null
+          confidence_scores?: Json | null
+          created_at?: string
+          download_count?: number | null
+          export_formats?: Json | null
+          id?: string
+          is_public?: boolean | null
+          job_id?: string | null
+          output_files?: Json | null
+          result_data?: Json
+          result_type?: string
+          user_id?: string
+          visualization_config?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geoai_results_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "geoai_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geoai_usage_tracking: {
+        Row: {
+          api_calls_made: number | null
+          compute_minutes_used: number | null
+          created_at: string
+          data_processed_gb: number | null
+          id: string
+          jobs_executed: number | null
+          limits: Json | null
+          month_year: string
+          plan_tier: string
+          storage_used_gb: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_calls_made?: number | null
+          compute_minutes_used?: number | null
+          created_at?: string
+          data_processed_gb?: number | null
+          id?: string
+          jobs_executed?: number | null
+          limits?: Json | null
+          month_year: string
+          plan_tier?: string
+          storage_used_gb?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_calls_made?: number | null
+          compute_minutes_used?: number | null
+          created_at?: string
+          data_processed_gb?: number | null
+          id?: string
+          jobs_executed?: number | null
+          limits?: Json | null
+          month_year?: string
+          plan_tier?: string
+          storage_used_gb?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      geoai_workflows: {
+        Row: {
+          average_rating: number | null
+          created_at: string
+          data_sources: Json | null
+          description: string | null
+          estimated_runtime: number | null
+          id: string
+          is_public: boolean | null
+          is_template: boolean | null
+          models_used: Json | null
+          name: string
+          output_config: Json | null
+          processing_steps: Json | null
+          tags: string[] | null
+          updated_at: string
+          usage_count: number | null
+          user_id: string
+          workflow_config: Json
+          workflow_type: string
+        }
+        Insert: {
+          average_rating?: number | null
+          created_at?: string
+          data_sources?: Json | null
+          description?: string | null
+          estimated_runtime?: number | null
+          id?: string
+          is_public?: boolean | null
+          is_template?: boolean | null
+          models_used?: Json | null
+          name: string
+          output_config?: Json | null
+          processing_steps?: Json | null
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id: string
+          workflow_config?: Json
+          workflow_type: string
+        }
+        Update: {
+          average_rating?: number | null
+          created_at?: string
+          data_sources?: Json | null
+          description?: string | null
+          estimated_runtime?: number | null
+          id?: string
+          is_public?: boolean | null
+          is_template?: boolean | null
+          models_used?: Json | null
+          name?: string
+          output_config?: Json | null
+          processing_steps?: Json | null
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id?: string
+          workflow_config?: Json
+          workflow_type?: string
         }
         Relationships: []
       }
