@@ -190,39 +190,62 @@ export type Database = {
       }
       ai_alerts: {
         Row: {
+          affected_regions: Json | null
           ai_system: string
           alert_type: string
+          confidence_score: number | null
           created_at: string
+          data_sources: Json | null
+          expires_at: string | null
           id: string
           message: string
           notified_admin: boolean | null
+          organization_id: string | null
           resolved: boolean | null
           resolved_at: string | null
           severity: string
         }
         Insert: {
+          affected_regions?: Json | null
           ai_system: string
           alert_type: string
+          confidence_score?: number | null
           created_at?: string
+          data_sources?: Json | null
+          expires_at?: string | null
           id?: string
           message: string
           notified_admin?: boolean | null
+          organization_id?: string | null
           resolved?: boolean | null
           resolved_at?: string | null
           severity: string
         }
         Update: {
+          affected_regions?: Json | null
           ai_system?: string
           alert_type?: string
+          confidence_score?: number | null
           created_at?: string
+          data_sources?: Json | null
+          expires_at?: string | null
           id?: string
           message?: string
           notified_admin?: boolean | null
+          organization_id?: string | null
           resolved?: boolean | null
           resolved_at?: string | null
           severity?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_health_status: {
         Row: {
@@ -336,6 +359,159 @@ export type Database = {
             columns: ["portfolio_id"]
             isOneToOne: false
             referencedRelation: "user_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alert_notifications: {
+        Row: {
+          alert_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          notification_type: string
+          sent_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          alert_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          notification_type: string
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          alert_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          notification_type?: string
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_notifications_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "ai_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_insights: {
+        Row: {
+          confidence_level: number | null
+          created_at: string | null
+          data_period_end: string | null
+          data_period_start: string | null
+          id: string
+          insight_type: string
+          metrics: Json | null
+          organization_id: string | null
+          recommendations: Json | null
+          summary: string
+          title: string
+          trends: Json | null
+          updated_at: string | null
+          user_id: string | null
+          visualizations: Json | null
+        }
+        Insert: {
+          confidence_level?: number | null
+          created_at?: string | null
+          data_period_end?: string | null
+          data_period_start?: string | null
+          id?: string
+          insight_type: string
+          metrics?: Json | null
+          organization_id?: string | null
+          recommendations?: Json | null
+          summary: string
+          title: string
+          trends?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          visualizations?: Json | null
+        }
+        Update: {
+          confidence_level?: number | null
+          created_at?: string | null
+          data_period_end?: string | null
+          data_period_start?: string | null
+          id?: string
+          insight_type?: string
+          metrics?: Json | null
+          organization_id?: string | null
+          recommendations?: Json | null
+          summary?: string
+          title?: string
+          trends?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          visualizations?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_insights_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_performance_logs: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          error_details: Json | null
+          id: string
+          ip_address: unknown | null
+          method: string
+          organization_id: string | null
+          payload_size_bytes: number | null
+          response_time_ms: number | null
+          status_code: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          error_details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          method: string
+          organization_id?: string | null
+          payload_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          error_details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          method?: string
+          organization_id?: string | null
+          payload_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_performance_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -2349,6 +2525,62 @@ export type Database = {
           view_count?: number | null
         }
         Relationships: []
+      }
+      enhanced_dashboards: {
+        Row: {
+          ai_insights: Json | null
+          created_at: string | null
+          data_sources: Json | null
+          description: string | null
+          export_settings: Json | null
+          id: string
+          is_shared: boolean | null
+          layout_config: Json | null
+          name: string
+          organization_id: string | null
+          sharing_settings: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_insights?: Json | null
+          created_at?: string | null
+          data_sources?: Json | null
+          description?: string | null
+          export_settings?: Json | null
+          id?: string
+          is_shared?: boolean | null
+          layout_config?: Json | null
+          name: string
+          organization_id?: string | null
+          sharing_settings?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_insights?: Json | null
+          created_at?: string | null
+          data_sources?: Json | null
+          description?: string | null
+          export_settings?: Json | null
+          id?: string
+          is_shared?: boolean | null
+          layout_config?: Json | null
+          name?: string
+          organization_id?: string | null
+          sharing_settings?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enhanced_dashboards_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enhanced_project_templates: {
         Row: {
@@ -5437,6 +5669,80 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          id: string
+          invited_by: string | null
+          joined_at: string | null
+          organization_id: string | null
+          permissions: Json | null
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id?: string | null
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id?: string | null
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          settings: Json | null
+          slug: string
+          subscription_tier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          settings?: Json | null
+          slug: string
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          settings?: Json | null
+          slug?: string
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payment_proofs: {
         Row: {
           admin_notes: string | null
@@ -6075,6 +6381,53 @@ export type Database = {
           },
         ]
       }
+      project_permissions: {
+        Row: {
+          can_admin: boolean | null
+          can_read: boolean | null
+          can_write: boolean | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          organization_id: string | null
+          permission_type: string
+          project_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          can_admin?: boolean | null
+          can_read?: boolean | null
+          can_write?: boolean | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          organization_id?: string | null
+          permission_type: string
+          project_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          can_admin?: boolean | null
+          can_read?: boolean | null
+          can_write?: boolean | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          organization_id?: string | null
+          permission_type?: string
+          project_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_ratings: {
         Row: {
           created_at: string | null
@@ -6650,6 +7003,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      scenario_simulations: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          estimated_completion: string | null
+          id: string
+          input_datasets: Json | null
+          name: string
+          organization_id: string | null
+          output_results: Json | null
+          parameters: Json
+          progress_percentage: number | null
+          scenario_type: Database["public"]["Enums"]["scenario_type"]
+          started_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_completion?: string | null
+          id?: string
+          input_datasets?: Json | null
+          name: string
+          organization_id?: string | null
+          output_results?: Json | null
+          parameters?: Json
+          progress_percentage?: number | null
+          scenario_type: Database["public"]["Enums"]["scenario_type"]
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_completion?: string | null
+          id?: string
+          input_datasets?: Json | null
+          name?: string
+          organization_id?: string | null
+          output_results?: Json | null
+          parameters?: Json
+          progress_percentage?: number | null
+          scenario_type?: Database["public"]["Enums"]["scenario_type"]
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_simulations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       search_index: {
         Row: {
@@ -9903,6 +10321,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_organization: {
+        Args: { p_name: string; p_slug: string; p_description?: string }
+        Returns: string
+      }
       create_user_subscription: {
         Args: { p_user_id: string; p_tier?: string }
         Returns: undefined
@@ -9922,6 +10344,19 @@ export type Database = {
       ensure_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_ai_alert: {
+        Args: {
+          p_org_id: string
+          p_user_id: string
+          p_alert_type: Database["public"]["Enums"]["alert_type"]
+          p_severity: Database["public"]["Enums"]["alert_severity"]
+          p_title: string
+          p_description: string
+          p_metadata?: Json
+          p_confidence_score?: number
+        }
+        Returns: string
       }
       generate_live_stream_key: {
         Args: Record<PropertyKey, never>
@@ -10077,6 +10512,14 @@ export type Database = {
       get_youtube_credentials: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      has_org_permission: {
+        Args: {
+          p_org_id: string
+          p_user_id: string
+          p_required_role: Database["public"]["Enums"]["org_role"]
+        }
+        Returns: boolean
       }
       has_role_bypass_rls: {
         Args: {
@@ -10326,6 +10769,13 @@ export type Database = {
       }
     }
     Enums: {
+      alert_severity: "low" | "medium" | "high" | "critical"
+      alert_type:
+        | "anomaly_detection"
+        | "threshold_breach"
+        | "predictive_warning"
+        | "data_quality_issue"
+        | "system_notification"
       app_role: "admin" | "moderator" | "beta_tester" | "user" | "super_admin"
       gis_tool:
         | "qgis"
@@ -10348,6 +10798,7 @@ export type Database = {
         | "envi"
         | "snap"
         | "matlab"
+      org_role: "owner" | "admin" | "analyst" | "viewer"
       project_sector:
         | "agriculture"
         | "urban_planning"
@@ -10366,6 +10817,12 @@ export type Database = {
         | "archaeology"
         | "marine"
         | "energy"
+      scenario_type:
+        | "urban_growth"
+        | "climate_projection"
+        | "flood_simulation"
+        | "drought_prediction"
+        | "vegetation_change"
       skill_level: "beginner" | "intermediate" | "advanced" | "expert"
       stream_status: "live" | "ended" | "scheduled" | "error"
     }
@@ -10495,6 +10952,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_severity: ["low", "medium", "high", "critical"],
+      alert_type: [
+        "anomaly_detection",
+        "threshold_breach",
+        "predictive_warning",
+        "data_quality_issue",
+        "system_notification",
+      ],
       app_role: ["admin", "moderator", "beta_tester", "user", "super_admin"],
       gis_tool: [
         "qgis",
@@ -10518,6 +10983,7 @@ export const Constants = {
         "snap",
         "matlab",
       ],
+      org_role: ["owner", "admin", "analyst", "viewer"],
       project_sector: [
         "agriculture",
         "urban_planning",
@@ -10536,6 +11002,13 @@ export const Constants = {
         "archaeology",
         "marine",
         "energy",
+      ],
+      scenario_type: [
+        "urban_growth",
+        "climate_projection",
+        "flood_simulation",
+        "drought_prediction",
+        "vegetation_change",
       ],
       skill_level: ["beginner", "intermediate", "advanced", "expert"],
       stream_status: ["live", "ended", "scheduled", "error"],
