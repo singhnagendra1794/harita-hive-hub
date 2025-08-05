@@ -19,6 +19,14 @@ interface Alert {
   is_resolved: boolean;
   affected_regions: any[];
   metadata: any;
+  message?: string;
+  ai_system?: string;
+  data_sources?: any;
+  expires_at?: string;
+  notified_admin?: boolean;
+  resolved?: boolean;
+  resolved_at?: string;
+  organization_id?: string;
 }
 
 interface Insight {
@@ -30,6 +38,13 @@ interface Insight {
   trends: any;
   recommendations: any[];
   created_at: string;
+  user_id?: string;
+  updated_at?: string;
+  data_period_start?: string;
+  data_period_end?: string;
+  metrics?: any;
+  visualizations?: any[];
+  organization_id?: string;
 }
 
 const PredictiveIntelligenceHub = () => {
@@ -56,7 +71,26 @@ const PredictiveIntelligenceHub = () => {
         .limit(20);
 
       if (error) throw error;
-      setAlerts(data || []);
+      
+      // Transform database records to Alert interface
+      const transformedAlerts: Alert[] = (data || []).map(alert => ({
+        id: alert.id,
+        alert_type: alert.alert_type,
+        severity: alert.severity as 'low' | 'medium' | 'high' | 'critical',
+        title: alert.message || `${alert.alert_type} Alert`,
+        description: alert.message || 'No description available',
+        confidence_score: alert.confidence_score || 0.5,
+        created_at: alert.created_at,
+        is_resolved: alert.resolved || false,
+        affected_regions: Array.isArray(alert.affected_regions) ? alert.affected_regions : [],
+        metadata: {
+          ai_system: alert.ai_system,
+          data_sources: alert.data_sources,
+          expires_at: alert.expires_at
+        }
+      }));
+      
+      setAlerts(transformedAlerts);
     } catch (error) {
       console.error('Error fetching alerts:', error);
       toast({
@@ -76,7 +110,20 @@ const PredictiveIntelligenceHub = () => {
         .limit(10);
 
       if (error) throw error;
-      setInsights(data || []);
+      
+      // Transform database records to Insight interface
+      const transformedInsights: Insight[] = (data || []).map(insight => ({
+        id: insight.id,
+        insight_type: insight.insight_type,
+        title: insight.title,
+        summary: insight.summary,
+        confidence_level: insight.confidence_level || 0.5,
+        trends: insight.trends || {},
+        recommendations: Array.isArray(insight.recommendations) ? insight.recommendations : [],
+        created_at: insight.created_at
+      }));
+      
+      setInsights(transformedInsights);
     } catch (error) {
       console.error('Error fetching insights:', error);
     } finally {

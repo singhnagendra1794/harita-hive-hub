@@ -52,13 +52,13 @@ const EnhancedAPIEndpoints = () => {
     try {
       const { data, error } = await supabase
         .from('enterprise_api_keys')
-        .select('key_value')
+        .select('*')
         .eq('user_id', user?.id)
         .eq('is_active', true)
         .single();
 
       if (!error && data) {
-        setApiKey(data.key_value);
+        setApiKey(data.api_key || 'No key available');
       }
     } catch (error) {
       console.error('Error fetching API key:', error);

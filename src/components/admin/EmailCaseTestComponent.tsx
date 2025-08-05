@@ -41,7 +41,7 @@ const EmailCaseTestComponent: React.FC = () => {
 
         // Since we can't directly query auth.users, we'll test the email function
         const { data: testData } = await supabase
-          .rpc('is_professional_email', { p_email: email });
+          .rpc('is_professional_email', { email_input: email });
 
         results.push({
           email,

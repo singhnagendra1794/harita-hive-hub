@@ -242,14 +242,14 @@ const AdvancedVisualizationDashboard: React.FC = () => {
   };
 
   const generateTerrainData = () => ({
-    elevationGrid: Array(50).fill().map(() => 
-      Array(50).fill().map(() => Math.random() * 1000)
+    elevationGrid: Array(50).fill(null).map(() => 
+      Array(50).fill(null).map(() => Math.random() * 1000)
     ),
-    landCoverGrid: Array(50).fill().map(() => 
-      Array(50).fill().map(() => Math.floor(Math.random() * 10))
+    landCoverGrid: Array(50).fill(null).map(() => 
+      Array(50).fill(null).map(() => Math.floor(Math.random() * 10))
     ),
-    temperatureGrid: Array(50).fill().map(() => 
-      Array(50).fill().map(() => 15 + Math.random() * 25)
+    temperatureGrid: Array(50).fill(null).map(() => 
+      Array(50).fill(null).map(() => 15 + Math.random() * 25)
     ),
     bounds: [[-122.5, 37.7], [-122.3, 37.9]]
   });
@@ -292,7 +292,7 @@ const AdvancedVisualizationDashboard: React.FC = () => {
         population_affected: 250000
       }
     ],
-    timeline: Array(10).fill().map((_, i) => ({
+    timeline: Array(10).fill(null).map((_, i) => ({
       year: 2025 + i,
       metrics: {
         temperature: 20 + i * 0.2 + Math.random() * 2,

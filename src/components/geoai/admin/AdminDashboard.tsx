@@ -205,8 +205,7 @@ const AdminDashboard: React.FC = () => {
           status,
           created_at,
           completed_at,
-          processing_time,
-          models_used
+          processing_time
         `)
         .order('created_at', { ascending: false })
         .limit(100);
@@ -250,7 +249,7 @@ const AdminDashboard: React.FC = () => {
         completed_at: job.completed_at,
         processing_time_minutes: job.processing_time || 0,
         plan_tier: planMap[job.user_id] || 'free',
-        models_used: Array.isArray(job.models_used) ? job.models_used : []
+        models_used: []
       })) || [];
 
       setJobStats(jobsWithDetails);

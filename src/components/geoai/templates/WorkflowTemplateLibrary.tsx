@@ -263,12 +263,22 @@ const WorkflowTemplateLibrary: React.FC<WorkflowTemplateLibraryProps> = ({
           usage_count: Math.floor(Math.random() * 1000) + 100
         })),
         ...(dbTemplates || []).map(template => ({
-          ...template,
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          category: 'ai-analysis',
+          difficulty: 'intermediate' as const,
+          estimated_runtime: template.estimated_runtime || 30,
+          accuracy_rating: template.average_rating || 0,
+          created_by: template.user_id || 'Unknown',
+          is_featured: false,
           tags: Array.isArray(template.tags) ? template.tags : [],
-          models_used: Array.isArray(template.models_used) ? template.models_used : [],
-          data_requirements: Array.isArray(template.data_requirements) ? template.data_requirements : [],
-          output_formats: Array.isArray(template.output_formats) ? template.output_formats : [],
-          use_cases: Array.isArray(template.use_cases) ? template.use_cases : []
+          workflow_config: template.workflow_config || {},
+          models_used: Array.isArray(template.models_used) ? template.models_used.map(String) : [],
+          data_requirements: [],
+          output_formats: [],
+          use_cases: [],
+          usage_count: template.usage_count || 0
         }))
       ];
 
