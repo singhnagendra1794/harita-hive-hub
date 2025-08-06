@@ -120,9 +120,26 @@ const RecordedSessionsTab = () => {
         });
       }
 
-      // If no recordings found, show example from YouTube
-      if (allRecordings.length === 0) {
-        allRecordings = [{
+      // Add featured recording
+      const featuredRecording = {
+        id: 'geospatial-intro-day1',
+        title: 'Day 1: Intro to Geospatial Tech',
+        description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
+        stream_key: 'intro-geospatial-day1',
+        start_time: '2024-07-25T05:00:00Z',
+        end_time: '2024-07-25T06:00:00Z',
+        recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=kCX0R0nLFA3mYaxr',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 60,
+        viewer_count: 250
+      };
+
+      // Always add the featured recording first
+      allRecordings = [featuredRecording, ...allRecordings];
+
+      // If no other recordings found, show example from YouTube
+      if (allRecordings.length === 1) {
+        allRecordings.push({
           id: 'sample-1',
           title: 'Introduction to Geospatial Technology',
           description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
@@ -133,7 +150,7 @@ const RecordedSessionsTab = () => {
           course_title: 'Geospatial Technology Unlocked',
           duration_minutes: 90,
           viewer_count: 342
-        }];
+        });
       }
 
       setRecordings(allRecordings);
