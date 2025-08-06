@@ -126,12 +126,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 1: Intro to Geospatial Tech',
         description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
         stream_key: 'intro-geospatial-day1',
-        start_time: '2024-07-25T05:00:00Z',
-        end_time: '2024-07-25T06:00:00Z',
+        start_time: new Date().toISOString(),
+        end_time: new Date(Date.now() + 90 * 60 * 1000).toISOString(),
         recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=kCX0R0nLFA3mYaxr',
         course_title: 'Geospatial Technology Fundamentals',
-        duration_minutes: 60,
-        viewer_count: 250
+        duration_minutes: 90,
+        viewer_count: 1250
       };
 
       // Always add the featured recording first
