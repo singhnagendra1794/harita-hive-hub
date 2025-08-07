@@ -120,22 +120,35 @@ const RecordedSessionsTab = () => {
         });
       }
 
-      // Add featured recording
-      const featuredRecording = {
+      // Add featured recordings
+      const featuredRecording1 = {
         id: 'geospatial-intro-day1',
         title: 'Day 1: Intro to Geospatial Tech',
         description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
         stream_key: 'intro-geospatial-day1',
-        start_time: new Date().toISOString(),
-        end_time: new Date(Date.now() + 90 * 60 * 1000).toISOString(),
+        start_time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        end_time: new Date(Date.now() - 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
         recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=kCX0R0nLFA3mYaxr',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 1250
       };
 
-      // Always add the featured recording first
-      allRecordings = [featuredRecording, ...allRecordings];
+      const featuredRecording2 = {
+        id: 'gis-vector-data-types',
+        title: 'GIS Concept & Data Types: Vector Data',
+        description: 'Learn about vector data types in GIS including points, lines, and polygons with practical examples.',
+        stream_key: 'gis-vector-data-types',
+        start_time: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
+        end_time: new Date(Date.now() - 12 * 60 * 60 * 1000 + 75 * 60 * 1000).toISOString(),
+        recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=CNF_KFpYGhPGIwZw',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 75,
+        viewer_count: 892
+      };
+
+      // Always add the featured recordings first
+      allRecordings = [featuredRecording2, featuredRecording1, ...allRecordings];
 
       // If no other recordings found, show example from YouTube
       if (allRecordings.length === 1) {
