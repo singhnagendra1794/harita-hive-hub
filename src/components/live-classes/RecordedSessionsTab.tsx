@@ -147,8 +147,21 @@ const RecordedSessionsTab = () => {
         viewer_count: 892
       };
 
+      const featuredRecording3 = {
+        id: 'gos-raster-data-types',
+        title: 'GOS Concept & Data Types : Raster Data',
+        description: 'Understand raster data types in GIS including grids and imagery, with practical examples.',
+        stream_key: 'gos-raster-data-types',
+        start_time: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago (today)
+        end_time: new Date(Date.now() - 3 * 60 * 60 * 1000 + 80 * 60 * 1000).toISOString(),
+        recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=ssLKqKD_wyGOsJMs',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 80,
+        viewer_count: 0
+      };
+
       // Always add the featured recordings first
-      allRecordings = [featuredRecording2, featuredRecording1, ...allRecordings];
+      allRecordings = [featuredRecording3, featuredRecording2, featuredRecording1, ...allRecordings];
 
       // If no other recordings found, show example from YouTube
       if (allRecordings.length === 1) {
