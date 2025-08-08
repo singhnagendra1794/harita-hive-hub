@@ -149,7 +149,7 @@ const RecordedSessionsTab = () => {
 
       const featuredRecording3 = {
         id: 'gos-raster-data-types',
-        title: 'GOS Concept & Data Types : Raster Data',
+        title: 'GIS Concept & Data Types : Raster Data',
         description: 'Understand raster data types in GIS including grids and imagery, with practical examples.',
         stream_key: 'gos-raster-data-types',
         start_time: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago (today)
