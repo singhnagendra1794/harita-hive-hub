@@ -179,6 +179,10 @@ const RecordedSessionsTab = () => {
         });
       }
 
+      console.log('[RecordedSessionsTab] Loaded recordings:', {
+        total: allRecordings.length,
+        titles: allRecordings.map(r => r.title).slice(0, 10)
+      });
       setRecordings(allRecordings);
     } catch (error) {
       console.error('Error loading recordings:', error);
@@ -212,6 +216,7 @@ const RecordedSessionsTab = () => {
     }
 
     setFilteredRecordings(filtered);
+    console.log('[RecordedSessionsTab] Filter applied:', { searchTerm, courseFilter, count: filtered.length, first: filtered[0]?.title });
   };
 
   const handleWatchRecording = (recording: RecordedSession) => {
