@@ -160,8 +160,22 @@ const RecordedSessionsTab = () => {
         viewer_count: 0
       };
 
+      // New: Coordinate Systems session (today)
+      const featuredRecording4 = {
+        id: 'coordinate-systems-gcs-pcs',
+        title: 'Coordinate Systems in GIS_ GCS vs PCS, Projections & Reprojection in QGIS',
+        description: 'Deep dive into GCS vs PCS, projections, and reprojection workflows in QGIS.',
+        stream_key: 'coordinate-systems-gcs-pcs',
+        start_time: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago (today)
+        end_time: new Date(Date.now() - 1 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
+        recording_url: 'https://www.youtube.com/embed/pG9CdDrXQd4?si=j_X3X2c3TLMHLMqT',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
       // Always add the featured recordings first
-      allRecordings = [featuredRecording3, featuredRecording2, featuredRecording1, ...allRecordings];
+      allRecordings = [featuredRecording4, featuredRecording3, featuredRecording2, featuredRecording1, ...allRecordings];
 
       // If no other recordings found, show example from YouTube
       if (allRecordings.length === 1) {
