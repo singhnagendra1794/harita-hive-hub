@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -10997,14 +10997,14 @@ export type Database = {
         Returns: Json
       }
       can_download_premium_plugin: {
-        Args: { p_user_id: string; p_tool_id: string }
+        Args: { p_tool_id: string; p_user_id: string }
         Returns: boolean
       }
       change_user_role_with_notification: {
         Args: {
-          target_email: string
-          new_role_name: string
           change_reason?: string
+          new_role_name: string
+          target_email: string
         }
         Returns: Json
       }
@@ -11013,7 +11013,7 @@ export type Database = {
         Returns: boolean
       }
       check_geo_processing_limits: {
-        Args: { p_user_id: string; p_job_type: string }
+        Args: { p_job_type: string; p_user_id: string }
         Returns: Json
       }
       check_gis_marketplace_access: {
@@ -11022,8 +11022,8 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
-          p_identifier: string
           p_action: string
+          p_identifier: string
           p_max_requests?: number
           p_window_minutes?: number
         }
@@ -11031,8 +11031,8 @@ export type Database = {
       }
       check_rate_limit_secure: {
         Args: {
-          identifier: string
           action_type: string
+          identifier: string
           max_attempts?: number
           window_minutes?: number
         }
@@ -11051,11 +11051,11 @@ export type Database = {
         Returns: undefined
       }
       create_organization: {
-        Args: { p_name: string; p_slug: string; p_description?: string }
+        Args: { p_description?: string; p_name: string; p_slug: string }
         Returns: string
       }
       create_user_subscription: {
-        Args: { p_user_id: string; p_tier?: string }
+        Args: { p_tier?: string; p_user_id: string }
         Returns: undefined
       }
       create_weekly_youtube_streams: {
@@ -11076,14 +11076,14 @@ export type Database = {
       }
       generate_ai_alert: {
         Args: {
-          p_org_id: string
-          p_user_id: string
           p_alert_type: Database["public"]["Enums"]["alert_type"]
-          p_severity: Database["public"]["Enums"]["alert_severity"]
-          p_title: string
+          p_confidence_score?: number
           p_description: string
           p_metadata?: Json
-          p_confidence_score?: number
+          p_org_id: string
+          p_severity: Database["public"]["Enums"]["alert_severity"]
+          p_title: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -11092,7 +11092,7 @@ export type Database = {
         Returns: string
       }
       generate_portfolio_url: {
-        Args: { p_user_id: string; p_portfolio_title: string }
+        Args: { p_portfolio_title: string; p_user_id: string }
         Returns: string
       }
       generate_referral_code: {
@@ -11118,10 +11118,10 @@ export type Database = {
       get_auth_users_data: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          email: string
-          last_sign_in_at: string
           created_at: string
+          email: string
+          id: string
+          last_sign_in_at: string
         }[]
       }
       get_email_template: {
@@ -11135,17 +11135,17 @@ export type Database = {
       get_next_geova_class_time: {
         Args: Record<PropertyKey, never>
         Returns: {
+          minutes_until_next: number
           next_class_date: string
           next_class_time: string
           next_class_topic: string
-          minutes_until_next: number
         }[]
       }
       get_regional_price: {
         Args: { p_base_price_usd: number; p_country_code?: string }
         Returns: {
-          local_price: number
           currency_code: string
+          local_price: number
           tax_rate: number
         }[]
       }
@@ -11160,13 +11160,13 @@ export type Database = {
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
+          created_at: string
+          days_old: number
           id: string
           query: string
-          times_requested: number
           status: string
-          created_at: string
+          times_requested: number
           updated_at: string
-          days_old: number
         }[]
       }
       get_user_credits: {
@@ -11180,27 +11180,27 @@ export type Database = {
       get_user_profile_for_stream: {
         Args: { p_user_id: string }
         Returns: {
-          full_name: string
           email: string
+          full_name: string
         }[]
       }
       get_user_recommendations: {
-        Args: { p_user_id: string; p_limit?: number }
+        Args: { p_limit?: number; p_user_id: string }
         Returns: {
-          content_type: string
           content_id: string
-          score: number
+          content_type: string
           reason: string
+          score: number
         }[]
       }
       get_user_roles_bypass_rls: {
         Args: { p_user_id: string }
         Returns: {
-          id: string
-          user_id: string
-          role: Database["public"]["Enums"]["app_role"]
           granted_at: string
           granted_by: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }[]
       }
       get_user_roles_safe: {
@@ -11212,30 +11212,30 @@ export type Database = {
       get_user_stats_safe: {
         Args: { p_user_id: string }
         Returns: {
-          user_id: string
-          subscription_tier: string
-          course_count: number
-          projects_completed: number
           community_posts: number
-          spatial_analyses: number
-          plan: string
+          course_count: number
           enrolled_courses_count: number
+          plan: string
+          projects_completed: number
+          spatial_analyses: number
+          subscription_tier: string
+          user_id: string
         }[]
       }
       get_user_subscription_safe: {
         Args: { p_user_id: string }
         Returns: {
-          id: string
-          user_id: string
-          subscription_tier: string
-          status: string
-          started_at: string
+          created_at: string
           expires_at: string
+          id: string
           payment_method: string
+          started_at: string
+          status: string
           stripe_customer_id: string
           stripe_subscription_id: string
-          created_at: string
+          subscription_tier: string
           updated_at: string
+          user_id: string
         }[]
       }
       get_youtube_automation_status: {
@@ -11249,15 +11249,15 @@ export type Database = {
       has_org_permission: {
         Args: {
           p_org_id: string
-          p_user_id: string
           p_required_role: Database["public"]["Enums"]["org_role"]
+          p_user_id: string
         }
         Returns: boolean
       }
       has_role_bypass_rls: {
         Args: {
-          p_user_id: string
           p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
         }
         Returns: boolean
       }
@@ -11274,7 +11274,7 @@ export type Database = {
         Returns: undefined
       }
       invalidate_previous_sessions: {
-        Args: { p_user_id: string; p_new_session_token: string }
+        Args: { p_new_session_token: string; p_user_id: string }
         Returns: undefined
       }
       is_admin_secure: {
@@ -11290,7 +11290,7 @@ export type Database = {
         Returns: boolean
       }
       is_session_valid: {
-        Args: { p_user_id: string; p_session_token: string }
+        Args: { p_session_token: string; p_user_id: string }
         Returns: boolean
       }
       is_super_admin: {
@@ -11311,61 +11311,61 @@ export type Database = {
       }
       log_admin_action: {
         Args: {
-          p_target_user_id: string
           p_action: string
-          p_old_value?: Json
           p_new_value?: Json
+          p_old_value?: Json
+          p_target_user_id: string
         }
         Returns: undefined
       }
       log_admin_action_secure: {
         Args: {
-          p_target_user_id: string
           p_action: string
-          p_old_value?: Json
           p_new_value?: Json
+          p_old_value?: Json
+          p_target_user_id: string
         }
         Returns: undefined
       }
       log_admin_error: {
         Args: {
-          p_error_type: string
-          p_error_message: string
           p_context_data?: Json
+          p_error_message: string
+          p_error_type: string
         }
         Returns: string
       }
       log_audit_event: {
         Args: {
           event_type: string
-          table_name: string
-          record_id: string
-          old_values?: Json
           new_values?: Json
+          old_values?: Json
+          record_id: string
+          table_name: string
         }
         Returns: undefined
       }
       log_project_activity: {
         Args: {
-          p_project_id: string
-          p_user_id: string
+          p_activity_data?: Json
           p_activity_type: string
           p_description: string
-          p_activity_data?: Json
+          p_project_id: string
+          p_user_id: string
         }
         Returns: undefined
       }
       log_security_event_secure: {
-        Args: { p_event_type: string; p_details?: Json; p_user_id?: string }
+        Args: { p_details?: Json; p_event_type: string; p_user_id?: string }
         Returns: undefined
       }
       log_youtube_api_error: {
         Args: {
           p_endpoint: string
-          p_method: string
-          p_status_code: number
           p_error_message: string
+          p_method: string
           p_response_data?: Json
+          p_status_code: number
         }
         Returns: undefined
       }
@@ -11394,17 +11394,17 @@ export type Database = {
         Returns: undefined
       }
       start_aws_stream: {
-        Args: { p_class_id: string; p_admin_user_id: string }
+        Args: { p_admin_user_id: string; p_class_id: string }
         Returns: Json
       }
       start_stream_session: {
-        Args: { p_user_id: string; p_title?: string; p_description?: string }
+        Args: { p_description?: string; p_title?: string; p_user_id: string }
         Returns: string
       }
       stop_aws_stream: {
         Args: {
-          p_class_id: string
           p_admin_user_id: string
+          p_class_id: string
           p_recording_s3_key?: string
         }
         Returns: Json
@@ -11414,41 +11414,41 @@ export type Database = {
         Returns: undefined
       }
       track_class_attendance: {
-        Args: { p_class_id: string; p_user_id: string; p_action: string }
+        Args: { p_action: string; p_class_id: string; p_user_id: string }
         Returns: undefined
       }
       track_missing_search_query: {
-        Args: { p_user_id: string; p_query: string; p_filters?: Json }
+        Args: { p_filters?: Json; p_query: string; p_user_id: string }
         Returns: string
       }
       track_portfolio_view: {
         Args: {
           p_portfolio_id: string
-          p_visitor_ip?: string
           p_user_agent?: string
+          p_visitor_ip?: string
         }
         Returns: undefined
       }
       track_recording_view: {
         Args: {
-          p_recording_id: string
-          p_user_id: string
           p_event_type: string
+          p_recording_id: string
           p_timestamp_seconds?: number
+          p_user_id: string
         }
         Returns: undefined
       }
       track_user_activity: {
-        Args: { p_user_id: string; p_activity_type: string; p_metadata?: Json }
+        Args: { p_activity_type: string; p_metadata?: Json; p_user_id: string }
         Returns: undefined
       }
       track_user_interaction: {
         Args: {
-          p_user_id: string
-          p_content_type: string
           p_content_id: string
+          p_content_type: string
           p_interaction_type: string
           p_metadata?: Json
+          p_user_id: string
         }
         Returns: undefined
       }
@@ -11461,11 +11461,11 @@ export type Database = {
         Returns: undefined
       }
       update_geova_student_progress: {
-        Args: { p_user_id: string; p_day_number: number }
+        Args: { p_day_number: number; p_user_id: string }
         Returns: undefined
       }
       update_session_order: {
-        Args: { p_session_id: string; p_new_order: number }
+        Args: { p_new_order: number; p_session_id: string }
         Returns: undefined
       }
       update_stream_status: {
@@ -11478,20 +11478,20 @@ export type Database = {
       }
       update_user_credits: {
         Args: {
-          p_user_id: string
           p_amount: number
-          p_transaction_type: string
           p_description: string
           p_reference_id?: string
+          p_transaction_type: string
+          p_user_id: string
         }
         Returns: boolean
       }
       update_user_enrolled_courses: {
-        Args: { p_user_id: string; p_course_title: string }
+        Args: { p_course_title: string; p_user_id: string }
         Returns: undefined
       }
       update_user_stats: {
-        Args: { p_user_id: string; p_stat_type: string; p_increment?: number }
+        Args: { p_increment?: number; p_stat_type: string; p_user_id: string }
         Returns: undefined
       }
       user_has_live_class_access: {
@@ -11503,7 +11503,7 @@ export type Database = {
         Returns: boolean
       }
       validate_and_sanitize_input: {
-        Args: { input_text: string; max_length?: number; allow_html?: boolean }
+        Args: { allow_html?: boolean; input_text: string; max_length?: number }
         Returns: string
       }
       validate_password: {
