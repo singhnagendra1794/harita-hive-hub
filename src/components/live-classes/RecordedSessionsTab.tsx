@@ -167,7 +167,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'coordinate-systems-gcs-pcs',
         start_time: '2024-08-09T00:00:00Z', // 9th August
         end_time: '2024-08-09T01:30:00Z',
-        recording_url: 'https://www.youtube.com/embed/pG9CdDrXQd4?si=j_X3X2c3TLMHLMqT',
+        recording_url: 'https://www.youtube.com/embed/pG9CdDrXQd4?si=_UCtOLuvkft7NNcP',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 0
