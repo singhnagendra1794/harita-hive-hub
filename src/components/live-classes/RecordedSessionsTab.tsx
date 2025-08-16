@@ -193,7 +193,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'remote-sensing-theoretical',
         start_time: '2024-08-15T00:00:00Z', // 15th August
         end_time: '2024-08-15T01:30:00Z',
-        recording_url: 'https://www.youtube.com/embed/remote-sensing-placeholder',
+        recording_url: 'https://www.youtube.com/embed/zVqAqkUWZ3I?si=QwnO4yR4rzXXa3Oz',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 0
