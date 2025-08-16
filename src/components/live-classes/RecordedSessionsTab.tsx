@@ -180,7 +180,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'cartography-class',
         start_time: '2024-08-14T00:00:00Z', // 14th August
         end_time: '2024-08-14T01:30:00Z',
-        recording_url: 'https://www.youtube.com/embed/cartography-placeholder',
+        recording_url: 'https://www.youtube.com/embed/SsIWMLKUi_I?si=as4tLV2A51ufYCTt',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 0
