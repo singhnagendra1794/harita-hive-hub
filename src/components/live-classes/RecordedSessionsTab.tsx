@@ -128,7 +128,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'intro-geospatial-day1',
         start_time: '2024-08-06T00:00:00Z', // 6th August
         end_time: '2024-08-06T01:30:00Z',
-        recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=kCX0R0nLFA3mYaxr',
+        recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=DN105w-XPex8SKN3',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 1250
