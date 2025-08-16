@@ -154,7 +154,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'gos-raster-data-types',
         start_time: '2024-08-08T00:00:00Z', // 8th August
         end_time: '2024-08-08T01:20:00Z',
-        recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=ssLKqKD_wyGOsJMs',
+        recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=IfF1CCjrBZU4fTmA',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 80,
         viewer_count: 0
