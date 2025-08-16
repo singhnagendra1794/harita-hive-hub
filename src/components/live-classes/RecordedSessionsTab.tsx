@@ -141,7 +141,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'gis-vector-data-types',
         start_time: '2024-08-07T00:00:00Z', // 7th August
         end_time: '2024-08-07T01:15:00Z',
-        recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=CNF_KFpYGhPGIwZw',
+        recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=AjyvPXYfLo4M0S1x',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 75,
         viewer_count: 892
