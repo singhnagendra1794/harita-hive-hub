@@ -120,14 +120,14 @@ const RecordedSessionsTab = () => {
         });
       }
 
-      // Add featured recordings
+      // Featured recordings in order (Day 1, Day 2, etc.)
       const featuredRecording1 = {
         id: 'geospatial-intro-day1',
         title: 'Day 1: Intro to Geospatial Tech',
         description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
         stream_key: 'intro-geospatial-day1',
-        start_time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-        end_time: new Date(Date.now() - 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
+        start_time: '2024-08-06T00:00:00Z', // 6th August
+        end_time: '2024-08-06T01:30:00Z',
         recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=kCX0R0nLFA3mYaxr',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
@@ -136,11 +136,11 @@ const RecordedSessionsTab = () => {
 
       const featuredRecording2 = {
         id: 'gis-vector-data-types',
-        title: 'GIS Concept & Data Types: Vector Data',
+        title: 'Day 2: GIS Concept & Data Types: Vector Data',
         description: 'Learn about vector data types in GIS including points, lines, and polygons with practical examples.',
         stream_key: 'gis-vector-data-types',
-        start_time: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
-        end_time: new Date(Date.now() - 12 * 60 * 60 * 1000 + 75 * 60 * 1000).toISOString(),
+        start_time: '2024-08-07T00:00:00Z', // 7th August
+        end_time: '2024-08-07T01:15:00Z',
         recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=CNF_KFpYGhPGIwZw',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 75,
@@ -149,49 +149,63 @@ const RecordedSessionsTab = () => {
 
       const featuredRecording3 = {
         id: 'gos-raster-data-types',
-        title: 'GIS Concept & Data Types : Raster Data',
+        title: 'Day 3: GIS Concept & Data Types: Raster Data',
         description: 'Understand raster data types in GIS including grids and imagery, with practical examples.',
         stream_key: 'gos-raster-data-types',
-        start_time: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago (today)
-        end_time: new Date(Date.now() - 3 * 60 * 60 * 1000 + 80 * 60 * 1000).toISOString(),
+        start_time: '2024-08-08T00:00:00Z', // 8th August
+        end_time: '2024-08-08T01:20:00Z',
         recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=ssLKqKD_wyGOsJMs',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 80,
         viewer_count: 0
       };
 
-      // New: Coordinate Systems session (today)
       const featuredRecording4 = {
         id: 'coordinate-systems-gcs-pcs',
-        title: 'Coordinate Systems in GIS_ GCS vs PCS, Projections & Reprojection in QGIS',
+        title: 'Day 4: Coordinate Systems in GIS: GCS vs PCS, Projections & Reprojection in QGIS',
         description: 'Deep dive into GCS vs PCS, projections, and reprojection workflows in QGIS.',
         stream_key: 'coordinate-systems-gcs-pcs',
-        start_time: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago (today)
-        end_time: new Date(Date.now() - 1 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
+        start_time: '2024-08-09T00:00:00Z', // 9th August
+        end_time: '2024-08-09T01:30:00Z',
         recording_url: 'https://www.youtube.com/embed/pG9CdDrXQd4?si=j_X3X2c3TLMHLMqT',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 0
       };
 
-      // Always add the featured recordings first
-      allRecordings = [featuredRecording4, featuredRecording3, featuredRecording2, featuredRecording1, ...allRecordings];
+      const featuredRecording5 = {
+        id: 'cartography-class',
+        title: 'Day 5: Cartography',
+        description: 'Master the art and science of cartography - creating meaningful maps that communicate spatial information effectively.',
+        stream_key: 'cartography-class',
+        start_time: '2024-08-14T00:00:00Z', // 14th August
+        end_time: '2024-08-14T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/cartography-placeholder',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
 
-      // If no other recordings found, show example from YouTube
-      if (allRecordings.length === 1) {
-        allRecordings.push({
-          id: 'sample-1',
-          title: 'Introduction to Geospatial Technology',
-          description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
-          stream_key: 'intro-geospatial',
-          start_time: '2024-07-25T05:00:00Z',
-          end_time: '2024-07-25T06:30:00Z',
-          recording_url: 'https://www.youtube.com/embed/bYKq_fsgYPo?si=7dWVWNRwG8K7z5pB',
-          course_title: 'Geospatial Technology Unlocked',
-          duration_minutes: 90,
-          viewer_count: 342
-        });
-      }
+      const featuredRecording6 = {
+        id: 'remote-sensing-theoretical',
+        title: 'Day 6: Remote Sensing - A Theoretical Class',
+        description: 'Comprehensive theoretical foundation of remote sensing principles, sensors, and applications in geospatial analysis.',
+        stream_key: 'remote-sensing-theoretical',
+        start_time: '2024-08-15T00:00:00Z', // 15th August
+        end_time: '2024-08-15T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/remote-sensing-placeholder',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      // Add recordings in sequential order (Day 1, Day 2, etc.)
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, ...allRecordings];
+
+      // Remove other video links and sections - only keep featured recordings
+      allRecordings = allRecordings.filter(recording => 
+        recording.title.startsWith('Day ')
+      );
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
         total: allRecordings.length,
@@ -249,12 +263,8 @@ const RecordedSessionsTab = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+      month: 'long'
     });
   };
 
@@ -319,66 +329,66 @@ const RecordedSessionsTab = () => {
 
       {/* Recordings Grid */}
       {filteredRecordings.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-6">
           {filteredRecordings.map((recording) => (
             <Card key={recording.id} className="group hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    {recording.course_title && (
-                      <Badge variant="secondary" className="mb-2 text-xs">
-                        {recording.course_title}
-                      </Badge>
-                    )}
-                    <CardTitle className="text-lg line-clamp-2">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-xl font-bold text-primary">
                       {recording.title}
-                    </CardTitle>
-                  </div>
-                  {!user && (
-                    <Lock className="h-4 w-4 text-muted-foreground ml-2" />
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(recording.start_time)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatDuration(recording.duration_minutes)}
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="pt-0">
-                {recording.description && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {recording.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Eye className="h-3 w-3" />
-                    {recording.viewer_count || 0} views
+                    </h3>
+                    {!user && (
+                      <Lock className="h-4 w-4 text-muted-foreground ml-2" />
+                    )}
                   </div>
                   
-                  <Button
-                    size="sm"
-                    onClick={() => handleWatchRecording(recording)}
-                    className="group-hover:scale-105 transition-transform"
-                  >
-                    <Play className="h-3 w-3 mr-1" />
-                    {user ? 'Watch' : 'Preview'}
-                  </Button>
+                  {/* Description */}
+                  {recording.description && (
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Description:</p>
+                      <p className="text-sm text-foreground">
+                        {recording.description}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Date */}
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Date:</p>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span className="text-sm">{formatDate(recording.start_time)}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Duration */}
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Duration:</p>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span className="text-sm">{formatDuration(recording.duration_minutes)}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Link */}
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Link:</p>
+                    <Button
+                      onClick={() => handleWatchRecording(recording)}
+                      className="w-full sm:w-auto"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      {user ? 'Watch Recording' : 'Preview Recording'}
+                    </Button>
+                    {!user && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Sign in to watch full recordings
+                      </p>
+                    )}
+                  </div>
                 </div>
-
-                {!user && (
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Sign in to watch full recordings
-                  </p>
-                )}
               </CardContent>
             </Card>
           ))}
