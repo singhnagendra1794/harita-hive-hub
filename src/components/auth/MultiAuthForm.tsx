@@ -38,6 +38,28 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Robust auth cleanup to prevent limbo states
+  const cleanupAuthState = () => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Auth cleanup skipped:', e);
+    }
+  };
+
   // Redirect authenticated users
   useEffect(() => {
     if (user) {
@@ -132,6 +154,10 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       title: isSignup ? "Account Created!" : "Welcome Back!",
       description: isSignup ? "Please check your email to verify your account." : "You have successfully signed in.",
     });
+    if (!isSignup) {
+      // Force full reload to avoid stale auth state
+      window.location.href = '/dashboard';
+    }
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -146,6 +172,7 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
       
       if (mode === 'signup') {
         // Clear any existing auth state first
+        cleanupAuthState();
         await supabase.auth.signOut({ scope: 'global' });
         
         // Get the current origin for redirect
@@ -170,7 +197,8 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
         
       } else {
         // Clear any existing auth state first for fresh login
-        await supabase.auth.signOut({ scope: 'global' });
+         cleanupAuthState();
+         await supabase.auth.signOut({ scope: 'global' });
         
         result = await supabase.auth.signInWithPassword({
           email,
@@ -350,7 +378,8 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
     setLoading(true);
     try {
       // Clear any existing auth state first
-      await supabase.auth.signOut({ scope: 'global' });
+       cleanupAuthState();
+       await supabase.auth.signOut({ scope: 'global' });
       
       // Get current origin for redirect
       const redirectUrl = window.location.origin + '/dashboard';

@@ -25,6 +25,36 @@ interface PremiumContent {
   premium_tier: 'basic' | 'pro' | 'enterprise';
 }
 
+// Manually whitelisted Professional users (temporary grant)
+const MANUAL_PRO_PRO_USERS = new Set<string>([
+  'bhumip107@gmail.com',
+  'kondojukushi10@gmail.com',
+  'adityapipil35@gmail.com',
+  'mukherjeejayita14@gmail.com',
+  'tanishkatyagi7500@gmail.com',
+  'kamakshiiit@gmail.com',
+  'nareshkumar.tamada@gmail.com',
+  'geospatialshekhar@gmail.com',
+  'ps.priyankasingh26996@gmail.com',
+  'madhubalapriya2@gmail.com',
+  'munmund66@gmail.com',
+  'sujansapkota27@gmail.com',
+  'sanjanaharidasan@gmail.com',
+  'ajays301298@gmail.com',
+  'jeevanleo2310@gmail.com',
+  'geoaiguru@gmail.com',
+  'rashidmsdian@gmail.com',
+  'bharath.viswakarma@gmail.com',
+  'shaliniazh@gmail.com',
+  'sg17122004@gmail.com',
+  'veenapoovukal@gmail.com',
+  'asadullahm031@gmail.com',
+  'moumitadas19996@gmail.com',
+  'javvad.rizvi@gmail.com',
+  'mandadi.jyothi123@gmail.com',
+  'udaypbrn@gmail.com'
+].map(e => e.toLowerCase()));
+
 export const usePremiumAccess = () => {
   const { user } = useAuth();
   const { isSuperAdmin, loading: rolesLoading } = useUserRoles();
@@ -55,6 +85,31 @@ export const usePremiumAccess = () => {
             stripe_subscription_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
+          });
+          setHasPremiumAccess(true);
+          setLoading(false);
+          return;
+        }
+
+        // Whitelisted professional emails bypass DB subscription checks
+        const emailLc = user.email?.toLowerCase();
+        if (emailLc && MANUAL_PRO_PRO_USERS.has(emailLc)) {
+          console.log('Whitelisted professional user detected - granting Pro access');
+          const now = new Date();
+          const expires = new Date(now);
+          expires.setFullYear(now.getFullYear() + 1);
+          setSubscription({
+            id: 'manual-pro',
+            user_id: user.id,
+            subscription_tier: 'pro',
+            status: 'active',
+            started_at: now.toISOString(),
+            expires_at: expires.toISOString(),
+            payment_method: 'manual',
+            stripe_customer_id: null,
+            stripe_subscription_id: null,
+            created_at: now.toISOString(),
+            updated_at: now.toISOString()
           });
           setHasPremiumAccess(true);
           setLoading(false);
@@ -158,6 +213,12 @@ export const usePremiumAccess = () => {
 
     // Super admin users (role-based) have access to everything
     if (isSuperAdmin()) {
+      setHasPremiumAccess(true);
+      return;
+    }
+
+    // Manual whitelist check
+    if (user.email && MANUAL_PRO_PRO_USERS.has(user.email.toLowerCase())) {
       setHasPremiumAccess(true);
       return;
     }
@@ -296,6 +357,9 @@ export const usePremiumAccess = () => {
     
     // Super admin users (role-based) have access to everything
     if (isSuperAdmin()) return true;
+    
+    // Manual whitelist check
+    if (user.email && MANUAL_PRO_PRO_USERS.has(user.email.toLowerCase())) return true;
     
     if (!subscription) return requiredTier === 'free';
     
