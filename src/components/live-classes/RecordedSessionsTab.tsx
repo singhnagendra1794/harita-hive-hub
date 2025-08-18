@@ -199,8 +199,21 @@ const RecordedSessionsTab = () => {
         viewer_count: 0
       };
 
+      const featuredRecording7 = {
+        id: 'satellite-sensors-data-processing',
+        title: 'Day 7: Introduction to Satellite Sensors and Data Processing',
+        description: 'Learn about different satellite sensors, data acquisition, and processing workflows.',
+        stream_key: 'satellite-sensors-data-processing',
+        start_time: '2024-08-16T00:00:00Z', // 16th August
+        end_time: '2024-08-16T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/e2hBwSvhbt0?si=_TWi7-Wmidg-wYuL',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
