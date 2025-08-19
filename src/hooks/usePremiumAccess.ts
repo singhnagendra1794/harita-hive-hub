@@ -112,6 +112,17 @@ export const usePremiumAccess = () => {
             created_at: now.toISOString(),
             updated_at: now.toISOString()
           });
+
+          // Persist Pro subscription in DB for backend/edge checks
+          try {
+            await supabase.rpc('create_user_subscription', {
+              p_user_id: user.id,
+              p_tier: 'pro'
+            });
+          } catch (e) {
+            console.warn('Failed to persist pro subscription via RPC:', e);
+          }
+
           setHasPremiumAccess(true);
           setLoading(false);
           return;
