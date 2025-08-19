@@ -212,8 +212,21 @@ const RecordedSessionsTab = () => {
         viewer_count: 0
       };
 
+      const featuredRecording8 = {
+        id: 'gnss-field-data-collection',
+        title: 'Day 8: GNSS, Field Data Collection - A Practical Guide',
+        description: 'Comprehensive guide to Global Navigation Satellite Systems and field data collection techniques.',
+        stream_key: 'gnss-field-data-collection',
+        start_time: '2024-08-17T00:00:00Z', // 17th August
+        end_time: '2024-08-17T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/GNBD5jHmx-g?si=iKhHd2xLv2RBbyEQ',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
