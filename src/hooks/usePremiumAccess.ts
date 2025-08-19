@@ -52,7 +52,8 @@ const MANUAL_PRO_PRO_USERS = new Set<string>([
   'moumitadas19996@gmail.com',
   'javvad.rizvi@gmail.com',
   'mandadi.jyothi123@gmail.com',
-  'udaypbrn@gmail.com'
+  'udaypbrn@gmail.com',
+  'alisha110bpl@gmail.com'
 ].map(e => e.toLowerCase()));
 
 export const usePremiumAccess = () => {
