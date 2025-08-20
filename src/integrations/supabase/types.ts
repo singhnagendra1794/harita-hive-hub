@@ -11285,6 +11285,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_platform_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_professional_email: {
         Args: { email_input: string }
         Returns: boolean
