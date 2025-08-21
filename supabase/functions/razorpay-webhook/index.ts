@@ -114,31 +114,47 @@ const handler = async (req: Request): Promise<Response> => {
           console.error('Error updating enrolled courses:', courseError);
         }
 
-        // Update user subscription to professional after course purchase
-        const { error: subscriptionError } = await supabase
-          .from('user_subscriptions')
-          .update({
-            subscription_tier: 'pro',
-            status: 'active',
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', enrollment.user_id);
-
-        if (subscriptionError) {
-          console.error('Error updating subscription:', subscriptionError);
+        // Update user subscription to professional after course purchase (respect plan lock)
+        let planLocked = false;
+        try {
+          const { data: existingSub } = await supabase
+            .from('user_subscriptions')
+            .select('plan_locked')
+            .eq('user_id', enrollment.user_id)
+            .maybeSingle();
+          planLocked = !!existingSub?.plan_locked;
+        } catch (e) {
+          console.warn('Could not check plan_locked for course enrollment flow');
         }
 
-        // Update profile plan
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            plan: 'professional',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', enrollment.user_id);
+        if (!planLocked) {
+          const { error: subscriptionError } = await supabase
+            .from('user_subscriptions')
+            .update({
+              subscription_tier: 'pro',
+              status: 'active',
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', enrollment.user_id);
 
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
+          if (subscriptionError) {
+            console.error('Error updating subscription:', subscriptionError);
+          }
+
+          // Update profile plan
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              plan: 'professional',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.user_id);
+
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+          }
+        } else {
+          console.log('Plan is locked; skipping subscription/profile updates for course enrollment flow');
         }
 
         console.log('Course enrollment payment processed successfully');
@@ -157,29 +173,49 @@ const handler = async (req: Request): Promise<Response> => {
         throw fetchError || new Error('Transaction not found');
       }
 
-      // Update user subscription
-      const { error: subscriptionError } = await supabase
-        .from('user_subscriptions')
-        .update({
-          subscription_tier: transaction.subscription_type,
-          status: 'active',
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', transaction.user_id);
-
-      if (subscriptionError) {
-        console.error('Error updating subscription:', subscriptionError);
-        throw subscriptionError;
+      // Update user subscription (respect plan lock)
+      let planLocked2 = false;
+      try {
+        const { data: existingSub2 } = await supabase
+          .from('user_subscriptions')
+          .select('plan_locked')
+          .eq('user_id', transaction.user_id)
+          .maybeSingle();
+        planLocked2 = !!existingSub2?.plan_locked;
+      } catch (e) {
+        console.warn('Could not check plan_locked for subscription flow');
       }
 
-      // Update profile plan
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          plan: transaction.subscription_type === 'pro' ? 'professional' : transaction.subscription_type,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', transaction.user_id);
+      if (!planLocked2) {
+        const { error: subscriptionError } = await supabase
+          .from('user_subscriptions')
+          .update({
+            subscription_tier: transaction.subscription_type,
+            status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', transaction.user_id);
+
+        if (subscriptionError) {
+          console.error('Error updating subscription:', subscriptionError);
+          throw subscriptionError;
+        }
+
+        // Update profile plan
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            plan: transaction.subscription_type === 'pro' ? 'professional' : transaction.subscription_type,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', transaction.user_id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
+      } else {
+        console.log('Plan is locked; skipping subscription/profile updates for subscription payment flow');
+      }
 
       // Auto-enroll professional and enterprise users into the current course
       if (transaction.subscription_type === 'pro' || transaction.subscription_type === 'enterprise' || 

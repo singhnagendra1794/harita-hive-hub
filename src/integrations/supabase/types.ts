@@ -10100,6 +10100,7 @@ export type Database = {
           expires_at: string | null
           id: string
           payment_method: string | null
+          plan_locked: boolean
           started_at: string | null
           status: string | null
           stripe_customer_id: string | null
@@ -10113,6 +10114,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           payment_method?: string | null
+          plan_locked?: boolean
           started_at?: string | null
           status?: string | null
           stripe_customer_id?: string | null
@@ -10126,6 +10128,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           payment_method?: string | null
+          plan_locked?: boolean
           started_at?: string | null
           status?: string | null
           stripe_customer_id?: string | null

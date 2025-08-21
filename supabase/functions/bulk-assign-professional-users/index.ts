@@ -52,25 +52,106 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log(`Starting bulk assignment for ${professionalEmails.length} professional users`);
 
-      const { data, error } = await supabaseClient.rpc('bulk_assign_professional_access', {
-        email_list: professionalEmails
-      });
+      // Also handle explicit revocations
+      const revokeEmails = [
+        'kaverinayar2005@gmail.com'
+      ];
 
-      if (error) {
-        console.error('Bulk assign error:', error);
+      // Fetch users from profiles by email
+      const targetEmails = [...new Set([...professionalEmails.map(e => e.toLowerCase()), ...revokeEmails.map(e => e.toLowerCase())])];
+      const { data: profiles, error: profilesError } = await supabaseClient
+        .from('profiles')
+        .select('id, email')
+        .in('email', targetEmails);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         return new Response(
-          JSON.stringify({ success: false, error: error.message }),
+          JSON.stringify({ success: false, error: profilesError.message }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      console.log('Bulk assignment completed:', data);
+      const emailToId = new Map((profiles || []).map(p => [p.email.toLowerCase(), p.id]));
+      const proUserIds = professionalEmails
+        .map(e => emailToId.get(e.toLowerCase()))
+        .filter(Boolean);
+      const revokeUserIds = revokeEmails
+        .map(e => emailToId.get(e.toLowerCase()))
+        .filter(Boolean);
+
+      console.log('Users found for pro assignment:', proUserIds.length, 'revocations:', revokeUserIds.length);
+
+      // Upsert Professional subscriptions with lock
+      if (proUserIds.length > 0) {
+        const upsertRows = proUserIds.map((id: string) => ({
+          user_id: id,
+          subscription_tier: 'pro',
+          status: 'active',
+          plan_locked: true,
+          updated_at: new Date().toISOString(),
+        }));
+        const { error: upsertError } = await supabaseClient
+          .from('user_subscriptions')
+          .upsert(upsertRows, { onConflict: 'user_id' });
+        if (upsertError) {
+          console.error('Error upserting pro subscriptions:', upsertError);
+          return new Response(
+            JSON.stringify({ success: false, error: upsertError.message }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Update profiles plan to professional
+        const { error: proProfileError } = await supabaseClient
+          .from('profiles')
+          .update({ plan: 'professional', updated_at: new Date().toISOString() })
+          .in('id', proUserIds as string[]);
+        if (proProfileError) {
+          console.error('Error updating professional profiles:', proProfileError);
+        }
+      }
+
+      // Revoke Professional access -> set to free and lock
+      if (revokeUserIds.length > 0) {
+        const { error: revokeError } = await supabaseClient
+          .from('user_subscriptions')
+          .upsert(
+            revokeUserIds.map((id: string) => ({
+              user_id: id,
+              subscription_tier: 'free',
+              status: 'active',
+              plan_locked: true,
+              updated_at: new Date().toISOString(),
+            })),
+            { onConflict: 'user_id' }
+          );
+        if (revokeError) {
+          console.error('Error revoking subscriptions:', revokeError);
+          return new Response(
+            JSON.stringify({ success: false, error: revokeError.message }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const { error: revokeProfileError } = await supabaseClient
+          .from('profiles')
+          .update({ plan: 'free', updated_at: new Date().toISOString() })
+          .in('id', revokeUserIds as string[]);
+        if (revokeProfileError) {
+          console.error('Error updating revoked profiles:', revokeProfileError);
+        }
+      }
+
+      console.log('Bulk assignment completed.');
 
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'Professional access assigned to all eligible users',
-          ...data
+          message: 'Professional access assigned and locked; revocations processed',
+          pro_assigned_count: (proUserIds as string[]).length,
+          revoked_count: (revokeUserIds as string[]).length,
+          missing_emails: targetEmails.filter(e => !emailToId.has(e)),
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

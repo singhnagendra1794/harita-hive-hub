@@ -104,35 +104,55 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Failed to update payment status');
     }
 
-    // Update user subscription
-    const { error: subscriptionError } = await supabase
-      .from('user_subscriptions')
-      .upsert({
-        user_id: user.id,
-        subscription_tier: transaction.subscription_type,
-        status: 'active',
-        started_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id'
-      });
-
-    if (subscriptionError) {
-      console.error('Error updating subscription:', subscriptionError);
+    // Check if user's plan is locked; if so, do not modify subscription/profile
+    let planLocked = false;
+    try {
+      const { data: existingSub } = await supabase
+        .from('user_subscriptions')
+        .select('plan_locked, subscription_tier')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      planLocked = !!existingSub?.plan_locked;
+      if (planLocked) {
+        console.log('Plan is locked; skipping subscription/profile updates for user', user.id);
+      }
+    } catch (e) {
+      console.warn('Could not check plan_locked state; proceeding cautiously');
     }
 
-    // Update profile plan
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        plan: transaction.subscription_type === 'pro' ? 'professional' : transaction.subscription_type,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', user.id);
+    if (!planLocked) {
+      // Update user subscription
+      const { error: subscriptionError } = await supabase
+        .from('user_subscriptions')
+        .upsert({
+          user_id: user.id,
+          subscription_tier: transaction.subscription_type,
+          status: 'active',
+          started_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
 
-    if (profileError) {
-      console.error('Error updating profile:', profileError);
+      if (subscriptionError) {
+        console.error('Error updating subscription:', subscriptionError);
+      }
+
+      // Update profile plan
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          plan: transaction.subscription_type === 'pro' ? 'professional' : transaction.subscription_type,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+      }
+    } else {
+      console.log('Subscription/profile updates skipped due to plan lock');
     }
 
     // Auto-enroll professional and enterprise users into courses
