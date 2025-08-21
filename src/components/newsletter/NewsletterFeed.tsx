@@ -19,6 +19,7 @@ import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { htmlSanitizer } from '@/lib/htmlSanitizer';
 import { NewsletterComments } from './NewsletterComments';
 import {
   DropdownMenu,
@@ -95,20 +96,16 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
       // Get author information for each post
       const postsWithAuthors = await Promise.all(
         (postsData || []).map(async (post) => {
-          const { data: authorData } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', post.user_id)
+          const { data: profileData } = await supabase
+            .rpc('get_user_profile_for_stream', { p_user_id: post.user_id })
             .single();
-
-          const { data: userEmail } = await supabase.auth.admin.getUserById(post.user_id);
 
           return {
             ...post,
             user_liked: post.newsletter_likes?.some((like: any) => like.user_id === user?.id) || false,
             author: {
-              full_name: authorData?.full_name || userEmail?.user?.email?.split('@')[0] || 'Anonymous',
-              email: userEmail?.user?.email || ''
+              full_name: profileData?.full_name || profileData?.email?.split('@')[0] || 'Anonymous',
+              email: profileData?.email || ''
             }
           };
         })
@@ -355,9 +352,9 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
                 
                 <div className="prose prose-sm max-w-none">
                   {expandedPosts.has(post.id) ? (
-                    <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(post.content) }} />
                   ) : (
-                    <div dangerouslySetInnerHTML={{ __html: truncateContent(post.content) }} />
+                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(truncateContent(post.content)) }} />
                   )}
                   
                   {post.content.length > 300 && (

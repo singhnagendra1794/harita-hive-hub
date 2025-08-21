@@ -34,20 +34,28 @@ const EnhancedAnalytics: React.FC<EnhancedAnalyticsProps> = ({
   useEffect(() => {
     if (!facebookPixelId) return;
 
+    // Load Facebook Pixel without inline scripts
+    window.fbq = window.fbq || (function(){
+      const fbq: any = function(){ (fbq.q = fbq.q || []).push(arguments) };
+      fbq.q = fbq.q || [];
+      fbq.loaded = true;
+      fbq.version = '2.0';
+      return fbq;
+    })();
+
     const script = document.createElement('script');
-    script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '${facebookPixelId}');
-      fbq('track', 'PageView');
-    `;
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(script);
+
+    script.onload = () => {
+      try {
+        window.fbq('init', facebookPixelId);
+        window.fbq('track', 'PageView');
+      } catch (e) {
+        // ignore
+      }
+    };
 
     return () => {
       document.head.removeChild(script);
@@ -58,26 +66,25 @@ const EnhancedAnalytics: React.FC<EnhancedAnalyticsProps> = ({
   useEffect(() => {
     if (!linkedinInsightId) return;
 
+    // Load LinkedIn Insight without inline scripts
+    (window as any)._linkedin_data_partner_ids = (window as any)._linkedin_data_partner_ids || [];
+    (window as any)._linkedin_data_partner_ids.push(linkedinInsightId);
+
     const script = document.createElement('script');
-    script.innerHTML = `
-      _linkedin_partner_id = "${linkedinInsightId}";
-      window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
-      window._linkedin_data_partner_ids.push(_linkedin_partner_id);
-      (function(l) {
-        if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
-        window.lintrk.q=[]}
-        var s = document.getElementsByTagName("script")[0];
-        var b = document.createElement("script");
-        b.type = "text/javascript";b.async = true;
-        b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
-        s.parentNode.insertBefore(b, s);})(window.lintrk);
-    `;
+    script.type = 'text/javascript';
+    script.async = true;
+    script.src = 'https://snap.licdn.com/li.lms-analytics/insight.min.js';
     document.head.appendChild(script);
 
-    // Track page view
-    if (window.lintrk) {
-      window.lintrk('track', { conversion_id: linkedinInsightId });
-    }
+    script.onload = () => {
+      try {
+        if (window.lintrk) {
+          window.lintrk('track', { conversion_id: linkedinInsightId });
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
 
     return () => {
       document.head.removeChild(script);
