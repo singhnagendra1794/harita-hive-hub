@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import SEOHead from "@/components/seo/SEOHead";
+import { validateEmailComplete } from "@/utils/emailValidation";
 
 const ForgotPassword: React.FC = () => {
   const { toast } = useToast();
@@ -33,11 +34,18 @@ const ForgotPassword: React.FC = () => {
     } catch {}
   };
 
-  const redirectUrl = `${window.location.origin}/reset-password`;
+  const redirectUrl =
+    window.location.origin.includes("lovable.dev") || window.location.origin.includes("lovable.app")
+      ? "https://haritahive.com/reset-password"
+      : `${window.location.origin}/reset-password`;
 
   const handleSendResetLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    const validation = validateEmailComplete(email);
+    if (!validation.isValid) {
+      toast({ title: "Invalid email", description: validation.error, variant: "destructive" });
+      return;
+    }
     setLoadingLink(true);
     try {
       cleanupAuthState();
@@ -64,7 +72,11 @@ const ForgotPassword: React.FC = () => {
   };
 
   const handleSendOtp = async () => {
-    if (!email) return;
+    const validation = validateEmailComplete(email);
+    if (!validation.isValid) {
+      toast({ title: "Invalid email", description: validation.error, variant: "destructive" });
+      return;
+    }
     setLoadingOtp(true);
     try {
       cleanupAuthState();
