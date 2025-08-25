@@ -31,8 +31,16 @@ const Login = () => {
         </p>
       </div>
       <MultiAuthForm mode="signin" onToggleMode={() => navigate('/signup')} />
-      <div className="mt-4 text-center text-sm">
-        <Link to="/forgot-password" className="underline">Forgot your password?</Link>
+      <div className="mt-6 text-center">
+        <p className="text-sm text-muted-foreground mb-2">Need help?</p>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => navigate('/forgot-password')}
+          className="text-primary hover:text-primary-foreground"
+        >
+          Reset your password
+        </Button>
       </div>
     </div>
   );

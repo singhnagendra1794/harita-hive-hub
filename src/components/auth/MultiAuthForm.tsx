@@ -500,11 +500,12 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
               </Button>
               
               {mode === 'signin' && (
-                <div className="text-center">
+                <div className="text-center mt-4">
                   <Button
                     type="button"
-                    variant="link"
-                    className="text-sm text-muted-foreground hover:text-primary"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
                     onClick={() => navigate('/forgot-password')}
                   >
                     Forgot your password?
