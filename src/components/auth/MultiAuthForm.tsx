@@ -498,6 +498,19 @@ export const MultiAuthForm: React.FC<MultiAuthFormProps> = ({ mode, onToggleMode
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
               </Button>
+              
+              {mode === 'signin' && (
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                    onClick={() => navigate('/forgot-password')}
+                  >
+                    Forgot your password?
+                  </Button>
+                </div>
+              )}
             </form>
           </TabsContent>
 

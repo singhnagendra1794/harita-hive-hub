@@ -29,6 +29,10 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
+// Lazy load password reset pages
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+
 // Lazy load non-critical pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Learn = lazy(() => import("./pages/Learn"));
@@ -150,6 +154,8 @@ function App() {
                    <Route path="/auth" element={<Layout><Auth /></Layout>} />
                    <Route path="/login" element={<Layout><Login /></Layout>} />
                    <Route path="/signup" element={<Layout><Signup /></Layout>} />
+                   <Route path="/forgot-password" element={<Layout><Suspense fallback={<PageLoader />}><ForgotPassword /></Suspense></Layout>} />
+                   <Route path="/reset-password" element={<Layout><Suspense fallback={<PageLoader />}><ResetPassword /></Suspense></Layout>} />
                    <Route path="/test-signup" element={<Layout><Suspense fallback={<PageLoader />}><TestSignup /></Suspense></Layout>} />
                    <Route path="/beta" element={<Layout><RouteWrapper><Beta /></RouteWrapper></Layout>} />
                    <Route path="/investors" element={<Layout><RouteWrapper><Investors /></RouteWrapper></Layout>} />
