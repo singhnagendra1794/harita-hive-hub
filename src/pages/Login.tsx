@@ -24,13 +24,16 @@ const Login = () => {
 
   return (
     <div className="container max-w-md py-12">
-    <div className="text-center mb-6">
-      <h1 className="text-2xl font-bold mb-2">Choose Sign In Method</h1>
-      <p className="text-muted-foreground">
-        We now support multiple authentication options
-      </p>
-    </div>
-    <MultiAuthForm mode="signin" onToggleMode={() => navigate('/signup')} />
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold mb-2">Choose Sign In Method</h1>
+        <p className="text-muted-foreground">
+          We now support multiple authentication options
+        </p>
+      </div>
+      <MultiAuthForm mode="signin" onToggleMode={() => navigate('/signup')} />
+      <div className="mt-4 text-center text-sm">
+        <Link to="/forgot-password" className="underline">Forgot your password?</Link>
+      </div>
     </div>
   );
 };
