@@ -62,6 +62,7 @@ const RecordedSessionsTab = () => {
         .select('*')
         .eq('session_type', 'recording')
         .eq('is_active', true)
+        .order('order_index', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
 
       let allRecordings: RecordedSession[] = [];
@@ -268,6 +269,20 @@ const RecordedSessionsTab = () => {
         recording.course_title === courseFilter
       );
     }
+
+    // Sort: if titles contain "Day N", sort by N ascending; otherwise by start_time ascending
+    const getDay = (title: string): number | null => {
+      const match = title.match(/Day\s*(\d+)/i);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    filtered = [...filtered].sort((a, b) => {
+      const da = getDay(a.title);
+      const db = getDay(b.title);
+      if (da !== null && db !== null) return da - db; // Day order
+      // Fallback to chronological order (older first)
+      return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    });
 
     setFilteredRecordings(filtered);
     console.log('[RecordedSessionsTab] Filter applied:', { searchTerm, courseFilter, count: filtered.length, first: filtered[0]?.title });
