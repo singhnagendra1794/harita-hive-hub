@@ -270,22 +270,42 @@ const RecordedSessionsTab = () => {
       );
     }
 
-    // Sort: if titles contain "Day N", sort by N ascending; otherwise by start_time ascending
+    // Enhanced sorting: prioritize "Day N" titles by numeric order
     const getDay = (title: string): number | null => {
       const match = title.match(/Day\s*(\d+)/i);
       return match ? parseInt(match[1], 10) : null;
     };
 
     filtered = [...filtered].sort((a, b) => {
-      const da = getDay(a.title);
-      const db = getDay(b.title);
-      if (da !== null && db !== null) return da - db; // Day order
-      // Fallback to chronological order (older first)
+      const dayA = getDay(a.title);
+      const dayB = getDay(b.title);
+      
+      // Both have day numbers - sort by day number
+      if (dayA !== null && dayB !== null) {
+        return dayA - dayB;
+      }
+      
+      // Only A has day number - A comes first
+      if (dayA !== null && dayB === null) {
+        return -1;
+      }
+      
+      // Only B has day number - B comes first
+      if (dayA === null && dayB !== null) {
+        return 1;
+      }
+      
+      // Neither has day number - sort by date
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     });
 
     setFilteredRecordings(filtered);
-    console.log('[RecordedSessionsTab] Filter applied:', { searchTerm, courseFilter, count: filtered.length, first: filtered[0]?.title });
+    console.log('[RecordedSessionsTab] Recordings sorted:', {
+      searchTerm, 
+      courseFilter, 
+      count: filtered.length,
+      dayTitles: filtered.filter(r => getDay(r.title) !== null).map(r => r.title)
+    });
   };
 
   const handleWatchRecording = (recording: RecordedSession) => {
