@@ -10,6 +10,7 @@ import { ScreenProtection } from '@/components/security/ScreenProtection';
 import { UserWatermark } from '@/components/security/UserWatermark';
 import SecureYouTubePlayer from '@/components/youtube/SecureYouTubePlayer';
 import { LiveClassCard } from './LiveClassCard';
+import { ZoomMeetingManager } from '@/components/zoom/ZoomMeetingManager';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -1003,6 +1004,11 @@ const LiveNowTab = () => {
           </CardContent>
         </Card>
       )}
+      
+      {/* Zoom Meetings Section */}
+      <div className="mt-8">
+        <ZoomMeetingManager />
+      </div>
     </div>
   );
 };
