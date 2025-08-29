@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OBSStreamManager from '@/components/streaming/OBSStreamManager';
 import StreamRecordings from '@/components/streaming/StreamRecordings';
-import { Monitor, Video } from 'lucide-react';
+import { ZoomMeetingManager } from '@/components/zoom/ZoomMeetingManager';
+import { Monitor, Video, Users } from 'lucide-react';
 
 const Streaming: React.FC = () => {
   return (
@@ -15,10 +16,14 @@ const Streaming: React.FC = () => {
         </div>
         
         <Tabs defaultValue="streaming" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="streaming" className="flex items-center gap-2">
               <Monitor className="h-4 w-4" />
               Stream Manager
+            </TabsTrigger>
+            <TabsTrigger value="zoom" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Zoom Meetings
             </TabsTrigger>
             <TabsTrigger value="recordings" className="flex items-center gap-2">
               <Video className="h-4 w-4" />
@@ -28,6 +33,10 @@ const Streaming: React.FC = () => {
           
           <TabsContent value="streaming">
             <OBSStreamManager />
+          </TabsContent>
+          
+          <TabsContent value="zoom">
+            <ZoomMeetingManager />
           </TabsContent>
           
           <TabsContent value="recordings">

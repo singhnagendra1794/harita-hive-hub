@@ -10978,6 +10978,154 @@ export type Database = {
           },
         ]
       }
+      zoom_meeting_participants: {
+        Row: {
+          duration_minutes: number | null
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          meeting_id: string
+          registered_at: string
+          user_id: string
+        }
+        Insert: {
+          duration_minutes?: number | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          meeting_id: string
+          registered_at?: string
+          user_id: string
+        }
+        Update: {
+          duration_minutes?: number | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          meeting_id?: string
+          registered_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zoom_meeting_participants_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "zoom_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zoom_meetings: {
+        Row: {
+          access_tier: string
+          created_at: string
+          description: string | null
+          duration: number
+          host_user_id: string
+          id: string
+          join_url: string
+          meeting_type: string
+          password: string | null
+          recording_enabled: boolean | null
+          start_time: string
+          start_url: string
+          status: string
+          topic: string
+          updated_at: string
+          waiting_room: boolean | null
+          zoom_meeting_id: string
+        }
+        Insert: {
+          access_tier?: string
+          created_at?: string
+          description?: string | null
+          duration?: number
+          host_user_id: string
+          id?: string
+          join_url: string
+          meeting_type?: string
+          password?: string | null
+          recording_enabled?: boolean | null
+          start_time: string
+          start_url: string
+          status?: string
+          topic: string
+          updated_at?: string
+          waiting_room?: boolean | null
+          zoom_meeting_id: string
+        }
+        Update: {
+          access_tier?: string
+          created_at?: string
+          description?: string | null
+          duration?: number
+          host_user_id?: string
+          id?: string
+          join_url?: string
+          meeting_type?: string
+          password?: string | null
+          recording_enabled?: boolean | null
+          start_time?: string
+          start_url?: string
+          status?: string
+          topic?: string
+          updated_at?: string
+          waiting_room?: boolean | null
+          zoom_meeting_id?: string
+        }
+        Relationships: []
+      }
+      zoom_recordings: {
+        Row: {
+          created_at: string
+          download_url: string
+          file_size: number | null
+          file_type: string
+          id: string
+          meeting_id: string
+          play_url: string | null
+          recording_end: string | null
+          recording_start: string | null
+          recording_type: string
+          zoom_recording_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_url: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          meeting_id: string
+          play_url?: string | null
+          recording_end?: string | null
+          recording_start?: string | null
+          recording_type?: string
+          zoom_recording_id: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          meeting_id?: string
+          play_url?: string | null
+          recording_end?: string | null
+          recording_start?: string | null
+          recording_type?: string
+          zoom_recording_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zoom_recordings_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "zoom_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
