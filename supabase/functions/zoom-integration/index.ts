@@ -127,7 +127,7 @@ async function getZoomAccessToken(): Promise<string> {
 
 async function createZoomMeeting(supabase: any, userId: string, meetingData: ZoomMeetingRequest) {
   try {
-    // Check if user is admin
+    // Check if user has permission to create meetings (admin or super admin)
     const { data: roles, error: rolesError } = await supabase
       .from('user_roles')
       .select('role')
@@ -136,8 +136,14 @@ async function createZoomMeeting(supabase: any, userId: string, meetingData: Zoo
     if (rolesError) {
       console.error('Role fetch error:', rolesError)
     }
+    
+    // Check if user is super admin by email (contact@haritahive.com)
+    const { data: userData } = await supabase.auth.getUser()
+    const isSuperAdmin = userData.user?.email === 'contact@haritahive.com'
+    
     const isAdmin = Array.isArray(roles) && roles.some((r: any) => r.role === 'admin' || r.role === 'super_admin')
-    if (!isAdmin) {
+    
+    if (!isAdmin && !isSuperAdmin) {
       throw new Error('Only administrators can create meetings')
     }
 
