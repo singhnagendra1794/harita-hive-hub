@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, Video, Settings, Plus, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, Users, Video, Settings, Plus, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +43,7 @@ interface CreateMeetingData {
 export function ZoomMeetingManager() {
   const [meetings, setMeetings] = useState<ZoomMeeting[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<CreateMeetingData>({
@@ -178,6 +179,36 @@ export function ZoomMeetingManager() {
     }
   };
 
+  const syncMeetings = async () => {
+    setSyncing(true);
+    try {
+      const response = await supabase.functions.invoke('zoom-integration', {
+        body: { action: 'sync_meetings' }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        toast({
+          title: "Meetings synced",
+          description: response.data.message,
+        });
+        fetchMeetings();
+      }
+    } catch (error) {
+      console.error('Error syncing meetings:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to sync meetings",
+        variant: "destructive"
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'live':
@@ -217,107 +248,113 @@ export function ZoomMeetingManager() {
           <h2 className="text-2xl font-bold">Zoom Meetings</h2>
           <p className="text-muted-foreground">Manage and join live classes via Zoom</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Meeting
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Create Zoom Meeting</DialogTitle>
-              <DialogDescription>
-                Schedule a new Zoom meeting for your class
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="topic">Meeting Topic *</Label>
-                <Input
-                  id="topic"
-                  value={formData.topic}
-                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                  placeholder="Enter meeting topic"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Meeting description (optional)"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={syncMeetings} disabled={syncing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync from Zoom'}
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Meeting
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Create Zoom Meeting</DialogTitle>
+                <DialogDescription>
+                  Schedule a new Zoom meeting for your class
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="start_time">Start Time *</Label>
+                  <Label htmlFor="topic">Meeting Topic *</Label>
                   <Input
-                    id="start_time"
-                    type="datetime-local"
-                    value={formData.start_time}
-                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                    id="topic"
+                    value={formData.topic}
+                    onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                    placeholder="Enter meeting topic"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="duration">Duration (minutes)</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                    min="15"
-                    max="480"
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Meeting description (optional)"
+                    rows={3}
                   />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="access_tier">Access Level</Label>
-                <Select value={formData.access_tier} onValueChange={(value) => setFormData({ ...formData, access_tier: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="free">Free Access</SelectItem>
-                    <SelectItem value="premium">Premium Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="start_time">Start Time *</Label>
+                    <Input
+                      id="start_time"
+                      type="datetime-local"
+                      value={formData.start_time}
+                      onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="duration">Duration (minutes)</Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      value={formData.duration}
+                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                      min="15"
+                      max="480"
+                    />
+                  </div>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="recording">Enable Recording</Label>
-                <Switch
-                  id="recording"
-                  checked={formData.recording_enabled}
-                  onCheckedChange={(checked) => setFormData({ ...formData, recording_enabled: checked })}
-                />
-              </div>
+                <div>
+                  <Label htmlFor="access_tier">Access Level</Label>
+                  <Select value={formData.access_tier} onValueChange={(value) => setFormData({ ...formData, access_tier: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free Access</SelectItem>
+                      <SelectItem value="premium">Premium Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="waiting_room">Waiting Room</Label>
-                <Switch
-                  id="waiting_room"
-                  checked={formData.waiting_room}
-                  onCheckedChange={(checked) => setFormData({ ...formData, waiting_room: checked })}
-                />
-              </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="recording">Enable Recording</Label>
+                  <Switch
+                    id="recording"
+                    checked={formData.recording_enabled}
+                    onCheckedChange={(checked) => setFormData({ ...formData, recording_enabled: checked })}
+                  />
+                </div>
 
-              <Button 
-                onClick={createMeeting} 
-                disabled={creating}
-                className="w-full"
-              >
-                {creating ? 'Creating...' : 'Create Meeting'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="waiting_room">Waiting Room</Label>
+                  <Switch
+                    id="waiting_room"
+                    checked={formData.waiting_room}
+                    onCheckedChange={(checked) => setFormData({ ...formData, waiting_room: checked })}
+                  />
+                </div>
+
+                <Button 
+                  onClick={createMeeting} 
+                  disabled={creating}
+                  className="w-full"
+                >
+                  {creating ? 'Creating...' : 'Create Meeting'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {meetings.length === 0 ? (
