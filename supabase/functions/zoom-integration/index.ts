@@ -41,21 +41,30 @@ serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { 'Authorization': req.headers.get('Authorization') || '' }
+        }
+      }
     )
 
     // Verify authentication
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      throw new Error('No authorization header')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      throw new Error('Authentication failed')
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const { action, ...payload } = await req.json()
@@ -119,13 +128,16 @@ async function getZoomAccessToken(): Promise<string> {
 async function createZoomMeeting(supabase: any, userId: string, meetingData: ZoomMeetingRequest) {
   try {
     // Check if user is admin
-    const { data: userRoles } = await supabase
+    const { data: roles, error: rolesError } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .single()
 
-    if (!userRoles || userRoles.role !== 'admin') {
+    if (rolesError) {
+      console.error('Role fetch error:', rolesError)
+    }
+    const isAdmin = Array.isArray(roles) && roles.some((r: any) => r.role === 'admin' || r.role === 'super_admin')
+    if (!isAdmin) {
       throw new Error('Only administrators can create meetings')
     }
 
@@ -260,15 +272,14 @@ async function joinMeeting(supabase: any, userId: string, meetingId: string) {
       }
     }
 
-    // Register participant
+    // Register participant (ignore duplicates)
     const { error: participantError } = await supabase
       .from('zoom_meeting_participants')
-      .insert({
+      .upsert({
         meeting_id: meetingId,
         user_id: userId,
-      })
-      .on_conflict('meeting_id,user_id')
-      .ignore()
+      }, { onConflict: 'meeting_id,user_id', ignoreDuplicates: true })
+
 
     if (participantError) {
       console.error('Participant registration error:', participantError)

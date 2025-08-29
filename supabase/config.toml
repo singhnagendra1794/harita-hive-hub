@@ -63,3 +63,6 @@ verify_jwt = false
 
 [functions.test-youtube-api]
 verify_jwt = false
+
+[functions.zoom-integration]
+verify_jwt = true
