@@ -63,8 +63,10 @@ export function ZoomMeetingManager() {
 
   const fetchMeetings = async () => {
     try {
+      console.log('Fetching meetings...');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        console.log('No session found');
         toast({
           title: "Authentication required",
           description: "Please log in to view meetings",
@@ -73,16 +75,24 @@ export function ZoomMeetingManager() {
         return;
       }
 
+      console.log('Calling zoom-integration edge function for get_meetings');
       const response = await supabase.functions.invoke('zoom-integration', {
         body: { action: 'get_meetings' }
       });
 
+      console.log('Get meetings response:', response);
+
       if (response.error) {
+        console.error('Zoom integration error:', response.error);
         throw new Error(response.error.message);
       }
 
       if (response.data?.success) {
+        console.log('Meetings fetched successfully:', response.data.meetings);
         setMeetings(response.data.meetings || []);
+      } else {
+        console.log('No meetings found or unsuccessful response');
+        setMeetings([]);
       }
     } catch (error) {
       console.error('Error fetching meetings:', error);
@@ -180,22 +190,46 @@ export function ZoomMeetingManager() {
   };
 
   const syncMeetings = async () => {
+    console.log('Starting sync meetings...');
     setSyncing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('No session for sync');
+        toast({
+          title: "Authentication required",
+          description: "Please log in to sync meetings",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Calling zoom-integration edge function for sync_meetings');
       const response = await supabase.functions.invoke('zoom-integration', {
         body: { action: 'sync_meetings' }
       });
 
+      console.log('Sync meetings response:', response);
+
       if (response.error) {
+        console.error('Sync error:', response.error);
         throw new Error(response.error.message);
       }
 
       if (response.data?.success) {
+        console.log('Sync successful:', response.data);
         toast({
           title: "Meetings synced",
           description: response.data.message,
         });
         fetchMeetings();
+      } else {
+        console.log('Sync unsuccessful:', response.data);
+        toast({
+          title: "Sync failed",
+          description: "Unable to sync meetings from Zoom",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error syncing meetings:', error);

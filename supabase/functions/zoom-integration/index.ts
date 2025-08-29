@@ -102,12 +102,19 @@ async function getZoomAccessToken(): Promise<string> {
   const clientSecret = Deno.env.get('ZOOM_CLIENT_SECRET')
   const accountId = Deno.env.get('ZOOM_ACCOUNT_ID')
 
+  console.log('Zoom credentials check:', {
+    hasClientId: !!clientId,
+    hasClientSecret: !!clientSecret,
+    hasAccountId: !!accountId
+  })
+
   if (!clientId || !clientSecret || !accountId) {
-    throw new Error('Missing Zoom credentials')
+    throw new Error('Missing Zoom credentials - ensure ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, and ZOOM_ACCOUNT_ID are set')
   }
 
   const auth = btoa(`${clientId}:${clientSecret}`)
   
+  console.log('Making OAuth request to Zoom...')
   const response = await fetch('https://zoom.us/oauth/token', {
     method: 'POST',
     headers: {
@@ -119,11 +126,12 @@ async function getZoomAccessToken(): Promise<string> {
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error('Zoom OAuth error:', errorText)
-    throw new Error(`Failed to get Zoom access token: ${response.status}`)
+    console.error('Zoom OAuth error:', response.status, errorText)
+    throw new Error(`Failed to get Zoom access token: ${response.status} - ${errorText}`)
   }
 
   const data: ZoomTokenResponse = await response.json()
+  console.log('Successfully obtained Zoom access token')
   return data.access_token
 }
 
@@ -359,27 +367,32 @@ function generateMeetingPassword(): string {
 
 async function syncZoomMeetings(supabase: any, userId: string) {
   try {
+    console.log('Starting sync for user:', userId)
+    
     // Check if user has permission
     const { data: roles, error: rolesError } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
 
-    if (rolesError) {
-      console.error('Role fetch error:', rolesError)
-    }
+    console.log('User roles:', roles, 'Error:', rolesError)
     
     const { data: userData } = await supabase.auth.getUser()
     const isSuperAdmin = userData.user?.email === 'contact@haritahive.com'
     const isAdmin = Array.isArray(roles) && roles.some((r: any) => r.role === 'admin' || r.role === 'super_admin')
     
+    console.log('User permissions - isSuperAdmin:', isSuperAdmin, 'isAdmin:', isAdmin)
+    
     if (!isAdmin && !isSuperAdmin) {
       throw new Error('Only administrators can sync meetings')
     }
 
+    console.log('Getting Zoom access token...')
     const accessToken = await getZoomAccessToken()
+    console.log('Access token obtained successfully')
 
     // Fetch meetings from Zoom API
+    console.log('Fetching meetings from Zoom API...')
     const response = await fetch('https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300', {
       method: 'GET',
       headers: {
@@ -391,17 +404,20 @@ async function syncZoomMeetings(supabase: any, userId: string) {
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Zoom meetings fetch error:', errorText)
-      throw new Error(`Failed to fetch Zoom meetings: ${response.status}`)
+      throw new Error(`Failed to fetch Zoom meetings: ${response.status} - ${errorText}`)
     }
 
     const zoomData = await response.json()
     const zoomMeetings = zoomData.meetings || []
+    console.log(`Found ${zoomMeetings.length} meetings in Zoom`)
     
     let syncedCount = 0
     let skippedCount = 0
 
     for (const meeting of zoomMeetings) {
       try {
+        console.log(`Processing meeting: ${meeting.id} - ${meeting.topic}`)
+        
         // Check if meeting already exists in our database
         const { data: existing } = await supabase
           .from('zoom_meetings')
@@ -410,38 +426,46 @@ async function syncZoomMeetings(supabase: any, userId: string) {
           .single()
 
         if (existing) {
+          console.log(`Meeting ${meeting.id} already exists, skipping`)
           skippedCount++
           continue
         }
 
         // Insert new meeting
+        const meetingData = {
+          zoom_meeting_id: meeting.id.toString(),
+          host_user_id: userId,
+          topic: meeting.topic,
+          description: meeting.agenda || '',
+          start_time: meeting.start_time,
+          duration: meeting.duration,
+          password: meeting.password || generateMeetingPassword(),
+          join_url: meeting.join_url,
+          start_url: meeting.start_url,
+          access_tier: 'free',
+          recording_enabled: true,
+          waiting_room: true,
+          status: 'scheduled'
+        }
+
+        console.log('Inserting meeting data:', meetingData)
+
         const { error: insertError } = await supabase
           .from('zoom_meetings')
-          .insert({
-            zoom_meeting_id: meeting.id.toString(),
-            host_user_id: userId,
-            topic: meeting.topic,
-            description: meeting.agenda || '',
-            start_time: meeting.start_time,
-            duration: meeting.duration,
-            password: meeting.password || generateMeetingPassword(),
-            join_url: meeting.join_url,
-            start_url: meeting.start_url,
-            access_tier: 'free',
-            recording_enabled: true,
-            waiting_room: true,
-            status: 'scheduled'
-          })
+          .insert(meetingData)
 
         if (insertError) {
           console.error('Insert error for meeting:', meeting.id, insertError)
         } else {
+          console.log(`Successfully synced meeting: ${meeting.id}`)
           syncedCount++
         }
       } catch (meetingError) {
         console.error('Error processing meeting:', meeting.id, meetingError)
       }
     }
+
+    console.log(`Sync complete - synced: ${syncedCount}, skipped: ${skippedCount}`)
 
     return new Response(
       JSON.stringify({ 
