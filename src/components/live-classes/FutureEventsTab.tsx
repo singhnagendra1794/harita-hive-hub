@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, ExternalLink, Users, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from "sonner";
 
 interface UpcomingEvent {
   id: string;
@@ -13,14 +15,16 @@ interface UpcomingEvent {
   time: string;
   duration: number; // minutes
   meetingLink?: string;
-  type: 'webinar' | 'workshop' | 'course';
+  type: 'webinar' | 'workshop' | 'course' | 'zoom_meeting';
   instructor?: string;
   capacity?: number;
   registered?: number;
   timezone: string;
+  isToday?: boolean;
 }
 
 const FutureEventsTab = () => {
+  const { user } = useAuth();
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,12 +55,22 @@ const FutureEventsTab = () => {
         .order('scheduled_time', { ascending: true })
         .limit(5);
 
+      // Get Zoom meetings
+      const { data: zoomMeetings, error: zoomError } = await supabase
+        .from('zoom_meetings')
+        .select('*')
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true })
+        .limit(10);
+
       const events: UpcomingEvent[] = [];
+      const today = new Date().toDateString();
       
       // Process live classes
       if (upcomingClasses && !classError) {
         upcomingClasses.forEach(liveClass => {
           const startDate = new Date(liveClass.start_time);
+          const isToday = startDate.toDateString() === today;
           events.push({
             id: liveClass.id,
             title: liveClass.title,
@@ -67,7 +81,8 @@ const FutureEventsTab = () => {
             type: liveClass.instructor === 'GEOVA AI' ? 'course' : 'webinar',
             instructor: liveClass.instructor || 'Expert Instructor',
             meetingLink: liveClass.youtube_url || undefined,
-            timezone: 'IST'
+            timezone: 'IST',
+            isToday
           });
         });
       }
@@ -75,6 +90,8 @@ const FutureEventsTab = () => {
       // Process GEOVA sessions
       if (geovaSchedule && !geovaError) {
         geovaSchedule.forEach(session => {
+          const eventDate = new Date(session.scheduled_date);
+          const isToday = eventDate.toDateString() === today;
           events.push({
             id: `geova-${session.id}`,
             title: `Day ${session.day_number}: ${session.topic_title}`,
@@ -84,14 +101,44 @@ const FutureEventsTab = () => {
             duration: session.duration_minutes || 90,
             type: 'course',
             instructor: 'GEOVA AI Mentor',
-            timezone: 'IST'
+            timezone: 'IST',
+            isToday
           });
         });
       }
 
+      // Process Zoom meetings
+      if (zoomMeetings && !zoomError) {
+        zoomMeetings.forEach(meeting => {
+          const startDate = new Date(meeting.start_time);
+          const isToday = startDate.toDateString() === today;
+          events.push({
+            id: meeting.id,
+            title: meeting.topic,
+            description: meeting.description || 'Zoom meeting session',
+            date: startDate.toISOString().split('T')[0],
+            time: startDate.toTimeString().split(' ')[0].substring(0, 5),
+            duration: meeting.duration || 60,
+            type: 'zoom_meeting',
+            instructor: 'HaritaHive Team',
+            meetingLink: meeting.join_url,
+            timezone: 'IST',
+            isToday
+          });
+        });
+      }
+
+      // Sort events by date and time
+      events.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}:00`);
+        const dateB = new Date(`${b.date}T${b.time}:00`);
+        return dateA.getTime() - dateB.getTime();
+      });
+
       setEvents(events);
     } catch (error) {
       console.error('Error loading events:', error);
+      toast.error('Failed to load upcoming events');
     } finally {
       setLoading(false);
     }
@@ -142,6 +189,8 @@ const FutureEventsTab = () => {
         return <Users className="h-4 w-4" />;
       case 'course':
         return <Calendar className="h-4 w-4" />;
+      case 'zoom_meeting':
+        return <Video className="h-4 w-4" />;
       default:
         return <Calendar className="h-4 w-4" />;
     }
@@ -155,14 +204,27 @@ const FutureEventsTab = () => {
         return <Badge variant="outline">Workshop</Badge>;
       case 'course':
         return <Badge variant="default">Course</Badge>;
+      case 'zoom_meeting':
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Zoom Meeting</Badge>;
       default:
         return <Badge variant="outline">Event</Badge>;
     }
   };
 
   const handleJoinEvent = (event: UpcomingEvent) => {
+    // If it's today's event, redirect to Live Now tab
+    if (event.isToday) {
+      // Trigger tab change by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('switchToLiveNow'));
+      toast.success(`Redirecting to Live Now for today's ${event.title}`);
+      return;
+    }
+
     if (event.meetingLink) {
       window.open(event.meetingLink, '_blank');
+      toast.success(`Opening ${event.title}`);
+    } else {
+      toast.error('No meeting link available for this event');
     }
   };
 
@@ -242,15 +304,14 @@ const FutureEventsTab = () => {
 
               <CardContent>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {event.meetingLink && (
-                    <Button 
-                      onClick={() => handleJoinEvent(event)}
-                      className="flex-1 sm:flex-none"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Join Event
-                    </Button>
-                  )}
+                  <Button 
+                    onClick={() => handleJoinEvent(event)}
+                    className="flex-1 sm:flex-none"
+                    variant={event.isToday ? "default" : "outline"}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {event.isToday ? 'Go to Live Now' : (event.meetingLink ? 'Join Event' : 'Event Info')}
+                  </Button>
                   <Button 
                     variant="outline"
                     onClick={() => addToCalendar(event)}

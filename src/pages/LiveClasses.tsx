@@ -10,6 +10,18 @@ import PremiumAccessGate from '@/components/premium/PremiumAccessGate';
 const LiveClasses = () => {
   const [activeTab, setActiveTab] = useState('live-now');
 
+  // Listen for custom event to switch to Live Now tab
+  React.useEffect(() => {
+    const handleSwitchToLiveNow = () => {
+      setActiveTab('live-now');
+    };
+
+    window.addEventListener('switchToLiveNow', handleSwitchToLiveNow);
+    return () => {
+      window.removeEventListener('switchToLiveNow', handleSwitchToLiveNow);
+    };
+  }, []);
+
   return (
     <PremiumAccessGate 
       requiredTier="pro" 

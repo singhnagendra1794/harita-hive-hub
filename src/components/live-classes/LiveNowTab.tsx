@@ -11,6 +11,7 @@ import { UserWatermark } from '@/components/security/UserWatermark';
 import SecureYouTubePlayer from '@/components/youtube/SecureYouTubePlayer';
 import { LiveClassCard } from './LiveClassCard';
 import { ZoomMeetingManager } from '@/components/zoom/ZoomMeetingManager';
+import TodaysSchedule from './TodaysSchedule';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -181,13 +182,26 @@ const LiveNowTab = () => {
       try {
         setLoading(true)
         
-        // Get only truly live classes (no scheduled unless starting very soon)
+        // Get live classes and today's scheduled meetings
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+        // Get truly live classes
         const { data: liveClasses, error } = await supabase
           .from('live_classes')
           .select('*')
           .eq('status', 'live') // Only truly live streams
           .order('updated_at', { ascending: false }) // Most recently updated first
         
+        // Get today's Zoom meetings
+        const { data: todayZoomMeetings, error: zoomError } = await supabase
+          .from('zoom_meetings')
+          .select('*')
+          .gte('start_time', todayStart.toISOString())
+          .lt('start_time', todayEnd.toISOString())
+          .order('start_time', { ascending: true });
+
         if (error) {
           console.error('Error fetching live classes:', error)
           throw error
@@ -252,6 +266,34 @@ const LiveNowTab = () => {
             
             setLoading(false)
             return
+          }
+        }
+        
+        // Check for today's Zoom meetings if no live stream
+        if (todayZoomMeetings && todayZoomMeetings.length > 0 && !zoomError) {
+          const now = new Date();
+          const upcomingMeeting = todayZoomMeetings.find(meeting => {
+            const meetingStart = new Date(meeting.start_time);
+            const meetingEnd = new Date(meetingStart.getTime() + (meeting.duration * 60 * 1000));
+            return now >= meetingStart && now <= meetingEnd; // Currently in progress
+          });
+
+          if (upcomingMeeting) {
+            setCurrentStream({
+              id: upcomingMeeting.id,
+              title: upcomingMeeting.topic,
+              description: upcomingMeeting.description || 'Zoom meeting in progress',
+              stream_key: upcomingMeeting.id,
+              start_time: upcomingMeeting.start_time,
+              status: 'live',
+              youtube_url: upcomingMeeting.join_url,
+              viewer_count: 0,
+              is_geova: false,
+              is_free_access: false,
+              access_tier: 'professional'
+            });
+            setLoading(false);
+            return;
           }
         }
         
@@ -985,24 +1027,30 @@ const LiveNowTab = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="border-dashed">
-          <CardContent className="p-12 text-center">
-            <Video className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">No Live Stream Active</h3>
-            <p className="text-muted-foreground mb-4">
-              Real-time stream detection is active. Live classes will appear here automatically when instructors go live.
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Button variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Check for Streams
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Last checked: {new Date(lastRefresh).toLocaleTimeString()}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          {/* Today's Schedule */}
+          <TodaysSchedule />
+          
+          {/* No Live Stream Message */}
+          <Card className="border-dashed">
+            <CardContent className="p-12 text-center">
+              <Video className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">No Live Stream Active</h3>
+              <p className="text-muted-foreground mb-4">
+                Real-time stream detection is active. Live classes will appear here automatically when instructors go live.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <Button variant="outline" onClick={handleRefresh}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Check for Streams
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                Last checked: {new Date(lastRefresh).toLocaleTimeString()}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       )}
       
       {/* Zoom Meetings Section */}
