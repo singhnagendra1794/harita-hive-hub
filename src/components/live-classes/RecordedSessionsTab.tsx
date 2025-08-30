@@ -226,8 +226,60 @@ const RecordedSessionsTab = () => {
         viewer_count: 0
       };
 
+      const featuredRecording9 = {
+        id: 'day-9-recording',
+        title: 'Day 9: Advanced GIS Concepts',
+        description: 'Exploring advanced GIS concepts and spatial analysis techniques.',
+        stream_key: 'day-9-recording',
+        start_time: '2024-08-18T00:00:00Z', // 18th August
+        end_time: '2024-08-18T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/placeholder1',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      const featuredRecording10 = {
+        id: 'day-10-recording',
+        title: 'Day 10: Spatial Database Management',
+        description: 'Understanding spatial databases and database management for GIS applications.',
+        stream_key: 'day-10-recording',
+        start_time: '2024-08-19T00:00:00Z', // 19th August
+        end_time: '2024-08-19T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/placeholder2',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      const featuredRecording11 = {
+        id: 'day-11-recording',
+        title: 'Day 11: Python for GIS Automation',
+        description: 'Introduction to Python programming for GIS automation and scripting.',
+        stream_key: 'day-11-recording',
+        start_time: '2024-08-20T00:00:00Z', // 20th August
+        end_time: '2024-08-20T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/placeholder3',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      const featuredRecording12 = {
+        id: 'vector-ops-python-day12',
+        title: 'Day 12: Vector Ops in Python: Sets of rules, syntax, function, variables etc',
+        description: 'Comprehensive guide to vector operations in Python, covering sets of rules, syntax, functions, and variables.',
+        stream_key: 'vector-ops-python-day12',
+        start_time: '2024-08-21T00:00:00Z', // 21st August
+        end_time: '2024-08-21T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/rgS8o1HCgOw?si=urak36CY_tU17Qvi',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
