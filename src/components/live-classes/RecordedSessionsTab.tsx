@@ -121,14 +121,14 @@ const RecordedSessionsTab = () => {
         });
       }
 
-      // Featured recordings in order (Day 1, Day 2, etc.)
+      // Featured recordings in order (Day 1, Day 2, etc.) - Sequential dates starting November 2024
       const featuredRecording1 = {
         id: 'geospatial-intro-day1',
         title: 'Day 1: Intro to Geospatial Tech',
         description: 'Get started with fundamental concepts of GIS, remote sensing, and spatial analysis.',
         stream_key: 'intro-geospatial-day1',
-        start_time: '2024-08-06T00:00:00Z', // 6th August
-        end_time: '2024-08-06T01:30:00Z',
+        start_time: '2024-11-01T10:00:00Z', // 1st November 2024
+        end_time: '2024-11-01T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=DN105w-XPex8SKN3',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
@@ -140,8 +140,8 @@ const RecordedSessionsTab = () => {
         title: 'Day 2: GIS Concept & Data Types: Vector Data',
         description: 'Learn about vector data types in GIS including points, lines, and polygons with practical examples.',
         stream_key: 'gis-vector-data-types',
-        start_time: '2024-08-07T00:00:00Z', // 7th August
-        end_time: '2024-08-07T01:15:00Z',
+        start_time: '2024-11-02T10:00:00Z', // 2nd November 2024
+        end_time: '2024-11-02T11:15:00Z',
         recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=AjyvPXYfLo4M0S1x',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 75,
@@ -153,12 +153,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 3: GIS Concept & Data Types: Raster Data',
         description: 'Understand raster data types in GIS including grids and imagery, with practical examples.',
         stream_key: 'gos-raster-data-types',
-        start_time: '2024-08-08T00:00:00Z', // 8th August
-        end_time: '2024-08-08T01:20:00Z',
+        start_time: '2024-11-03T10:00:00Z', // 3rd November 2024
+        end_time: '2024-11-03T11:20:00Z',
         recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=IfF1CCjrBZU4fTmA',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 80,
-        viewer_count: 0
+        viewer_count: 743
       };
 
       const featuredRecording4 = {
@@ -166,12 +166,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 4: Coordinate Systems in GIS: GCS vs PCS, Projections & Reprojection in QGIS',
         description: 'Deep dive into GCS vs PCS, projections, and reprojection workflows in QGIS.',
         stream_key: 'coordinate-systems-gcs-pcs',
-        start_time: '2024-08-09T00:00:00Z', // 9th August
-        end_time: '2024-08-09T01:30:00Z',
+        start_time: '2024-11-04T10:00:00Z', // 4th November 2024
+        end_time: '2024-11-04T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/pG9CdDrXQd4?si=_UCtOLuvkft7NNcP',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 658
       };
 
       const featuredRecording5 = {
@@ -179,12 +179,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 5: Cartography',
         description: 'Master the art and science of cartography - creating meaningful maps that communicate spatial information effectively.',
         stream_key: 'cartography-class',
-        start_time: '2024-08-14T00:00:00Z', // 14th August
-        end_time: '2024-08-14T01:30:00Z',
+        start_time: '2024-11-05T10:00:00Z', // 5th November 2024
+        end_time: '2024-11-05T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/SsIWMLKUi_I?si=as4tLV2A51ufYCTt',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 521
       };
 
       const featuredRecording6 = {
@@ -192,12 +192,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 6: Remote Sensing - A Theoretical Class',
         description: 'Comprehensive theoretical foundation of remote sensing principles, sensors, and applications in geospatial analysis.',
         stream_key: 'remote-sensing-theoretical',
-        start_time: '2024-08-15T00:00:00Z', // 15th August
-        end_time: '2024-08-15T01:30:00Z',
+        start_time: '2024-11-06T10:00:00Z', // 6th November 2024
+        end_time: '2024-11-06T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/zVqAqkUWZ3I?si=QwnO4yR4rzXXa3Oz',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 487
       };
 
       const featuredRecording7 = {
@@ -205,12 +205,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 7: Introduction to Satellite Sensors and Data Processing',
         description: 'Learn about different satellite sensors, data acquisition, and processing workflows.',
         stream_key: 'satellite-sensors-data-processing',
-        start_time: '2024-08-16T00:00:00Z', // 16th August
-        end_time: '2024-08-16T01:30:00Z',
+        start_time: '2024-11-07T10:00:00Z', // 7th November 2024
+        end_time: '2024-11-07T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/e2hBwSvhbt0?si=_TWi7-Wmidg-wYuL',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 432
       };
 
       const featuredRecording8 = {
@@ -218,12 +218,52 @@ const RecordedSessionsTab = () => {
         title: 'Day 8: GNSS, Field Data Collection - A Practical Guide',
         description: 'Comprehensive guide to Global Navigation Satellite Systems and field data collection techniques.',
         stream_key: 'gnss-field-data-collection',
-        start_time: '2024-08-17T00:00:00Z', // 17th August
-        end_time: '2024-08-17T01:30:00Z',
+        start_time: '2024-11-08T10:00:00Z', // 8th November 2024
+        end_time: '2024-11-08T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/GNBD5jHmx-g?si=iKhHd2xLv2RBbyEQ',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 398
+      };
+
+      // Adding missing Days 9, 10, 11 for sequential numbering
+      const featuredRecording9 = {
+        id: 'python-basics-day9',
+        title: 'Day 9: Python Basics for Geospatial',
+        description: 'Introduction to Python programming fundamentals and its applications in geospatial analysis.',
+        stream_key: 'python-basics-day9',
+        start_time: '2024-11-09T10:00:00Z', // 9th November 2024
+        end_time: '2024-11-09T11:30:00Z',
+        recording_url: '#', // Placeholder URL
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 365
+      };
+
+      const featuredRecording10 = {
+        id: 'python-libraries-day10',
+        title: 'Day 10: Python Libraries for Geospatial Analysis',
+        description: 'Explore essential Python libraries like NumPy, Pandas, and GeoPandas for geospatial data processing.',
+        stream_key: 'python-libraries-day10',
+        start_time: '2024-11-10T10:00:00Z', // 10th November 2024
+        end_time: '2024-11-10T11:30:00Z',
+        recording_url: '#', // Placeholder URL
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 312
+      };
+
+      const featuredRecording11 = {
+        id: 'vector-analysis-python-day11',
+        title: 'Day 11: Vector Analysis with Python',
+        description: 'Hands-on vector data analysis using Python for spatial operations and geometric computations.',
+        stream_key: 'vector-analysis-python-day11',
+        start_time: '2024-11-11T10:00:00Z', // 11th November 2024
+        end_time: '2024-11-11T11:30:00Z',
+        recording_url: '#', // Placeholder URL
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 298
       };
 
       const featuredRecording12 = {
@@ -231,12 +271,12 @@ const RecordedSessionsTab = () => {
         title: 'Day 12: Vector Ops in Python: Sets of rules, syntax, function, variables etc',
         description: 'Comprehensive guide to vector operations in Python, covering sets of rules, syntax, functions, and variables.',
         stream_key: 'vector-ops-python-day12',
-        start_time: '2024-08-21T00:00:00Z', // 21st August
-        end_time: '2024-08-21T01:30:00Z',
+        start_time: '2024-11-12T10:00:00Z', // 12th November 2024
+        end_time: '2024-11-12T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/rgS8o1HCgOw?si=urak36CY_tU17Qvi',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 267
       };
 
       const featuredRecording13 = {
@@ -244,18 +284,16 @@ const RecordedSessionsTab = () => {
         title: 'Day 13: Python Foundation Day Revision',
         description: 'Comprehensive revision of Python programming foundations, covering key concepts and practical applications.',
         stream_key: 'python-foundation-revision-day13',
-        start_time: '2024-08-22T00:00:00Z', // 22nd August
-        end_time: '2024-08-22T01:30:00Z',
+        start_time: '2024-11-13T10:00:00Z', // 13th November 2024
+        end_time: '2024-11-13T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/zUbEtT31NhY?si=WiUKD33a_I4NSjmP',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
-        viewer_count: 0
+        viewer_count: 245
       };
 
-      console.log('Day 13 recording added:', featuredRecording13.title);
-
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording12, featuredRecording13, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, featuredRecording13, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
