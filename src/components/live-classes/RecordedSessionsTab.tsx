@@ -239,10 +239,23 @@ const RecordedSessionsTab = () => {
         viewer_count: 0
       };
 
-      console.log('Day 12 recording added:', featuredRecording12.title);
+      const featuredRecording13 = {
+        id: 'python-foundation-revision-day13',
+        title: 'Day 13: Python Foundation Day Revision',
+        description: 'Comprehensive revision of Python programming foundations, covering key concepts and practical applications.',
+        stream_key: 'python-foundation-revision-day13',
+        start_time: '2024-08-22T00:00:00Z', // 22nd August
+        end_time: '2024-08-22T01:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/zUbEtT31NhY?si=WiUKD33a_I4NSjmP',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      console.log('Day 13 recording added:', featuredRecording13.title);
 
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording12, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording12, featuredRecording13, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
