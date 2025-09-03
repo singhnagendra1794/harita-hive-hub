@@ -291,8 +291,21 @@ const RecordedSessionsTab = () => {
         viewer_count: 245
       };
 
+      const featuredRecording14 = {
+        id: 'python-qgis-vector-ops-day14',
+        title: 'Day 14 Python in QGIS: Vector Ops',
+        description: 'Advanced Python scripting in QGIS for vector operations and spatial analysis workflows.',
+        stream_key: 'python-qgis-vector-ops-day14',
+        start_time: '2025-09-03T10:00:00Z', // 3rd September 2025
+        end_time: '2025-09-03T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/KmkYo6_pMsg?si=hewXg-74Va_yi1Tw',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 198
+      };
+
       // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, featuredRecording13, ...allRecordings];
+      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, featuredRecording13, featuredRecording14, ...allRecordings];
 
       // Remove other video links and sections - only keep featured recordings
       allRecordings = allRecordings.filter(recording => 
