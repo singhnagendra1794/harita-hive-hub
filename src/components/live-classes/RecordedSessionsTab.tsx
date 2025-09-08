@@ -304,25 +304,23 @@ const RecordedSessionsTab = () => {
         viewer_count: 198
       };
 
-      // Add recordings in sequential order (Day 1, Day 2, etc.)
-      allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, featuredRecording13, featuredRecording14, ...allRecordings];
-
-      // Remove duplicates and keep only Day recordings, prioritizing featured recordings
-      const seenDays = new Set<string>();
-      const uniqueRecordings: RecordedSession[] = [];
-      
-      allRecordings.forEach(recording => {
-        const dayMatch = recording.title.match(/Day\s*(\d+)/i);
-        if (dayMatch) {
-          const dayNumber = dayMatch[1];
-          if (!seenDays.has(dayNumber)) {
-            seenDays.add(dayNumber);
-            uniqueRecordings.push(recording);
-          }
-        }
-      });
-      
-      allRecordings = uniqueRecordings;
+      // Only use featured recordings Days 1-14 in correct order
+      allRecordings = [
+        featuredRecording1,   // Day 1
+        featuredRecording2,   // Day 2
+        featuredRecording3,   // Day 3
+        featuredRecording4,   // Day 4
+        featuredRecording5,   // Day 5
+        featuredRecording6,   // Day 6
+        featuredRecording7,   // Day 7
+        featuredRecording8,   // Day 8
+        featuredRecording9,   // Day 9
+        featuredRecording10,  // Day 10
+        featuredRecording11,  // Day 11
+        featuredRecording12,  // Day 12
+        featuredRecording13,  // Day 13
+        featuredRecording14   // Day 14
+      ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
         total: allRecordings.length,
