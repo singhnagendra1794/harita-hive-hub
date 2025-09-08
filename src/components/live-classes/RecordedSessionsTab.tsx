@@ -307,10 +307,22 @@ const RecordedSessionsTab = () => {
       // Add recordings in sequential order (Day 1, Day 2, etc.)
       allRecordings = [featuredRecording1, featuredRecording2, featuredRecording3, featuredRecording4, featuredRecording5, featuredRecording6, featuredRecording7, featuredRecording8, featuredRecording9, featuredRecording10, featuredRecording11, featuredRecording12, featuredRecording13, featuredRecording14, ...allRecordings];
 
-      // Remove other video links and sections - only keep featured recordings
-      allRecordings = allRecordings.filter(recording => 
-        recording.title.startsWith('Day ')
-      );
+      // Remove duplicates and keep only Day recordings, prioritizing featured recordings
+      const seenDays = new Set<string>();
+      const uniqueRecordings: RecordedSession[] = [];
+      
+      allRecordings.forEach(recording => {
+        const dayMatch = recording.title.match(/Day\s*(\d+)/i);
+        if (dayMatch) {
+          const dayNumber = dayMatch[1];
+          if (!seenDays.has(dayNumber)) {
+            seenDays.add(dayNumber);
+            uniqueRecordings.push(recording);
+          }
+        }
+      });
+      
+      allRecordings = uniqueRecordings;
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
         total: allRecordings.length,
