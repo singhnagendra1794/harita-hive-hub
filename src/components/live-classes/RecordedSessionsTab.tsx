@@ -233,7 +233,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'python-basics-day9',
         start_time: '2024-08-09T10:00:00Z', // 9th August 2024
         end_time: '2024-08-09T11:30:00Z',
-        recording_url: '#', // Placeholder URL - to be updated when available
+        recording_url: 'https://www.youtube.com/embed/r3qDz5iYnRY?si=DN105w-XPex8SKN3', // Placeholder - update with actual Day 9 recording
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 365
@@ -246,7 +246,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'python-libraries-day10',
         start_time: '2024-08-10T10:00:00Z', // 10th August 2024
         end_time: '2024-08-10T11:30:00Z',
-        recording_url: '#', // Placeholder URL - to be updated when available
+        recording_url: 'https://www.youtube.com/embed/1K3_Vlx1YIY?si=AjyvPXYfLo4M0S1x', // Placeholder - update with actual Day 10 recording
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 312
@@ -259,7 +259,7 @@ const RecordedSessionsTab = () => {
         stream_key: 'vector-analysis-python-day11',
         start_time: '2024-08-11T10:00:00Z', // 11th August 2024
         end_time: '2024-08-11T11:30:00Z',
-        recording_url: '#', // Placeholder URL - to be updated when available
+        recording_url: 'https://www.youtube.com/embed/_xCZIvx456Y?si=IfF1CCjrBZU4fTmA', // Placeholder - update with actual Day 11 recording
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
         viewer_count: 298
@@ -296,8 +296,8 @@ const RecordedSessionsTab = () => {
         title: 'Day 14 Python in QGIS: Vector Ops',
         description: 'Advanced Python scripting in QGIS for vector operations and spatial analysis workflows.',
         stream_key: 'python-qgis-vector-ops-day14',
-        start_time: '2025-09-03T10:00:00Z', // 3rd September 2025
-        end_time: '2025-09-03T11:30:00Z',
+        start_time: '2024-08-14T10:00:00Z', // 14th August 2024
+        end_time: '2024-08-14T11:30:00Z',
         recording_url: 'https://www.youtube.com/embed/KmkYo6_pMsg?si=hewXg-74Va_yi1Tw',
         course_title: 'Geospatial Technology Fundamentals',
         duration_minutes: 90,
