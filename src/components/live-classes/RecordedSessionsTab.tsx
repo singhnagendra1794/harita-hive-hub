@@ -304,7 +304,20 @@ const RecordedSessionsTab = () => {
         viewer_count: 198
       };
 
-      // Only use featured recordings Days 1-14 in correct order
+      const featuredRecording15 = {
+        id: 'jobs-market-revision-day15',
+        title: 'Day 15, Jobs Market & Revision',
+        description: 'Comprehensive overview of jobs market opportunities and revision of key geospatial concepts.',
+        stream_key: 'jobs-market-revision-day15',
+        start_time: '2024-08-15T10:00:00Z', // 15th August 2024
+        end_time: '2024-08-15T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/_zMzWKM4HRk?si=8SY2-JsRb_AYg2je',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 176
+      };
+
+      // Only use featured recordings Days 1-15 in correct order
       allRecordings = [
         featuredRecording1,   // Day 1
         featuredRecording2,   // Day 2
@@ -319,7 +332,8 @@ const RecordedSessionsTab = () => {
         featuredRecording11,  // Day 11
         featuredRecording12,  // Day 12
         featuredRecording13,  // Day 13
-        featuredRecording14   // Day 14
+        featuredRecording14,  // Day 14
+        featuredRecording15   // Day 15
       ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
