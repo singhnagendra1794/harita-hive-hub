@@ -317,7 +317,20 @@ const RecordedSessionsTab = () => {
         viewer_count: 176
       };
 
-      // Only use featured recordings Days 1-15 in correct order
+      const featuredRecording16 = {
+        id: 'track1-revision-qa-geocoded-day16',
+        title: 'Day 16, Track 1 Revision, QA and Geocoded',
+        description: 'Track 1 revision session covering quality assurance and geocoding concepts.',
+        stream_key: 'track1-revision-qa-geocoded-day16',
+        start_time: '2024-08-16T10:00:00Z', // 16th August 2024
+        end_time: '2024-08-16T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/Ws8P7xCXdlw?si=l6N3bsHFg388yPFy',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 164
+      };
+
+      // Only use featured recordings Days 1-16 in correct order
       allRecordings = [
         featuredRecording1,   // Day 1
         featuredRecording2,   // Day 2
@@ -333,7 +346,8 @@ const RecordedSessionsTab = () => {
         featuredRecording12,  // Day 12
         featuredRecording13,  // Day 13
         featuredRecording14,  // Day 14
-        featuredRecording15   // Day 15
+        featuredRecording15,  // Day 15
+        featuredRecording16   // Day 16
       ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
