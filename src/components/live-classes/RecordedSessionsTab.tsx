@@ -330,7 +330,20 @@ const RecordedSessionsTab = () => {
         viewer_count: 164
       };
 
-      // Only use featured recordings Days 1-16 in correct order
+      const featuredRecording17 = {
+        id: 'urban-analysis-preprocess-geo-dashboard-day17',
+        title: 'Day 17, Urban Analysis - Pre process of Geo-dashboard',
+        description: 'Urban analysis session covering pre-processing techniques for geo-dashboard development.',
+        stream_key: 'urban-analysis-preprocess-geo-dashboard-day17',
+        start_time: '2024-08-17T10:00:00Z', // 17th August 2024
+        end_time: '2024-08-17T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/-SVMzX5udUc?si=soA8x9uVCddGl79Q',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 152
+      };
+
+      // Only use featured recordings Days 1-17 in correct order
       allRecordings = [
         featuredRecording1,   // Day 1
         featuredRecording2,   // Day 2
@@ -347,7 +360,8 @@ const RecordedSessionsTab = () => {
         featuredRecording13,  // Day 13
         featuredRecording14,  // Day 14
         featuredRecording15,  // Day 15
-        featuredRecording16   // Day 16
+        featuredRecording16,  // Day 16
+        featuredRecording17   // Day 17
       ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
