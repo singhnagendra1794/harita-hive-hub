@@ -20,8 +20,16 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (req.method === 'POST') {
-      // Professional emails list from the PDF
-      const professionalEmails = [
+      // Try to parse payload (optional)
+      let payload: any = {};
+      try {
+        payload = await req.json();
+      } catch (_) {
+        payload = {};
+      }
+
+      // Default professional emails list (fallback)
+      const professionalEmailsDefault = [
         'bhumip107@gmail.com',
         'kondojukushi10@gmail.com',
         'adityapipil35@gmail.com',
@@ -50,12 +58,17 @@ const handler = async (req: Request): Promise<Response> => {
         'udaypbrn@gmail.com'
       ];
 
-      console.log(`Starting bulk assignment for ${professionalEmails.length} professional users`);
+      // Allow overriding lists from request body
+      const professionalEmails: string[] = Array.isArray(payload.assignEmails)
+        ? payload.assignEmails
+        : professionalEmailsDefault;
 
-      // Also handle explicit revocations
-      const revokeEmails = [
-        'kaverinayar2005@gmail.com'
-      ];
+      const defaultRevoke: string[] = ['kaverinayar2005@gmail.com'];
+      const revokeEmails: string[] = Array.isArray(payload.revokeEmails)
+        ? payload.revokeEmails
+        : (payload.action === 'revoke' && Array.isArray(payload.emails) ? payload.emails : defaultRevoke);
+
+      console.log(`Starting bulk process. Assign: ${professionalEmails.length}, Revoke: ${revokeEmails.length}`);
 
       // Fetch users from profiles by email
       const targetEmails = [...new Set([...professionalEmails.map(e => e.toLowerCase()), ...revokeEmails.map(e => e.toLowerCase())])];
@@ -112,34 +125,55 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // Revoke Professional access -> set to free and lock
+      // Revoke Professional access -> set to free and lock (only if currently pro/enterprise & active)
       if (revokeUserIds.length > 0) {
-        const { error: revokeError } = await supabaseClient
+        // Check current subscriptions
+        const { data: currentSubs, error: subCheckError } = await supabaseClient
           .from('user_subscriptions')
-          .upsert(
-            revokeUserIds.map((id: string) => ({
-              user_id: id,
-              subscription_tier: 'free',
-              status: 'active',
-              plan_locked: true,
-              updated_at: new Date().toISOString(),
-            })),
-            { onConflict: 'user_id' }
-          );
-        if (revokeError) {
-          console.error('Error revoking subscriptions:', revokeError);
+          .select('user_id, subscription_tier, status')
+          .in('user_id', revokeUserIds as string[])
+          .in('subscription_tier', ['pro', 'enterprise'])
+          .eq('status', 'active');
+        if (subCheckError) {
+          console.error('Error checking current subscriptions:', subCheckError);
           return new Response(
-            JSON.stringify({ success: false, error: revokeError.message }),
+            JSON.stringify({ success: false, error: subCheckError.message }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
-        const { error: revokeProfileError } = await supabaseClient
-          .from('profiles')
-          .update({ plan: 'free', updated_at: new Date().toISOString() })
-          .in('id', revokeUserIds as string[]);
-        if (revokeProfileError) {
-          console.error('Error updating revoked profiles:', revokeProfileError);
+        const eligibleToRevokeIds = (currentSubs || []).map((r: any) => r.user_id);
+
+        if (eligibleToRevokeIds.length > 0) {
+          const { error: revokeError } = await supabaseClient
+            .from('user_subscriptions')
+            .upsert(
+              eligibleToRevokeIds.map((id: string) => ({
+                user_id: id,
+                subscription_tier: 'free',
+                status: 'active',
+                plan_locked: true,
+                updated_at: new Date().toISOString(),
+              })),
+              { onConflict: 'user_id' }
+            );
+          if (revokeError) {
+            console.error('Error revoking subscriptions:', revokeError);
+            return new Response(
+              JSON.stringify({ success: false, error: revokeError.message }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const { error: revokeProfileError } = await supabaseClient
+            .from('profiles')
+            .update({ plan: 'free', updated_at: new Date().toISOString() })
+            .in('id', eligibleToRevokeIds as string[]);
+          if (revokeProfileError) {
+            console.error('Error updating revoked profiles:', revokeProfileError);
+          }
+        } else {
+          console.log('No users eligible for revocation (already free or inactive)');
         }
       }
 

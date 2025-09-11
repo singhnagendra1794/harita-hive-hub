@@ -58,6 +58,20 @@ const AccessManagementPanel = () => {
     'udaypbrn@gmail.com'
   ];
 
+  // Emails to revoke Professional (set to Free)
+  const revokeEmails = [
+    'prachisarode95@gmail.com',
+    'koushikghosh1a2s@gmail.com',
+    'ps.priyankasingh26996@gmail.com',
+    'rashidmsdian@gmail.com',
+    'shaliniazh@gmail.com',
+    'sg17122004@gmail.com',
+    'ankushrathod96@gmail.com',
+    'sreejadas1997@gmail.com',
+    'ds.sreeja22@gmail.com',
+    'parasmongia0895@gmail.com'
+  ];
+
   const roleOptions = [
     { value: 'user', label: 'Free User', color: 'bg-gray-500' },
     { value: 'professional', label: 'Professional', color: 'bg-blue-500' },
@@ -178,6 +192,39 @@ const AccessManagementPanel = () => {
     }
   };
 
+  const handleBulkRevokeToFree = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-assign-professional-users', {
+        body: {
+          revokeEmails
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: "✅ Bulk Revocation Complete",
+          description: data.message || 'Selected users set to Free (where eligible).'
+        });
+        // Refresh audit logs
+        fetchAuditLogs();
+      } else {
+        throw new Error(data?.error || 'Bulk revocation failed');
+      }
+    } catch (error: any) {
+      console.error('Bulk revocation error:', error);
+      toast({
+        title: "❌ Bulk Revocation Failed",
+        description: error.message || 'Failed to revoke professional access',
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const roleConfig = roleOptions.find(r => r.value === role) || { color: 'bg-gray-500', label: role };
     return (
@@ -214,9 +261,17 @@ const AccessManagementPanel = () => {
             <Button 
               onClick={handleBulkProfessionalAssignment}
               disabled={loading}
-              className="w-full"
+              className="w-full mb-2"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assign Professional Access'}
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleBulkRevokeToFree}
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : `Revoke to Free (${revokeEmails.length})`}
             </Button>
           </CardContent>
         </Card>
