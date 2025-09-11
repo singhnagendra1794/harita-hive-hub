@@ -72,6 +72,12 @@ const AccessManagementPanel = () => {
     'parasmongia0895@gmail.com'
   ];
 
+  // Specific two emails to revoke now
+  const revokeTwoEmails = [
+    'parasmongia0895@gmail.com',
+    'sreejadas1997@gmail.com'
+  ];
+
   const roleOptions = [
     { value: 'user', label: 'Free User', color: 'bg-gray-500' },
     { value: 'professional', label: 'Professional', color: 'bg-blue-500' },
@@ -225,6 +231,39 @@ const AccessManagementPanel = () => {
     }
   };
 
+  const handleRevokeSpecificTwo = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-assign-professional-users', {
+        body: {
+          revokeEmails: revokeTwoEmails
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: "✅ Revocation Complete",
+          description: data.message || 'Selected users set to Free.'
+        });
+        // Refresh audit logs
+        fetchAuditLogs();
+      } else {
+        throw new Error(data?.error || 'Revocation failed');
+      }
+    } catch (error: any) {
+      console.error('Specific revocation error:', error);
+      toast({
+        title: "❌ Revocation Failed",
+        description: error.message || 'Failed to revoke professional access',
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const roleConfig = roleOptions.find(r => r.value === role) || { color: 'bg-gray-500', label: role };
     return (
@@ -272,6 +311,14 @@ const AccessManagementPanel = () => {
               className="w-full"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : `Revoke to Free (${revokeEmails.length})`}
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleRevokeSpecificTwo}
+              disabled={loading}
+              className="w-full mt-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Revoke to Free (2 selected)'}
             </Button>
           </CardContent>
         </Card>
