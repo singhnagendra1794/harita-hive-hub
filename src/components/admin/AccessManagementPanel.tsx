@@ -55,7 +55,8 @@ const AccessManagementPanel = () => {
     'moumitadas19996@gmail.com',
     'javvad.rizvi@gmail.com',
     'mandadi.jyothi123@gmail.com',
-    'udaypbrn@gmail.com'
+    'udaypbrn@gmail.com',
+    'syedarshiya2110@gmail.com'
   ];
 
   // Emails to revoke Professional (set to Free)
