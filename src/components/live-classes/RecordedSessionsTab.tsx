@@ -343,7 +343,20 @@ const RecordedSessionsTab = () => {
         viewer_count: 152
       };
 
-      // Only use featured recordings Days 1-17 in correct order
+      const featuredRecording18 = {
+        id: 'pune-urban-analysis-day18',
+        title: 'Day 18, Pune Urban Analysis',
+        description: 'Comprehensive urban analysis of Pune city, covering spatial patterns and development insights.',
+        stream_key: 'pune-urban-analysis-day18',
+        start_time: '2024-08-18T10:00:00Z', // 18th August 2024
+        end_time: '2024-08-18T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/MU_YTZvE10s?si=mpCB8M7M77WhMNdm',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 143
+      };
+
+      // Only use featured recordings Days 1-18 in correct order
       allRecordings = [
         featuredRecording1,   // Day 1
         featuredRecording2,   // Day 2
@@ -361,7 +374,8 @@ const RecordedSessionsTab = () => {
         featuredRecording14,  // Day 14
         featuredRecording15,  // Day 15
         featuredRecording16,  // Day 16
-        featuredRecording17   // Day 17
+        featuredRecording17,  // Day 17
+        featuredRecording18   // Day 18
       ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
