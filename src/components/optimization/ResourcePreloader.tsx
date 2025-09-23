@@ -12,7 +12,7 @@ const preloadCriticalResources = () => {
 
   // Preload critical images
   const criticalImages = [
-    '/lovable-uploads/c5358765-5f6a-4c01-bb00-5f17261ffd2d.png', // Logo
+    '/harita-hive-logo.png', // Logo
   ];
 
   criticalImages.forEach(src => {
