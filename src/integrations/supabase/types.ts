@@ -11548,6 +11548,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      should_get_auto_pro_access: {
+        Args: { email_input: string }
+        Returns: boolean
+      }
       start_aws_stream: {
         Args: { p_admin_user_id: string; p_class_id: string }
         Returns: Json
