@@ -356,7 +356,20 @@ const RecordedSessionsTab = () => {
         viewer_count: 143
       };
 
-      // Only use featured recordings Days 1-18 in correct order
+      const featuredRecording19 = {
+        id: 'track2-day26-python-intro',
+        title: 'Track 2, Day 26: Introduction to Python Programming',
+        description: 'Comprehensive introduction to Python programming fundamentals and best practices for beginners.',
+        stream_key: 'track2-day26-python-intro',
+        start_time: '2024-08-26T10:00:00Z', // 26th August 2024
+        end_time: '2024-08-26T11:30:00Z',
+        recording_url: 'https://www.youtube.com/embed/N65U4tkTt4c?si=WV-yhHvVD6_qPBvi',
+        course_title: 'Geospatial Technology Fundamentals',
+        duration_minutes: 90,
+        viewer_count: 0
+      };
+
+      // Only use featured recordings Days 1-18 + Track 2 Day 26 in correct order
       allRecordings = [
         featuredRecording1,   // Day 1
         featuredRecording2,   // Day 2
@@ -375,7 +388,8 @@ const RecordedSessionsTab = () => {
         featuredRecording15,  // Day 15
         featuredRecording16,  // Day 16
         featuredRecording17,  // Day 17
-        featuredRecording18   // Day 18
+        featuredRecording18,  // Day 18
+        featuredRecording19   // Track 2, Day 26
       ];
 
       console.log('[RecordedSessionsTab] Loaded recordings:', {
