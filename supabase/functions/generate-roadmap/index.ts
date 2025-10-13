@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -65,23 +65,45 @@ serve(async (req) => {
       .eq('user_id', userId)
       .single();
 
-    // Generate roadmap with OpenAI
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Generate comprehensive roadmap with Lovable AI
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert geospatial career advisor. Create detailed, actionable 6-month roadmaps for GIS professionals based on their resume analysis and career goals.'
+            content: `You are an expert geospatial and GIS career advisor with deep knowledge of the industry, tools, technologies, and learning resources. 
+
+Your task is to create EXTREMELY DETAILED, step-by-step career roadmaps that include:
+- Day-by-day breakdown of activities
+- Specific learning resources with actual URLs
+- Platform recommendations (YouTube channels, Coursera courses, Udemy courses, documentation sites)
+- Hands-on project ideas with implementation details
+- Skill progression milestones
+- Tool mastery checkpoints
+- Industry best practices
+- Real-world application examples
+
+CRITICAL INSTRUCTIONS:
+1. Be EXTREMELY specific - no generic advice
+2. Include actual resource URLs when possible (YouTube videos, courses, documentation)
+3. Break down every skill into micro-steps
+4. Provide alternative resources for each topic
+5. Include time estimates for each activity
+6. Suggest practical projects to apply knowledge
+7. Recommend specific tools, software versions, and configurations
+8. Include troubleshooting tips and common pitfalls
+
+Return ONLY valid JSON without markdown code blocks.`
           },
           {
             role: 'user',
-            content: `Create a personalized 6-month geospatial career roadmap based on the following:
+            content: `Create an ULTRA-COMPREHENSIVE 6-month geospatial career roadmap based on:
 
 RESUME ANALYSIS:
 ${JSON.stringify(resumeData.extracted_data, null, 2)}
@@ -89,67 +111,226 @@ ${JSON.stringify(resumeData.extracted_data, null, 2)}
 FOLLOW-UP RESPONSES:
 ${followUpData?.responses ? JSON.stringify(followUpData.responses, null, 2) : 'No additional responses provided'}
 
-Please provide a structured roadmap in the following JSON format:
+Generate a JSON roadmap with this structure:
 {
-  "roadmapTitle": "6-Month Career Development Plan",
-  "targetRole": "specific role based on analysis",
+  "roadmapTitle": "6-Month Comprehensive Geospatial Career Development Plan",
+  "targetRole": "specific target role based on analysis",
+  "currentLevel": "assessed current level",
   "estimatedTimeToGoal": "6 months",
+  "learningApproach": "recommended learning strategy",
   "months": [
     {
       "month": 1,
-      "focus": "Foundation Building",
-      "weeklyGoals": [
+      "monthTitle": "Month 1: [Descriptive Title]",
+      "focus": "Primary focus area",
+      "objectives": ["objective 1", "objective 2"],
+      "weeks": [
         {
           "week": 1,
-          "theme": "Getting Started",
-          "dailyTasks": [
-            {
-              "day": "Monday",
-              "tasks": [
-                {
-                  "type": "study",
-                  "task": "Learn QGIS basics",
-                  "duration": "2 hours",
-                  "resources": ["specific resource links"]
-                }
-              ]
+          "weekTheme": "Specific theme",
+          "weekObjective": "What to achieve this week",
+          "days": {
+            "Monday": {
+              "focus": "Daily focus",
+              "morning": {
+                "activity": "Specific activity",
+                "duration": "1.5 hours",
+                "resources": [
+                  {
+                    "title": "Resource name",
+                    "url": "actual URL",
+                    "platform": "YouTube/Coursera/Udemy/Documentation",
+                    "type": "video/article/course/documentation"
+                  }
+                ],
+                "deliverable": "What to complete"
+              },
+              "afternoon": {
+                "activity": "Hands-on practice",
+                "duration": "2 hours",
+                "tasks": ["micro-task 1", "micro-task 2"],
+                "tools": ["tool 1", "tool 2"],
+                "checkpoints": ["verify step 1", "verify step 2"]
+              },
+              "evening": {
+                "activity": "Review and practice",
+                "duration": "1 hour",
+                "exercises": ["exercise 1", "exercise 2"]
+              }
+            },
+            "Tuesday": { ... },
+            "Wednesday": { ... },
+            "Thursday": { ... },
+            "Friday": { ... },
+            "Weekend": {
+              "project": "Weekend project",
+              "description": "Detailed project description",
+              "steps": ["step 1", "step 2", "step 3"],
+              "expectedOutcome": "What you'll have built",
+              "resources": []
             }
-          ]
+          },
+          "weekendProject": {
+            "title": "Project name",
+            "description": "Full description",
+            "difficulty": "beginner/intermediate/advanced",
+            "estimatedTime": "4-6 hours",
+            "technologies": ["tech 1", "tech 2"],
+            "steps": ["detailed step 1", "detailed step 2"],
+            "resources": [],
+            "bonus": "Extra challenges"
+          },
+          "milestones": ["checkpoint 1", "checkpoint 2"]
         }
-      ]
+      ],
+      "monthlyProject": {
+        "title": "Major project",
+        "description": "Comprehensive project",
+        "skills": ["skill 1", "skill 2"],
+        "deliverables": ["deliverable 1"],
+        "resources": []
+      },
+      "certificationPrep": {
+        "recommended": "Certification name",
+        "studyResources": [],
+        "practiceTests": []
+      }
     }
   ],
-  "skillsToAcquire": ["list of skills"],
-  "toolsToMaster": ["list of tools"],
-  "projectMilestones": ["list of projects"],
-  "certificationTargets": ["relevant certifications"],
-  "networkingGoals": ["networking objectives"],
-  "salaryProjection": "expected salary increase"
+  "skillsToAcquire": [
+    {
+      "skill": "Skill name",
+      "priority": "high/medium/low",
+      "currentLevel": "beginner/intermediate/advanced",
+      "targetLevel": "intermediate/advanced/expert",
+      "resources": [
+        {
+          "title": "Resource",
+          "url": "URL",
+          "platform": "Platform",
+          "estimatedTime": "time"
+        }
+      ],
+      "practiceProjects": ["project 1", "project 2"],
+      "milestones": ["milestone 1", "milestone 2"]
+    }
+  ],
+  "toolsToMaster": [
+    {
+      "tool": "Tool name",
+      "purpose": "Why learn this",
+      "learningPath": {
+        "beginner": {
+          "topics": ["topic 1", "topic 2"],
+          "resources": [],
+          "projects": []
+        },
+        "intermediate": { ... },
+        "advanced": { ... }
+      },
+      "alternatives": ["alternative tool 1"]
+    }
+  ],
+  "platformRecommendations": {
+    "youtube": ["Channel 1", "Channel 2"],
+    "coursera": ["Course 1"],
+    "udemy": ["Course 1"],
+    "documentation": ["Site 1"],
+    "practice": ["Platform 1"],
+    "community": ["Forum 1", "Discord 1"]
+  },
+  "certificationTargets": [
+    {
+      "name": "Cert name",
+      "provider": "Provider",
+      "difficulty": "level",
+      "cost": "cost",
+      "preparationTime": "time",
+      "resources": [],
+      "examTips": ["tip 1", "tip 2"]
+    }
+  ],
+  "projectMilestones": [
+    {
+      "month": 1,
+      "project": "Project name",
+      "description": "Description",
+      "technologies": [],
+      "steps": [],
+      "resources": [],
+      "portfolio": "How to showcase"
+    }
+  ],
+  "careerProgression": {
+    "currentPosition": "Current role",
+    "sixMonthGoal": "Role after roadmap",
+    "marketDemand": "Industry demand info",
+    "salaryRange": "Salary range",
+    "requiredSkills": [],
+    "recommendedActions": []
+  },
+  "networkingStrategy": {
+    "platforms": ["LinkedIn", "GIS Stack Exchange"],
+    "communities": [],
+    "events": [],
+    "mentorship": []
+  },
+  "portfolioBuilding": {
+    "projects": [],
+    "githubStrategy": "Strategy",
+    "showcaseIdeas": []
+  },
+  "additionalResources": {
+    "books": [],
+    "blogs": [],
+    "podcasts": [],
+    "newsletters": []
+  }
 }
 
-Make it highly specific to their current level and target goals.`
+Make this THE MOST COMPREHENSIVE roadmap possible - every day should have specific, actionable tasks with real resources.`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 3000
+        temperature: 0.4,
       }),
     });
 
-    const openAIData = await openAIResponse.json();
+    const aiData = await aiResponse.json();
     
-    if (!openAIResponse.ok) {
-      throw new Error(`OpenAI API error: ${openAIData.error?.message || 'Unknown error'}`);
+    if (!aiResponse.ok) {
+      const errorMsg = aiData.error?.message || 'AI API error';
+      console.error('AI API error:', errorMsg, aiData);
+      
+      if (aiResponse.status === 429) {
+        throw new Error('AI service rate limit exceeded. Please try again in a moment.');
+      }
+      if (aiResponse.status === 402) {
+        throw new Error('AI service credits exhausted. Please contact support.');
+      }
+      throw new Error(`AI API error: ${errorMsg}`);
     }
 
-    const roadmapContent = openAIData.choices[0].message.content;
+    let roadmapContent = aiData.choices[0].message.content.trim();
+    
+    // Remove markdown code blocks if present
+    roadmapContent = roadmapContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    // Validate JSON
+    let parsedRoadmap;
+    try {
+      parsedRoadmap = JSON.parse(roadmapContent);
+    } catch (e) {
+      console.error('Failed to parse roadmap JSON:', roadmapContent);
+      throw new Error('Generated roadmap was not valid JSON');
+    }
 
-    // Create roadmap record
+    // Create roadmap record with parsed data
     const { data: roadmapRecord, error: roadmapError } = await supabase
       .from('career_roadmaps')
       .insert({
         user_id: userId,
         resume_id: resumeId,
-        roadmap_data: { content: roadmapContent },
+        roadmap_data: parsedRoadmap,
         generation_status: 'completed'
       })
       .select()
@@ -159,10 +340,13 @@ Make it highly specific to their current level and target goals.`
       throw new Error(`Failed to create roadmap: ${roadmapError.message}`);
     }
 
+    console.log('Comprehensive roadmap generated successfully for user:', userId);
+
     return new Response(JSON.stringify({
       success: true,
       roadmapId: roadmapRecord.id,
-      message: 'Roadmap generated successfully'
+      roadmap: parsedRoadmap,
+      message: 'Comprehensive roadmap generated successfully'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
