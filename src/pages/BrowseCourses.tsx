@@ -49,8 +49,8 @@ const BrowseCourses = () => {
   // Ongoing courses - currently active and accepting enrollments
   const ongoingCourses = [
     {
-      id: "geospatial-technology-unlocked",
-      title: "Geospatial Technology Unlocked",
+      id: "geospatial-technology-unlocked-batch-1",
+      title: "Geospatial Technology Unlocked - Batch 1",
       description: "90-Day Advanced Practical Program – GIS, Remote Sensing, Python, SQL, GeoAI",
       instructor: "Expert Instructors",
       timeline: "Starts from 21st July 08:00 PM TO 09:30 PM Monday to Saturday",
@@ -68,6 +68,27 @@ const BrowseCourses = () => {
       courseUrl: "/courses/geospatial-technology-unlocked",
       enrollmentDeadline: "25th July, 11:59 PM",
       startDate: "July 21, 2025"
+    },
+    {
+      id: "geospatial-technology-unlocked-batch-2",
+      title: "Geospatial Technology Unlocked - Batch 2",
+      description: "90-Day Advanced Practical Program – GIS, Remote Sensing, Python, SQL, GeoAI",
+      instructor: "Expert Instructors",
+      timeline: "Starts from 14th October 08:00 PM TO 09:30 PM Monday to Saturday",
+      duration: "90 days",
+      level: "Advanced",
+      category: "live-training",
+      icon: GraduationCap,
+      priceINR: "₹11,999",
+      priceUSD: "$149",
+      enrolled: 0,
+      maxStudents: 50,
+      rating: 5.0,
+      isLive: true,
+      isPriority: true,
+      courseUrl: "/courses/geospatial-technology-unlocked",
+      enrollmentDeadline: "12th October, 11:59 PM",
+      startDate: "October 14, 2025"
     }
   ];
 
@@ -89,7 +110,7 @@ const BrowseCourses = () => {
       maxStudents: 100,
       rating: 5.0,
       isUpcoming: true,
-      launchDate: "January 15, 2025"
+      launchDate: "To be launched"
     },
     {
       id: "arcgis-enterprise-mastery",
@@ -107,7 +128,7 @@ const BrowseCourses = () => {
       maxStudents: 75,
       rating: 4.9,
       isUpcoming: true,
-      launchDate: "September 10, 2025"
+      launchDate: "To be launched"
     },
     {
       id: "python-gis-automation",
@@ -125,7 +146,7 @@ const BrowseCourses = () => {
       maxStudents: 120,
       rating: 4.8,
       isUpcoming: true,
-      launchDate: "October 15, 2025"
+      launchDate: "To be launched"
     },
     {
       id: "drone-mapping-photogrammetry",
@@ -143,7 +164,7 @@ const BrowseCourses = () => {
       maxStudents: 80,
       rating: 4.7,
       isUpcoming: true,
-      launchDate: "December 1, 2025"
+      launchDate: "To be launched"
     },
     {
       id: "gis-data-science",
@@ -161,7 +182,7 @@ const BrowseCourses = () => {
       maxStudents: 60,
       rating: 4.9,
       isUpcoming: true,
-      launchDate: "January 20, 2026"
+      launchDate: "To be launched"
     }
   ];
 

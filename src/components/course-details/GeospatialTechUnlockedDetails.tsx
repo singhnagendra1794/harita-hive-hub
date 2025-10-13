@@ -138,7 +138,7 @@ const GeospatialTechUnlockedDetails = ({
                 <Badge variant="outline">Live Training</Badge>
               </div>
               <CardTitle className="text-3xl lg:text-4xl mb-3">
-                Geospatial Technology Unlocked
+                Geospatial Technology Unlocked - Batch 1
               </CardTitle>
               <CardDescription className="text-lg mb-4">
                 90-Day Advanced Practical Program – GIS, Remote Sensing, Python, SQL, GeoAI
