@@ -72,3 +72,12 @@ verify_jwt = true
 
 [functions.fetch-trending-news]
 verify_jwt = false
+
+[functions.ai-resume-tailor]
+verify_jwt = false
+
+[functions.calculate-ats-score]
+verify_jwt = false
+
+[functions.ai-portfolio-enhancer]
+verify_jwt = false

@@ -26,6 +26,7 @@ import { PortfolioTemplateSelector } from "./PortfolioTemplateSelector";
 import { PortfolioPreview } from "./PortfolioPreview";
 import { PortfolioAnalytics } from "./PortfolioAnalytics";
 import { AIEnhancementPanel } from "./AIEnhancementPanel";
+import { ATSScoreCard } from "./ATSScoreCard";
 
 interface EnhancedPortfolioBuilderProps {
   personalInfo: any;
@@ -198,11 +199,23 @@ export const EnhancedPortfolioBuilder = ({
         </TabsContent>
 
         <TabsContent value="preview" className="space-y-6">
-          <PortfolioPreview 
-            portfolio={portfolio}
-            sections={sections}
-            data={exportData}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <PortfolioPreview 
+                portfolio={portfolio}
+                sections={sections}
+                data={exportData}
+              />
+            </div>
+            <div>
+              <ATSScoreCard 
+                personalInfo={personalInfo}
+                projects={projects}
+                skills={skills}
+                certificates={certificates}
+              />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">

@@ -70,8 +70,8 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
       {/* Preview Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Portfolio Preview</h2>
-          <p className="text-muted-foreground">See how your portfolio will look to visitors</p>
+          <h2 className="text-2xl font-bold">Professional Portfolio Preview</h2>
+          <p className="text-muted-foreground">ATS-optimized professional format</p>
         </div>
         <div className="flex gap-2">
           {portfolio.public_url && (
@@ -89,38 +89,56 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
         </div>
       </div>
 
-      {/* Preview Frame */}
-      <Card className="overflow-hidden">
-        <div className="bg-gradient-to-br from-background to-muted/50 p-6">
-          <div className="max-w-4xl mx-auto bg-background rounded-lg shadow-lg overflow-hidden">
+      {/* Preview Frame - Professional Design */}
+      <Card className="overflow-hidden shadow-xl border-2">
+        <div className="bg-gradient-to-br from-background via-muted/30 to-background p-8">
+          <div className="max-w-5xl mx-auto bg-background rounded-xl shadow-2xl overflow-hidden border border-border/50">
             
-            {/* Header Section */}
-            <div className={`bg-gradient-to-r ${gradientClass} text-white p-8`}>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold mb-2">{personalInfo.name}</h1>
-                <p className="text-xl opacity-90 mb-4">
-                  {personalInfo.preferredJobRoles[0] || 'Geospatial Professional'}
-                </p>
-                <div className="flex justify-center gap-4 text-sm opacity-80">
-                  <span>{personalInfo.email}</span>
-                  {personalInfo.phone && <span>•</span>}
-                  {personalInfo.phone && <span>{personalInfo.phone}</span>}
-                  {personalInfo.location && <span>•</span>}
-                  {personalInfo.location && <span>{personalInfo.location}</span>}
+            {/* Professional Header Section */}
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-primary/5"></div>
+              <div className="relative border-b-4 border-primary/20 bg-gradient-to-r from-background to-muted/30 px-12 py-10">
+                <div className="space-y-4">
+                  <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+                    {personalInfo.name}
+                  </h1>
+                  <div className="flex items-center gap-3 text-lg text-muted-foreground font-medium">
+                    <div className="h-1 w-12 bg-primary rounded-full"></div>
+                    <span>{personalInfo.preferredJobRoles[0] || 'Geospatial Professional'}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2">
+                    <span className="flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                      {personalInfo.email}
+                    </span>
+                    {personalInfo.phone && (
+                      <span className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                        {personalInfo.phone}
+                      </span>
+                    )}
+                    {personalInfo.location && (
+                      <span className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                        {personalInfo.location}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Content Sections */}
-            <div className="p-8 space-y-8">
+            {/* Content Sections - Professional Spacing */}
+            <div className="px-12 py-10 space-y-10">
               
               {/* Professional Summary */}
               {personalInfo.professionalSummary && (
-                <section>
-                  <h2 className="text-xl font-semibold border-b-2 border-primary/20 pb-2 mb-4">
-                    Professional Summary
-                  </h2>
-                  <p className="text-muted-foreground leading-relaxed">
+                <section className="space-y-4 animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 bg-primary rounded-full"></div>
+                    <h2 className="text-2xl font-bold tracking-tight">Professional Summary</h2>
+                  </div>
+                  <p className="text-foreground/80 leading-relaxed text-base pl-7 font-light">
                     {personalInfo.professionalSummary}
                   </p>
                 </section>
@@ -128,19 +146,25 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
 
               {/* Skills Section */}
               {skills.length > 0 && (
-                <section>
-                  <h2 className="text-xl font-semibold border-b-2 border-primary/20 pb-2 mb-4">
-                    Technical Skills
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <section className="space-y-5 animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 bg-primary rounded-full"></div>
+                    <h2 className="text-2xl font-bold tracking-tight">Technical Expertise</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pl-7">
                     {Object.entries(groupSkillsByCategory(skills)).map(([category, categorySkills]) => (
-                      <div key={category}>
-                        <h3 className="font-medium text-primary capitalize mb-2">
+                      <div key={category} className="space-y-3">
+                        <h3 className="font-semibold text-base text-primary capitalize flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-primary/60"></div>
                           {category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                          {(categorySkills as any[]).slice(0, 6).map(skill => (
-                            <Badge key={skill.name} variant="secondary" className="text-xs">
+                          {(categorySkills as any[]).slice(0, 8).map(skill => (
+                            <Badge 
+                              key={skill.name} 
+                              variant="secondary" 
+                              className="text-xs font-medium px-3 py-1 hover:bg-primary/10 transition-colors"
+                            >
                               {skill.name}
                             </Badge>
                           ))}
@@ -153,27 +177,45 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
 
               {/* Projects Section */}
               {projects.length > 0 && (
-                <section>
-                  <h2 className="text-xl font-semibold border-b-2 border-primary/20 pb-2 mb-4">
-                    Featured Projects
-                  </h2>
-                  <div className="grid gap-6">
-                    {projects.slice(0, 3).map((project, index) => (
-                      <div key={project.id || index} className="border-l-4 border-primary pl-4">
-                        <h3 className="font-semibold text-lg">{project.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {new Date(project.completedDate).toLocaleDateString()}
-                          {project.duration && ` • ${project.duration}`}
-                        </p>
-                        <p className="text-muted-foreground mb-3 line-clamp-2">
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {project.technologies.slice(0, 5).map((tech: string) => (
-                            <Badge key={tech} variant="outline" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
+                <section className="space-y-6 animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 bg-primary rounded-full"></div>
+                    <h2 className="text-2xl font-bold tracking-tight">Professional Projects</h2>
+                  </div>
+                  <div className="grid gap-7 pl-7">
+                    {projects.slice(0, 4).map((project, index) => (
+                      <div 
+                        key={project.id || index} 
+                        className="relative group pl-6 border-l-2 border-primary/30 hover:border-primary transition-all duration-300"
+                      >
+                        <div className="absolute -left-[5px] top-2 h-2 w-2 rounded-full bg-primary group-hover:scale-150 transition-transform"></div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+                            {project.title}
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
+                            <span>{new Date(project.completedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                            {project.duration && (
+                              <>
+                                <span>•</span>
+                                <span>{project.duration}</span>
+                              </>
+                            )}
+                          </div>
+                          <p className="text-foreground/70 leading-relaxed text-sm">
+                            {project.description}
+                          </p>
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {project.technologies.slice(0, 6).map((tech: string) => (
+                              <Badge 
+                                key={tech} 
+                                variant="outline" 
+                                className="text-xs font-medium border-primary/30 hover:bg-primary/5 transition-colors"
+                              >
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -183,18 +225,22 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
 
               {/* Certificates Section */}
               {certificates.length > 0 && (
-                <section>
-                  <h2 className="text-xl font-semibold border-b-2 border-primary/20 pb-2 mb-4">
-                    Certifications
-                  </h2>
-                  <div className="grid gap-3">
+                <section className="space-y-5 animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 bg-primary rounded-full"></div>
+                    <h2 className="text-2xl font-bold tracking-tight">Professional Certifications</h2>
+                  </div>
+                  <div className="grid gap-4 pl-7">
                     {certificates.map((cert: any) => (
-                      <div key={cert.id} className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-medium">{cert.name}</h3>
-                          <p className="text-sm text-muted-foreground">{cert.issuer}</p>
+                      <div 
+                        key={cert.id} 
+                        className="flex justify-between items-start p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/30 transition-all duration-200 group"
+                      >
+                        <div className="space-y-1">
+                          <h3 className="font-semibold text-base group-hover:text-primary transition-colors">{cert.name}</h3>
+                          <p className="text-sm text-muted-foreground font-medium">{cert.issuer}</p>
                         </div>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="shrink-0 font-semibold">
                           {new Date(cert.date).getFullYear()}
                         </Badge>
                       </div>
@@ -204,11 +250,17 @@ export const PortfolioPreview = ({ portfolio, sections, data }: PortfolioPreview
               )}
             </div>
 
-            {/* Footer */}
-            <div className="bg-muted/50 p-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Generated with Harita Hive Portfolio Builder
-              </p>
+            {/* Professional Footer */}
+            <div className="relative overflow-hidden border-t border-border/50">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-purple-500/5 to-primary/5"></div>
+              <div className="relative px-12 py-8 text-center space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Portfolio created with Harita Hive Professional Portfolio Builder
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  ATS-Optimized • Professional Design • Industry Standards
+                </p>
+              </div>
             </div>
           </div>
         </div>
