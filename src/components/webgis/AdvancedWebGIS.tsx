@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,14 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Layers, Upload, Settings, Map, Brain, BarChart3, 
   Database, Plug, Eye, EyeOff, Download, Share,
-  Save, Globe, Code, Play, Maximize2, Filter
+  Save, Globe, Code, Play, Maximize2, Filter, Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
-// Import existing components
+// Import components
 import LeftPanel from './LeftPanel';
 import MapCanvas from './MapCanvas';
 import RightPanel from './RightPanel';
+import { AIRequirementForm } from './AIRequirementForm';
+import { GlobalDataBrowser } from './GlobalDataBrowser';
 
 interface MapLayer {
   id: string;
@@ -133,7 +137,13 @@ const preBuiltTemplates = [
 
 const AdvancedWebGIS = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const mapRef = useRef<HTMLDivElement>(null);
+  
+  // AI and initialization state
+  const [showAIForm, setShowAIForm] = useState(true);
+  const [showDataBrowser, setShowDataBrowser] = useState(false);
+  const [currentProject, setCurrentProject] = useState<any>(null);
   
   // Core state
   const [layers, setLayers] = useState<MapLayer[]>([
@@ -161,6 +171,72 @@ const AdvancedWebGIS = () => {
   const [mapCenter] = useState<[number, number]>([0, 0]);
   const [mapZoom] = useState(2);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
+
+  // Auto-save project
+  useEffect(() => {
+    if (!user || !currentProject) return;
+    
+    const saveTimer = setTimeout(() => {
+      saveProject();
+    }, 30000); // Auto-save every 30 seconds
+    
+    return () => clearTimeout(saveTimer);
+  }, [layers, currentProject]);
+
+  const saveProject = async () => {
+    if (!user || !currentProject) return;
+    
+    try {
+      // Project auto-save will be enabled once types are regenerated
+      console.log('Auto-saving project...', currentProject.id);
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    }
+  };
+
+  const handleAIRequirementSubmit = async (toolkitData: any) => {
+    setShowAIForm(false);
+    
+    toast({
+      title: "🎉 Toolkit Ready!",
+      description: "Loading recommended datasets and tools...",
+    });
+
+    // Auto-load recommended datasets
+    if (toolkitData.recommended_datasets?.length > 0) {
+      const newLayers = toolkitData.recommended_datasets.map((dataset: any) => ({
+        id: crypto.randomUUID(),
+        name: dataset.dataset_name || dataset.name,
+        type: dataset.type === 'Raster' ? 'raster' : 'vector',
+        visible: true,
+        opacity: 0.8,
+        metadata: {
+          provider: dataset.source,
+          source: dataset.download_link,
+          description: dataset.description
+        }
+      }));
+      
+      setLayers(prev => [...prev, ...newLayers]);
+    }
+
+    // Create project record (will be enabled when types are regenerated)
+    const mockProject = {
+      id: crypto.randomUUID(),
+      title: `${toolkitData.formData.goal} - ${toolkitData.formData.region}`,
+      metadata: {
+        ai_generated: true,
+        toolkit_session_id: toolkitData.sessionId
+      }
+    };
+    
+    setCurrentProject(mockProject);
+    
+    toast({
+      title: "Project Created",
+      description: "Your AI-powered workspace is ready!",
+    });
+  };
 
   const handleFileUpload = useCallback(async (files: File[]) => {
     const newLayers: MapLayer[] = [];
@@ -318,9 +394,54 @@ const AdvancedWebGIS = () => {
   }, [isFullscreen]);
 
   return (
-    <div className={`flex h-screen bg-background overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
-      {/* Left Panel - Layers & Tools */}
-      {leftPanelVisible && (
+    <>
+      {/* AI Requirement Form - Initial Setup */}
+      {showAIForm && (
+        <AIRequirementForm
+          onRequirementSubmit={handleAIRequirementSubmit}
+          onSkip={() => setShowAIForm(false)}
+        />
+      )}
+
+      {/* Global Data Browser Modal */}
+      {showDataBrowser && (
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl">
+            <GlobalDataBrowser
+              onDatasetSelect={(dataset) => {
+                const newLayer: MapLayer = {
+                  id: crypto.randomUUID(),
+                  name: dataset.name,
+                  type: dataset.dataset_type === 'raster' ? 'raster' : 'vector',
+                  visible: true,
+                  opacity: 0.8,
+                  metadata: {
+                    provider: dataset.provider,
+                    source: dataset.api_endpoint
+                  }
+                };
+                setLayers(prev => [...prev, newLayer]);
+                setShowDataBrowser(false);
+                toast({
+                  title: "Dataset Added",
+                  description: `${dataset.name} loaded successfully`,
+                });
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={() => setShowDataBrowser(false)}
+              className="w-full mt-4"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className={`flex h-screen bg-background overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+        {/* Left Panel - Layers & Tools */}
+        {leftPanelVisible && (
         <div className="w-80 border-r bg-card flex flex-col">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-3">
@@ -395,6 +516,24 @@ const AdvancedWebGIS = () => {
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDataBrowser(true)}
+            className="bg-background/95 backdrop-blur"
+          >
+            <Database className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setShowAIForm(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="absolute top-4 right-4 z-10">
@@ -466,7 +605,8 @@ const AdvancedWebGIS = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
