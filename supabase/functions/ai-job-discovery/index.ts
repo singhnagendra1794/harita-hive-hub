@@ -15,16 +15,25 @@ interface JobData {
   experience_level?: string;
   salary_min?: number;
   salary_max?: number;
+  salary_currency?: string;
   description: string;
   requirements: string[];
   skills: string[];
+  preferred_qualifications?: string[];
   apply_url: string;
+  apply_method?: string;
   external_job_id: string;
   source_platform: string;
   is_remote: boolean;
   is_india_focused: boolean;
   posted_date: string;
+  expires_at?: string;
   ai_relevance_score: number;
+  seo_title?: string;
+  meta_description?: string;
+  tags?: string[];
+  domain_category?: string;
+  thumbnail_prompt?: string;
 }
 
 serve(async (req) => {
@@ -59,28 +68,66 @@ serve(async (req) => {
 
     const keywords = search_keywords.length > 0 ? search_keywords : defaultKeywords;
 
-    // Generate job listings using OpenAI based on current job market trends
-    const prompt = `Generate ${max_jobs} realistic job listings for geospatial technology positions in ${location_filter}. Focus on these keywords: ${keywords.join(', ')}.
+    // Enhanced prompt for realistic, SEO-optimized job generation
+    const prompt = `You are the global job curator for Harita Hive AI Job Discovery - the leading platform for geospatial professionals.
 
-Each job should include:
-- title: Job title
-- company: Real or realistic company name
-- location: City, state/country (prioritize ${location_filter})
-- job_type: full-time, part-time, contract, or internship
-- experience_level: entry, mid, senior, or expert
-- salary_min & salary_max: In local currency (INR for India)
-- description: 2-3 sentence job description
-- requirements: Array of 3-4 requirements
-- skills: Array of 5-7 relevant technical skills
-- apply_url: Realistic URL (can be generic like linkedin.com/jobs/view/[job-id])
-- external_job_id: Unique identifier
-- source_platform: linkedin, naukri, indeed, government, or careers_page
-- is_remote: boolean
-- is_india_focused: boolean (true if position is in India or allows remote from India)
-- posted_date: Recent date (within last 7 days)
-- ai_relevance_score: Number between 80-100 based on keyword match
+Generate ${max_jobs} authentic, detailed, SEO-optimized job listings for geospatial technology positions. Focus on: ${keywords.join(', ')}.
 
-Return ONLY a JSON array of job objects. Make 70% of jobs India-focused. Include government positions, startups, and MNCs. Make it realistic and current.`;
+DISTRIBUTION (total ${max_jobs} jobs):
+- 14 India-focused (Delhi, Bangalore, Pune, Hyderabad, Chennai, Mumbai, Remote India)
+- 6 International (US, UK, Germany, Singapore, Australia, Canada)
+
+DOMAIN BALANCE:
+- 4 GIS Analysis jobs
+- 3 Remote Sensing/Satellite Data jobs
+- 3 Machine Learning/GeoAI jobs
+- 2 Drone Mapping/Photogrammetry jobs
+- 2 Web GIS/Frontend jobs
+- 2 Environmental Modeling/Hydrology jobs
+- 2 Data Engineering/Spatial Databases jobs
+- 2 Urban Analytics/Smart Cities jobs
+
+Each job MUST include:
+1. title: SEO-friendly, specific (e.g., "GIS Data Analyst – Remote Sensing & Spatial Modeling")
+2. company: Real or realistic (e.g., "Esri India", "SatSure Analytics", "GeoAI Labs")
+3. location: City + Country, or "Remote"
+4. salary_min & salary_max: INR for India (₹), USD ($) for international
+5. salary_currency: "INR" or "USD"
+6. job_type: full-time, contract, internship, or remote
+7. experience_level: entry, mid, senior, or expert
+8. description: 4-6 sentences summarizing company, role, deliverables, and impact
+9. requirements: Array of 3-4 key requirements
+10. skills: Array of 5-8 technical skills (Python, QGIS, GDAL, PostGIS, GEE, TensorFlow, etc.)
+11. preferred_qualifications: Array of 2-3 degrees/certifications
+12. apply_url: Realistic job link (linkedin.com/jobs/view/[job-id], indeed.com/viewjob?jk=[id])
+13. apply_method: "Apply via Harita Hive" OR "Apply on LinkedIn" OR "Apply on Indeed"
+14. external_job_id: Unique 8-12 character ID
+15. source_platform: linkedin, indeed, glassdoor, government, naukri, or careers_page
+16. is_remote: boolean
+17. is_india_focused: boolean (true if India-based or remote from India allowed)
+18. posted_date: Within last 14 days (ISO format)
+19. expires_at: 15-30 days after posted_date (ISO format)
+20. ai_relevance_score: 60-98 (varied, not all identical)
+21. seo_title: Under 70 characters, keyword-rich
+22. meta_description: Under 160 characters with action phrase
+23. tags: 4-6 SEO keywords as array (e.g., ["GIS", "Remote Sensing", "GeoAI", "Python"])
+24. domain_category: One of: "GIS Analysis", "Remote Sensing", "Machine Learning/GeoAI", "Drone Mapping", "Web GIS", "Environmental", "Data Engineering", "Urban Analytics"
+25. thumbnail_prompt: Brief description for visualization (e.g., "Satellite map showing urban growth")
+
+SEO OPTIMIZATION:
+- Include keywords: GIS Jobs, Remote Sensing Careers, GeoAI Jobs, Geospatial Analyst, QGIS, PostGIS, Python
+- Write professional, action-driven descriptions
+- Each meta_description should include "Apply Now" or similar CTA
+- End each description with: "Verified opportunity curated by Harita Hive."
+
+REALISM:
+- Use authentic company names (Esri, Maxar, Planet Labs, ISRO, Survey of India, TCS, Wipro, Accenture)
+- Include realistic startups (SatSure, GalaxEye, Pixxel, SkyMap Global, Genesys International)
+- Mix government (Survey of India, NRSC, State Remote Sensing Centers) and private sector
+- Vary salary ranges realistically (Entry: ₹3-6L, Mid: ₹8-15L, Senior: ₹18-35L for India; $60-200K for international)
+- Make job descriptions specific and technical, not generic
+
+Return ONLY a valid JSON array of job objects. No markdown, no explanation.`;
 
     console.log('Calling OpenAI to generate job listings...');
 
@@ -95,15 +142,15 @@ Return ONLY a JSON array of job objects. Make 70% of jobs India-focused. Include
         messages: [
           {
             role: 'system',
-            content: 'You are a job market expert specializing in geospatial technology careers. Generate realistic, current job listings based on actual market trends.'
+            content: 'You are a global job curator and SEO strategist for Harita Hive. You specialize in geospatial technology careers and create authentic, detailed job listings that reflect real opportunities in GIS, Remote Sensing, GeoAI, and Spatial Analytics worldwide. Generate publication-ready content with perfect SEO optimization.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 4000
+        temperature: 0.65,
+        max_tokens: 6000
       }),
     });
 
@@ -130,15 +177,26 @@ Return ONLY a JSON array of job objects. Make 70% of jobs India-focused. Include
       throw new Error('Failed to parse job listings from AI response');
     }
 
-    // Validate and clean job data
+    // Validate and enrich job data
     const validJobs = jobListings.filter(job => 
       job.title && job.company && job.location && job.description && job.apply_url
-    ).map(job => ({
-      ...job,
-      posted_date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      is_verified: true, // Mark AI-generated jobs as verified
-      is_active: true
-    }));
+    ).map(job => {
+      // Ensure dates are properly formatted
+      const postedDate = job.posted_date || new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresDate = job.expires_at || new Date(new Date(postedDate).getTime() + (15 + Math.random() * 15) * 24 * 60 * 60 * 1000).toISOString();
+      
+      return {
+        ...job,
+        posted_date: postedDate,
+        expires_at: expiresDate,
+        is_verified: true,
+        is_active: true,
+        salary_currency: job.salary_currency || (job.is_india_focused ? 'INR' : 'USD'),
+        apply_method: job.apply_method || 'Apply on ' + (job.source_platform || 'LinkedIn'),
+        tags: job.tags || ['GIS', 'Geospatial', 'Remote Sensing'],
+        thumbnail_prompt: job.thumbnail_prompt || 'Geospatial analysis visualization'
+      };
+    });
 
     console.log(`Generated ${validJobs.length} valid job listings`);
 

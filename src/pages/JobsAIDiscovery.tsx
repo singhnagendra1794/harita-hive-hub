@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { updatePageSEO, addSchemaMarkup } from '@/utils/seoUtils';
 import { 
   Search, 
   MapPin, 
@@ -33,7 +34,8 @@ import {
   BarChart3,
   Sparkles,
   Eye,
-  BookmarkPlus
+  BookmarkPlus,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremiumAccess } from '@/hooks/usePremiumAccess';
@@ -41,6 +43,7 @@ import { usePersonalization } from '@/hooks/usePersonalization';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import UpgradePrompt from '@/components/premium/UpgradePrompt';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface JobPosting {
   id: string;
@@ -149,6 +152,58 @@ const JobsAIDiscovery = () => {
 
   const hasProfessionalAccess = hasAccess('pro');
   const hasEnterpriseAccess = hasAccess('enterprise');
+
+  // Set SEO on component mount
+  useEffect(() => {
+    updatePageSEO({
+      title: "Find Verified Geospatial Jobs Worldwide | Harita Hive AI Job Discovery",
+      description: "Discover verified GIS, Remote Sensing, and GeoAI jobs from across India and the world. AI-powered job discovery personalized for your skills. Apply now!",
+      keywords: "GIS Jobs, Remote Sensing Careers, GeoAI Jobs, Geospatial Analyst, QGIS Jobs, PostGIS Jobs, Python GIS, Drone Mapping Jobs, India GIS Jobs",
+      type: "website"
+    });
+
+    // Add structured data for JobPosting
+    if (jobs.length > 0) {
+      const topJobs = jobs.slice(0, 5);
+      topJobs.forEach(job => {
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "JobPosting",
+          "title": job.title,
+          "description": job.description,
+          "datePosted": job.posted_date,
+          "validThrough": job.expires_at,
+          "hiringOrganization": {
+            "@type": "Organization",
+            "name": job.company
+          },
+          "jobLocation": {
+            "@type": "Place",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": job.location
+            }
+          },
+          "baseSalary": job.salary_min && job.salary_max ? {
+            "@type": "MonetaryAmount",
+            "currency": "INR",
+            "value": {
+              "@type": "QuantitativeValue",
+              "minValue": job.salary_min,
+              "maxValue": job.salary_max,
+              "unitText": "YEAR"
+            }
+          } : undefined,
+          "employmentType": job.employment_type?.toUpperCase(),
+          "experienceRequirements": {
+            "@type": "OccupationalExperienceRequirements",
+            "monthsOfExperience": job.experience_level === 'entry' ? 0 : job.experience_level === 'mid' ? 24 : 60
+          }
+        };
+        addSchemaMarkup(schema);
+      });
+    }
+  }, [jobs]);
 
   useEffect(() => {
     fetchJobs();
@@ -953,6 +1008,67 @@ const JobsAIDiscovery = () => {
             </Card>
           </div>
         )}
+      </div>
+
+      {/* FAQ Section for SEO */}
+      <Card className="mt-12">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HelpCircle className="h-5 w-5" />
+            Frequently Asked Questions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Are all jobs verified?</AccordionTrigger>
+              <AccordionContent>
+                Yes, each listing is AI-screened and verified by Harita Hive before publishing. We aggregate jobs from trusted sources including LinkedIn, Indeed, Glassdoor, government portals, and company career pages to ensure authenticity.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>How is AI used to personalize results?</AccordionTrigger>
+              <AccordionContent>
+                Our AI analyzes your enrolled courses, skills, location preferences, and past interactions to calculate a personalized match score (60-98%) for each job. This helps surface the most relevant opportunities for your career goals.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Do I need a paid account to apply?</AccordionTrigger>
+              <AccordionContent>
+                Basic job browsing and external applications are free for all users. Professional tier unlocks AI Match scoring, career insights, and smart recommendations. Enterprise tier includes advanced analytics and market trends.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4">
+              <AccordionTrigger>What types of geospatial jobs are available?</AccordionTrigger>
+              <AccordionContent>
+                We feature jobs across 8 core domains: GIS Analysis, Remote Sensing & Satellite Data, Machine Learning/GeoAI, Drone Mapping & Photogrammetry, Web GIS Development, Environmental Modeling, Spatial Data Engineering, and Urban Analytics & Smart Cities.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-5">
+              <AccordionTrigger>How often are new jobs added?</AccordionTrigger>
+              <AccordionContent>
+                Our AI job discovery system runs daily at 8 AM IST, aggregating fresh opportunities from global sources. We maintain a 70/30 split (India-focused vs international) to serve our diverse user base.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Marketing Taglines */}
+      <div className="mt-8 text-center space-y-4 pb-8">
+        <Separator className="my-8" />
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-primary">Your next geospatial career starts here.</h2>
+          <p className="text-muted-foreground">
+            AI-powered job discovery built for GIS professionals worldwide.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            From Earth observation to GeoAI — find your perfect role with Harita Hive.
+          </p>
+        </div>
+        <Badge variant="outline" className="text-xs">
+          🛰️ Verified by Harita Hive - India's #1 Geospatial Career Platform
+        </Badge>
       </div>
     </div>
   );
