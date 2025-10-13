@@ -134,7 +134,7 @@ const GEOVAAvatarMentor: React.FC<GEOVAAvatarMentorProps> = ({ userContext }) =>
     setAvatarGesture('listening');
 
     try {
-      const { data, error } = await supabase.functions.invoke('geova-realtime-mentor', {
+      const { data, error } = await supabase.functions.invoke('geova-mentor', {
         body: {
           message: input,
           conversationHistory: messages.slice(-6).map(m => ({
@@ -142,7 +142,7 @@ const GEOVAAvatarMentor: React.FC<GEOVAAvatarMentorProps> = ({ userContext }) =>
             content: m.content
           })),
           userContext,
-          mode
+          mode: 'realtime'
         }
       });
 
