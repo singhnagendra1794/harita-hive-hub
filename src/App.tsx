@@ -28,6 +28,7 @@ import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Newsletter from "./pages/Newsletter";
 
 // Lazy load password reset pages
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -56,7 +57,6 @@ const Payment = lazy(() => import("./pages/Payment"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const PremiumUpgrade = lazy(() => import("./pages/PremiumUpgrade"));
 const Pricing = lazy(() => import("./pages/Pricing"));
-const Newsletter = lazy(() => import("./pages/Newsletter"));
 const NewsletterNew = lazy(() => import("./pages/NewsletterNew"));
 const Blog = lazy(() => import("./pages/Blog"));
 const EnhancedPluginMarketplace = lazy(() => import("./pages/EnhancedPluginMarketplace"));
