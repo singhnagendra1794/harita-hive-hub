@@ -69,3 +69,6 @@ verify_jwt = true
 
 [functions.generate-daily-newsletter]
 verify_jwt = true
+
+[functions.fetch-trending-news]
+verify_jwt = false

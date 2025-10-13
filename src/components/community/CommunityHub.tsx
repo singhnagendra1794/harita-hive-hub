@@ -11,6 +11,7 @@ import { CreatorApplicationForm } from '@/components/community/CreatorApplicatio
 import { ReferralDashboard } from '@/components/referral/ReferralDashboard';
 import { useTrendingData } from '@/hooks/useTrendingData';
 import { formatDistanceToNow } from 'date-fns';
+import { TrendingNewsManager } from './TrendingNewsManager';
 export const CommunityHub: React.FC = () => {
   const { data: trendingData, loading: trendingLoading, error: trendingError, refetch } = useTrendingData();
 
@@ -95,7 +96,12 @@ export const CommunityHub: React.FC = () => {
 
           <TabsContent value="trending" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Trending Now</h2>
+              <div>
+                <h2 className="text-2xl font-bold">Trending Now</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Auto-updated hourly with latest geospatial news from around the world
+                </p>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -107,6 +113,8 @@ export const CommunityHub: React.FC = () => {
                 Refresh
               </Button>
             </div>
+
+            <TrendingNewsManager />
 
             {trendingError && (
               <Card className="border-destructive">

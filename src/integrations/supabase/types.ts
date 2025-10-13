@@ -8970,6 +8970,51 @@ export type Database = {
         }
         Relationships: []
       }
+      trending_news: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          fetched_at: string | null
+          id: string
+          image_url: string | null
+          published_date: string
+          relevance_score: number | null
+          source: string
+          summary: string
+          title: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          fetched_at?: string | null
+          id?: string
+          image_url?: string | null
+          published_date: string
+          relevance_score?: number | null
+          source: string
+          summary: string
+          title: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          fetched_at?: string | null
+          id?: string
+          image_url?: string | null
+          published_date?: string
+          relevance_score?: number | null
+          source?: string
+          summary?: string
+          title?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       trending_topics: {
         Row: {
           category: string
@@ -11188,6 +11233,10 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      cleanup_old_trending_news: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       create_daily_live_class: {
         Args: Record<PropertyKey, never>
