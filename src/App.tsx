@@ -689,6 +689,17 @@ function App() {
                           </SubscriptionRoute>
                         </Layout>
                         } />
+                        <Route path="/labs/launch/:sessionId" element={
+                          <Layout>
+                            <ProtectedRoute>
+                              <RouteWrapper>
+                                <Suspense fallback={<PageLoader />}>
+                                  <LabSession />
+                                </Suspense>
+                              </RouteWrapper>
+                            </ProtectedRoute>
+                          </Layout>
+                        } />
                         <Route path="/ava-test" element={
                           <Layout>
                             <ProtectedRoute>

@@ -75,3 +75,9 @@ verify_jwt = false
 
 [functions.ai-caption-generator]
 verify_jwt = false
+
+[functions.create-lab-session]
+verify_jwt = true
+
+[functions.launch-lab-session]
+verify_jwt = false
