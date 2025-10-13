@@ -81,3 +81,6 @@ verify_jwt = false
 
 [functions.ai-portfolio-enhancer]
 verify_jwt = false
+
+[functions.ai-caption-generator]
+verify_jwt = false
