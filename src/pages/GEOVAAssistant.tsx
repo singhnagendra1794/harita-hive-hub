@@ -3,18 +3,20 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GEOVAChatInterface } from '@/components/geova/GEOVAChatInterface';
+import GEOVAAvatarMentor from '@/components/geova/GEOVAAvatarMentor';
 import { useChatbotIntegration } from '@/hooks/useChatbotIntegration';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Brain, BookOpen, Target, Code, Map, Rocket, Trophy, Clock, 
   CheckCircle, Star, Play, ArrowRight, MessageCircle, Users,
-  Zap, Globe, Award, TrendingUp, Quote, ExternalLink
+  Zap, Globe, Award, TrendingUp, Quote, ExternalLink, Video
 } from 'lucide-react';
 
 const GEOVAAssistant = () => {
   const { user } = useAuth();
   const { askQuestion } = useChatbotIntegration();
   const [showChatInterface, setShowChatInterface] = useState(false);
+  const [showAvatarMentor, setShowAvatarMentor] = useState(false);
 
   const features = [
     {
@@ -85,11 +87,44 @@ const GEOVAAssistant = () => {
 
   const handleStartLearning = () => {
     if (user) {
-      setShowChatInterface(true);
+      setShowAvatarMentor(true);
     } else {
       askQuestion("I want to start learning with GEOVA. How do I begin my geospatial journey?");
     }
   };
+
+  const handleStartTextChat = () => {
+    if (user) {
+      setShowChatInterface(true);
+    } else {
+      askQuestion("I want to chat with GEOVA about geospatial concepts.");
+    }
+  };
+
+  if (showAvatarMentor) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-6 flex items-center justify-between">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAvatarMentor(false)}
+          >
+            ← Back to GEOVA Overview
+          </Button>
+          <Badge variant="secondary" className="gap-2">
+            <Video className="w-4 h-4" />
+            Live Avatar Mode
+          </Badge>
+        </div>
+        <GEOVAAvatarMentor 
+          userContext={user ? {
+            name: user.email?.split('@')[0],
+            skillLevel: 'intermediate'
+          } : undefined}
+        />
+      </div>
+    );
+  }
 
   if (showChatInterface) {
     return (
@@ -139,8 +174,18 @@ const GEOVAAssistant = () => {
                 onClick={handleStartLearning}
                 className="text-lg px-8 py-4 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
               >
-                <Rocket className="w-5 h-5 mr-2" />
-                Start Learning with GEOVA
+                <Video className="w-5 h-5 mr-2" />
+                Meet GEOVA (Avatar Mode)
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={handleStartTextChat}
+                className="text-lg px-8 py-4"
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Text Chat Mode
               </Button>
               
               <Button 
@@ -150,7 +195,7 @@ const GEOVAAssistant = () => {
                 className="text-lg px-8 py-4"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Watch How It Works
+                Watch Demo
               </Button>
             </div>
           </div>
@@ -300,8 +345,18 @@ const GEOVAAssistant = () => {
               onClick={handleStartLearning}
               className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90"
             >
+              <Video className="w-5 h-5 mr-2" />
+              Launch Avatar Mentor
+            </Button>
+            
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={handleStartTextChat}
+              className="text-lg px-8 py-4 border-white text-white hover:bg-white/10"
+            >
               <MessageCircle className="w-5 h-5 mr-2" />
-              Try GEOVA Now – Free with Professional Plan
+              Text Chat Mode
             </Button>
             
             {!user && (
