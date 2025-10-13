@@ -8872,6 +8872,39 @@ export type Database = {
         }
         Relationships: []
       }
+      toolkit_recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          recommendation_data: Json
+          region: string | null
+          requirement: string
+          skill_level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recommendation_data?: Json
+          region?: string | null
+          requirement: string
+          skill_level?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recommendation_data?: Json
+          region?: string | null
+          requirement?: string
+          skill_level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       toolkits: {
         Row: {
           category_id: string | null

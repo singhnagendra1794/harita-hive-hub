@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ToolkitCard from "@/components/toolkits/ToolkitCard";
+import AIToolkitEngine from "@/components/toolkits/AIToolkitEngine";
 import { 
   Search, 
   Plus, 
@@ -24,7 +25,8 @@ import {
   Pickaxe,
   Waves,
   Sun,
-  Droplets
+  Droplets,
+  Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -276,6 +278,7 @@ const Toolkits = () => {
   const [search, setSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [bookmarkedTools, setBookmarkedTools] = useState(new Set<string>());
+  const [showAIEngine, setShowAIEngine] = useState(false);
 
   // Filter tools based on search and sector
   const filteredTools = tools.filter(tool => {
@@ -368,28 +371,50 @@ const Toolkits = () => {
       </div>
 
       <div className="container py-8">
-        {/* Search and Actions */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search tools, sectors, or use cases..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-12"
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleSuggestTool}>
-              <Plus className="h-4 w-4 mr-2" />
-              Suggest Tool
-            </Button>
-          </div>
+        {/* AI Engine Toggle */}
+        <div className="mb-6">
+          <Button
+            onClick={() => setShowAIEngine(!showAIEngine)}
+            size="lg"
+            variant={showAIEngine ? "default" : "outline"}
+            className="w-full md:w-auto"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            {showAIEngine ? 'Browse All Tools' : 'AI-Powered Toolkit Generator'}
+          </Button>
         </div>
 
-        {/* Sector Tabs */}
-        <Tabs value={selectedSector} onValueChange={setSelectedSector} className="w-full">
+        {/* AI Toolkit Engine */}
+        {showAIEngine && (
+          <div className="mb-8">
+            <AIToolkitEngine />
+          </div>
+        )}
+
+        {/* Search and Actions */}
+        {!showAIEngine && (
+          <>
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search tools, sectors, or use cases..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 h-12"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleSuggestTool}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Suggest Tool
+                </Button>
+              </div>
+            </div>
+
+            {/* Sector Tabs */}
+            <Tabs value={selectedSector} onValueChange={setSelectedSector} className="w-full">
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 mb-8">
             <TabsTrigger value="all" className="text-xs">All Sectors</TabsTrigger>
             {sectors.slice(0, 6).map(sector => (
@@ -467,6 +492,8 @@ const Toolkits = () => {
             </TabsContent>
           ))}
         </Tabs>
+          </>
+        )}
       </div>
     </div>
   );
