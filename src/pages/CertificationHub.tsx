@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import CertificationCourseCard from "../components/certifications/CertificationC
 import { useCertificationCourses } from "@/hooks/useCertificationCourses";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { updatePageSEO, addSchemaMarkup } from "@/utils/seoUtils";
 
 const CertificationHub = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +23,45 @@ const CertificationHub = () => {
   const { courses, loading, error } = useCertificationCourses();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // SEO Optimization
+  useEffect(() => {
+    updatePageSEO({
+      title: "Affordable Geospatial Certification Programs | ₹1,999 Courses by Harita Hive",
+      description: "Learn GIS, Remote Sensing, and GeoAI with Harita Hive. 1-Day and 1-Week online certification programs designed for real-world geospatial careers.",
+      keywords: "GIS certification, remote sensing courses, GeoAI training, QGIS courses, drone mapping certification, geospatial learning, affordable GIS courses India",
+      image: "/images/certifications-og.jpg",
+    });
+
+    // Add structured data for courses
+    if (courses.length > 0) {
+      const courseSchemas = courses.slice(0, 5).map(course => ({
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": course.title,
+        "description": course.description,
+        "provider": {
+          "@type": "Organization",
+          "name": "Harita Hive",
+          "sameAs": "https://haritahive.com"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": course.price,
+          "priceCurrency": "INR"
+        },
+        "timeRequired": course.duration,
+        "educationalLevel": course.difficulty,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": course.rating,
+          "reviewCount": course.students_enrolled
+        }
+      }));
+
+      courseSchemas.forEach(schema => addSchemaMarkup(schema));
+    }
+  }, [courses]);
 
   const filteredCertifications = courses.filter(cert => {
     const matchesSearch = cert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,10 +148,15 @@ const CertificationHub = () => {
     <div className="container py-8">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">GIS Certifications</h1>
+        <h1 className="text-4xl font-bold mb-4">Affordable Geospatial Certification Programs</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Earn industry-recognized credentials with blockchain verification. Validate your GIS skills and advance your career.
+          Learn GIS, Remote Sensing, and GeoAI with industry experts. 1-Day and 1-Week certification programs at just ₹1,999.
         </p>
+        <div className="flex flex-wrap justify-center gap-4 mt-6">
+          <Badge variant="secondary" className="text-sm">🚀 Start small. Learn fast. Get certified.</Badge>
+          <Badge variant="secondary" className="text-sm">⚡ Master tools in a day or week</Badge>
+          <Badge variant="secondary" className="text-sm">✓ Affordable, practical learning</Badge>
+        </div>
       </div>
 
       {/* Stats */}
@@ -356,6 +401,70 @@ const CertificationHub = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* FAQ Section for SEO */}
+      <div className="mt-16 max-w-4xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-2">Are these live or recorded courses?</h3>
+              <p className="text-muted-foreground">Most courses are live with instructor Q&A. Recordings are available for all enrolled learners for lifetime access.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-2">Do I get a certificate?</h3>
+              <p className="text-muted-foreground">Yes, every participant receives a verified digital certificate from Harita Hive that you can share on LinkedIn and include in your portfolio.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-2">Is there a hands-on project included?</h3>
+              <p className="text-muted-foreground">Absolutely! Every course ends with a practical, hands-on project that you can showcase in your professional portfolio.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-2">What tools do I need?</h3>
+              <p className="text-muted-foreground">Requirements vary by course but typically include a laptop with 8GB RAM and installation of free GIS software like QGIS or access to cloud platforms like Google Earth Engine.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-2">Can I get a refund?</h3>
+              <p className="text-muted-foreground">Yes, we offer a 7-day money-back guarantee if you're not satisfied with the course content or delivery.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* CTA Banner */}
+      <div className="mt-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 text-center">
+        <h2 className="text-3xl font-bold mb-4">🚀 Build Your Geospatial Career One Course at a Time</h2>
+        <p className="text-xl text-muted-foreground mb-6">Start small. Learn fast. Get certified — Enroll today for just ₹1,999!</p>
+        <div className="flex flex-wrap justify-center gap-6 mb-6">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="font-medium">Affordable Learning</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="font-medium">Industry Mentors</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="font-medium">Verified Certificates</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="font-medium">Hands-on Projects</span>
+          </div>
+        </div>
+        <Button size="lg" asChild>
+          <a href="#certifications">Browse All Courses</a>
+        </Button>
+      </div>
     </div>
   );
 };
