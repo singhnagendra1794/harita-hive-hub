@@ -19,9 +19,6 @@ verify_jwt = false
 [functions.ai-learning-assistant]
 verify_jwt = false
 
-[functions.test-connectivity]
-verify_jwt = false
-
 [functions.razorpay-webhook]
 verify_jwt = false
 
@@ -57,12 +54,6 @@ verify_jwt = true
 
 [functions.bulk-assign-professional-users]
 verify_jwt = true
-
-[functions.test-ai-endpoints]
-verify_jwt = false
-
-[functions.test-youtube-api]
-verify_jwt = false
 
 [functions.zoom-integration]
 verify_jwt = true
