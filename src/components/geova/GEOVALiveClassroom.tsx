@@ -228,7 +228,9 @@ export const GEOVALiveClassroom: React.FC<GEOVALiveClassroomProps> = ({
     try {
       // Create WAV header for PCM16 at 24kHz
       const wavData = createWavFromPCM(chunk);
-      const audioBuffer = await audioContextRef.current!.decodeAudioData(wavData.buffer);
+      // Convert ArrayBufferLike to ArrayBuffer for decodeAudioData
+      const arrayBuffer = new Uint8Array(wavData.buffer).buffer as ArrayBuffer;
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
       
       const source = audioContextRef.current!.createBufferSource();
       source.buffer = audioBuffer;
