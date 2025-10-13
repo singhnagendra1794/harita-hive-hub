@@ -144,7 +144,7 @@ const Pricing = () => {
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
-                  <span>Post up to 5 job listings</span>
+                  <span>Apply recommended jobs based on your profile</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
@@ -163,7 +163,7 @@ const Pricing = () => {
                   "Full access to Learn section",
                   "QGIS Project integration", 
                   "Basic Geo-Dashboard features",
-                  "Post up to 5 job listings",
+                  "Apply recommended jobs based on your profile",
                   "Enhanced profile features",
                   "Priority support"
                 ])}
@@ -206,7 +206,7 @@ const Pricing = () => {
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
-                  <span>API access</span>
+                  <span>Geodashboard share, project sharing, reporting</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 mr-2 text-green-500" />
@@ -227,7 +227,7 @@ const Pricing = () => {
                   "Team collaboration features",
                   "Advanced Geo-Dashboard",
                   "Unlimited job postings",
-                  "API access",
+                  "Geodashboard share, project sharing, reporting",
                   "Dedicated support",
                   "Custom integration options"
                 ])}
