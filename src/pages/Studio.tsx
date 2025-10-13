@@ -162,27 +162,27 @@ const Studio = () => {
   const creationTools = [
     {
       id: 'screen-recording',
-      title: 'Professional Screen Recording',
-      description: 'Record your screen in 1080p with audio for tutorials and demos',
+      title: 'Screen Recording Magic',
+      description: 'Capture your workflows in stunning HD. One click. Zero hassle. Pure professionalism.',
       icon: ScreenShare,
       component: ScreenRecorder,
-      features: ['1080p HD Recording', 'Audio Capture', 'Auto-upload', 'Custom Thumbnails']
+      features: ['Record in 1080p HD', 'Crystal-clear audio', 'Auto-upload ready', 'Custom thumbnails']
     },
     {
       id: 'map-walkthrough',
-      title: 'Interactive Map Walkthrough',
-      description: 'Create guided tours of your maps with voiceover narration',
+      title: 'Map Story Builder',
+      description: 'Guide your audience through spatial narratives with cinematic map tours and voiceovers',
       icon: MapPin,
       component: MapWalkthroughCreator,
-      features: ['Step-by-step Navigation', 'Voiceover Recording', 'Scene Jumps', 'Export Options']
+      features: ['Scene-by-scene flow', 'Voice narration', 'Smooth transitions', 'One-click export']
     },
     {
       id: 'before-after-analysis',
-      title: 'Before/After Satellite Analysis',
-      description: 'Showcase temporal changes using satellite imagery comparison',
+      title: 'Change Detection Studio',
+      description: 'Reveal the story of change. Compare satellite imagery and watch landscapes transform.',
       icon: BarChart3,
       component: BeforeAfterAnalyzer,
-      features: ['Satellite Data Integration', 'Temporal Analysis', 'Interactive Slider', 'Auto-generation']
+      features: ['Satellite integration', 'Temporal intelligence', 'Interactive slider', 'Instant analysis']
     }
   ];
 
@@ -193,8 +193,8 @@ const Studio = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">My Studio Dashboard</h2>
-                <p className="text-muted-foreground">Manage and create your geospatial content</p>
+                <h2 className="text-2xl font-bold">Your Creative Command Center</h2>
+                <p className="text-muted-foreground">Transform data into stories. Create, collaborate, inspire.</p>
               </div>
               {user && (
                 <Button onClick={() => setActiveSection('upload-content')}>
@@ -231,7 +231,7 @@ const Studio = () => {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold">My Recent Content</h3>
+                <h3 className="text-xl font-semibold">Your Latest Creations</h3>
                 <Button variant="outline" size="sm">View All</Button>
               </div>
               
@@ -239,9 +239,9 @@ const Studio = () => {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Video className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Sign in to view your content</h3>
+                    <h3 className="text-lg font-semibold mb-2">Ready to create?</h3>
                     <p className="text-muted-foreground text-center">
-                      Please sign in to access your uploaded videos and content.
+                      Sign in to unlock your studio and start building geospatial stories that inspire.
                     </p>
                   </CardContent>
                 </Card>
@@ -261,9 +261,9 @@ const Studio = () => {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No content yet</h3>
+                    <h3 className="text-lg font-semibold mb-2">Your canvas awaits ✨</h3>
                     <p className="text-muted-foreground text-center mb-4">
-                      Start by creating your first video or uploading content.
+                      Every great map story starts here. Pick a tool, hit record, and let your creativity flow.
                     </p>
                     <div className="flex gap-2">
                       <Button onClick={() => setActiveSection('upload-content')}>
@@ -314,8 +314,8 @@ const Studio = () => {
         <div className="w-64 min-h-screen bg-muted/30 border-r">
           <div className="p-6">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold">Content Studio</h1>
-              <p className="text-sm text-muted-foreground">Professional GIS Creator Hub</p>
+              <h1 className="text-2xl font-bold">🗺️ Harita Hive Studio</h1>
+              <p className="text-sm text-muted-foreground">Where geospatial stories come to life</p>
             </div>
 
             <nav className="space-y-2">
