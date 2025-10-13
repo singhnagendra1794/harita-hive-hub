@@ -122,6 +122,7 @@ const Toolkits = lazy(() => import("./pages/Toolkits"));
 const JobsAIDiscovery = lazy(() => import("./pages/JobsAIDiscovery"));
 const ProjectStudio = lazy(() => import("./pages/ProjectStudio"));
 const Labs = lazy(() => import("./pages/Labs"));
+const LabSession = lazy(() => import("./pages/LabSession"));
 const Challenge = lazy(() => import("./pages/Challenge"));
 const FreelanceProjects = lazy(() => import("./pages/FreelanceProjects"));
 const Studio = lazy(() => import("./pages/Studio"));

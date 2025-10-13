@@ -5120,6 +5120,158 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_sessions: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          expires_at: string
+          id: string
+          lab_id: string
+          metadata: Json | null
+          runtime_url: string | null
+          session_token: string
+          started_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          expires_at: string
+          id?: string
+          lab_id: string
+          metadata?: Json | null
+          runtime_url?: string | null
+          session_token: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          lab_id?: string
+          metadata?: Json | null
+          runtime_url?: string | null
+          session_token?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_sessions_lab_id_fkey"
+            columns: ["lab_id"]
+            isOneToOne: false
+            referencedRelation: "labs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lab_usage: {
+        Row: {
+          created_at: string | null
+          credits_consumed: number | null
+          duration_seconds: number | null
+          id: string
+          lab_id: string
+          session_id: string | null
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          credits_consumed?: number | null
+          duration_seconds?: number | null
+          id?: string
+          lab_id: string
+          session_id?: string | null
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          credits_consumed?: number | null
+          duration_seconds?: number | null
+          id?: string
+          lab_id?: string
+          session_id?: string | null
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_usage_lab_id_fkey"
+            columns: ["lab_id"]
+            isOneToOne: false
+            referencedRelation: "labs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lab_usage_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "lab_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      labs: {
+        Row: {
+          created_at: string | null
+          default_data: Json | null
+          description: string
+          difficulty: string
+          duration_minutes: number
+          id: string
+          is_active: boolean | null
+          lab_type: string
+          name: string
+          runtime_host: string
+          thumbnail_url: string | null
+          tools: string[]
+          topics: string[]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          default_data?: Json | null
+          description: string
+          difficulty: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          lab_type: string
+          name: string
+          runtime_host: string
+          thumbnail_url?: string | null
+          tools?: string[]
+          topics?: string[]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          default_data?: Json | null
+          description?: string
+          difficulty?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          lab_type?: string
+          name?: string
+          runtime_host?: string
+          thumbnail_url?: string | null
+          tools?: string[]
+          topics?: string[]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       learning_paths: {
         Row: {
           content_order: Json | null
@@ -11498,6 +11650,10 @@ export type Database = {
       check_gis_marketplace_access: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      check_lab_quota: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       check_rate_limit: {
         Args: {
