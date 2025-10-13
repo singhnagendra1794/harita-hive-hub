@@ -11,9 +11,6 @@ import EnhancedAnalytics from './analytics/EnhancedAnalytics';
 import GoogleAds from './analytics/GoogleAds';
 import FeedbackWidget from './FeedbackWidget';
 import OnboardingTour from './OnboardingTour';
-import HeaderTest from './layout/HeaderTest';
-import HeaderOptimizer from './optimization/HeaderOptimizer';
-import ResourcePreloader from './optimization/ResourcePreloader';
 
 interface LayoutProps {
   children: ReactNode;
@@ -22,9 +19,6 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-background w-full max-w-full overflow-x-hidden">
-      <ResourcePreloader />
-      <HeaderTest />
-      <HeaderOptimizer />
       <MobileOptimizations />
       <EnhancedAnalytics />
       <GoogleAds />

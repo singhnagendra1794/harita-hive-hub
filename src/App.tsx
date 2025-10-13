@@ -16,7 +16,7 @@ import AILearningAssistant from "@/components/ai/AILearningAssistant";
 import Layout from "@/components/Layout";
 import GlobalAuthCheck from "@/components/auth/GlobalAuthCheck";
 import RouteWrapper from "@/components/RouteWrapper";
-import PerformanceMonitor from "@/components/PerformanceMonitor";
+
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -719,8 +719,7 @@ function App() {
                       <Route path="*" element={<Layout><NotFound /></Layout>} />
                   </Routes>
                  
-                   {/* Performance monitoring and AI Assistant */}
-                   <PerformanceMonitor />
+                   {/* AI Assistant */}
                    <AILearningAssistant />
                 </BrowserRouter>
             </TooltipProvider>
