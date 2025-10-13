@@ -4636,6 +4636,57 @@ export type Database = {
         }
         Relationships: []
       }
+      global_spatial_datasets: {
+        Row: {
+          access_method: string
+          api_endpoint: string
+          category: string
+          coverage_area: string | null
+          created_at: string | null
+          data_type: string
+          dataset_name: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          provider: string
+          resolution: string | null
+          temporal_range: string | null
+        }
+        Insert: {
+          access_method: string
+          api_endpoint: string
+          category: string
+          coverage_area?: string | null
+          created_at?: string | null
+          data_type: string
+          dataset_name: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          provider: string
+          resolution?: string | null
+          temporal_range?: string | null
+        }
+        Update: {
+          access_method?: string
+          api_endpoint?: string
+          category?: string
+          coverage_area?: string | null
+          created_at?: string | null
+          data_type?: string
+          dataset_name?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          provider?: string
+          resolution?: string | null
+          temporal_range?: string | null
+        }
+        Relationships: []
+      }
       industry_intelligence_packs: {
         Row: {
           category: string
@@ -7852,6 +7903,205 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      spatial_analysis_projects: {
+        Row: {
+          analysis_history: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          layers: Json | null
+          metadata: Json | null
+          organization_id: string | null
+          project_name: string
+          project_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis_history?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          layers?: Json | null
+          metadata?: Json | null
+          organization_id?: string | null
+          project_name: string
+          project_type?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis_history?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          layers?: Json | null
+          metadata?: Json | null
+          organization_id?: string | null
+          project_name?: string
+          project_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spatial_analysis_projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spatial_analysis_quotas: {
+        Row: {
+          created_at: string | null
+          id: string
+          monthly_analysis_count: number | null
+          monthly_limit: number | null
+          reset_date: string | null
+          storage_limit_mb: number | null
+          storage_used_mb: number | null
+          subscription_tier: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          monthly_analysis_count?: number | null
+          monthly_limit?: number | null
+          reset_date?: string | null
+          storage_limit_mb?: number | null
+          storage_used_mb?: number | null
+          subscription_tier?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          monthly_analysis_count?: number | null
+          monthly_limit?: number | null
+          reset_date?: string | null
+          storage_limit_mb?: number | null
+          storage_used_mb?: number | null
+          subscription_tier?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      spatial_analysis_tools: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          display_name: string
+          id: string
+          input_requirements: Json
+          is_active: boolean | null
+          output_type: string
+          parameters_schema: Json
+          processing_engine: string
+          requires_subscription: string | null
+          subcategory: string | null
+          tool_name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          display_name: string
+          id?: string
+          input_requirements: Json
+          is_active?: boolean | null
+          output_type: string
+          parameters_schema: Json
+          processing_engine: string
+          requires_subscription?: string | null
+          subcategory?: string | null
+          tool_name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          display_name?: string
+          id?: string
+          input_requirements?: Json
+          is_active?: boolean | null
+          output_type?: string
+          parameters_schema?: Json
+          processing_engine?: string
+          requires_subscription?: string | null
+          subcategory?: string | null
+          tool_name?: string
+        }
+        Relationships: []
+      }
+      spatial_processing_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          input_layers: Json
+          output_layer: Json | null
+          parameters: Json
+          processing_time_ms: number | null
+          progress: number | null
+          project_id: string | null
+          status: string
+          tool_category: string
+          tool_name: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_layers?: Json
+          output_layer?: Json | null
+          parameters?: Json
+          processing_time_ms?: number | null
+          progress?: number | null
+          project_id?: string | null
+          status?: string
+          tool_category: string
+          tool_name: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_layers?: Json
+          output_layer?: Json | null
+          parameters?: Json
+          processing_time_ms?: number | null
+          progress?: number | null
+          project_id?: string | null
+          status?: string
+          tool_category?: string
+          tool_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spatial_processing_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "spatial_analysis_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stream_analytics: {
         Row: {

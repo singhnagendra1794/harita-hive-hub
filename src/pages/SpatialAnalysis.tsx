@@ -1,8 +1,7 @@
-
-import EnhancedSpatialWorkspace from '../components/spatial/EnhancedSpatialWorkspace';
+import SpatialAnalysisStudio from '../components/spatial/SpatialAnalysisStudio';
 
 const SpatialAnalysis = () => {
-  return <EnhancedSpatialWorkspace />;
+  return <SpatialAnalysisStudio />;
 };
 
 export default SpatialAnalysis;
