@@ -11,6 +11,7 @@ import { useCertificationCourses } from "@/hooks/useCertificationCourses";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { updatePageSEO, addSchemaMarkup } from "@/utils/seoUtils";
+import ErrorBoundaryWrapper from "@/components/ui/error-boundary";
 
 const CertificationHub = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -145,7 +146,8 @@ const CertificationHub = () => {
   }
 
   return (
-    <div className="container py-8">
+    <ErrorBoundaryWrapper>
+      <div className="container py-8">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Affordable Geospatial Certification Programs</h1>
@@ -466,6 +468,7 @@ const CertificationHub = () => {
         </Button>
       </div>
     </div>
+    </ErrorBoundaryWrapper>
   );
 };
 
