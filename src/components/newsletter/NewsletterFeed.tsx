@@ -252,6 +252,11 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
     });
   };
 
+  const formatTimeAgo = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? 'Just now' : formatDistanceToNow(d, { addSuffix: true });
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -310,7 +315,7 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
                   <div>
                     <p className="font-semibold">{post.author?.full_name || 'Anonymous'}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                      {formatTimeAgo(post.created_at)}
                     </p>
                   </div>
                 </div>
@@ -352,12 +357,12 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
                 
                 <div className="prose prose-sm max-w-none">
                   {expandedPosts.has(post.id) ? (
-                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(post.content) }} />
+                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(post.content || '') }} />
                   ) : (
-                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(truncateContent(post.content)) }} />
+                    <div dangerouslySetInnerHTML={{ __html: htmlSanitizer.sanitizeNewsletterHTML(truncateContent(post.content || '')) }} />
                   )}
                   
-                  {post.content.length > 300 && (
+                  {(post.content?.length ?? 0) > 300 && (
                     <Button 
                       variant="link" 
                       className="p-0 h-auto text-primary"
@@ -369,9 +374,9 @@ export const NewsletterFeed: React.FC<NewsletterFeedProps> = ({ onPostUpdate }) 
                 </div>
               </div>
 
-              {post.tags.length > 0 && (
+              {(post.tags?.length ?? 0) > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
+                  {(post.tags ?? []).map((tag) => (
                     <Badge key={tag} variant="secondary">
                       #{tag}
                     </Badge>
