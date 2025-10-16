@@ -1,12 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
-import Layout from '../components/Layout';
 
 const Contact = () => {
   return (
-    <Layout>
-      <div className="container py-12">
+    <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -105,7 +103,6 @@ const Contact = () => {
           </p>
         </div>
       </div>
-    </Layout>
   );
 };
 
