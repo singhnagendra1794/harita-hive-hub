@@ -45,6 +45,7 @@ import { CuratedContent } from '@/components/newsletter/CuratedContent';
 import { AINewsletterSuggestions } from '@/components/newsletter/AINewsletterSuggestions';
 import { NewsletterFeed } from '@/components/newsletter/NewsletterFeed';
 import { Link } from 'react-router-dom';
+import ErrorBoundaryWrapper from '@/components/ui/error-boundary';
 
 const Newsletter = () => {
   const { user } = useAuth();
@@ -146,9 +147,10 @@ const Newsletter = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-16">
+    <ErrorBoundaryWrapper>
+      <div className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="p-3 bg-primary/10 rounded-lg">
             <Newspaper className="h-8 w-8 text-primary" />
@@ -561,7 +563,8 @@ const Newsletter = () => {
           <AINewsletterSuggestions />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ErrorBoundaryWrapper>
   );
 };
 
