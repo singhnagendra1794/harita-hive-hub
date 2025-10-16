@@ -6,6 +6,7 @@ import { GEOVAChatInterface } from '@/components/geova/GEOVAChatInterface';
 import GEOVAAvatarMentor from '@/components/geova/GEOVAAvatarMentor';
 import { useChatbotIntegration } from '@/hooks/useChatbotIntegration';
 import { useAuth } from '@/contexts/AuthContext';
+import ErrorBoundaryWrapper from '@/components/ui/error-boundary';
 import { 
   Brain, BookOpen, Target, Code, Map, Rocket, Trophy, Clock, 
   CheckCircle, Star, Play, ArrowRight, MessageCircle, Users,
@@ -103,51 +104,56 @@ const GEOVAAssistant = () => {
 
   if (showAvatarMentor) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-6 flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowAvatarMentor(false)}
-          >
-            ← Back to GEOVA Overview
-          </Button>
-          <Badge variant="secondary" className="gap-2">
-            <Video className="w-4 h-4" />
-            Live Avatar Mode
-          </Badge>
+      <ErrorBoundaryWrapper>
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="mb-6 flex items-center justify-between">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAvatarMentor(false)}
+            >
+              ← Back to GEOVA Overview
+            </Button>
+            <Badge variant="secondary" className="gap-2">
+              <Video className="w-4 h-4" />
+              Live Avatar Mode
+            </Badge>
+          </div>
+          <GEOVAAvatarMentor 
+            userContext={user ? {
+              name: user.email?.split('@')[0],
+              skillLevel: 'intermediate'
+            } : undefined}
+          />
         </div>
-        <GEOVAAvatarMentor 
-          userContext={user ? {
-            name: user.email?.split('@')[0],
-            skillLevel: 'intermediate'
-          } : undefined}
-        />
-      </div>
+      </ErrorBoundaryWrapper>
     );
   }
 
   if (showChatInterface) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowChatInterface(false)}
-            className="mb-4"
-          >
-            ← Back to GEOVA Overview
-          </Button>
+      <ErrorBoundaryWrapper>
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="mb-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowChatInterface(false)}
+              className="mb-4"
+            >
+              ← Back to GEOVA Overview
+            </Button>
+          </div>
+          <GEOVAChatInterface 
+            contextType="assistant"
+            showVoiceControls={true}
+          />
         </div>
-        <GEOVAChatInterface 
-          contextType="assistant"
-          showVoiceControls={true}
-        />
-      </div>
+      </ErrorBoundaryWrapper>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <ErrorBoundaryWrapper>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
@@ -388,7 +394,8 @@ const GEOVAAssistant = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </ErrorBoundaryWrapper>
   );
 };
 
