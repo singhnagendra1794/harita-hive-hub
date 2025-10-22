@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Radio, Play, Calendar } from "lucide-react";
+import { Radio, Play, Calendar, Video } from "lucide-react";
 import LiveNowTab from '@/components/live-classes/LiveNowTab';
 import RecordedSessionsTab from '@/components/live-classes/RecordedSessionsTab';
 import FutureEventsTab from '@/components/live-classes/FutureEventsTab';
 import PremiumAccessGate from '@/components/premium/PremiumAccessGate';
+import { BrowserLiveStream } from '@/components/live-classes/BrowserLiveStream';
 
 
 const LiveClasses = () => {
@@ -39,22 +40,27 @@ const LiveClasses = () => {
           </p>
         </div>
 
-        {/* 3-Tab Layout */}
+        {/* 4-Tab Layout */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="live-now" className="flex items-center gap-2">
               <Radio className="h-4 w-4" />
               <span className="hidden sm:inline">🔴 Live Now</span>
               <span className="sm:hidden">Live</span>
             </TabsTrigger>
+            <TabsTrigger value="go-live" className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              <span className="hidden sm:inline">📹 Go Live</span>
+              <span className="sm:hidden">Go Live</span>
+            </TabsTrigger>
             <TabsTrigger value="recordings" className="flex items-center gap-2">
               <Play className="h-4 w-4" />
-              <span className="hidden sm:inline">🎞️ Recorded Sessions</span>
+              <span className="hidden sm:inline">🎞️ Recordings</span>
               <span className="sm:hidden">Recordings</span>
             </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">📅 Future Events</span>
+              <span className="hidden sm:inline">📅 Events</span>
               <span className="sm:hidden">Events</span>
             </TabsTrigger>
           </TabsList>
@@ -62,6 +68,17 @@ const LiveClasses = () => {
           <div className="mt-8">
             <TabsContent value="live-now">
               <LiveNowTab />
+            </TabsContent>
+
+            <TabsContent value="go-live">
+              <div className="max-w-4xl mx-auto">
+                <BrowserLiveStream 
+                  onStreamStart={() => {
+                    // Switch to live-now tab after starting stream
+                    setTimeout(() => setActiveTab('live-now'), 2000);
+                  }}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="recordings">
