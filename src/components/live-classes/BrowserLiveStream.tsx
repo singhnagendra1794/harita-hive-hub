@@ -3,10 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Video, VideoOff, Mic, MicOff, Radio, Square, MonitorUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Video, VideoOff, Mic, MicOff, Radio, Square, MonitorUp, Shield, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCanGoLive } from '@/hooks/useCanGoLive';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BrowserLiveStreamProps {
   onStreamStart?: () => void;
@@ -18,6 +22,7 @@ export const BrowserLiveStream: React.FC<BrowserLiveStreamProps> = ({
   onStreamEnd
 }) => {
   const { user } = useAuth();
+  const { canGoLive, loading: permissionLoading } = useCanGoLive();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLive, setIsLive] = useState(false);
@@ -205,12 +210,60 @@ export const BrowserLiveStream: React.FC<BrowserLiveStreamProps> = ({
     }
   };
 
+  if (permissionLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Radio className="h-5 w-5" />
+            Go Live from Browser
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!canGoLive) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Radio className="h-5 w-5" />
+            Go Live from Browser
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <Shield className="h-4 w-4" />
+            <AlertDescription className="ml-2">
+              <div className="space-y-2">
+                <p className="font-semibold">Admin Access Required</p>
+                <p className="text-sm">
+                  You need admin or super admin privileges to go live. Please contact a super admin to request access.
+                </p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Radio className="h-5 w-5" />
           Go Live from Browser
+          <Badge variant="secondary" className="ml-auto">
+            <Shield className="h-3 w-3 mr-1" />
+            Admin Access
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

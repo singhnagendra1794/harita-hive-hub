@@ -417,12 +417,32 @@ export const SuperAdminUserManagement = () => {
                         <DropdownMenuContent align="end" className="bg-background border border-border z-50">
                           {!user.roles.includes('admin') && (
                             <DropdownMenuItem onClick={() => updateUserRole(user.id, 'admin', 'grant')}>
-                              Grant Admin Role
+                              ✅ Grant Admin (Go Live Access)
                             </DropdownMenuItem>
                           )}
                           {user.roles.includes('admin') && (
                             <DropdownMenuItem onClick={() => updateUserRole(user.id, 'admin', 'revoke')}>
-                              Revoke Admin Role
+                              ❌ Revoke Admin (Remove Go Live)
+                            </DropdownMenuItem>
+                          )}
+                          {!user.roles.includes('super_admin') && (
+                            <DropdownMenuItem onClick={() => updateUserRole(user.id, 'super_admin', 'grant')}>
+                              ✅ Grant Super Admin (Full Access)
+                            </DropdownMenuItem>
+                          )}
+                          {user.roles.includes('super_admin') && (
+                            <DropdownMenuItem onClick={() => updateUserRole(user.id, 'super_admin', 'revoke')}>
+                              ❌ Revoke Super Admin
+                            </DropdownMenuItem>
+                          )}
+                          {!user.roles.includes('moderator') && (
+                            <DropdownMenuItem onClick={() => updateUserRole(user.id, 'moderator', 'grant')}>
+                              ✅ Grant Moderator
+                            </DropdownMenuItem>
+                          )}
+                          {user.roles.includes('moderator') && (
+                            <DropdownMenuItem onClick={() => updateUserRole(user.id, 'moderator', 'revoke')}>
+                              ❌ Revoke Moderator
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => updateUserSubscription(user.id, 'free')}>

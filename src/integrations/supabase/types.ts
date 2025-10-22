@@ -472,7 +472,7 @@ export type Database = {
           endpoint: string
           error_details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           method: string
           organization_id: string | null
           payload_size_bytes: number | null
@@ -485,7 +485,7 @@ export type Database = {
           endpoint: string
           error_details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method: string
           organization_id?: string | null
           payload_size_bytes?: number | null
@@ -498,7 +498,7 @@ export type Database = {
           endpoint?: string
           error_details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method?: string
           organization_id?: string | null
           payload_size_bytes?: number | null
@@ -522,7 +522,7 @@ export type Database = {
           created_at: string
           endpoint: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           method: string
           request_size_bytes: number | null
           response_size_bytes: number | null
@@ -536,7 +536,7 @@ export type Database = {
           created_at?: string
           endpoint: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method: string
           request_size_bytes?: number | null
           response_size_bytes?: number | null
@@ -550,7 +550,7 @@ export type Database = {
           created_at?: string
           endpoint?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method?: string
           request_size_bytes?: number | null
           response_size_bytes?: number | null
@@ -2539,7 +2539,7 @@ export type Database = {
           download_completed: boolean | null
           download_timestamp: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           tool_id: string
           tool_name: string | null
           user_agent: string | null
@@ -2550,7 +2550,7 @@ export type Database = {
           download_completed?: boolean | null
           download_timestamp?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           tool_id: string
           tool_name?: string | null
           user_agent?: string | null
@@ -2561,7 +2561,7 @@ export type Database = {
           download_completed?: boolean | null
           download_timestamp?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           tool_id?: string
           tool_name?: string | null
           user_agent?: string | null
@@ -4885,7 +4885,7 @@ export type Database = {
         Row: {
           battery_level: number | null
           configuration: Json | null
-          coordinates: unknown | null
+          coordinates: unknown
           created_at: string | null
           current_value: number | null
           id: string
@@ -4902,7 +4902,7 @@ export type Database = {
         Insert: {
           battery_level?: number | null
           configuration?: Json | null
-          coordinates?: unknown | null
+          coordinates?: unknown
           created_at?: string | null
           current_value?: number | null
           id?: string
@@ -4919,7 +4919,7 @@ export type Database = {
         Update: {
           battery_level?: number | null
           configuration?: Json | null
-          coordinates?: unknown | null
+          coordinates?: unknown
           created_at?: string | null
           current_value?: number | null
           id?: string
@@ -7380,7 +7380,7 @@ export type Database = {
           created_at: string | null
           endpoint: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           request_count: number | null
           user_id: string | null
           window_start: string | null
@@ -7389,7 +7389,7 @@ export type Database = {
           created_at?: string | null
           endpoint: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_count?: number | null
           user_id?: string | null
           window_start?: string | null
@@ -7398,7 +7398,7 @@ export type Database = {
           created_at?: string | null
           endpoint?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_count?: number | null
           user_id?: string | null
           window_start?: string | null
@@ -7900,7 +7900,7 @@ export type Database = {
           action_type: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -7912,7 +7912,7 @@ export type Database = {
           action_type: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -7924,7 +7924,7 @@ export type Database = {
           action_type?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -7940,7 +7940,7 @@ export type Database = {
           details: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -7949,7 +7949,7 @@ export type Database = {
           details?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -7958,7 +7958,7 @@ export type Database = {
           details?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -8841,7 +8841,7 @@ export type Database = {
           download_type: string | null
           downloaded_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           template_id: string | null
           user_agent: string | null
           user_id: string | null
@@ -8850,7 +8850,7 @@ export type Database = {
           download_type?: string | null
           downloaded_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           template_id?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -8859,7 +8859,7 @@ export type Database = {
           download_type?: string | null
           downloaded_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           template_id?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -8999,7 +8999,7 @@ export type Database = {
         Row: {
           downloaded_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           order_id: string | null
           tool_id: string | null
           user_agent: string | null
@@ -9008,7 +9008,7 @@ export type Database = {
         Insert: {
           downloaded_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           order_id?: string | null
           tool_id?: string | null
           user_agent?: string | null
@@ -9017,7 +9017,7 @@ export type Database = {
         Update: {
           downloaded_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           order_id?: string | null
           tool_id?: string | null
           user_agent?: string | null
@@ -9762,7 +9762,7 @@ export type Database = {
           downloaded_at: string | null
           file_hash: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           tool_id: string
           user_agent: string | null
           user_id: string
@@ -9773,7 +9773,7 @@ export type Database = {
           downloaded_at?: string | null
           file_hash?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           tool_id: string
           user_agent?: string | null
           user_id: string
@@ -9784,7 +9784,7 @@ export type Database = {
           downloaded_at?: string | null
           file_hash?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           tool_id?: string
           user_agent?: string | null
           user_id?: string
@@ -11611,26 +11611,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      auto_enroll_professional_users: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      auto_enroll_professional_users: { Args: never; Returns: undefined }
       bulk_assign_professional_access: {
         Args: { email_list: string[] }
         Returns: Json
       }
-      bulk_assign_professional_and_enroll: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      bulk_assign_professional_and_enroll: { Args: never; Returns: Json }
       bulk_assign_professional_and_enroll_updated: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Json
       }
       can_download_premium_plugin: {
         Args: { p_tool_id: string; p_user_id: string }
         Returns: boolean
       }
+      can_user_go_live: { Args: { p_user_id?: string }; Returns: boolean }
       change_user_role_with_notification: {
         Args: {
           change_reason?: string
@@ -11639,10 +11634,7 @@ export type Database = {
         }
         Returns: Json
       }
-      check_admin_rate_limit: {
-        Args: { p_action: string }
-        Returns: boolean
-      }
+      check_admin_rate_limit: { Args: { p_action: string }; Returns: boolean }
       check_geo_processing_limits: {
         Args: { p_job_type: string; p_user_id: string }
         Returns: Json
@@ -11651,10 +11643,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
-      check_lab_quota: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      check_lab_quota: { Args: { p_user_id: string }; Returns: Json }
       check_rate_limit: {
         Args: {
           p_action: string
@@ -11673,22 +11662,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      cleanup_old_trending_news: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      create_daily_live_class: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      create_geova_daily_class: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      create_geova_daily_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_trending_news: { Args: never; Returns: undefined }
+      create_daily_live_class: { Args: never; Returns: string }
+      create_geova_daily_class: { Args: never; Returns: string }
+      create_geova_daily_sessions: { Args: never; Returns: undefined }
       create_organization: {
         Args: { p_description?: string; p_name: string; p_slug: string }
         Returns: string
@@ -11697,10 +11674,7 @@ export type Database = {
         Args: { p_tier?: string; p_user_id: string }
         Returns: undefined
       }
-      create_weekly_youtube_streams: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      create_weekly_youtube_streams: { Args: never; Returns: Json }
       debug_storage_path: {
         Args: { file_path: string; user_id: string }
         Returns: Json
@@ -11709,10 +11683,7 @@ export type Database = {
         Args: { stream_id: string }
         Returns: undefined
       }
-      ensure_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      ensure_super_admin: { Args: never; Returns: undefined }
       generate_ai_alert: {
         Args: {
           p_alert_type: Database["public"]["Enums"]["alert_type"]
@@ -11726,36 +11697,18 @@ export type Database = {
         }
         Returns: string
       }
-      generate_live_stream_key: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_live_stream_key: { Args: never; Returns: string }
       generate_portfolio_url: {
         Args: { p_portfolio_title: string; p_user_id: string }
         Returns: string
       }
-      generate_referral_code: {
-        Args: { user_id: string }
-        Returns: string
-      }
-      generate_session_stream_key: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_stream_key: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
-      generate_unique_stream_key: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_unsubscribe_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_referral_code: { Args: { user_id: string }; Returns: string }
+      generate_session_stream_key: { Args: never; Returns: string }
+      generate_stream_key: { Args: { p_user_id: string }; Returns: string }
+      generate_unique_stream_key: { Args: never; Returns: string }
+      generate_unsubscribe_token: { Args: never; Returns: string }
       get_auth_users_data: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -11763,16 +11716,10 @@ export type Database = {
           last_sign_in_at: string
         }[]
       }
-      get_email_template: {
-        Args: { template_name: string }
-        Returns: Json
-      }
-      get_ga_tracking_id: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      get_email_template: { Args: { template_name: string }; Returns: Json }
+      get_ga_tracking_id: { Args: never; Returns: Json }
       get_next_geova_class_time: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           minutes_until_next: number
           next_class_date: string
@@ -11788,14 +11735,8 @@ export type Database = {
           tax_rate: number
         }[]
       }
-      get_secure_embed_url: {
-        Args: { p_youtube_url: string }
-        Returns: string
-      }
-      get_super_admin_user_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_secure_embed_url: { Args: { p_youtube_url: string }; Returns: string }
+      get_super_admin_user_id: { Args: never; Returns: string }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
@@ -11808,10 +11749,7 @@ export type Database = {
           updated_at: string
         }[]
       }
-      get_user_credits: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
+      get_user_credits: { Args: { p_user_id: string }; Returns: number }
       get_user_enrollment_count: {
         Args: { p_user_id: string }
         Returns: number
@@ -11877,14 +11815,8 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_youtube_automation_status: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      get_youtube_credentials: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      get_youtube_automation_status: { Args: never; Returns: Json }
+      get_youtube_credentials: { Args: never; Returns: Json }
       has_org_permission: {
         Args: {
           p_org_id: string
@@ -11916,42 +11848,23 @@ export type Database = {
         Args: { p_new_session_token: string; p_user_id: string }
         Returns: undefined
       }
-      is_admin_secure: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_platform_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_professional_email: {
-        Args: { email_input: string }
-        Returns: boolean
-      }
+      is_admin_secure: { Args: never; Returns: boolean }
+      is_admin_user: { Args: never; Returns: boolean }
+      is_platform_super_admin: { Args: never; Returns: boolean }
+      is_professional_email: { Args: { email_input: string }; Returns: boolean }
       is_session_valid: {
         Args: { p_session_token: string; p_user_id: string }
         Returns: boolean
       }
-      is_super_admin: {
-        Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: boolean
-      }
+      is_super_admin:
+        | { Args: { user_id: string }; Returns: boolean }
+        | { Args: never; Returns: boolean }
       is_super_admin_bypass_rls: {
         Args: { p_user_id: string }
         Returns: boolean
       }
-      is_super_admin_secure: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_valid_email_domain: {
-        Args: { email_input: string }
-        Returns: boolean
-      }
+      is_super_admin_secure: { Args: never; Returns: boolean }
+      is_valid_email_domain: { Args: { email_input: string }; Returns: boolean }
       log_admin_action: {
         Args: {
           p_action: string
@@ -12024,18 +11937,9 @@ export type Database = {
         Args: { token_id: string }
         Returns: boolean
       }
-      refresh_youtube_oauth_token_if_needed: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      reset_monthly_points: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      reset_weekly_points: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_youtube_oauth_token_if_needed: { Args: never; Returns: Json }
+      reset_monthly_points: { Args: never; Returns: undefined }
+      reset_weekly_points: { Args: never; Returns: undefined }
       should_get_auto_pro_access: {
         Args: { email_input: string }
         Returns: boolean
@@ -12056,10 +11960,7 @@ export type Database = {
         }
         Returns: Json
       }
-      sync_geova_recordings_from_schedule: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      sync_geova_recordings_from_schedule: { Args: never; Returns: undefined }
       track_class_attendance: {
         Args: { p_action: string; p_class_id: string; p_user_id: string }
         Returns: undefined
@@ -12099,14 +12000,8 @@ export type Database = {
         }
         Returns: undefined
       }
-      trigger_youtube_detection: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      update_class_status: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      trigger_youtube_detection: { Args: never; Returns: Json }
+      update_class_status: { Args: never; Returns: undefined }
       update_geova_student_progress: {
         Args: { p_day_number: number; p_user_id: string }
         Returns: undefined
@@ -12145,18 +12040,12 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
-      user_has_premium_access: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
+      user_has_premium_access: { Args: { p_user_id: string }; Returns: boolean }
       validate_and_sanitize_input: {
         Args: { allow_html?: boolean; input_text: string; max_length?: number }
         Returns: string
       }
-      validate_password: {
-        Args: { password_input: string }
-        Returns: Json
-      }
+      validate_password: { Args: { password_input: string }; Returns: Json }
     }
     Enums: {
       alert_severity: "low" | "medium" | "high" | "critical"
