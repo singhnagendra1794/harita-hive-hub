@@ -11857,8 +11857,8 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin:
-        | { Args: { user_id: string }; Returns: boolean }
         | { Args: never; Returns: boolean }
+        | { Args: { user_id: string }; Returns: boolean }
       is_super_admin_bypass_rls: {
         Args: { p_user_id: string }
         Returns: boolean
