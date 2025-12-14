@@ -826,6 +826,229 @@ export type Database = {
         }
         Relationships: []
       }
+      batch_enrollments: {
+        Row: {
+          access_granted_at: string | null
+          batch_id: string
+          course_id: string
+          created_at: string | null
+          enrolled_at: string | null
+          expires_at: string | null
+          id: string
+          payment_amount: number | null
+          payment_id: string | null
+          payment_status: string | null
+          user_id: string
+        }
+        Insert: {
+          access_granted_at?: string | null
+          batch_id: string
+          course_id: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_id?: string | null
+          payment_status?: string | null
+          user_id: string
+        }
+        Update: {
+          access_granted_at?: string | null
+          batch_id?: string
+          course_id?: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_id?: string | null
+          payment_status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_enrollments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batch_live_sessions: {
+        Row: {
+          batch_id: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          meeting_link: string | null
+          meeting_platform: string | null
+          scheduled_at: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          meeting_platform?: string | null
+          scheduled_at: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          meeting_platform?: string | null
+          scheduled_at?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_live_sessions_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batch_recordings: {
+        Row: {
+          batch_id: string
+          created_at: string | null
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          is_available: boolean | null
+          live_session_id: string | null
+          order_index: number | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          video_platform: string | null
+          video_url: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_available?: boolean | null
+          live_session_id?: string | null
+          order_index?: number | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          video_platform?: string | null
+          video_url: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_available?: boolean | null
+          live_session_id?: string | null
+          order_index?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          video_platform?: string | null
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_recordings_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_recordings_live_session_id_fkey"
+            columns: ["live_session_id"]
+            isOneToOne: false
+            referencedRelation: "batch_live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batch_study_materials: {
+        Row: {
+          batch_id: string
+          category: string | null
+          created_at: string | null
+          description: string | null
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          order_index: number | null
+          title: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          batch_id: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          order_index?: number | null
+          title: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          batch_id?: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          order_index?: number | null
+          title?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_study_materials_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beta_analytics: {
         Row: {
           date_bucket: string | null
@@ -5703,6 +5926,247 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_batches: {
+        Row: {
+          batch_name: string
+          batch_number: number
+          course_id: string
+          created_at: string | null
+          current_enrollments: number | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          max_students: number | null
+          start_date: string | null
+          teacher_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          batch_name: string
+          batch_number: number
+          course_id: string
+          created_at?: string | null
+          current_enrollments?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_students?: number | null
+          start_date?: string | null
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          batch_name?: string
+          batch_number?: number
+          course_id?: string
+          created_at?: string | null
+          current_enrollments?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_students?: number | null
+          start_date?: string | null
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_batches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_courses: {
+        Row: {
+          category: string | null
+          course_fee: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_free: boolean | null
+          status: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          course_fee?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_free?: boolean | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          course_fee?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_free?: boolean | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lms_payments: {
+        Row: {
+          amount: number
+          batch_id: string
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          currency: string | null
+          id: string
+          order_id: string | null
+          payment_data: Json | null
+          payment_gateway: string | null
+          payment_id: string | null
+          payment_method: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          batch_id: string
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          order_id?: string | null
+          payment_data?: Json | null
+          payment_gateway?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          batch_id?: string
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          order_id?: string | null
+          payment_data?: Json | null
+          payment_gateway?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_payments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_payments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_session_attendance: {
+        Row: {
+          duration_seconds: number | null
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          duration_seconds?: number | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          duration_seconds?: number | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "batch_live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_teachers: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          batch_id: string | null
+          course_id: string | null
+          id: string
+          is_primary: boolean | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          batch_id?: string | null
+          course_id?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          batch_id?: string | null
+          course_id?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_teachers_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_teachers_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       map_projects: {
         Row: {
           created_at: string | null
@@ -6856,6 +7320,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_name: string | null
+          lms_role: string | null
           location_city: string | null
           location_country: string | null
           location_detected_at: string | null
@@ -6876,6 +7341,7 @@ export type Database = {
           full_name?: string | null
           id: string
           last_name?: string | null
+          lms_role?: string | null
           location_city?: string | null
           location_country?: string | null
           location_detected_at?: string | null
@@ -6896,6 +7362,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_name?: string | null
+          lms_role?: string | null
           location_city?: string | null
           location_country?: string | null
           location_detected_at?: string | null
@@ -11737,6 +12204,18 @@ export type Database = {
       }
       get_secure_embed_url: { Args: { p_youtube_url: string }; Returns: string }
       get_super_admin_user_id: { Args: never; Returns: string }
+      get_teacher_batches: {
+        Args: { p_user_id: string }
+        Returns: {
+          batch_id: string
+          batch_name: string
+          course_id: string
+          course_title: string
+          end_date: string
+          start_date: string
+          student_count: number
+        }[]
+      }
       get_top_missing_queries: {
         Args: { p_limit?: number; p_status?: string }
         Returns: {
@@ -11747,6 +12226,18 @@ export type Database = {
           status: string
           times_requested: number
           updated_at: string
+        }[]
+      }
+      get_user_batches: {
+        Args: { p_user_id: string }
+        Returns: {
+          batch_id: string
+          batch_name: string
+          course_id: string
+          course_title: string
+          end_date: string
+          payment_status: string
+          start_date: string
         }[]
       }
       get_user_credits: { Args: { p_user_id: string }; Returns: number }
@@ -11817,6 +12308,14 @@ export type Database = {
       }
       get_youtube_automation_status: { Args: never; Returns: Json }
       get_youtube_credentials: { Args: never; Returns: Json }
+      grant_batch_access: {
+        Args: { p_batch_id: string; p_payment_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      has_batch_access: {
+        Args: { p_batch_id: string; p_user_id: string }
+        Returns: boolean
+      }
       has_org_permission: {
         Args: {
           p_org_id: string
@@ -11850,6 +12349,7 @@ export type Database = {
       }
       is_admin_secure: { Args: never; Returns: boolean }
       is_admin_user: { Args: never; Returns: boolean }
+      is_lms_teacher: { Args: { p_user_id?: string }; Returns: boolean }
       is_platform_super_admin: { Args: never; Returns: boolean }
       is_professional_email: { Args: { email_input: string }; Returns: boolean }
       is_session_valid: {
